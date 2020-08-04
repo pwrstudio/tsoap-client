@@ -52,8 +52,8 @@
   let moveQ = [];
 
   // COLYSEUS
-  const client = new Colyseus.Client("ws://localhost:2567");
-  // const client = new Colyseus.Client("ws://18.194.21.39:2567");
+  // const client = new Colyseus.Client("ws://localhost:2567");
+  const client = new Colyseus.Client("ws://18.194.21.39:2567");
 
   // PIXI: APP
   const app = new PIXI.Application({
