@@ -21,7 +21,8 @@
     localUserUUID,
     localUserName,
     localUserTint,
-    localUserSessionID
+    localUserSessionID,
+    localUserArea
   } from "./stores.js";
   localUserUUID.set(chance.guid());
 
@@ -51,8 +52,8 @@
   let moveQ = [];
 
   // COLYSEUS
-  // const client = new Colyseus.Client("ws://localhost:2567");
-  const client = new Colyseus.Client("ws://18.194.21.39:2567");
+  const client = new Colyseus.Client("ws://localhost:2567");
+  // const client = new Colyseus.Client("ws://18.194.21.39:2567");
 
   // PIXI: APP
   const app = new PIXI.Application({
@@ -80,6 +81,10 @@
   // PIXI: TICKER
   const ticker = PIXI.Ticker.shared;
 
+  // console.dir(ticker);
+
+  // $: fpsCounter = ticker.FPS;
+
   // $: {
   //   if (Object.keys(moveQ).length > 0) {
   //     console.log("TICKER START");
@@ -91,6 +96,8 @@
   //     ticker.stop();
   //   }
   // }
+
+  const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"];
 
   // GAME LOOP
   const updatePositions = t => {
@@ -147,6 +154,7 @@
           avatar.x = player.x;
           avatar.y = player.y;
           avatar.waypoints = [];
+          avatar.area = player.area;
           avatar.anchor.set(0.5);
           avatar.scale.set(0.2);
           avatar.tint = player.tint;
@@ -251,6 +259,7 @@
 
             // STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
+              localUserArea.set(player.area);
               if (player.path.waypoints.length > 0) {
                 // console.dir(player.path.waypoints);
                 moveQ[sessionId] = player.path.waypoints;
@@ -413,8 +422,8 @@
     height: calc(100vh - 80px);
     line-height: 100px;
     text-align: center;
-    top: 20px;
-    right: 20px;
+    top: 10px;
+    right: 10px;
     padding: 20px;
     line-height: 1.4em;
     border-radius: 10px;
@@ -484,6 +493,50 @@
       }
     }
   }
+
+  .fps {
+    position: fixed;
+    bottom: 20px;
+    right: 0;
+    background: $lightgrey;
+    padding: 20px;
+    font-size: $font_size_small;
+    text-align: center;
+  }
+
+  .current-area {
+    position: fixed;
+    width: auto;
+    background: $grey;
+    height: auto;
+    line-height: 2em;
+    text-align: center;
+    bottom: 10px;
+    right: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    @include screen-size("small") {
+      top: unset;
+      bottom: 20px;
+    }
+  }
+
+  .stream-test {
+    position: fixed;
+    width: auto;
+    background: $grey;
+    height: auto;
+    line-height: 2em;
+    text-align: center;
+    top: 10px;
+    width: 360px;
+    left: 430px;
+    // padding: 10px;
+    border-radius: 10px;
+    @include screen-size("small") {
+      display: none;
+    }
+  }
 </style>
 
 {#if !loggedIn}
@@ -548,6 +601,22 @@
     </p>
   </div>
 {/if}
+
+{#if $localUserArea}
+  <div class="current-area">Currently in {colorTrans[$localUserArea]} area</div>
+{/if}
+
+{#if $localUserArea === 2}
+  <video
+    class="stream-test"
+    src="test.mp4"
+    muted
+    autoplay
+    loop
+    transition:fly={{ y: 200 }} />
+{/if}
+
+<!-- <div class="fps">{fpsCounter}</div> -->
 
 <!-- PROXIMITY -->
 <!-- {#if closePlayers.length > 0}
