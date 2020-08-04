@@ -1,0 +1,48 @@
+// TYPOGRAPHY
+$sans-stack: Helvetica, Arial, sans-serif;
+$serif-stack: "times new roman", times, serif;
+$font_size_small: 12px;
+$font_size_normal: 16px;
+$font_size_large: 24px;
+
+// ANIMATION
+$transition: cubic-bezier(0.23, 1, 0.32, 1);
+
+// COLOR
+$grey: #e5e5e5;
+$lightgrey: #f5f5f5;
+$lightergrey: #fafafa;
+$darkgrey: #555555;
+$darkergrey: #444444;
+
+// RESPONSIVE
+$breakpoints: (
+    "small": (
+        max-width: 800px,
+    ),
+    "medium": (
+        max-width: 1000px,
+    ),
+    "large": (
+        max-width: 1600px,
+    ),
+    "short": (
+        max-height: 700px,
+    ),
+);
+
+/// Responsive manager.
+/// @access public
+/// @param {String} $breakpoint - Breakpoint
+/// @requires $breakpoints
+@mixin screen-size($breakpoint) {
+    $raw-query: map-get($breakpoints, $breakpoint);
+    @if $raw-query {
+        $query: if(type-of($raw-query) == "string", unquote($raw-query), inspect($raw-query));
+        @media #{$query} {
+            @content;
+        }
+    } @else {
+        @error 'No value found for `#{$breakpoint}`. ' + 'Please make sure it is defined in `$breakpoints` map.';
+    }
+}
