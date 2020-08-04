@@ -10,7 +10,7 @@
   import * as Colyseus from "colyseus.js";
   import * as PIXI from "pixi.js";
   import { Viewport } from "pixi-viewport";
-  import Hammer from "hammerjs";
+  // import Hammer from "hammerjs";
   import Chance from "chance";
   import get from "lodash/get";
   import { fade, fly } from "svelte/transition";
