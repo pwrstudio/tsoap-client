@@ -12,12 +12,18 @@
   import { Viewport } from "pixi-viewport";
   import Hammer from "hammerjs";
   import Chance from "chance";
+  import get from "lodash/get";
   import { fade, fly } from "svelte/transition";
   const chance = new Chance();
 
   // STORES
-  import { localUser, localUserTint } from "./stores.js";
-  localUser.set(chance.guid());
+  import {
+    localUserUUID,
+    localUserName,
+    localUserTint,
+    localUserSessionID
+  } from "./stores.js";
+  localUserUUID.set(chance.guid());
 
   // GLOBAL
   import { houseList, KEYBOARD, WIDTH, HEIGHT } from "./global.js";
@@ -36,11 +42,13 @@
   let newUserName = "";
   let newUserColor = "";
   let loggedIn = false;
-  let localPlayers = [];
-  let chatMessages = [];
   let userLoaded = false;
   let showUserList = false;
   let showChat = false;
+
+  let localPlayers = {};
+  let chatMessages = [];
+  let moveQ = [];
 
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567");
@@ -63,22 +71,37 @@
     screenHeight: window.innerHeight,
     worldWidth: WIDTH,
     worldHeight: HEIGHT,
-    interaction: app.renderer.plugins.interaction // the interaction module is important for wheel to work properly when renderer.view is placed or scaled
+    interaction: app.renderer.plugins.interaction
   });
 
   // PIXI: LOADER
-  const loader = PIXI.Loader.shared; // PixiJS exposes a premade instance for you to use.
+  const loader = PIXI.Loader.shared;
 
   // PIXI: TICKER
   const ticker = PIXI.Ticker.shared;
 
+  // $: {
+  //   if (Object.keys(moveQ).length > 0) {
+  //     console.log("TICKER START");
+  //     console.dir(JSON.stringify(moveQ));
+  //     ticker.start();
+  //   } else {
+  //     console.log("TICKER STOP");
+  //     console.dir(moveQ);
+  //     ticker.stop();
+  //   }
+  // }
+
   // GAME LOOP
-  const updatePositions = () => {
-    for (let i = 0; i < localPlayers.length; i++) {
-      if (localPlayers[i].waypoints.length > 0) {
-        let step = localPlayers[i].waypoints.shift();
-        localPlayers[i].x = step.x;
-        localPlayers[i].y = step.y;
+  const updatePositions = t => {
+    // console.log(t);
+    for (let key in moveQ) {
+      if (localPlayers[key] && moveQ[key].length > 0) {
+        let step = moveQ[key].shift();
+        localPlayers[key].x = step.x;
+        localPlayers[key].y = step.y;
+      } else {
+        delete moveQ[key];
       }
     }
   };
@@ -91,7 +114,6 @@
     graphics.drawCircle(x, y, 32); // drawCircle(x, y, radius)
     graphics.endFill();
     viewport.addChild(graphics);
-
     // HACK
     setTimeout(() => {
       viewport.removeChild(graphics);
@@ -100,6 +122,10 @@
 
   // FUNCTIONS
   let submitChat = () => {};
+
+  const startPrivateChat = partner => {
+    console.log(partner.id);
+  };
 
   const makeNewUser = () => {
     loggedIn = true;
@@ -116,10 +142,8 @@
         viewport.addChild(map);
 
         // CREATE PLAYER
-        const createPlayer = (player, i) => {
+        const createPlayer = (player, sessionId) => {
           let avatar = new PIXI.Sprite(resources.avatar.texture);
-
-          console.dir(avatar);
           avatar.x = player.x;
           avatar.y = player.y;
           avatar.waypoints = [];
@@ -128,9 +152,9 @@
           avatar.tint = player.tint;
           avatar.name = player.name;
           avatar.uuid = player.uuid;
-          avatar.id = i;
+          avatar.id = sessionId;
           avatar.zIndex = 10;
-          avatar.isSelf = player.uuid == $localUser;
+          avatar.isSelf = player.uuid == $localUserUUID;
           avatar.interactive = true;
           avatar.on("mousedown", onDown);
           avatar.on("touchstart", onDown);
@@ -140,6 +164,7 @@
           function onDown(e) {
             // console.dir(e);
             // console.log(avatar.name);
+            startPrivateChat(avatar);
             e.data.originalEvent.preventDefault();
             e.data.originalEvent.stopPropagation(); // here ! not work
           }
@@ -160,6 +185,8 @@
             viewport.follow(avatar);
             userLoaded = true;
             localUserTint.set(avatar.tint);
+            localUserName.set(avatar.name);
+            localUserSessionID.set(avatar.id);
           }
 
           return avatar;
@@ -201,7 +228,7 @@
         // => GAME ROOM
         client
           .joinOrCreate("game", {
-            uuid: $localUser,
+            uuid: $localUserUUID,
             name: newUserName || chance.name(),
             tint:
               newUserColor.replace("#", "0x").toUpperCase() ||
@@ -212,24 +239,23 @@
           })
           .then(gameRoom => {
             // REMOVE
-            gameRoom.state.players.onRemove = function(player, i) {
-              viewport.removeChild(localPlayers.find(obj => obj.id === i));
-              localPlayers = localPlayers.filter(obj => obj.id !== i);
+            gameRoom.state.players.onRemove = function(player, sessionId) {
+              viewport.removeChild(localPlayers[sessionId]);
+              delete localPlayers[sessionId];
             };
 
             // ADD
-            gameRoom.state.players.onAdd = function(player, i) {
-              localPlayers = [createPlayer(player, i), ...localPlayers];
+            gameRoom.state.players.onAdd = function(player, sessionId) {
+              localPlayers[sessionId] = createPlayer(player, sessionId);
             };
 
             // STATE CHANGE
-            gameRoom.onStateChange(state => {
-              for (let key in state.players) {
-                const player = state.players[key];
-                const index = localPlayers.findIndex(p => p.id === key);
-                localPlayers[index].waypoints = player.path.waypoints;
+            gameRoom.state.players.onChange = function(player, sessionId) {
+              if (player.path.waypoints.length > 0) {
+                // console.dir(player.path.waypoints);
+                moveQ[sessionId] = player.path.waypoints;
               }
-            });
+            };
 
             // ERROR
             gameRoom.onError((code, message) => {
@@ -239,11 +265,13 @@
 
             // USER INTERACTION: CLICK / TAP
             viewport.on("clicked", e => {
-              gameRoom.send("go", {
-                x: Math.round(e.world.x),
-                y: Math.round(e.world.y)
-              });
-              showTarget(Math.round(e.world.x), Math.round(e.world.y));
+              if (!folderActive) {
+                gameRoom.send("go", {
+                  x: Math.round(e.world.x),
+                  y: Math.round(e.world.y)
+                });
+                showTarget(Math.round(e.world.x), Math.round(e.world.y));
+              }
             });
           })
           .catch(e => {
@@ -268,10 +296,10 @@
             submitChat = event => {
               chatRoom.send("submit", {
                 msgId: chance.guid(),
-                uuid: $localUser,
-                name: localPlayers.find(p => p.isSelf).name,
+                uuid: $localUserUUID,
+                name: $localUserName,
                 text: event.detail.text,
-                tint: localPlayers.find(p => p.isSelf).tint
+                tint: $localUserTint
               });
             };
           })
@@ -282,7 +310,7 @@
   };
 
   onMount(async () => {
-    console.dir(viewport);
+    // console.dir(viewport);
     app.stage.addChild(viewport);
     ticker.start();
     ticker.add(updatePositions);

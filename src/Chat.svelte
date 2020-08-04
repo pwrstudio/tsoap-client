@@ -62,6 +62,10 @@
     width: calc(100% - 10px);
     height: calc(50vh - 40px);
     overflow-y: auto;
+
+    @include screen-size("small") {
+      height: calc(100% - 40px);
+    }
   }
 
   .input-container {

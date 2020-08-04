@@ -7,14 +7,13 @@
 
   // IMPORTS
   import { fade } from "svelte/transition";
+  import get from "lodash/get";
 
   // GLOBALS
   import { formattedDate } from "./global.js";
 
   // PROPS
   export let message = {};
-
-  console.dir(message);
 </script>
 
 <style lang="scss">
@@ -59,7 +58,7 @@
   <div class="meta">
     <span
       class="color-code"
-      style={'background-color:' + message.tint.replace('0X', '#')} />
+      style={'background-color:' + get(message, 'tint', '0XFF0000').replace('0X', '#')} />
     <span class="name">{message.name}</span>
     <span class="date">{formattedDate()}</span>
   </div>
