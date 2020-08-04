@@ -141,11 +141,13 @@
 
     // LOADER
     loader
-      .add("map", "hkw-map-no-house.png")
+      .add("map", "hkw-map-no-house-smaller.png")
       .add("avatar", "avatar.png")
       .load((loader, resources) => {
         // Add map to viewport
         let map = new PIXI.Sprite(resources.map.texture);
+        map.width = 5000;
+        map.height = 5000;
         viewport.addChild(map);
 
         // CREATE PLAYER
