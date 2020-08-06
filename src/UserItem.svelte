@@ -12,6 +12,8 @@
   export let player = {};
   export let header = false;
   export let numberOfUsers = 0;
+
+  console.dir(player);
 </script>
 
 <style lang="scss">
@@ -24,6 +26,12 @@
     border-bottom: 1px solid $lightgrey;
     line-height: 1em;
     font-size: $font_size_small;
+
+    opacity: 0.2;
+
+    &.active {
+      opacity: 1;
+    }
 
     div {
       width: calc(100% - 120px);
@@ -73,7 +81,11 @@
   }
 </style>
 
-<div class="user-item" class:header transition:fade>
+<div
+  class="user-item"
+  class:header
+  class:active={player.connected}
+  transition:fade>
 
   {#if header}
     <div class="small">
@@ -88,7 +100,7 @@
         class="color-code"
         style={'background-color:' + player.tint.replace('0X', '#')} />
     </div>
-    <div class="name">{player.name}</div>
+    <div class="name">{player.name} ({player.ip})</div>
     <div class="mid">{player.x}</div>
     <div class="mid">{player.y}</div>
   {/if}

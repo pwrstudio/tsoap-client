@@ -14,7 +14,6 @@
 
 <style lang="scss" global>
   @import "./variables.scss";
-
   * {
     box-sizing: border-box;
   }

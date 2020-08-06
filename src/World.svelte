@@ -13,6 +13,7 @@
   // import Hammer from "hammerjs";
   import Chance from "chance";
   import get from "lodash/get";
+  import sample from "lodash/sample";
   import { fade, fly } from "svelte/transition";
   const chance = new Chance();
 
@@ -63,6 +64,7 @@
   let closePlayers = [];
   let newUserName = "";
   let newUserColor = "";
+  let newUserAvatar = 1;
   let loggedIn = false;
   let userLoaded = false;
   let showUserList = false;
@@ -143,7 +145,9 @@
     // LOADER
     loader
       .add("map", "hkw-map-no-house-smaller.png")
-      .add("avatar", "avatar.png")
+      .add("avatarOne", "avatar1.png")
+      .add("avatarTwo", "avatar2.png")
+      .add("avatarThree", "avatar3.png")
       .load((loader, resources) => {
         // Add map to viewport
         let map = new PIXI.Sprite(resources.map.texture);
@@ -151,18 +155,28 @@
         map.height = 5000;
         viewport.addChild(map);
 
+        const avatarList = [
+          resources.avatarOne.texture,
+          resources.avatarTwo.texture,
+          resources.avatarThree.texture
+        ];
+
+        let avatarIndex = sample([0, 1, 2]);
+
         // CREATE PLAYER
         const createPlayer = (player, sessionId) => {
-          let avatar = new PIXI.Sprite(resources.avatar.texture);
+          let avatar = new PIXI.Sprite(avatarList[player.avatar]);
           avatar.x = player.x;
           avatar.y = player.y;
           avatar.waypoints = [];
           avatar.area = player.area;
           avatar.anchor.set(0.5);
-          avatar.scale.set(0.2);
+          avatar.scale.set(0.5);
           avatar.tint = player.tint;
           avatar.name = player.name;
           avatar.uuid = player.uuid;
+          avatar.ip = player.ip;
+          avatar.connected = player.connected;
           avatar.id = sessionId;
           avatar.zIndex = 10;
           avatar.isSelf = player.uuid == $localUserUUID;
@@ -241,6 +255,7 @@
           .joinOrCreate("game", {
             uuid: $localUserUUID,
             name: newUserName || chance.name(),
+            avatar: avatarIndex,
             tint:
               newUserColor.replace("#", "0x").toUpperCase() ||
               chance
@@ -263,6 +278,10 @@
             // STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
               localUserArea.set(player.area);
+              if (!player.connected) {
+                player.opacity = 0.2;
+              }
+
               if (player.path.waypoints.length > 0) {
                 // console.dir(player.path.waypoints);
                 moveQ[sessionId] = player.path.waypoints;
@@ -766,7 +785,11 @@
 {/if}
 
 {#if $localUserArea}
-  <div class="current-area">Currently in {colorTrans[$localUserArea]} area</div>
+  <div class="current-area">
+    Currently in
+    <strong>{colorTrans[$localUserArea]}</strong>
+    area
+  </div>
 {/if}
 
 {#if $localUserArea === 2}
