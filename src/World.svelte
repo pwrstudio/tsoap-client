@@ -6,15 +6,15 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { onMount } from 'svelte'
-  import * as Colyseus from 'colyseus.js'
-  import * as PIXI from 'pixi.js'
-  import { Viewport } from 'pixi-viewport'
+  import { onMount } from "svelte";
+  import * as Colyseus from "colyseus.js";
+  import * as PIXI from "pixi.js";
+  import { Viewport } from "pixi-viewport";
   // import Hammer from "hammerjs";
-  import Chance from 'chance'
-  import get from 'lodash/get'
-  import { fade, fly } from 'svelte/transition'
-  const chance = new Chance()
+  import Chance from "chance";
+  import get from "lodash/get";
+  import { fade, fly } from "svelte/transition";
+  const chance = new Chance();
 
   // STORES
   import {
@@ -22,74 +22,66 @@
     localUserName,
     localUserTint,
     localUserSessionID,
-    localUserArea,
-  } from './stores.js'
-  localUserUUID.set(chance.guid())
+    localUserArea
+  } from "./stores.js";
+  localUserUUID.set(chance.guid());
 
   // PROPS
-  export let login = false
-  export let position = false
-  export let x = 0
-  export let y = 0
+  export let login = false;
+  export let position = false;
+  export let debug = false;
+  export let x = 0;
+  export let y = 0;
 
-  console.log(position)
-  console.log(x)
-  console.log(y)
+  // console.log(position);
+  // console.log(x);
+  // console.log(y);
+
+  let worldX = 0;
+  let worldY = 0;
+  let screenX = 0;
+  let screenY = 0;
+
+  let rendererHeight = 0;
+  let rendererWidth = 0;
+  let viewportHeight = 0;
+  let viewportWidth = 0;
 
   // GLOBAL
-  import { houseList, KEYBOARD, WIDTH, HEIGHT } from './global.js'
+  import { houseList, KEYBOARD, WIDTH, HEIGHT } from "./global.js";
 
   // COMPONENTS
-  import Chat from './Chat.svelte'
-  import UserList from './UserList.svelte'
+  import Chat from "./Chat.svelte";
+  import UserList from "./UserList.svelte";
 
   // DOM REFERENCES
-  let gameContainer = {}
+  let gameContainer = {};
 
   // VARIABLES
-  let popUpText = false
-  let folderActive = false
-  let closePlayers = []
-  let newUserName = ''
-  let newUserColor = ''
-  let loggedIn = false
-  let userLoaded = false
-  let showUserList = false
-  let showChat = false
+  let popUpText = false;
+  let folderActive = false;
+  let closePlayers = [];
+  let newUserName = "";
+  let newUserColor = "";
+  let loggedIn = false;
+  let userLoaded = false;
+  let showUserList = false;
+  let showChat = false;
 
-  let localPlayers = {}
-  let chatMessages = []
-  let moveQ = []
+  let localPlayers = {};
+  let chatMessages = [];
+  let moveQ = [];
 
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567");
-  const client = new Colyseus.Client('ws://18.194.21.39:2567')
+  const client = new Colyseus.Client("ws://18.194.21.39:2567");
 
   // PIXI: APP
-  const app = new PIXI.Application({
-    width: WIDTH,
-    height: HEIGHT,
-    transparent: true,
-  })
-
-  let responsiveWidth = window.matchMedia('(max-width: 700px)').matches
-    ? window.innerWidth
-    : window.innerWidth - 420
-
-  // PIXI: VIEWPORT
-  let viewport = new Viewport({
-    screenWidth: responsiveWidth,
-    screenHeight: window.innerHeight,
-    worldWidth: WIDTH,
-    worldHeight: HEIGHT,
-    interaction: app.renderer.plugins.interaction,
-  })
-
-  // PIXI: LOADER
-  const loader = PIXI.Loader.shared
-
-  // PIXI: TICKER
-  const ticker = PIXI.Ticker.shared
+  let app = {};
+  let responsiveWidth = 0;
+  let viewport = {};
+  let loader = {};
+  let ticker = {};
 
   // console.dir(ticker);
 
@@ -107,249 +99,319 @@
   //   }
   // }
 
-  const colorTrans = ['WHITE', 'BLACK', 'YELLOW', 'RED', 'GREEN', 'BLUE']
+  const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"];
 
   // GAME LOOP
-  const updatePositions = (t) => {
+  const updatePositions = t => {
     // console.log(t);
     for (let key in moveQ) {
       if (localPlayers[key] && moveQ[key].length > 0) {
-        let step = moveQ[key].shift()
-        localPlayers[key].x = step.x
-        localPlayers[key].y = step.y
+        let step = moveQ[key].shift();
+        localPlayers[key].x = step.x;
+        localPlayers[key].y = step.y;
       } else {
-        delete moveQ[key]
+        delete moveQ[key];
       }
     }
-  }
+  };
 
   const showTarget = (x, y) => {
-    let graphics = new PIXI.Graphics()
-    graphics.beginFill($localUserTint)
-    graphics.alpha = 0.7
-    graphics.zIndex = 1
-    graphics.drawCircle(x, y, 32) // drawCircle(x, y, radius)
-    graphics.endFill()
-    viewport.addChild(graphics)
+    let graphics = new PIXI.Graphics();
+    graphics.beginFill($localUserTint);
+    graphics.alpha = 0.7;
+    graphics.zIndex = 1;
+    graphics.drawCircle(x, y, 32); // drawCircle(x, y, radius)
+    graphics.endFill();
+    viewport.addChild(graphics);
     // HACK
     setTimeout(() => {
-      viewport.removeChild(graphics)
-    }, 1000)
-  }
+      viewport.removeChild(graphics);
+    }, 1000);
+  };
 
   // FUNCTIONS
-  let submitChat = () => {}
+  let submitChat = () => {};
 
-  const startPrivateChat = (partner) => {
-    console.log(partner.id)
-  }
+  const startPrivateChat = partner => {
+    console.log(partner.id);
+  };
   const makeNewUser = () => {
-    loggedIn = true
+    loggedIn = true;
 
-    gameContainer.appendChild(app.view)
+    gameContainer.appendChild(app.view);
 
     // LOADER
     loader
-      .add('map', 'hkw-map-no-house-smaller.png')
-      .add('avatar', 'avatar.png')
+      .add("map", "hkw-map-no-house-smaller.png")
+      .add("avatar", "avatar.png")
       .load((loader, resources) => {
         // Add map to viewport
-        let map = new PIXI.Sprite(resources.map.texture)
-        map.width = 5000
-        map.height = 5000
-        viewport.addChild(map)
+        let map = new PIXI.Sprite(resources.map.texture);
+        map.width = 5000;
+        map.height = 5000;
+        viewport.addChild(map);
 
         // CREATE PLAYER
         const createPlayer = (player, sessionId) => {
-          let avatar = new PIXI.Sprite(resources.avatar.texture)
-          avatar.x = player.x
-          avatar.y = player.y
-          avatar.waypoints = []
-          avatar.area = player.area
-          avatar.anchor.set(0.5)
-          avatar.scale.set(0.2)
-          avatar.tint = player.tint
-          avatar.name = player.name
-          avatar.uuid = player.uuid
-          avatar.id = sessionId
-          avatar.zIndex = 10
-          avatar.isSelf = player.uuid == $localUserUUID
-          avatar.interactive = true
-          avatar.on('mousedown', onDown)
-          avatar.on('touchstart', onDown)
-          avatar.on('mouseover', onEnter)
-          avatar.on('mouseout', onLeave)
+          let avatar = new PIXI.Sprite(resources.avatar.texture);
+          avatar.x = player.x;
+          avatar.y = player.y;
+          avatar.waypoints = [];
+          avatar.area = player.area;
+          avatar.anchor.set(0.5);
+          avatar.scale.set(0.2);
+          avatar.tint = player.tint;
+          avatar.name = player.name;
+          avatar.uuid = player.uuid;
+          avatar.id = sessionId;
+          avatar.zIndex = 10;
+          avatar.isSelf = player.uuid == $localUserUUID;
+          avatar.interactive = true;
+          avatar.on("mousedown", onDown);
+          avatar.on("touchstart", onDown);
+          avatar.on("mouseover", onEnter);
+          avatar.on("mouseout", onLeave);
 
           function onDown(e) {
             // console.dir(e);
             // console.log(avatar.name);
-            startPrivateChat(avatar)
-            e.data.originalEvent.preventDefault()
-            e.data.originalEvent.stopPropagation() // here ! not work
+            startPrivateChat(avatar);
+            e.data.originalEvent.preventDefault();
+            e.data.originalEvent.stopPropagation(); // here ! not work
           }
 
           function onEnter(e) {
-            popUpText = avatar.name
+            popUpText = avatar.name;
           }
 
           function onLeave(e) {
-            popUpText = false
+            popUpText = false;
           }
 
           // Add the avatar to the scene we are building
           // app.stage.addChild(avatar);
-          viewport.addChild(avatar)
+          viewport.addChild(avatar);
 
           if (avatar.isSelf) {
-            viewport.follow(avatar)
-            userLoaded = true
-            localUserTint.set(avatar.tint)
-            localUserName.set(avatar.name)
-            localUserSessionID.set(avatar.id)
+            viewport.follow(avatar);
+            userLoaded = true;
+            localUserTint.set(avatar.tint);
+            localUserName.set(avatar.name);
+            localUserSessionID.set(avatar.id);
           }
 
-          return avatar
-        }
+          return avatar;
+        };
 
         // ADD CASE STUDIES
-        houseList.forEach((h) => {
-          let graphics = new PIXI.Graphics()
-          graphics.beginFill(0xff0000)
-          graphics.alpha = 1
-          graphics.drawRect(h.x, h.y, 140, 140)
-          graphics.endFill()
-          graphics.title = h.title
-          graphics.interactive = true
-          graphics.on('mousedown', onDown)
-          graphics.on('touchstart', onDown)
-          graphics.on('mouseover', onEnter)
-          graphics.on('mouseout', onLeave)
+        houseList.forEach(h => {
+          let graphics = new PIXI.Graphics();
+          graphics.beginFill(0xff0000);
+          graphics.alpha = 1;
+          graphics.drawRect(h.x, h.y, 140, 140);
+          graphics.endFill();
+          graphics.title = h.title;
+          graphics.interactive = true;
+          graphics.on("mousedown", onDown);
+          graphics.on("touchstart", onDown);
+          graphics.on("mouseover", onEnter);
+          graphics.on("mouseout", onLeave);
 
           function onDown(e) {
             // console.log("house");
             // console.dir(e);
-            folderActive = graphics.title
-            e.data.originalEvent.preventDefault()
-            e.data.originalEvent.stopPropagation() // here ! not work
+            folderActive = graphics.title;
+            e.data.originalEvent.preventDefault();
+            e.data.originalEvent.stopPropagation(); // here ! not work
           }
 
           function onEnter(e) {
-            popUpText = graphics.title
+            popUpText = graphics.title;
           }
 
           function onLeave(e) {
-            popUpText = false
+            popUpText = false;
           }
 
-          viewport.addChild(graphics)
-        })
+          viewport.addChild(graphics);
+        });
 
         // => GAME ROOM
         client
-          .joinOrCreate('game', {
+          .joinOrCreate("game", {
             uuid: $localUserUUID,
             name: newUserName || chance.name(),
             tint:
-              newUserColor.replace('#', '0x').toUpperCase() ||
-              chance.color({ format: 'hex' }).replace('#', '0x').toUpperCase(),
+              newUserColor.replace("#", "0x").toUpperCase() ||
+              chance
+                .color({ format: "hex" })
+                .replace("#", "0x")
+                .toUpperCase()
           })
-          .then((gameRoom) => {
+          .then(gameRoom => {
             // REMOVE
-            gameRoom.state.players.onRemove = function (player, sessionId) {
-              viewport.removeChild(localPlayers[sessionId])
-              delete localPlayers[sessionId]
-            }
+            gameRoom.state.players.onRemove = function(player, sessionId) {
+              viewport.removeChild(localPlayers[sessionId]);
+              delete localPlayers[sessionId];
+            };
 
             // ADD
-            gameRoom.state.players.onAdd = function (player, sessionId) {
-              localPlayers[sessionId] = createPlayer(player, sessionId)
-            }
+            gameRoom.state.players.onAdd = function(player, sessionId) {
+              localPlayers[sessionId] = createPlayer(player, sessionId);
+            };
 
             // STATE CHANGE
-            gameRoom.state.players.onChange = function (player, sessionId) {
-              localUserArea.set(player.area)
+            gameRoom.state.players.onChange = function(player, sessionId) {
+              localUserArea.set(player.area);
               if (player.path.waypoints.length > 0) {
                 // console.dir(player.path.waypoints);
-                moveQ[sessionId] = player.path.waypoints
+                moveQ[sessionId] = player.path.waypoints;
               }
-            }
+            };
 
             // ERROR
             gameRoom.onError((code, message) => {
-              console.error('!!! COLYSEUS ERROR:')
-              console.error(message)
-            })
+              console.error("!!! COLYSEUS ERROR:");
+              console.error(message);
+            });
 
             // USER INTERACTION: CLICK / TAP
-            viewport.on('clicked', (e) => {
+            viewport.on("clicked", e => {
               if (!folderActive) {
-                gameRoom.send('go', {
+                gameRoom.send("go", {
                   x: Math.round(e.world.x),
-                  y: Math.round(e.world.y),
-                })
-                showTarget(Math.round(e.world.x), Math.round(e.world.y))
+                  y: Math.round(e.world.y)
+                });
+
+                screenX = Math.round(e.screen.x);
+                screenY = Math.round(e.screen.y);
+                worldX = Math.round(e.world.x);
+                worldY = Math.round(e.world.y);
+
+                // console.log("e.event.type", e.event.type);
+                // console.log("*");
+                // console.log("screen.X", Math.round(e.screen.x));
+                // console.log("screen.Y", Math.round(e.screen.y));
+                // console.log("world.X", Math.round(e.world.x));
+                // console.log("world.Y", Math.round(e.world.y));
+                // console.log("- - - - - -");
+                // console.dir(e);
+
+                showTarget(Math.round(e.world.x), Math.round(e.world.y));
               }
-            })
+            });
           })
-          .catch((e) => {
-            console.log('GAME ROOM: JOIN ERROR', e)
-          })
+          .catch(e => {
+            console.log("GAME ROOM: JOIN ERROR", e);
+          });
 
         // => CHAT ROOM
         client
-          .joinOrCreate('chat')
-          .then((chatRoom) => {
+          .joinOrCreate("chat")
+          .then(chatRoom => {
             // CHANGE
-            chatRoom.onStateChange((state) => {
-              chatMessages = state.messages
-            })
+            chatRoom.onStateChange(state => {
+              chatMessages = state.messages;
+            });
 
             // ERROR
             chatRoom.onError((code, message) => {
-              console.error(message)
-            })
+              console.error(message);
+            });
 
             // SUBMIT CHAT
-            submitChat = (event) => {
-              chatRoom.send('submit', {
+            submitChat = event => {
+              chatRoom.send("submit", {
                 msgId: chance.guid(),
                 uuid: $localUserUUID,
                 name: $localUserName,
                 text: event.detail.text,
-                tint: $localUserTint,
-              })
-            }
+                tint: $localUserTint
+              });
+            };
           })
-          .catch((e) => {
-            console.log('CHAT ROOM: JOIN ERROR', e)
-          })
-      })
-  }
+          .catch(e => {
+            console.log("CHAT ROOM: JOIN ERROR", e);
+          });
+      });
+  };
 
   onMount(async () => {
-    app.stage.addChild(viewport)
-    ticker.start()
-    ticker.add(updatePositions)
+    // PIXI: APP
+    app = new PIXI.Application({
+      width: WIDTH,
+      height: HEIGHT
+      // autoDensity: true
+      // resolution: 1
+    });
 
-    // viewport
-    //   .clampZoom({ minScale: 0.5, maxScale: 1.5 })
-    //   .wheel()
-    //   .pinch();
+    responsiveWidth = window.matchMedia("(max-width: 700px)").matches
+      ? window.innerWidth
+      : window.innerWidth - 420;
 
-    if (window.matchMedia('(max-width: 700px)').matches) {
-      viewport.setZoom(0.75)
+    // console.log("responsiveWidth", responsiveWidth);
+    // console.log(" window.innerHeight", window.innerHeight);
+    // console.log("window.devicePixelRatio", window.devicePixelRatio);
+
+    // PIXI: VIEWPORT
+    viewport = new Viewport({
+      screenWidth: responsiveWidth,
+      screenHeight: window.innerHeight,
+      worldWidth: WIDTH,
+      worldHeight: HEIGHT,
+      interaction: app.renderer.plugins.interaction
+    });
+
+    // PIXI: LOADER
+    loader = PIXI.Loader.shared;
+
+    // PIXI: TICKER
+    ticker = PIXI.Ticker.shared;
+
+    app.stage.addChild(viewport);
+    ticker.start();
+    ticker.add(updatePositions);
+
+    // viewport.drag();
+
+    rendererHeight = app.screen.height;
+    rendererWidth = app.screen.width;
+    viewportHeight = viewport.screenHeight;
+    viewportWidth = viewport.screenWidth;
+
+    window.onresize = () => {
+      // console.log("RESIZE");
+      responsiveWidth = window.matchMedia("(max-width: 700px)").matches
+        ? window.innerWidth
+        : window.innerWidth - 420;
+      viewport.resize(responsiveWidth, window.innerHeight);
+      app.renderer.resize(responsiveWidth, window.innerHeight);
+
+      rendererHeight = app.screen.height;
+      rendererWidth = app.screen.width;
+      viewportHeight = viewport.screenHeight;
+      viewportWidth = viewport.screenWidth;
+
+      // console.log("app.screen:", app.screen.width, app.screen.height);
+      // console.log("viewport", viewport.screenWidth, viewport.screenHeight);
+    };
+
+    window.dispatchEvent(new Event("resize"));
+
+    if (window.matchMedia("(max-width: 700px)").matches) {
+      viewport.setZoom(0.75);
     }
 
     // console.dir(viewport);
 
     if (!login) {
-      makeNewUser()
+      makeNewUser();
     }
-  })
+  });
 </script>
 
 <style lang="scss" global>
-  @import './variables.scss';
+  @import "./variables.scss";
 
   * {
     box-sizing: border-box;
@@ -370,7 +432,7 @@
       opacity: 1;
     }
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       width: 100vw;
       right: 0;
     }
@@ -399,7 +461,7 @@
       margin-bottom: 20px;
     }
 
-    input[type='text'] {
+    input[type="text"] {
       display: block;
       width: 100%;
       margin-bottom: 10px;
@@ -409,7 +471,7 @@
       outline: none;
     }
 
-    input[type='color'] {
+    input[type="color"] {
       display: block;
       margin-bottom: 10px;
     }
@@ -442,9 +504,18 @@
     padding: 20px;
     border-radius: 10px;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       top: unset;
       bottom: 20px;
+    }
+
+    &.tiny {
+      border-radius: 5px;
+      opacity: 0.7;
+      padding: 5px;
+      font-size: 10px;
+      line-height: 1.2em;
+      pointer-events: none;
     }
   }
 
@@ -465,7 +536,7 @@
     position: fixed;
     width: 400px;
     background: $grey;
-    height: calc(100vh - 80px);
+    height: auto;
     line-height: 100px;
     text-align: center;
     top: 10px;
@@ -479,11 +550,10 @@
       text-align: left;
     }
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       top: 20px;
       left: 20px;
       width: calc(100vw - 40px);
-      height: calc(100vh - 40px);
     }
   }
 
@@ -509,7 +579,7 @@
     text-align: center;
     display: none;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: block;
     }
 
@@ -561,9 +631,10 @@
     right: 10px;
     padding: 20px;
     border-radius: 10px;
-    @include screen-size('small') {
+    @include screen-size("small") {
       top: unset;
       bottom: 20px;
+      display: none;
     }
   }
 
@@ -579,7 +650,7 @@
     left: 430px;
     // padding: 10px;
     border-radius: 10px;
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: none;
     }
   }
@@ -604,16 +675,16 @@
   <div
     class="userlist-nav"
     on:click={() => {
-      showChat = false
-      showUserList = !showUserList
+      showChat = false;
+      showUserList = !showUserList;
     }}>
     USERLIST
   </div>
   <div
     class="chat-nav"
     on:click={() => {
-      showUserList = false
-      showChat = !showChat
+      showUserList = false;
+      showChat = !showChat;
     }}>
     CHAT
   </div>
@@ -633,13 +704,54 @@
   <div class="pop" in:fade>{popUpText}</div>
 {/if}
 
+{#if debug}
+  <div class="pop tiny" in:fade>
+    <div>
+      <strong>Renderer width:</strong>
+      {rendererWidth}
+    </div>
+    <div>
+      <strong>Renderer Height:</strong>
+      {rendererHeight}
+    </div>
+    <div>
+      <strong>viewport width:</strong>
+      {viewportWidth}
+    </div>
+    <div>
+      <strong>viewport Height:</strong>
+      {viewportHeight}
+    </div>
+    <div>
+      <strong>Pixel ratio:</strong>
+      {window.devicePixelRatio}
+    </div>
+    <div>
+      <strong>World X:</strong>
+      {worldX}
+    </div>
+    <div>
+      <strong>World Y:</strong>
+      {worldY}
+    </div>
+    <div>
+      <strong>Screen X:</strong>
+      {screenX}
+    </div>
+    <div>
+      <strong>Screen Y:</strong>
+      {screenY}
+    </div>
+  </div>
+{/if}
+
 <!-- FOLDER  -->
 {#if folderActive}
   <div
     class="folder"
     transition:fly={{ y: 200 }}
     on:click={() => {
-      folderActive = false
+      folderActive = false;
     }}>
     <h2>{folderActive}</h2>
     <p>
