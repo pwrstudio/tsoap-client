@@ -277,10 +277,13 @@
 
             // STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
-              localUserArea.set(player.area);
-              if (!player.connected) {
-                player.opacity = 0.2;
+              if (localPlayers[sessionId].isSelf) {
+                localUserArea.set(player.area);
               }
+
+              // if (!player.connected) {
+              //   player.opacity = 0.2;
+              // }
 
               if (player.path.waypoints.length > 0) {
                 // console.dir(player.path.waypoints);
