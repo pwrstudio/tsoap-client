@@ -132,7 +132,7 @@
               300
           ) {
             closePlayers.push(localPlayers[k]);
-            console.dir(closePlayers);
+            // console.dir(closePlayers);
           }
         }
       }
@@ -474,7 +474,7 @@
   }
 
   .game {
-    width: calc(100vw - 420px);
+    width: calc(100vw - 430px);
     height: 100vh;
     position: fixed;
     top: 0;
