@@ -100,7 +100,7 @@
         class="color-code"
         style={'background-color:' + player.tint.replace('0X', '#')} />
     </div>
-    <div class="name">{player.name} ({player.ip})</div>
+    <div class="name">{player.name}</div>
     <div class="mid">{player.x}</div>
     <div class="mid">{player.y}</div>
   {/if}

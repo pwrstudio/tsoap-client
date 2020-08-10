@@ -69,14 +69,15 @@
   let userLoaded = false;
   let showUserList = false;
   let showChat = false;
+  let banned = false;
 
   let localPlayers = {};
   let chatMessages = [];
   let moveQ = [];
 
   // COLYSEUS
-  const client = new Colyseus.Client("ws://localhost:2567");
-  // const client = new Colyseus.Client("ws://18.194.21.39:2567");
+  // const client = new Colyseus.Client("ws://localhost:2567");
+  const client = new Colyseus.Client("ws://18.194.21.39:2567");
 
   // PIXI: APP
   let app = {};
@@ -113,6 +114,27 @@
         localPlayers[key].y = step.y;
       } else {
         delete moveQ[key];
+        closePlayers = [];
+        for (let k in localPlayers) {
+          // console.log(
+          //   localPlayers[k].name,
+          //   Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x)
+          // );
+          // console.log(
+          //   localPlayers[k].name,
+          //   Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y)
+          // );
+          if (
+            !localPlayers[k].isSelf &&
+            Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
+              300 &&
+            Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
+              300
+          ) {
+            closePlayers.push(localPlayers[k]);
+            console.dir(closePlayers);
+          }
+        }
       }
     }
   };
@@ -277,6 +299,11 @@
               localPlayers[sessionId] = createPlayer(player, sessionId);
             };
 
+            // BANNED
+            gameRoom.onMessage("banned", message => {
+              banned = true;
+            });
+
             // STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
               if (localPlayers[sessionId].isSelf) {
@@ -295,7 +322,7 @@
 
             // ERROR
             gameRoom.onError((code, message) => {
-              console.error("!!! COLYSEUS ERROR:");
+              console.error("!!! ZSZSZ COLYSEUS ERROR:");
               console.error(message);
             });
 
@@ -327,6 +354,11 @@
           })
           .catch(e => {
             console.log("GAME ROOM: JOIN ERROR", e);
+            console.log(e.code);
+            // throw new Error("Whoops!");
+            if (e.code == 4215) {
+              banned = true;
+            }
           });
 
         // => CHAT ROOM
@@ -516,6 +548,31 @@
     }
   }
 
+  .banned-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100000;
+  }
+
+  .banned-box {
+    background: red;
+    padding: 20px;
+    font-size: 16vw;
+    text-align: center;
+    user-select: none;
+
+    .header {
+      font-weight: bold;
+    }
+  }
+
   .pop {
     position: fixed;
     width: auto;
@@ -551,7 +608,7 @@
     line-height: 2em;
     text-align: center;
     bottom: 10px;
-    right: 10px;
+    left: 420px;
     padding: 20px;
     border-radius: 10px;
   }
@@ -679,6 +736,14 @@
     }
   }
 </style>
+
+{#if banned}
+  <div class="banned-overlay">
+    <div class="banned-box">
+      <div class="header">BANNED</div>
+    </div>
+  </div>
+{/if}
 
 {#if login && !loggedIn}
   <div class="account-overlay">
@@ -810,7 +875,7 @@
 <!-- <div class="fps">{fpsCounter}</div> -->
 
 <!-- PROXIMITY -->
-<!-- {#if closePlayers.length > 0}
+{#if closePlayers.length > 0}
   <div class="proximity" transition:fly={{ y: 200 }}>
     <div>
       <strong>Players nearby</strong>
@@ -819,4 +884,4 @@
       <div>{player.name}</div>
     {/each}
   </div>
-{/if} -->
+{/if}
