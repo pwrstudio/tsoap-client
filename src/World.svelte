@@ -70,6 +70,7 @@
   let showUserList = false;
   let showChat = false;
   let banned = false;
+  let inMotion = false;
 
   let localPlayers = {};
   let chatMessages = [];
@@ -113,6 +114,7 @@
         localPlayers[key].x = step.x;
         localPlayers[key].y = step.y;
       } else {
+        if(key === $localUserSessionID) inMotion = false
         delete moveQ[key];
         closePlayers = [];
         for (let k in localPlayers) {
@@ -328,11 +330,13 @@
 
             // USER INTERACTION: CLICK / TAP
             viewport.on("clicked", e => {
-              if (!folderActive) {
+              if (!folderActive && !inMotion) {
                 gameRoom.send("go", {
                   x: Math.round(e.world.x),
                   y: Math.round(e.world.y)
                 });
+
+                inMotion = true;
 
                 screenX = Math.round(e.screen.x);
                 screenY = Math.round(e.screen.y);
