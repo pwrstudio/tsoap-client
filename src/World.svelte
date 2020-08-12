@@ -478,7 +478,7 @@
   }
 
   .game {
-    width: calc(100vw - 430px);
+    width: calc(100vw - 420px);
     height: 100vh;
     position: fixed;
     top: 0;
