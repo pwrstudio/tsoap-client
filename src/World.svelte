@@ -76,6 +76,8 @@
   let chatMessages = [];
   let moveQ = [];
 
+  let targetGraphics = {}
+
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567");
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
@@ -115,7 +117,10 @@
         localPlayers[key].x = step.x;
         localPlayers[key].y = step.y;
       } else {
-        if (key === $localUserSessionID) inMotion = false;
+        if (key === $localUserSessionID) {
+          inMotion = false;
+          hideTarget()
+        }
         delete moveQ[key];
         closePlayers = [];
         for (let k in localPlayers) {
@@ -150,10 +155,12 @@
     graphics.drawCircle(x, y, 32); // drawCircle(x, y, radius)
     graphics.endFill();
     viewport.addChild(graphics);
-    // HACK
-    setTimeout(() => {
-      viewport.removeChild(graphics);
-    }, 1000);
+    targetGraphics = graphics
+  };
+
+  const hideTarget = () => {
+      viewport.removeChild(targetGraphics);
+      targetGraphics = {}
   };
 
   // FUNCTIONS
@@ -309,6 +316,7 @@
 
             // BANNED
             gameRoom.onMessage("illegalMove", message => {
+              hideTarget()
               inMotion = false;
             });
 
@@ -317,10 +325,6 @@
               if (localPlayers[sessionId].isSelf) {
                 localUserArea.set(player.area);
               }
-
-              // if (!player.connected) {
-              //   player.opacity = 0.2;
-              // }
 
               if (player.path.waypoints.length > 0) {
                 // console.dir(player.path.waypoints);
