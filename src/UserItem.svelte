@@ -13,7 +13,6 @@
   export let header = false;
   export let numberOfUsers = 0;
 
-  console.dir(player);
 </script>
 
 <style lang="scss">

@@ -10,12 +10,15 @@
   import * as Colyseus from "colyseus.js";
   import * as PIXI from "pixi.js";
   import { Viewport } from "pixi-viewport";
-  // import Hammer from "hammerjs";
   import Chance from "chance";
   import get from "lodash/get";
   import sample from "lodash/sample";
   import { fade, fly } from "svelte/transition";
   const chance = new Chance();
+
+  // COMPONENTS
+  import Chat from "./Chat.svelte";
+  import UserList from "./UserList.svelte";
 
   // STORES
   import {
@@ -25,6 +28,7 @@
     localUserSessionID,
     localUserArea
   } from "./stores.js";
+
   localUserUUID.set(chance.guid());
 
   // PROPS
@@ -34,26 +38,18 @@
   export let x = 0;
   export let y = 0;
 
-  // console.log(position);
-  // console.log(x);
-  // console.log(y);
+  // GLOBAL
+  import { houseList, KEYBOARD, WIDTH, HEIGHT, colorTrans } from "./global.js";
 
+  // DEBUG VARIABLES
   let worldX = 0;
   let worldY = 0;
   let screenX = 0;
   let screenY = 0;
-
   let rendererHeight = 0;
   let rendererWidth = 0;
   let viewportHeight = 0;
   let viewportWidth = 0;
-
-  // GLOBAL
-  import { houseList, KEYBOARD, WIDTH, HEIGHT } from "./global.js";
-
-  // COMPONENTS
-  import Chat from "./Chat.svelte";
-  import UserList from "./UserList.svelte";
 
   // DOM REFERENCES
   let gameContainer = {};
@@ -84,30 +80,12 @@
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
   const client = new Colyseus.Client("wss://scarmonger.xyz");
 
-  // PIXI: APP
+  // PIXI
   let app = {};
   let responsiveWidth = 0;
   let viewport = {};
   let loader = {};
   let ticker = {};
-
-  // console.dir(ticker);
-
-  // $: fpsCounter = ticker.FPS;
-
-  // $: {
-  //   if (Object.keys(moveQ).length > 0) {
-  //     console.log("TICKER START");
-  //     console.dir(JSON.stringify(moveQ));
-  //     ticker.start();
-  //   } else {
-  //     console.log("TICKER STOP");
-  //     console.dir(moveQ);
-  //     ticker.stop();
-  //   }
-  // }
-
-  const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"];
 
   // GAME LOOP
   const updatePositions = t => {
@@ -126,14 +104,6 @@
         delete moveQ[key];
         closePlayers = [];
         for (let k in localPlayers) {
-          // console.log(
-          //   localPlayers[k].name,
-          //   Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x)
-          // );
-          // console.log(
-          //   localPlayers[k].name,
-          //   Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y)
-          // );
           if (
             !localPlayers[k].isSelf &&
             Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
@@ -142,7 +112,6 @@
               200
           ) {
             closePlayers.push(localPlayers[k]);
-            // console.dir(closePlayers);
           }
         }
       }
@@ -154,7 +123,7 @@
     graphics.beginFill($localUserTint);
     graphics.alpha = 0.7;
     graphics.zIndex = 1;
-    graphics.drawCircle(x, y, 32); // drawCircle(x, y, radius)
+    graphics.drawCircle(x, y, 32);
     graphics.endFill();
     viewport.addChild(graphics);
     targetGraphics = graphics
@@ -166,19 +135,23 @@
   };
 
   const showPath = path => {
-    let line = new PIXI.Graphics();
-    line.lineStyle(3, 0xFF0000, 0.6);
-    line.moveTo(localPlayers[$localUserSessionID].x, localPlayers[$localUserSessionID].y);
-    path.forEach(p => {
-      line.lineTo(p.x, p.y);
-    })
-    viewport.addChild(line);
-    pathGraphics = line
+    try {
+      let line = new PIXI.Graphics();
+      line.lineStyle(3, 0xFF0000, 0.6);
+      line.moveTo(localPlayers[$localUserSessionID].x, localPlayers[$localUserSessionID].y);
+      path.forEach(p => {
+        line.lineTo(p.x, p.y);
+      })
+      viewport.addChild(line);
+      pathGraphics = line
+    } catch (err) {
+      Sentry.captureException(err);
+    }
   };
 
   const hidePath = () => {
-      viewport.removeChild(pathGraphics);
-      pathGraphics = {}
+    viewport.removeChild(pathGraphics);
+    pathGraphics = {}
   };
 
   // FUNCTIONS
@@ -187,9 +160,9 @@
   const startPrivateChat = partner => {
     console.log(partner.id);
   };
+
   const makeNewUser = () => {
     loggedIn = true;
-
     gameContainer.appendChild(app.view);
 
     // LOADER
@@ -199,7 +172,6 @@
       .add("avatarTwo", "avatar2.png")
       .add("avatarThree", "avatar3.png")
       .load((loader, resources) => {
-        // Add map to viewport
         let map = new PIXI.Sprite(resources.map.texture);
         map.width = 5000;
         map.height = 5000;
@@ -231,29 +203,25 @@
           avatar.zIndex = 10;
           avatar.isSelf = player.uuid == $localUserUUID;
           avatar.interactive = true;
+
+          const onDown = e => {
+            startPrivateChat(avatar);
+            e.stopPropagation();
+          }
+
+          const onEnter = () => {
+            popUpText = avatar.name;
+          }
+
+         const onLeave = () => {
+            popUpText = false;
+          }
+
           avatar.on("mousedown", onDown);
           avatar.on("touchstart", onDown);
           avatar.on("mouseover", onEnter);
           avatar.on("mouseout", onLeave);
 
-          function onDown(e) {
-            // console.dir(e);
-            // console.log(avatar.name);
-            startPrivateChat(avatar);
-            e.data.originalEvent.preventDefault();
-            e.data.originalEvent.stopPropagation(); // here ! not work
-          }
-
-          function onEnter(e) {
-            popUpText = avatar.name;
-          }
-
-          function onLeave(e) {
-            popUpText = false;
-          }
-
-          // Add the avatar to the scene we are building
-          // app.stage.addChild(avatar);
           viewport.addChild(avatar);
 
           if (avatar.isSelf) {
@@ -276,26 +244,24 @@
           graphics.endFill();
           graphics.title = h.title;
           graphics.interactive = true;
+
+          const onDown = e => {
+            folderActive = graphics.title;
+            e.stopPropagation();
+          }
+
+          const onEnter = e => {
+            popUpText = graphics.title;
+          }
+
+          const onLeave = e => {
+            popUpText = false;
+          }
+
           graphics.on("mousedown", onDown);
           graphics.on("touchstart", onDown);
           graphics.on("mouseover", onEnter);
           graphics.on("mouseout", onLeave);
-
-          function onDown(e) {
-            // console.log("house");
-            // console.dir(e);
-            folderActive = graphics.title;
-            e.data.originalEvent.preventDefault();
-            e.data.originalEvent.stopPropagation(); // here ! not work
-          }
-
-          function onEnter(e) {
-            popUpText = graphics.title;
-          }
-
-          function onLeave(e) {
-            popUpText = false;
-          }
 
           viewport.addChild(graphics);
         });
@@ -315,15 +281,18 @@
           })
           .then(gameRoom => {
             // REMOVE
-            gameRoom.state.players.onRemove = function(player, sessionId) {
-              viewport.removeChild(localPlayers[sessionId]);
-              delete localPlayers[sessionId];
-              // FORCE RENDER
-              localPlayers = localPlayers;
+            gameRoom.state.players.onRemove = (player, sessionId) => {
+              try {
+                viewport.removeChild(localPlayers[sessionId]);
+                delete localPlayers[sessionId];
+                localPlayers = localPlayers;
+              } catch (err) {
+                Sentry.captureException(err);
+              }
             };
 
             // ADD
-            gameRoom.state.players.onAdd = function(player, sessionId) {
+            gameRoom.state.players.onAdd = (player, sessionId) => {
               localPlayers[sessionId] = createPlayer(player, sessionId);
             };
 
@@ -332,7 +301,7 @@
               banned = true;
             });
 
-            // BANNED
+            // ILLEGAL MOVE
             gameRoom.onMessage("illegalMove", message => {
               hideTarget()
               inMotion = false;
@@ -351,13 +320,14 @@
 
             // ERROR
             gameRoom.onError((code, message) => {
-              console.error("!!! ZSZSZ COLYSEUS ERROR:");
+              console.error("!!! COLYSEUS ERROR:");
               console.error(message);
+              Sentry.captureException(err);
             });
 
             // USER INTERACTION: CLICK / TAP
             viewport.on("clicked", e => {
-              if (!folderActive && !inMotion) {
+              if (!inMotion) {
                 gameRoom.send("go", {
                   x: Math.round(e.world.x),
                   y: Math.round(e.world.y)
@@ -370,25 +340,17 @@
                 worldX = Math.round(e.world.x);
                 worldY = Math.round(e.world.y);
 
-                // console.log("e.event.type", e.event.type);
-                // console.log("*");
-                // console.log("screen.X", Math.round(e.screen.x));
-                // console.log("screen.Y", Math.round(e.screen.y));
-                // console.log("world.X", Math.round(e.world.x));
-                // console.log("world.Y", Math.round(e.world.y));
-                // console.log("- - - - - -");
-                // console.dir(e);
-
                 showTarget(Math.round(e.world.x), Math.round(e.world.y));
               }
             });
           })
           .catch(e => {
-            console.log("GAME ROOM: JOIN ERROR", e);
-            console.log(e.code);
-            // throw new Error("Whoops!");
             if (e.code == 4215) {
+              console.log('BANNED')
               banned = true;
+            } else {
+              console.log("GAME ROOM: JOIN ERROR", e);
+              Sentry.captureException(e);
             }
           });
 
@@ -402,14 +364,19 @@
             
             // REMOVE MESSAGE
             chatRoom.state.messages.onRemove = message => {
-              const itemIndex = chatMessages.findIndex(m => m === message);
-              chatMessages.splice(itemIndex, 1);
-              chatMessages = chatMessages
+              try {
+                const itemIndex = chatMessages.findIndex(m => m === message);
+                chatMessages.splice(itemIndex, 1);
+                chatMessages = chatMessages
+              } catch (err) {
+                Sentry.captureException(err);
+              }
             }
 
             // ERROR
             chatRoom.onError((code, message) => {
               console.error(message);
+              Sentry.captureException(message);
             });
 
             // SUBMIT CHAT
@@ -425,6 +392,7 @@
           })
           .catch(e => {
             console.log("CHAT ROOM: JOIN ERROR", e);
+            Sentry.captureException(e);
           });
       });
   };
@@ -433,18 +401,13 @@
     // PIXI: APP
     app = new PIXI.Application({
       width: WIDTH,
-      height: HEIGHT
-      // autoDensity: true
-      // resolution: 1
+      height: HEIGHT,
+      resolution: 1
     });
 
     responsiveWidth = window.matchMedia("(max-width: 700px)").matches
       ? window.innerWidth
       : window.innerWidth - 420;
-
-    // console.log("responsiveWidth", responsiveWidth);
-    // console.log(" window.innerHeight", window.innerHeight);
-    // console.log("window.devicePixelRatio", window.devicePixelRatio);
 
     // PIXI: VIEWPORT
     viewport = new Viewport({
@@ -465,15 +428,12 @@
     ticker.start();
     ticker.add(updatePositions);
 
-    // viewport.drag();
-
     rendererHeight = app.screen.height;
     rendererWidth = app.screen.width;
     viewportHeight = viewport.screenHeight;
     viewportWidth = viewport.screenWidth;
 
     window.onresize = () => {
-      // console.log("RESIZE");
       responsiveWidth = window.matchMedia("(max-width: 700px)").matches
         ? window.innerWidth
         : window.innerWidth - 420;
@@ -484,9 +444,6 @@
       rendererWidth = app.screen.width;
       viewportHeight = viewport.screenHeight;
       viewportWidth = viewport.screenWidth;
-
-      // console.log("app.screen:", app.screen.width, app.screen.height);
-      // console.log("viewport", viewport.screenWidth, viewport.screenHeight);
     };
 
     window.dispatchEvent(new Event("resize"));
@@ -494,8 +451,6 @@
     if (window.matchMedia("(max-width: 700px)").matches) {
       viewport.setZoom(0.75);
     }
-
-    // console.dir(viewport);
 
     if (!login) {
       makeNewUser();
@@ -720,22 +675,11 @@
       background: $darkgrey;
       cursor: pointer;
       color: $lightergrey;
-      // border-bottom: 1px solid $lightergrey;
 
       &:active {
         background: $darkergrey;
       }
     }
-  }
-
-  .fps {
-    position: fixed;
-    bottom: 20px;
-    right: 0;
-    background: $lightgrey;
-    padding: 20px;
-    font-size: $font_size_small;
-    text-align: center;
   }
 
   .current-area {
@@ -766,7 +710,6 @@
     top: 10px;
     width: 360px;
     left: 430px;
-    // padding: 10px;
     border-radius: 10px;
     @include screen-size("small") {
       display: none;
@@ -908,8 +851,6 @@
     loop
     transition:fly={{ y: 200 }} />
 {/if}
-
-<!-- <div class="fps">{fpsCounter}</div> -->
 
 <!-- PROXIMITY -->
 {#if closePlayers.length > 0}

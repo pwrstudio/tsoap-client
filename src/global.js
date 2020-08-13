@@ -19,6 +19,8 @@ export const KEYBOARD = {
     ENTER: 13
 }
 
+export const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"];
+
 export const WIDTH = 5000;
 export const HEIGHT = 5000;
 

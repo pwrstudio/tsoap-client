@@ -147,3 +147,20 @@
           //     y: correctedY
           //   });
           // });
+                // console.log("e.event.type", e.event.type);
+                // console.log("*");
+                // console.log("screen.X", Math.round(e.screen.x));
+                // console.log("screen.Y", Math.round(e.screen.y));
+                // console.log("world.X", Math.round(e.world.x));
+                // console.log("world.Y", Math.round(e.world.y));
+                // console.log("- - - - - -");
+                // console.dir(e);
+
+                          // console.log(
+          //   localPlayers[k].name,
+          //   Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x)
+          // );
+          // console.log(
+          //   localPlayers[k].name,
+          //   Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y)
+          // );
