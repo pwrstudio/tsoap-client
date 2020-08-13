@@ -27,7 +27,7 @@
     line-height: 1em;
     font-size: $font_size_small;
 
-    opacity: 0.2;
+    opacity: 1;
 
     &.active {
       opacity: 1;

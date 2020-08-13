@@ -77,6 +77,7 @@
   let moveQ = [];
 
   let targetGraphics = {}
+  let pathGraphics = {}
 
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567");
@@ -120,6 +121,7 @@
         if (key === $localUserSessionID) {
           inMotion = false;
           hideTarget()
+          if(debug) hidePath()
         }
         delete moveQ[key];
         closePlayers = [];
@@ -161,6 +163,22 @@
   const hideTarget = () => {
       viewport.removeChild(targetGraphics);
       targetGraphics = {}
+  };
+
+  const showPath = path => {
+    let line = new PIXI.Graphics();
+    line.lineStyle(3, 0xFF0000, 0.6);
+    line.moveTo(localPlayers[$localUserSessionID].x, localPlayers[$localUserSessionID].y);
+    path.forEach(p => {
+      line.lineTo(p.x, p.y);
+    })
+    viewport.addChild(line);
+    pathGraphics = line
+  };
+
+  const hidePath = () => {
+      viewport.removeChild(pathGraphics);
+      pathGraphics = {}
   };
 
   // FUNCTIONS
@@ -322,12 +340,11 @@
 
             // STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
-              if (localPlayers[sessionId].isSelf) {
-                localUserArea.set(player.area);
-              }
-
               if (player.path.waypoints.length > 0) {
-                // console.dir(player.path.waypoints);
+                if (localPlayers[sessionId].isSelf) {
+                  localUserArea.set(player.area);
+                  if(debug) showPath(player.path.waypoints)
+                }
                 moveQ[sessionId] = player.path.waypoints;
               }
             };
