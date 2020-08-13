@@ -375,10 +375,16 @@
         client
           .joinOrCreate("chat")
           .then(chatRoom => {
-            // CHANGE
-            chatRoom.onStateChange(state => {
-              chatMessages = state.messages;
-            });
+
+            // ADD MESSAGE
+            chatRoom.state.messages.onAdd = message => chatMessages = [...chatMessages, message];
+            
+            // REMOVE MESSAGE
+            chatRoom.state.messages.onRemove = message => {
+              const itemIndex = chatMessages.findIndex(m => m === message);
+              chatMessages.splice(itemIndex, 1);
+              chatMessages = chatMessages
+            }
 
             // ERROR
             chatRoom.onError((code, message) => {

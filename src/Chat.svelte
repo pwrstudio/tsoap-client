@@ -12,9 +12,23 @@
   // COMPONENTS
   import ChatMessage from "./ChatMessage.svelte";
 
+  // DOM REFERENCES
+  let messageContainerEl = {}
+
   // PROPS
   export let chatMessages = [];
   export let phoneActive = false;
+
+  $: { 
+    if(chatMessages){
+      setTimeout(() =>{
+        messageContainerEl.scrollTo({
+        top: messageContainerEl.scrollHeight,
+        left: 0,
+        behavior: 'smooth'
+      })}, 100)
+    }
+  }
 
   // VARIABLES
   let chatInputValue = "";
@@ -60,7 +74,7 @@
 
   .message-container {
     width: calc(100% - 10px);
-    height: calc(50vh - 40px);
+    height: calc(50vh - 60px);
     overflow-y: auto;
 
     @include screen-size("small") {
@@ -108,8 +122,8 @@
   }
 </style>
 
-<div class="chat" class:phone={phoneActive}>
-  <div class="message-container">
+<div class="chat" class:phone={phoneActive} >
+  <div class="message-container" bind:this={messageContainerEl}>
     {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />
     {/each}
