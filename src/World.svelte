@@ -78,7 +78,8 @@
 
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567");
-  const client = new Colyseus.Client("ws://18.194.21.39:2567");
+  // const client = new Colyseus.Client("ws://18.194.21.39:2567");
+  const client = new Colyseus.Client("wss://scarmonger.xyz");
 
   // PIXI: APP
   let app = {};
@@ -114,7 +115,7 @@
         localPlayers[key].x = step.x;
         localPlayers[key].y = step.y;
       } else {
-        if(key === $localUserSessionID) inMotion = false
+        if (key === $localUserSessionID) inMotion = false;
         delete moveQ[key];
         closePlayers = [];
         for (let k in localPlayers) {
@@ -129,9 +130,9 @@
           if (
             !localPlayers[k].isSelf &&
             Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
-              300 &&
+              200 &&
             Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
-              300
+              200
           ) {
             closePlayers.push(localPlayers[k]);
             // console.dir(closePlayers);
@@ -306,6 +307,11 @@
               banned = true;
             });
 
+            // BANNED
+            gameRoom.onMessage("illegalMove", message => {
+              inMotion = false;
+            });
+
             // STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
               if (localPlayers[sessionId].isSelf) {
@@ -470,7 +476,7 @@
   });
 </script>
 
-<style lang="scss" global>
+<style lang="scss">
   @import "./variables.scss";
 
   * {
@@ -612,7 +618,7 @@
     line-height: 2em;
     text-align: center;
     bottom: 10px;
-    left: 420px;
+    left: 430px;
     padding: 20px;
     border-radius: 10px;
   }
