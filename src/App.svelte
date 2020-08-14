@@ -10,7 +10,6 @@
 
   // ROUTES
   import World from "./World.svelte";
-
 </script>
 
 <style lang="scss" global>

@@ -12,7 +12,6 @@
   export let player = {};
   export let header = false;
   export let numberOfUsers = 0;
-
 </script>
 
 <style lang="scss">
@@ -42,8 +41,6 @@
       &.small {
         width: 20px;
         height: 20px;
-        // width: 20%;
-        // text-align: left;
       }
 
       &.name {

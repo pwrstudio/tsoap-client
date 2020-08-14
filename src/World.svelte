@@ -72,8 +72,8 @@
   let chatMessages = [];
   let moveQ = [];
 
-  let targetGraphics = {}
-  let pathGraphics = {}
+  let targetGraphics = {};
+  let pathGraphics = {};
 
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567");
@@ -98,8 +98,8 @@
       } else {
         if (key === $localUserSessionID) {
           inMotion = false;
-          hideTarget()
-          if(debug) hidePath()
+          hideTarget();
+          if (debug) hidePath();
         }
         delete moveQ[key];
         closePlayers = [];
@@ -126,32 +126,37 @@
     graphics.drawCircle(x, y, 32);
     graphics.endFill();
     viewport.addChild(graphics);
-    targetGraphics = graphics
+    targetGraphics = graphics;
   };
 
   const hideTarget = () => {
-      viewport.removeChild(targetGraphics);
-      targetGraphics = {}
+    viewport.removeChild(targetGraphics);
+    targetGraphics = {};
   };
 
   const showPath = path => {
     try {
       let line = new PIXI.Graphics();
-      line.lineStyle(3, 0xFF0000, 0.6);
-      line.moveTo(localPlayers[$localUserSessionID].x, localPlayers[$localUserSessionID].y);
+      line.lineStyle(3, 0xff0000, 0.6);
+      line.moveTo(
+        localPlayers[$localUserSessionID].x,
+        localPlayers[$localUserSessionID].y
+      );
       path.forEach(p => {
         line.lineTo(p.x, p.y);
-      })
+      });
       viewport.addChild(line);
-      pathGraphics = line
+      pathGraphics = line;
     } catch (err) {
       Sentry.captureException(err);
     }
   };
 
+  let teleportTo = () => {};
+
   const hidePath = () => {
     viewport.removeChild(pathGraphics);
-    pathGraphics = {}
+    pathGraphics = {};
   };
 
   // FUNCTIONS
@@ -207,15 +212,15 @@
           const onDown = e => {
             startPrivateChat(avatar);
             e.stopPropagation();
-          }
+          };
 
           const onEnter = () => {
             popUpText = avatar.name;
-          }
+          };
 
-         const onLeave = () => {
+          const onLeave = () => {
             popUpText = false;
-          }
+          };
 
           avatar.on("mousedown", onDown);
           avatar.on("touchstart", onDown);
@@ -248,15 +253,15 @@
           const onDown = e => {
             folderActive = graphics.title;
             e.stopPropagation();
-          }
+          };
 
           const onEnter = e => {
             popUpText = graphics.title;
-          }
+          };
 
           const onLeave = e => {
             popUpText = false;
-          }
+          };
 
           graphics.on("mousedown", onDown);
           graphics.on("touchstart", onDown);
@@ -303,7 +308,7 @@
 
             // ILLEGAL MOVE
             gameRoom.onMessage("illegalMove", message => {
-              hideTarget()
+              hideTarget();
               inMotion = false;
             });
 
@@ -312,9 +317,31 @@
               if (player.path.waypoints.length > 0) {
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
-                  if(debug) showPath(player.path.waypoints)
+                  if (debug) showPath(player.path.waypoints);
                 }
                 moveQ[sessionId] = player.path.waypoints;
+              } else {
+                // TELEPORT
+                if (localPlayers[sessionId].isSelf) {
+                  localUserArea.set(player.area);
+                }
+                localPlayers[sessionId].x = player.x;
+                localPlayers[sessionId].y = player.y;
+
+                closePlayers = [];
+                for (let k in localPlayers) {
+                  if (
+                    !localPlayers[k].isSelf &&
+                    Math.abs(
+                      localPlayers[k].x - localPlayers[$localUserSessionID].x
+                    ) < 200 &&
+                    Math.abs(
+                      localPlayers[k].y - localPlayers[$localUserSessionID].y
+                    ) < 200
+                  ) {
+                    closePlayers.push(localPlayers[k]);
+                  }
+                }
               }
             };
 
@@ -343,10 +370,17 @@
                 showTarget(Math.round(e.world.x), Math.round(e.world.y));
               }
             });
+
+            teleportTo = area => {
+              console.log(area);
+              gameRoom.send("teleport", {
+                area: area
+              });
+            };
           })
           .catch(e => {
             if (e.code == 4215) {
-              console.log('BANNED')
+              console.log("BANNED");
               banned = true;
             } else {
               console.log("GAME ROOM: JOIN ERROR", e);
@@ -358,20 +392,20 @@
         client
           .joinOrCreate("chat")
           .then(chatRoom => {
-
             // ADD MESSAGE
-            chatRoom.state.messages.onAdd = message => chatMessages = [...chatMessages, message];
-            
+            chatRoom.state.messages.onAdd = message =>
+              (chatMessages = [...chatMessages, message]);
+
             // REMOVE MESSAGE
             chatRoom.state.messages.onRemove = message => {
               try {
                 const itemIndex = chatMessages.findIndex(m => m === message);
                 chatMessages.splice(itemIndex, 1);
-                chatMessages = chatMessages
+                chatMessages = chatMessages;
               } catch (err) {
                 Sentry.captureException(err);
               }
-            }
+            };
 
             // ERROR
             chatRoom.onError((code, message) => {
@@ -617,6 +651,7 @@
     padding: 20px;
     line-height: 1.4em;
     border-radius: 10px;
+    z-index: 1000;
     cursor: pointer;
 
     p {
@@ -715,6 +750,57 @@
       display: none;
     }
   }
+
+  .teleport {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    width: 420px;
+    height: 80px;
+    background: #f4f4f4;
+    padding: 10px;
+    overflow: scroll;
+    font-size: 12px;
+    z-index: 100;
+    user-select: none;
+
+    .header {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .link-container {
+      .link {
+        float: left;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin-right: 10px;
+        cursor: pointer;
+        &.green {
+          background: #78f878;
+        }
+        &.blue {
+          background: #7878f8;
+        }
+        &.yellow {
+          background: #f8f878;
+        }
+        &.red {
+          background: #f87878;
+        }
+
+        opacity: 0.7;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+
+    @include screen-size("small") {
+      display: none;
+    }
+  }
 </style>
 
 {#if banned}
@@ -761,6 +847,41 @@
 
 <!-- USER LIST -->
 <UserList playerList={localPlayers} phoneActive={showUserList} />
+
+<!-- TELEPORT MENU -->
+<div class="teleport" in:fade>
+  <div class="header">Go to area</div>
+  <div class="link-container">
+    <div
+      class="link green"
+      on:click={() => {
+        teleportTo('green');
+      }}>
+      Green
+    </div>
+    <div
+      class="link blue"
+      on:click={() => {
+        teleportTo('blue');
+      }}>
+      Blue
+    </div>
+    <div
+      class="link yellow"
+      on:click={() => {
+        teleportTo('yellow');
+      }}>
+      Yellow
+    </div>
+    <div
+      class="link red"
+      on:click={() => {
+        teleportTo('red');
+      }}>
+      Red
+    </div>
+  </div>
+</div>
 
 <!-- CHAT -->
 <Chat {chatMessages} on:submit={submitChat} phoneActive={showChat} />

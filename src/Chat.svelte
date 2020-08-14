@@ -13,20 +13,21 @@
   import ChatMessage from "./ChatMessage.svelte";
 
   // DOM REFERENCES
-  let messageContainerEl = {}
+  let messageContainerEl = {};
 
   // PROPS
   export let chatMessages = [];
   export let phoneActive = false;
 
-  $: { 
-    if(chatMessages){
-      setTimeout(() =>{
+  $: {
+    if (chatMessages) {
+      setTimeout(() => {
         messageContainerEl.scrollTo({
-        top: messageContainerEl.scrollHeight,
-        left: 0,
-        behavior: 'smooth'
-      })}, 100)
+          top: messageContainerEl.scrollHeight,
+          left: 0,
+          behavior: "smooth"
+        });
+      }, 100);
     }
   }
 
@@ -46,10 +47,10 @@
 
   .chat {
     position: fixed;
-    top: 50%;
+    top: calc(50% + 80px);
     left: 0;
     width: 400px;
-    height: 50vh;
+    height: calc(50vh - 80px);
     background: #a4a4a4;
     padding: 10px;
     overflow: scroll;
@@ -74,7 +75,7 @@
 
   .message-container {
     width: calc(100% - 10px);
-    height: calc(50vh - 60px);
+    height: calc(100% - 60px);
     overflow-y: auto;
 
     @include screen-size("small") {
@@ -122,7 +123,7 @@
   }
 </style>
 
-<div class="chat" class:phone={phoneActive} >
+<div class="chat" class:phone={phoneActive}>
   <div class="message-container" bind:this={messageContainerEl}>
     {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />
