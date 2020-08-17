@@ -12,6 +12,8 @@
   export let player = {};
   export let header = false;
   export let numberOfUsers = 0;
+
+  console.dir(player);
 </script>
 
 <style lang="scss">
@@ -96,7 +98,10 @@
         class="color-code"
         style={'background-color:' + player.tint.replace('0X', '#')} />
     </div>
-    <div class="name">{player.name}</div>
+    <div class="name">
+      {player.name}
+      {#if player.authenticated}(&#9733;){/if}
+    </div>
     <div class="mid">{player.x}</div>
     <div class="mid">{player.y}</div>
   {/if}

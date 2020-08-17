@@ -19,6 +19,7 @@
   // COMPONENTS
   import Chat from "./Chat.svelte";
   import UserList from "./UserList.svelte";
+  import Login from "./Login.svelte";
 
   // STORES
   import {
@@ -32,11 +33,14 @@
   localUserUUID.set(chance.guid());
 
   // PROPS
+  export let authenticate = false;
   export let login = false;
   export let position = false;
   export let debug = false;
   export let x = 0;
   export let y = 0;
+  export let sso = false;
+  export let sig = false;
 
   // GLOBAL
   import { houseList, KEYBOARD, WIDTH, HEIGHT, colorTrans } from "./global.js";
@@ -76,9 +80,9 @@
   let pathGraphics = {};
 
   // COLYSEUS
-  // const client = new Colyseus.Client("ws://localhost:2567");
+  const client = new Colyseus.Client("ws://localhost:2567");
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  const client = new Colyseus.Client("wss://scarmonger.xyz");
+  // const client = new Colyseus.Client("wss://scarmonger.xyz");
 
   // PIXI
   let app = {};
@@ -166,7 +170,7 @@
     console.log(partner.id);
   };
 
-  const makeNewUser = () => {
+  const makeNewUser = (sso, sig) => {
     loggedIn = true;
     gameContainer.appendChild(app.view);
 
@@ -192,6 +196,10 @@
 
         // CREATE PLAYER
         const createPlayer = (player, sessionId) => {
+          console.log("create");
+          console.log($localUserUUID);
+          console.log(player.uuid);
+
           let avatar = new PIXI.Sprite(avatarList[player.avatar]);
           avatar.x = player.x;
           avatar.y = player.y;
@@ -204,10 +212,13 @@
           avatar.uuid = player.uuid;
           avatar.ip = player.ip;
           avatar.connected = player.connected;
+          avatar.authenticated = player.authenticated;
           avatar.id = sessionId;
           avatar.zIndex = 10;
           avatar.isSelf = player.uuid == $localUserUUID;
           avatar.interactive = true;
+
+          console.dir(avatar.isSelf);
 
           const onDown = e => {
             startPrivateChat(avatar);
@@ -271,9 +282,23 @@
           viewport.addChild(graphics);
         });
 
-        // => GAME ROOM
-        client
-          .joinOrCreate("game", {
+        let playerObject = {};
+
+        if (authenticate && sso && sig) {
+          playerObject = {
+            sso: sso,
+            sig: sig,
+            uuid: $localUserUUID,
+            avatar: avatarIndex,
+            tint:
+              newUserColor.replace("#", "0x").toUpperCase() ||
+              chance
+                .color({ format: "hex" })
+                .replace("#", "0x")
+                .toUpperCase()
+          };
+        } else {
+          playerObject = {
             uuid: $localUserUUID,
             name: newUserName || chance.name(),
             avatar: avatarIndex,
@@ -283,7 +308,12 @@
                 .color({ format: "hex" })
                 .replace("#", "0x")
                 .toUpperCase()
-          })
+          };
+        }
+
+        // => GAME ROOM
+        client
+          .joinOrCreate("game", playerObject)
           .then(gameRoom => {
             // REMOVE
             gameRoom.state.players.onRemove = (player, sessionId) => {
@@ -298,6 +328,8 @@
 
             // ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
+              console.dir(player);
+              console.log(sessionId);
               localPlayers[sessionId] = createPlayer(player, sessionId);
             };
 
@@ -314,6 +346,8 @@
 
             // STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
+              console.dir(localPlayers);
+              console.log(sessionId);
               if (player.path.waypoints.length > 0) {
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
@@ -487,7 +521,7 @@
     }
 
     if (!login) {
-      makeNewUser();
+      makeNewUser(sso, sig);
     }
   });
 </script>
@@ -517,60 +551,6 @@
     @include screen-size("small") {
       width: 100vw;
       right: 0;
-    }
-  }
-
-  .account-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100000;
-  }
-
-  .account-box {
-    background: #a4a4a4;
-    width: 300px;
-    padding: 20px;
-
-    .header {
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    input[type="text"] {
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
-      background: $lightgrey;
-      padding: 10px;
-      border: 0;
-      outline: none;
-    }
-
-    input[type="color"] {
-      display: block;
-      margin-bottom: 10px;
-    }
-
-    button {
-      width: 60px;
-      float: right;
-      display: block;
-      background: $darkgrey;
-      padding: 10px;
-      border: 0;
-      outline: none;
-      color: white;
-      cursor: pointer;
-      &:hover {
-        background: $darkergrey;
-      }
     }
   }
 
@@ -812,14 +792,7 @@
 {/if}
 
 {#if login && !loggedIn}
-  <div class="account-overlay">
-    <div class="account-box">
-      <div class="header">Create session account</div>
-      <input bind:value={newUserName} type="text" placeholder="Name" />
-      <input bind:value={newUserColor} type="color" />
-      <button on:click={makeNewUser}>Start</button>
-    </div>
-  </div>
+  <Login {sso} {sig} />
 {/if}
 
 {#if position}

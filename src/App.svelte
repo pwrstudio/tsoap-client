@@ -20,16 +20,9 @@
 </style>
 
 <Router>
-  <Route path="/">
-    <World />
-  </Route>
-  <Route path="/create-account">
-    <World login={true} />
-  </Route>
-  <Route path="/debug">
-    <World debug={true} />
-  </Route>
-  <Route path="/position/:x/:y" let:params>
-    <World position={true} x={params.x} y={params.y} />
-  </Route>
+  <Route path="/" component={World} />
+  <Route path="/authenticate/:sso/:sig" component={World} authenticate={true} />
+  <Route path="/login" component={World} login={true} />
+  <Route path="/debug" component={World} debug={true} />
+  <!-- <Route path="/position/:x/:y" component="World" position={true} /> -->
 </Router>
