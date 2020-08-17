@@ -75,11 +75,12 @@
 
   .message-container {
     width: calc(100% - 10px);
+    width: 100%;
     height: calc(100% - 60px);
     overflow-y: auto;
 
     @include screen-size("small") {
-      height: calc(100% - 60px);
+      height: calc(100% - 130px);
     }
   }
 
