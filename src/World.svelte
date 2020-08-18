@@ -175,11 +175,12 @@
     gameContainer.appendChild(app.view);
 
     // LOADER
+    // http://localhost:5000/
     loader
-      .add("map", "hkw-map-no-house-smaller.png")
-      .add("avatarOne", "avatar1.png")
-      .add("avatarTwo", "avatar2.png")
-      .add("avatarThree", "avatar3.png")
+      .add("map", "/hkw-map-no-house-smaller.png")
+      .add("avatarOne", "/avatar1.png")
+      .add("avatarTwo", "/avatar2.png")
+      .add("avatarThree", "/avatar3.png")
       .load((loader, resources) => {
         let map = new PIXI.Sprite(resources.map.texture);
         map.width = 5000;
@@ -315,6 +316,10 @@
         client
           .joinOrCreate("game", playerObject)
           .then(gameRoom => {
+            // HACK
+            history.replaceState({}, "CONNECTED", "/");
+            console.log("connected ------");
+
             // REMOVE
             gameRoom.state.players.onRemove = (player, sessionId) => {
               try {
@@ -793,7 +798,16 @@
 {/if}
 
 {#if login && !loggedIn}
-  <Login {sso} {sig} />
+  <Login
+    {sso}
+    {sig}
+    on:newTemporaryUser={e => {
+      console.dir(e);
+      newUserName = e.detail.newUserName;
+      newUserColor = e.detail.newUserColor;
+      loggedIn = true;
+      makeNewUser();
+    }} />
 {/if}
 
 {#if position}
@@ -940,7 +954,7 @@
 {#if $localUserArea === 2}
   <video
     class="stream-test"
-    src="test.mp4"
+    src="/test.mp4"
     muted
     autoplay
     loop
