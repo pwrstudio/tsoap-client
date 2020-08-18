@@ -218,7 +218,7 @@
           avatar.isSelf = player.uuid == $localUserUUID;
           avatar.interactive = true;
 
-          console.dir(avatar.isSelf);
+          // console.dir(avatar.isSelf);
 
           const onDown = e => {
             startPrivateChat(avatar);
@@ -328,8 +328,9 @@
 
             // ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
+              console.log("onAdd");
               console.dir(player);
-              console.log(sessionId);
+              // console.log(sessionId);
               localPlayers[sessionId] = createPlayer(player, sessionId);
             };
 
@@ -346,8 +347,8 @@
 
             // STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
-              console.dir(localPlayers);
-              console.log(sessionId);
+              // console.dir(localPlayers);
+              // console.log(sessionId);
               if (player.path.waypoints.length > 0) {
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
