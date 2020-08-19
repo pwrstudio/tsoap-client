@@ -11,32 +11,6 @@
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
 
-  //   // COMPONENTS
-  //   import ChatMessage from "./ChatMessage.svelte";
-
-  //   // DOM REFERENCES
-  //   let messageContainerEl = {};
-
-  //   // PROPS
-
-  //   export let phoneActive = false;
-
-  //   $: {
-  //     if (chatMessages) {
-  //       setTimeout(() => {
-  //         messageContainerEl.scrollTo({
-  //           top: messageContainerEl.scrollHeight,
-  //           left: 0,
-  //           behavior: "smooth"
-  //         });
-  //       }, 100);
-  //     }
-  //   }
-
-  //   if (sso && sig) {
-
-  //   }
-
   const SSO_SERVER = "https://sso.scarmonger.xyz/auth/discourse_sso";
 
   //   // VARIABLES
@@ -136,7 +110,11 @@
     </div>
     <div>
       <div class="header">Create session account</div>
-      <input bind:value={newUserName} type="text" placeholder="Name" />
+      <input
+        bind:value={newUserName}
+        type="text"
+        placeholder="Name"
+        maxlength="100" />
       <input bind:value={newUserColor} type="color" />
       <button on:click={makeTemporaryUser}>Start</button>
     </div>
