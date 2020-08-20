@@ -51,7 +51,7 @@
     overflow-y: auto;
 
     @include screen-size('small') {
-      height: calc(100% - 130px);
+      height: calc(100% - 40px);
     }
   }
 

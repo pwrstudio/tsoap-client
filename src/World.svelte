@@ -22,6 +22,7 @@
   import Login from "./Login.svelte";
   import CaseStudy from "./CaseStudy.svelte";
   import Banned from "./Banned.svelte";
+  import AudioChat from "./AudioChat.svelte";
 
   // STORES
   import {
@@ -82,6 +83,8 @@
 
   let caseStudyActive = false;
   let currentCaseStudy = {};
+
+  let audioChatActive = false;
 
   let localPlayers = {};
   let chatMessages = [];
@@ -619,7 +622,7 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    top: 10px;
+    top: 50px;
     right: 10px;
     padding: 20px;
     border-radius: 10px;
@@ -709,6 +712,16 @@
       bottom: 20px;
       display: none;
     }
+
+    &.tiny {
+      border-radius: 5px;
+      opacity: 0.7;
+      // padding: 5px;
+      font-size: 10px;
+      line-height: 1.2em;
+      pointer-events: none;
+    }
+
   }
 
   .stream-test {
@@ -718,7 +731,7 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    top: 10px;
+    top: 50px;
     width: 360px;
     left: 430px;
     border-radius: 10px;
@@ -727,63 +740,81 @@
     }
   }
 
-  .teleport {
+
+  .top-bar {
     position: fixed;
-    top: 50%;
-    left: 0;
-    width: 420px;
-    height: 80px;
-    background: #f4f4f4;
+    top: 0%;
+    right: 0;
+    width: calc(100vw - 420px);
+    height: 40px;
+    background: #a4a4a4;
     padding: 10px;
+    padding-top: 5px;
     overflow: scroll;
     font-size: 12px;
-    z-index: 100;
+    z-index: 1000;
     user-select: none;
 
-    .header {
-      font-weight: bold;
-      margin-bottom: 10px;
+    @include screen-size("small") {
+      display: none;
     }
 
-    .link-container {
-      .link {
-        float: left;
-        padding: 10px 20px;
-        border-radius: 5px;
-        margin-right: 10px;
-        cursor: pointer;
-        &.green {
-          background: #78f878;
-        }
-        &.blue {
-          background: #7878f8;
-        }
-        &.yellow {
-          background: #f8f878;
-        }
-        &.red {
-          background: #f87878;
-        }
+    .link {
+      text-decoration: none;
+      font-weight: bold;
+      height: 30px;
+      line-height: 10px;
+      padding: 10px;
+      color: black;
+      border-radius: 5px;
+      text-align: center;
+      display: block;
+      float: left;
+      margin-right: 5px;
+      background: lightgray;
 
+      &.audio-chat {
+        float: right;
+        background: #2e2e2e;
+        color: white;
+      }  
+
+      &.header {
+        border: 1px solid lightgray;
+        background: transparent;
+      }
+
+      &.green {
+        background: #78f878;
+      }
+      &.blue {
+        background: #7878f8;
+      }
+      &.yellow {
+        background: #f8f878;
+      }
+      &.red {
+        background: #f87878;
+      }
+
+      &.interact {
+        border: none;
         opacity: 0.7;
+        cursor: pointer;
 
         &:hover {
           opacity: 1;
         }
       }
     }
-
-    @include screen-size("small") {
-      display: none;
-    }
   }
 
   .mainChatContainer {
     position: fixed;
-    top: calc(50% + 80px);
+    top: 50%;
     left: 0;
     width: 420px;
-    height: calc(50vh - 80px);
+    height: 50vh;
     background: #a4a4a4;
     padding: 10px;
     overflow: scroll;
@@ -830,7 +861,7 @@
 
   .mainUserListContainer {
     position: fixed;
-    top: 0;
+    top: 0px;
     left: 0;
     width: 420px;
     height: 50vh;
@@ -857,6 +888,47 @@
   }
 </style>
 
+<!-- TOP BAR -->
+<div class='top-bar'>
+   <a class='interact link' href='login'>Login</a>
+  <div
+    class="link interact green"
+    on:click={() => {
+      teleportTo('green');
+    }}>
+    GOTO: Green
+  </div>
+  <div
+    class="link interact blue"
+    on:click={() => {
+      teleportTo('blue');
+    }}>
+    GOTO: Blue
+  </div>
+  <div
+    class="link interact yellow"
+    on:click={() => {
+      teleportTo('yellow');
+    }}>
+    GOTO: Yellow
+  </div>
+  <div
+    class="link interact red"
+    on:click={() => {
+      teleportTo('red');
+    }}>
+    GOTO: Red
+  </div>
+
+  <div
+  class="link audio-chat interact"
+  on:click={() => {
+    audioChatActive = true
+  }}>
+  ~ ~ Test audio chat ~ ~
+</div>
+</div>
+
 {#if banned}
   <Banned />
 {/if}
@@ -872,6 +944,11 @@
       loggedIn = true;
       makeNewUser();
     }} />
+{/if}
+
+<!-- AUDIO CHAT -->
+{#if audioChatActive}
+  <AudioChat name={$localUserName} on:close={e =>{audioChatActive = false}}/>
 {/if}
 
 <!-- PHONE NAVIGATION -->
@@ -899,41 +976,6 @@
   <UserList playerList={localPlayers} phoneActive={showUserList} />
 </div>
 
-<!-- TELEPORT MENU -->
-<div class="teleport" in:fade>
-  <div class="header">Go to area</div>
-  <div class="link-container">
-    <div
-      class="link green"
-      on:click={() => {
-        teleportTo('green');
-      }}>
-      Green
-    </div>
-    <div
-      class="link blue"
-      on:click={() => {
-        teleportTo('blue');
-      }}>
-      Blue
-    </div>
-    <div
-      class="link yellow"
-      on:click={() => {
-        teleportTo('yellow');
-      }}>
-      Yellow
-    </div>
-    <div
-      class="link red"
-      on:click={() => {
-        teleportTo('red');
-      }}>
-      Red
-    </div>
-  </div>
-</div>
-
 <!-- CHAT -->
 <div class="mainChatContainer" class:phone={showChat}>
   <Chat {chatMessages} on:submit={submitChat} phoneActive={showChat} />
@@ -944,10 +986,9 @@
   <div
     transition:fade
     class="privateChatContainer"
-    class:phone={showChat}
     on:click={leavePrivateChat}>
     <div class="box">
-      <Chat {chatMessages} on:submit={submitChat} phoneActive={showChat} />
+      <Chat {chatMessages} on:submit={submitChat} />
     </div>
   </div>
 {/if}
@@ -971,7 +1012,7 @@
 
 <!-- CURRENT AREA BOX -->
 {#if $localUserArea}
-  <div class="current-area">
+  <div class="current-area tiny">
     Currently in
     <strong>{colorTrans[$localUserArea]}</strong>
     area
