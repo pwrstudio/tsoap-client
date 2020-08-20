@@ -6,21 +6,19 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { fade } from "svelte/transition";
+  import { fade } from 'svelte/transition'
 
   // PROPS
-  export let player = {};
-  export let header = false;
-  export let numberOfUsers = 0;
-
-  // console.dir(player);
+  export let player = {}
+  export let header = false
+  export let numberOfUsers = 0
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import './variables.scss';
 
   .user-item {
-    width: calc(100% - 20px);
+    width: 100%;
     display: flex;
     margin-bottom: 10px;
     border-bottom: 1px solid $lightgrey;

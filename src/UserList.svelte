@@ -10,44 +10,9 @@
 
   // PROPS
   export let playerList = [];
-  export let phoneActive = false;
 </script>
 
-<style lang="scss">
-  @import "./variables.scss";
-
-  .user-list {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 400px;
-    height: 50vh;
-    background: lightgray;
-    padding: 10px;
-    padding-top: 10px;
-    overflow: scroll;
-    padding-bottom: 200px;
-    z-index: 100;
-
-    @include screen-size("small") {
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.5 ease-out;
-      padding-top: 80px;
-
-      &.phone {
-        opacity: 1;
-        pointer-events: all;
-      }
-    }
-  }
-</style>
-
-<div class="user-list" class:phone={phoneActive}>
-  <UserItem header={true} numberOfUsers={Object.entries(playerList).length} />
-  {#each Object.entries(playerList) as player (player[1].uuid)}
-    <UserItem player={player[1]} />
-  {/each}
-</div>
+<UserItem header={true} numberOfUsers={Object.entries(playerList).length} />
+{#each Object.entries(playerList) as player (player[1].uuid)}
+  <UserItem player={player[1]} />
+{/each}

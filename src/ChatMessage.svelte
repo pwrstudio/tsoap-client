@@ -60,7 +60,7 @@
       class="color-code"
       style={'background-color:' + get(message, 'tint', '0XFF0000').replace('0X', '#')} />
     <span class="name">{message.name}</span>
-    <span class="date">{formattedDate()}</span>
+    <span class="date">{formattedDate(message.timestamp)}</span>
   </div>
   <div class="body">{message.text}</div>
 </div>

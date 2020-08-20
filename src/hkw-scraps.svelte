@@ -164,3 +164,44 @@
           //   localPlayers[k].name,
           //   Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y)
           // );
+
+                  // => CHAT ROOM
+        // client
+        //   .joinOrCreate("chat")
+        //   .then(chatRoom => {
+        //     // ADD MESSAGE
+        //     chatRoom.state.messages.onAdd = message =>
+        //       (chatMessages = [...chatMessages, message]);
+
+        //     // REMOVE MESSAGE
+        //     chatRoom.state.messages.onRemove = message => {
+        //       try {
+        //         const itemIndex = chatMessages.findIndex(m => m === message);
+        //         chatMessages.splice(itemIndex, 1);
+        //         chatMessages = chatMessages;
+        //       } catch (err) {
+        //         Sentry.captureException(err);
+        //       }
+        //     };
+
+        //     // ERROR
+        //     chatRoom.onError((code, message) => {
+        //       console.error(message);
+        //       Sentry.captureException(message);
+        //     });
+
+        //     // SUBMIT CHAT
+        //     submitChat = event => {
+        //       chatRoom.send("submit", {
+        //         msgId: chance.guid(),
+        //         uuid: $localUserUUID,
+        //         name: $localUserName,
+        //         text: event.detail.text,
+        //         tint: $localUserTint
+        //       });
+        //     };
+        //   })
+        //   .catch(e => {
+        //     console.log("CHAT ROOM: JOIN ERROR", e);
+        //     Sentry.captureException(e);
+        //   });
