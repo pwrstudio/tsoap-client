@@ -6,22 +6,22 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { onMount } from 'svelte'
-  import * as Colyseus from 'colyseus.js'
-  import * as PIXI from 'pixi.js'
-  import { Viewport } from 'pixi-viewport'
-  import Chance from 'chance'
-  import get from 'lodash/get'
-  import sample from 'lodash/sample'
-  import { fade, fly } from 'svelte/transition'
-  const chance = new Chance()
+  import { onMount } from "svelte";
+  import * as Colyseus from "colyseus.js";
+  import * as PIXI from "pixi.js";
+  import { Viewport } from "pixi-viewport";
+  import Chance from "chance";
+  import get from "lodash/get";
+  import sample from "lodash/sample";
+  import { fade, fly } from "svelte/transition";
+  const chance = new Chance();
 
   // COMPONENTS
-  import Chat from './Chat.svelte'
-  import UserList from './UserList.svelte'
-  import Login from './Login.svelte'
-  import CaseStudy from './CaseStudy.svelte'
-  import Banned from './Banned.svelte'
+  import Chat from "./Chat.svelte";
+  import UserList from "./UserList.svelte";
+  import Login from "./Login.svelte";
+  import CaseStudy from "./CaseStudy.svelte";
+  import Banned from "./Banned.svelte";
 
   // STORES
   import {
@@ -30,20 +30,20 @@
     localUserTint,
     localUserSessionID,
     localUserArea,
-    inPrivateChat,
-  } from './stores.js'
+    inPrivateChat
+  } from "./stores.js";
 
-  localUserUUID.set(chance.guid())
+  localUserUUID.set(chance.guid());
 
   // PROPS
-  export let authenticate = false
-  export let login = false
-  export let debug = false
+  export let authenticate = false;
+  export let login = false;
+  export let debug = false;
   // export let position = false
   // export let x = 0
   // export let y = 0
-  export let sso = false
-  export let sig = false
+  export let sso = false;
+  export let sig = false;
 
   // GLOBAL
   import {
@@ -51,73 +51,73 @@
     KEYBOARD,
     WIDTH,
     HEIGHT,
-    colorTrans,
-  } from './global.js'
+    colorTrans
+  } from "./global.js";
 
   // DEBUG VARIABLES
-  let worldX = 0
-  let worldY = 0
-  let screenX = 0
-  let screenY = 0
-  let rendererHeight = 0
-  let rendererWidth = 0
-  let viewportHeight = 0
-  let viewportWidth = 0
+  let worldX = 0;
+  let worldY = 0;
+  let screenX = 0;
+  let screenY = 0;
+  let rendererHeight = 0;
+  let rendererWidth = 0;
+  let viewportHeight = 0;
+  let viewportWidth = 0;
 
   // DOM REFERENCES
-  let gameContainer = {}
+  let gameContainer = {};
 
   // VARIABLES
-  let popUpText = false
-  let playersInProximity = []
-  let newUserName = ''
-  let newUserColor = ''
-  let newUserAvatar = 1
-  let loggedIn = false
-  let userLoaded = false
-  let showUserList = false
-  let showChat = false
-  let banned = false
-  let inMotion = false
+  let popUpText = false;
+  let playersInProximity = [];
+  let newUserName = "";
+  let newUserColor = "";
+  let newUserAvatar = 1;
+  let loggedIn = false;
+  let userLoaded = false;
+  let showUserList = false;
+  let showChat = false;
+  let banned = false;
+  let inMotion = false;
 
-  let caseStudyActive = false
-  let currentCaseStudy = {}
+  let caseStudyActive = false;
+  let currentCaseStudy = {};
 
-  let localPlayers = {}
-  let chatMessages = []
-  let moveQ = []
+  let localPlayers = {};
+  let chatMessages = [];
+  let moveQ = [];
 
-  let targetGraphics = {}
-  let pathGraphics = {}
+  let targetGraphics = {};
+  let pathGraphics = {};
 
   // COLYSEUS
   // const client = new Colyseus.Client('ws://localhost:2567')
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  const client = new Colyseus.Client('wss://scarmonger.xyz')
+  const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
 
   // PIXI
-  let app = {}
-  let responsiveWidth = 0
-  let viewport = {}
-  let loader = {}
-  let ticker = {}
+  let app = {};
+  let responsiveWidth = 0;
+  let viewport = {};
+  let loader = {};
+  let ticker = {};
 
   // GAME LOOP
-  const updatePositions = (t) => {
+  const updatePositions = t => {
     // console.log(t);
     for (let key in moveQ) {
       if (localPlayers[key] && moveQ[key].length > 0) {
-        let step = moveQ[key].shift()
-        localPlayers[key].x = step.x
-        localPlayers[key].y = step.y
+        let step = moveQ[key].shift();
+        localPlayers[key].x = step.x;
+        localPlayers[key].y = step.y;
       } else {
         if (key === $localUserSessionID) {
-          inMotion = false
-          hideTarget()
-          if (debug) hidePath()
+          inMotion = false;
+          hideTarget();
+          if (debug) hidePath();
         }
-        delete moveQ[key]
-        playersInProximity = []
+        delete moveQ[key];
+        playersInProximity = [];
         for (let k in localPlayers) {
           if (
             !localPlayers[k].isSelf &&
@@ -126,170 +126,170 @@
             Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
               200
           ) {
-            playersInProximity.push(localPlayers[k])
+            playersInProximity.push(localPlayers[k]);
           }
         }
       }
     }
-  }
+  };
 
   const showTarget = (x, y) => {
-    let graphics = new PIXI.Graphics()
-    graphics.beginFill($localUserTint)
-    graphics.alpha = 0.7
-    graphics.zIndex = 1
-    graphics.drawCircle(x, y, 32)
-    graphics.endFill()
-    viewport.addChild(graphics)
-    targetGraphics = graphics
-  }
+    let graphics = new PIXI.Graphics();
+    graphics.beginFill($localUserTint);
+    graphics.alpha = 0.7;
+    graphics.zIndex = 1;
+    graphics.drawCircle(x, y, 32);
+    graphics.endFill();
+    viewport.addChild(graphics);
+    targetGraphics = graphics;
+  };
 
   const hideTarget = () => {
-    viewport.removeChild(targetGraphics)
-    targetGraphics = {}
-  }
+    viewport.removeChild(targetGraphics);
+    targetGraphics = {};
+  };
 
-  const showPath = (path) => {
+  const showPath = path => {
     try {
-      let line = new PIXI.Graphics()
-      line.lineStyle(3, 0xff0000, 0.6)
+      let line = new PIXI.Graphics();
+      line.lineStyle(3, 0xff0000, 0.6);
       line.moveTo(
         localPlayers[$localUserSessionID].x,
         localPlayers[$localUserSessionID].y
-      )
-      path.forEach((p) => {
-        line.lineTo(p.x, p.y)
-      })
-      viewport.addChild(line)
-      pathGraphics = line
+      );
+      path.forEach(p => {
+        line.lineTo(p.x, p.y);
+      });
+      viewport.addChild(line);
+      pathGraphics = line;
     } catch (err) {
-      Sentry.captureException(err)
+      Sentry.captureException(err);
     }
-  }
+  };
 
   const hidePath = () => {
-    viewport.removeChild(pathGraphics)
-    pathGraphics = {}
-  }
+    viewport.removeChild(pathGraphics);
+    pathGraphics = {};
+  };
 
   // FUNCTIONS
-  let teleportTo = () => {}
-  let submitChat = () => {}
-  let startPrivateChat = () => {}
-  let leavePrivateChat = () => {}
+  let teleportTo = () => {};
+  let submitChat = () => {};
+  let startPrivateChat = () => {};
+  let leavePrivateChat = () => {};
 
   const makeNewUser = (sso, sig) => {
-    loggedIn = true
-    gameContainer.appendChild(app.view)
+    loggedIn = true;
+    gameContainer.appendChild(app.view);
 
     // LOADER
     // http://localhost:5000/
     loader
-      .add('map', '/hkw-map-no-house-smaller.png')
-      .add('avatarOne', '/avatar1.png')
-      .add('avatarTwo', '/avatar2.png')
-      .add('avatarThree', '/avatar3.png')
+      .add("map", "/hkw-map-no-house-smaller.png")
+      .add("avatarOne", "/avatar1.png")
+      .add("avatarTwo", "/avatar2.png")
+      .add("avatarThree", "/avatar3.png")
       .load((loader, resources) => {
-        let map = new PIXI.Sprite(resources.map.texture)
-        map.width = 5000
-        map.height = 5000
-        viewport.addChild(map)
+        let map = new PIXI.Sprite(resources.map.texture);
+        map.width = 5000;
+        map.height = 5000;
+        viewport.addChild(map);
 
         const avatarList = [
           resources.avatarOne.texture,
           resources.avatarTwo.texture,
-          resources.avatarThree.texture,
-        ]
+          resources.avatarThree.texture
+        ];
 
-        let avatarIndex = sample([0, 1, 2])
+        let avatarIndex = sample([0, 1, 2]);
 
         // CREATE PLAYER
         const createPlayer = (player, sessionId) => {
-          let avatar = new PIXI.Sprite(avatarList[player.avatar])
-          avatar.x = player.x
-          avatar.y = player.y
-          avatar.waypoints = []
-          avatar.area = player.area
-          avatar.anchor.set(0.5)
-          avatar.scale.set(0.5)
-          avatar.tint = player.tint
-          avatar.name = player.name
-          avatar.uuid = player.uuid
-          avatar.ip = player.ip
-          avatar.connected = player.connected
-          avatar.authenticated = player.authenticated
-          avatar.id = sessionId
-          avatar.zIndex = 10
-          avatar.isSelf = player.uuid == $localUserUUID
-          avatar.interactive = true
+          let avatar = new PIXI.Sprite(avatarList[player.avatar]);
+          avatar.x = player.x;
+          avatar.y = player.y;
+          avatar.waypoints = [];
+          avatar.area = player.area;
+          avatar.anchor.set(0.5);
+          avatar.scale.set(0.5);
+          avatar.tint = player.tint;
+          avatar.name = player.name;
+          avatar.uuid = player.uuid;
+          avatar.ip = player.ip;
+          avatar.connected = player.connected;
+          avatar.authenticated = player.authenticated;
+          avatar.id = sessionId;
+          avatar.zIndex = 10;
+          avatar.isSelf = player.uuid == $localUserUUID;
+          avatar.interactive = true;
 
           // console.dir(avatar.isSelf);
 
-          const onDown = (e) => {
-            startPrivateChat(avatar)
-            e.stopPropagation()
-          }
+          const onDown = e => {
+            startPrivateChat(avatar);
+            e.stopPropagation();
+          };
 
           const onEnter = () => {
-            popUpText = avatar.name
-          }
+            popUpText = avatar.name;
+          };
 
           const onLeave = () => {
-            popUpText = false
-          }
+            popUpText = false;
+          };
 
-          avatar.on('mousedown', onDown)
-          avatar.on('touchstart', onDown)
-          avatar.on('mouseover', onEnter)
-          avatar.on('mouseout', onLeave)
+          avatar.on("mousedown", onDown);
+          avatar.on("touchstart", onDown);
+          avatar.on("mouseover", onEnter);
+          avatar.on("mouseout", onLeave);
 
-          viewport.addChild(avatar)
+          viewport.addChild(avatar);
 
           if (avatar.isSelf) {
-            viewport.follow(avatar)
-            userLoaded = true
-            localUserTint.set(avatar.tint)
-            localUserName.set(avatar.name)
-            localUserSessionID.set(avatar.id)
+            viewport.follow(avatar);
+            userLoaded = true;
+            localUserTint.set(avatar.tint);
+            localUserName.set(avatar.name);
+            localUserSessionID.set(avatar.id);
           }
 
-          return avatar
-        }
+          return avatar;
+        };
 
         // ADD CASE STUDIES
         caseStudyList.forEach((h, i) => {
-          let graphics = new PIXI.Graphics()
-          graphics.beginFill(0xff0000)
-          graphics.alpha = 1
-          graphics.drawRect(h.x, h.y, 140, 140)
-          graphics.endFill()
-          graphics.title = h.title
-          graphics.index = i
-          graphics.interactive = true
+          let graphics = new PIXI.Graphics();
+          graphics.beginFill(0xff0000);
+          graphics.alpha = 1;
+          graphics.drawRect(h.x, h.y, 140, 140);
+          graphics.endFill();
+          graphics.title = h.title;
+          graphics.index = i;
+          graphics.interactive = true;
 
-          const onDown = (e) => {
-            caseStudyActive = true
-            currentCaseStudy = caseStudyList[graphics.index]
-            e.stopPropagation()
-          }
+          const onDown = e => {
+            caseStudyActive = true;
+            currentCaseStudy = caseStudyList[graphics.index];
+            e.stopPropagation();
+          };
 
-          const onEnter = (e) => {
-            popUpText = graphics.title
-          }
+          const onEnter = e => {
+            popUpText = graphics.title;
+          };
 
-          const onLeave = (e) => {
-            popUpText = false
-          }
+          const onLeave = e => {
+            popUpText = false;
+          };
 
-          graphics.on('mousedown', onDown)
-          graphics.on('touchstart', onDown)
-          graphics.on('mouseover', onEnter)
-          graphics.on('mouseout', onLeave)
+          graphics.on("mousedown", onDown);
+          graphics.on("touchstart", onDown);
+          graphics.on("mouseover", onEnter);
+          graphics.on("mouseout", onLeave);
 
-          viewport.addChild(graphics)
-        })
+          viewport.addChild(graphics);
+        });
 
-        let playerObject = {}
+        let playerObject = {};
 
         if (authenticate && sso && sig) {
           playerObject = {
@@ -298,26 +298,32 @@
             uuid: $localUserUUID,
             avatar: avatarIndex,
             tint:
-              newUserColor.replace('#', '0x').toUpperCase() ||
-              chance.color({ format: 'hex' }).replace('#', '0x').toUpperCase(),
-          }
+              newUserColor.replace("#", "0x").toUpperCase() ||
+              chance
+                .color({ format: "hex" })
+                .replace("#", "0x")
+                .toUpperCase()
+          };
         } else {
           playerObject = {
             uuid: $localUserUUID,
             name: newUserName || chance.name(),
             avatar: avatarIndex,
             tint:
-              newUserColor.replace('#', '0x').toUpperCase() ||
-              chance.color({ format: 'hex' }).replace('#', '0x').toUpperCase(),
-          }
+              newUserColor.replace("#", "0x").toUpperCase() ||
+              chance
+                .color({ format: "hex" })
+                .replace("#", "0x")
+                .toUpperCase()
+          };
         }
 
         // => GAME ROOM
         client
-          .joinOrCreate('game', playerObject)
-          .then((gameRoom) => {
+          .joinOrCreate("game", playerObject)
+          .then(gameRoom => {
             // HACK
-            history.replaceState({}, 'CONNECTED', '/')
+            history.replaceState({}, "CONNECTED", "/");
 
             // ******
             // PLAYER
@@ -326,52 +332,52 @@
             // PLAYER: REMOVE
             gameRoom.state.players.onRemove = (player, sessionId) => {
               try {
-                viewport.removeChild(localPlayers[sessionId])
-                delete localPlayers[sessionId]
-                localPlayers = localPlayers
+                viewport.removeChild(localPlayers[sessionId]);
+                delete localPlayers[sessionId];
+                localPlayers = localPlayers;
               } catch (err) {
-                Sentry.captureException(err)
+                Sentry.captureException(err);
               }
-            }
+            };
 
             // PLAYER: ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
               // console.log('onAdd player')
               // console.dir(player)
               // console.log(sessionId);
-              localPlayers[sessionId] = createPlayer(player, sessionId)
-            }
+              localPlayers[sessionId] = createPlayer(player, sessionId);
+            };
 
             // PLAYER: BANNED
-            gameRoom.onMessage('banned', (message) => {
-              banned = true
-            })
+            gameRoom.onMessage("banned", message => {
+              banned = true;
+            });
 
             // PLAYER: ILLEGAL MOVE
-            gameRoom.onMessage('illegalMove', (message) => {
-              hideTarget()
-              inMotion = false
-            })
+            gameRoom.onMessage("illegalMove", message => {
+              hideTarget();
+              inMotion = false;
+            });
 
             // PLAYER: STATE CHANGE
-            gameRoom.state.players.onChange = function (player, sessionId) {
+            gameRoom.state.players.onChange = function(player, sessionId) {
               // console.dir(localPlayers);
               // console.log(sessionId);
               if (player.path.waypoints.length > 0) {
                 if (localPlayers[sessionId].isSelf) {
-                  localUserArea.set(player.area)
-                  if (debug) showPath(player.path.waypoints)
+                  localUserArea.set(player.area);
+                  if (debug) showPath(player.path.waypoints);
                 }
-                moveQ[sessionId] = player.path.waypoints
+                moveQ[sessionId] = player.path.waypoints;
               } else {
                 // TELEPORT
                 if (localPlayers[sessionId].isSelf) {
-                  localUserArea.set(player.area)
+                  localUserArea.set(player.area);
                 }
-                localPlayers[sessionId].x = player.x
-                localPlayers[sessionId].y = player.y
+                localPlayers[sessionId].x = player.x;
+                localPlayers[sessionId].y = player.y;
 
-                playersInProximity = []
+                playersInProximity = [];
                 for (let k in localPlayers) {
                   if (
                     !localPlayers[k].isSelf &&
@@ -382,117 +388,117 @@
                       localPlayers[k].y - localPlayers[$localUserSessionID].y
                     ) < 200
                   ) {
-                    playersInProximity.push(localPlayers[k])
+                    playersInProximity.push(localPlayers[k]);
                   }
                 }
               }
-            }
+            };
 
             // PLAYER: CLICK / TAP
-            viewport.on('clicked', (e) => {
+            viewport.on("clicked", e => {
               if (!inMotion) {
-                gameRoom.send('go', {
+                gameRoom.send("go", {
                   x: Math.round(e.world.x),
-                  y: Math.round(e.world.y),
-                })
+                  y: Math.round(e.world.y)
+                });
 
-                inMotion = true
+                inMotion = true;
 
-                screenX = Math.round(e.screen.x)
-                screenY = Math.round(e.screen.y)
-                worldX = Math.round(e.world.x)
-                worldY = Math.round(e.world.y)
+                screenX = Math.round(e.screen.x);
+                screenY = Math.round(e.screen.y);
+                worldX = Math.round(e.world.x);
+                worldY = Math.round(e.world.y);
 
-                showTarget(Math.round(e.world.x), Math.round(e.world.y))
+                showTarget(Math.round(e.world.x), Math.round(e.world.y));
               }
-            })
+            });
 
             // PLAYER: TELEPORT
-            teleportTo = (area) => {
+            teleportTo = area => {
               // console.log(area)
-              gameRoom.send('teleport', {
-                area: area,
-              })
-            }
+              gameRoom.send("teleport", {
+                area: area
+              });
+            };
 
             // *******
             // MESSAGE
             // *******
 
             // MESSAGE: ADD
-            gameRoom.state.messages.onAdd = (message) => {
-              chatMessages = [...chatMessages, message]
-            }
+            gameRoom.state.messages.onAdd = message => {
+              chatMessages = [...chatMessages, message];
+            };
 
             // MESSAGE: REMOVE
-            gameRoom.state.messages.onRemove = (message) => {
+            gameRoom.state.messages.onRemove = message => {
               try {
-                const itemIndex = chatMessages.findIndex((m) => m === message)
-                chatMessages.splice(itemIndex, 1)
-                chatMessages = chatMessages
+                const itemIndex = chatMessages.findIndex(m => m === message);
+                chatMessages.splice(itemIndex, 1);
+                chatMessages = chatMessages;
               } catch (err) {
-                Sentry.captureException(err)
+                Sentry.captureException(err);
               }
-            }
+            };
 
             // MESSAGE: SUBMIT
-            submitChat = (event) => {
+            submitChat = event => {
               try {
-                gameRoom.send('submitChatMessage', {
+                gameRoom.send("submitChatMessage", {
                   msgId: chance.guid(),
                   uuid: $localUserUUID,
                   name: $localUserName,
                   text: event.detail.text,
-                  tint: $localUserTint,
-                })
+                  tint: $localUserTint
+                });
               } catch (err) {
-                Sentry.captureException(err)
+                Sentry.captureException(err);
               }
-            }
+            };
 
             // ************
             // PRIVATE ROOM
             // ************
 
             // PRIVATE ROOM: START
-            startPrivateChat = (partner) => {
+            startPrivateChat = partner => {
               try {
-                client.create('chat', { partner: partner.id }).then((r) => {
-                  gameRoom.send('createPrivateRoom', {
+                client.create("chat", { partner: partner.id }).then(r => {
+                  gameRoom.send("createPrivateRoom", {
                     roomId: r.id,
-                    partner: partner.id,
-                  })
+                    partner: partner.id
+                  });
 
-                  inPrivateChat.set(true)
+                  inPrivateChat.set(true);
 
                   // PRIVATE ROOM: LEAVE
                   leavePrivateChat = () => {
-                    r.leave()
+                    r.leave();
 
-                    gameRoom.send('leavePrivateRoom', {
-                      roomId: r.id,
-                    })
+                    gameRoom.send("leavePrivateRoom", {
+                      roomId: r.id
+                    });
 
-                    inPrivateChat.set(false)
-                  }
-                })
+                    inPrivateChat.set(false);
+                  };
+                });
               } catch (err) {
-                Sentry.captureException(err)
+                Sentry.captureException(err);
               }
-            }
+            };
 
             // PRIVATE ROOM: ADD
-            gameRoom.state.privateRooms.onAdd = (message) => {
+            gameRoom.state.privateRooms.onAdd = message => {
               // console.log('add private room')
               // console.dir(gameRoom.state.privateRooms)
               // console.dir(message)
-            }
+            };
 
             // PRIVATE ROOM: REMOVE
-            gameRoom.state.privateRooms.onRemove = (message) => {
+            gameRoom.state.privateRooms.onRemove = message => {
               // console.log('remove private room')
               // console.dir(gameRoom.state.privateRooms)
-            }
+            };
 
             // ************
             // GENERAL
@@ -500,34 +506,34 @@
 
             // GENNERAL: ERROR
             gameRoom.onError((code, message) => {
-              console.error('!!! COLYSEUS ERROR:')
-              console.error(message)
-              Sentry.captureException(err)
-            })
+              console.error("!!! COLYSEUS ERROR:");
+              console.error(message);
+              Sentry.captureException(err);
+            });
           })
-          .catch((e) => {
+          .catch(e => {
             if (e.code == 4215) {
-              console.log('BANNED')
-              banned = true
+              console.log("BANNED");
+              banned = true;
             } else {
-              console.log('GAME ROOM: JOIN ERROR', e)
-              Sentry.captureException(e)
+              console.log("GAME ROOM: JOIN ERROR", e);
+              Sentry.captureException(e);
             }
-          })
-      })
-  }
+          });
+      });
+  };
 
   onMount(async () => {
     // PIXI: APP
     app = new PIXI.Application({
       width: WIDTH,
       height: HEIGHT,
-      resolution: 1,
-    })
+      resolution: 1
+    });
 
-    responsiveWidth = window.matchMedia('(max-width: 700px)').matches
+    responsiveWidth = window.matchMedia("(max-width: 700px)").matches
       ? window.innerWidth
-      : window.innerWidth - 420
+      : window.innerWidth - 420;
 
     // PIXI: VIEWPORT
     viewport = new Viewport({
@@ -535,51 +541,51 @@
       screenHeight: window.innerHeight,
       worldWidth: WIDTH,
       worldHeight: HEIGHT,
-      interaction: app.renderer.plugins.interaction,
-    })
+      interaction: app.renderer.plugins.interaction
+    });
 
     // PIXI: LOADER
-    loader = PIXI.Loader.shared
+    loader = PIXI.Loader.shared;
 
     // PIXI: TICKER
-    ticker = PIXI.Ticker.shared
+    ticker = PIXI.Ticker.shared;
 
-    app.stage.addChild(viewport)
-    ticker.start()
-    ticker.add(updatePositions)
+    app.stage.addChild(viewport);
+    ticker.start();
+    ticker.add(updatePositions);
 
-    rendererHeight = app.screen.height
-    rendererWidth = app.screen.width
-    viewportHeight = viewport.screenHeight
-    viewportWidth = viewport.screenWidth
+    rendererHeight = app.screen.height;
+    rendererWidth = app.screen.width;
+    viewportHeight = viewport.screenHeight;
+    viewportWidth = viewport.screenWidth;
 
     window.onresize = () => {
-      responsiveWidth = window.matchMedia('(max-width: 700px)').matches
+      responsiveWidth = window.matchMedia("(max-width: 700px)").matches
         ? window.innerWidth
-        : window.innerWidth - 420
-      viewport.resize(responsiveWidth, window.innerHeight)
-      app.renderer.resize(responsiveWidth, window.innerHeight)
+        : window.innerWidth - 420;
+      viewport.resize(responsiveWidth, window.innerHeight);
+      app.renderer.resize(responsiveWidth, window.innerHeight);
 
-      rendererHeight = app.screen.height
-      rendererWidth = app.screen.width
-      viewportHeight = viewport.screenHeight
-      viewportWidth = viewport.screenWidth
-    }
+      rendererHeight = app.screen.height;
+      rendererWidth = app.screen.width;
+      viewportHeight = viewport.screenHeight;
+      viewportWidth = viewport.screenWidth;
+    };
 
-    window.dispatchEvent(new Event('resize'))
+    window.dispatchEvent(new Event("resize"));
 
-    if (window.matchMedia('(max-width: 700px)').matches) {
-      viewport.setZoom(0.75)
+    if (window.matchMedia("(max-width: 700px)").matches) {
+      viewport.setZoom(0.75);
     }
 
     if (!login) {
-      makeNewUser(sso, sig)
+      makeNewUser(sso, sig);
     }
-  })
+  });
 </script>
 
 <style lang="scss">
-  @import './variables.scss';
+  @import "./variables.scss";
 
   * {
     box-sizing: border-box;
@@ -600,7 +606,7 @@
       opacity: 1;
     }
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       width: 100vw;
       right: 0;
     }
@@ -618,7 +624,7 @@
     padding: 20px;
     border-radius: 10px;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       top: unset;
       bottom: 20px;
     }
@@ -657,7 +663,7 @@
     text-align: center;
     display: none;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: block;
     }
 
@@ -698,7 +704,7 @@
     right: 10px;
     padding: 20px;
     border-radius: 10px;
-    @include screen-size('small') {
+    @include screen-size("small") {
       top: unset;
       bottom: 20px;
       display: none;
@@ -716,7 +722,7 @@
     width: 360px;
     left: 430px;
     border-radius: 10px;
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: none;
     }
   }
@@ -767,7 +773,7 @@
       }
     }
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: none;
     }
   }
@@ -784,7 +790,7 @@
     font-size: 12px;
     z-index: 100;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       top: 0;
       width: 100vw;
       height: 100vh;
@@ -835,7 +841,7 @@
     padding-bottom: 200px;
     z-index: 100;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       width: 100vw;
       height: 100vh;
       pointer-events: none;
@@ -859,12 +865,12 @@
   <Login
     {sso}
     {sig}
-    on:newTemporaryUser={(e) => {
-      console.dir(e)
-      newUserName = e.detail.newUserName
-      newUserColor = e.detail.newUserColor
-      loggedIn = true
-      makeNewUser()
+    on:newTemporaryUser={e => {
+      console.dir(e);
+      newUserName = e.detail.newUserName;
+      newUserColor = e.detail.newUserColor;
+      loggedIn = true;
+      makeNewUser();
     }} />
 {/if}
 
@@ -873,16 +879,16 @@
   <div
     class="userlist-nav"
     on:click={() => {
-      showChat = false
-      showUserList = !showUserList
+      showChat = false;
+      showUserList = !showUserList;
     }}>
     USERLIST
   </div>
   <div
     class="chat-nav"
     on:click={() => {
-      showUserList = false
-      showChat = !showChat
+      showUserList = false;
+      showChat = !showChat;
     }}>
     CHAT
   </div>
@@ -900,28 +906,28 @@
     <div
       class="link green"
       on:click={() => {
-        teleportTo('green')
+        teleportTo('green');
       }}>
       Green
     </div>
     <div
       class="link blue"
       on:click={() => {
-        teleportTo('blue')
+        teleportTo('blue');
       }}>
       Blue
     </div>
     <div
       class="link yellow"
       on:click={() => {
-        teleportTo('yellow')
+        teleportTo('yellow');
       }}>
       Yellow
     </div>
     <div
       class="link red"
       on:click={() => {
-        teleportTo('red')
+        teleportTo('red');
       }}>
       Red
     </div>
@@ -958,8 +964,8 @@
 {#if caseStudyActive}
   <CaseStudy
     caseStudy={currentCaseStudy}
-    on:closeCaseStudy={(e) => {
-      caseStudyActive = false
+    on:closeCaseStudy={e => {
+      caseStudyActive = false;
     }} />
 {/if}
 
@@ -993,8 +999,8 @@
       <div>
         {player.name}
         <button
-          on:click={(e) => {
-            startPrivateChat(player)
+          on:click={e => {
+            startPrivateChat(player);
           }}>
           Start chat
         </button>

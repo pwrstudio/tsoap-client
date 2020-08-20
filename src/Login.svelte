@@ -11,7 +11,7 @@
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
 
-  const SSO_SERVER = "https://sso.scarmonger.xyz/auth/discourse_sso";
+  const SSO_SERVER = "https://sso.tsoap.dev/auth/discourse_sso";
 
   //   // VARIABLES
   let newUserName = "";
