@@ -16,14 +16,6 @@
     
     const dispatch = createEventDispatcher()
 
-	const iceServers = [
-		{url:'stun:stun.stunprotocol.org:3478'},
-		{url:'stun:stun.sipnet.net:3478'},
-		{url:'stun:stun.sipnet.ru:3478'},
-		{url:'stun:stun3.l.google.com:19302'}, 
-		{url:'stun:stun.l.google.com:19302'}, 
-		{url:'stun:stun2.l.google.com:19302'}];
-
 	// const server = 'http://54.93.169.243:8088/janus';
 	const server = 'https://janus.tsoap.dev'
 	let username =''
@@ -50,7 +42,7 @@
 				return;
 			}
 			// console.dir(Janus)
-			janus = new Janus({server: server, iceServers:iceServers, success: function() {
+			janus = new Janus({server: server, success: function() {
 			console.dir(janus)
 			janus.attach({plugin: "janus.plugin.audiobridge",
 				opaqueId: opaqueId,
