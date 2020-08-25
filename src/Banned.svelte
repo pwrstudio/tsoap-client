@@ -7,7 +7,7 @@
 </script>
 
 <style lang="scss">
-  @import './variables.scss';
+  @import "./variables.scss";
 
   .banned {
     position: fixed;

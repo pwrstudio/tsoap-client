@@ -721,7 +721,6 @@
       line-height: 1.2em;
       pointer-events: none;
     }
-
   }
 
   .stream-test {
@@ -739,7 +738,6 @@
       display: none;
     }
   }
-
 
   .top-bar {
     position: fixed;
@@ -777,7 +775,7 @@
         float: right;
         background: #2e2e2e;
         color: white;
-      }  
+      }
 
       &.header {
         border: 1px solid lightgray;
@@ -889,8 +887,8 @@
 </style>
 
 <!-- TOP BAR -->
-<div class='top-bar'>
-   <a class='interact link' href='login'>Login</a>
+<div class="top-bar">
+  <a class="interact link" href="login">Login</a>
   <div
     class="link interact green"
     on:click={() => {
@@ -921,12 +919,12 @@
   </div>
 
   <div
-  class="link audio-chat interact"
-  on:click={() => {
-    audioChatActive = true
-  }}>
-  ~ ~ Test audio chat ~ ~
-</div>
+    class="link audio-chat interact"
+    on:click={() => {
+      audioChatActive = true;
+    }}>
+    ~ ~ Test audio chat ~ ~
+  </div>
 </div>
 
 {#if banned}
@@ -948,7 +946,11 @@
 
 <!-- AUDIO CHAT -->
 {#if audioChatActive}
-  <AudioChat name={$localUserName} on:close={e =>{audioChatActive = false}}/>
+  <AudioChat
+    name={$localUserName}
+    on:close={e => {
+      audioChatActive = false;
+    }} />
 {/if}
 
 <!-- PHONE NAVIGATION -->
@@ -983,10 +985,7 @@
 
 <!-- PRIVATE CHAT -->
 {#if $inPrivateChat}
-  <div
-    transition:fade
-    class="privateChatContainer"
-    on:click={leavePrivateChat}>
+  <div transition:fade class="privateChatContainer" on:click={leavePrivateChat}>
     <div class="box">
       <Chat {chatMessages} on:submit={submitChat} />
     </div>

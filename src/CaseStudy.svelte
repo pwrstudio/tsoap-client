@@ -6,19 +6,19 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import get from 'lodash/get'
-  import { fly } from 'svelte/transition'
-  import { createEventDispatcher } from 'svelte'
+  import get from "lodash/get";
+  import { fly } from "svelte/transition";
+  import { createEventDispatcher } from "svelte";
 
-  const dispatch = createEventDispatcher()
+  const dispatch = createEventDispatcher();
 
-  export let caseStudy = {}
+  export let caseStudy = {};
 
   // COMPONENTS
 </script>
 
 <style lang="scss">
-  @import './variables.scss';
+  @import "./variables.scss";
 
   .folder {
     position: fixed;
@@ -39,7 +39,7 @@
       text-align: left;
     }
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       top: 20px;
       left: 20px;
       width: calc(100vw - 40px);
@@ -51,7 +51,7 @@
   class="folder"
   transition:fly={{ y: 200 }}
   on:click={() => {
-    dispatch('closeCaseStudy')
+    dispatch('closeCaseStudy');
   }}>
   <h2>{caseStudy.title}</h2>
   <div class="content">{caseStudy.content}</div>

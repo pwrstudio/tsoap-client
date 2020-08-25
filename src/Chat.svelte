@@ -6,17 +6,17 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { createEventDispatcher } from 'svelte'
-  const dispatch = createEventDispatcher()
+  import { createEventDispatcher } from "svelte";
+  const dispatch = createEventDispatcher();
 
   // COMPONENTS
-  import ChatMessage from './ChatMessage.svelte'
+  import ChatMessage from "./ChatMessage.svelte";
 
   // DOM REFERENCES
-  let messageContainerEl = {}
+  let messageContainerEl = {};
 
   // PROPS
-  export let chatMessages = []
+  export let chatMessages = [];
 
   $: {
     if (chatMessages) {
@@ -24,25 +24,25 @@
         messageContainerEl.scrollTo({
           top: messageContainerEl.scrollHeight,
           left: 0,
-          behavior: 'smooth',
-        })
-      }, 100)
+          behavior: "smooth"
+        });
+      }, 100);
     }
   }
 
   // VARIABLES
-  let chatInputValue = ''
+  let chatInputValue = "";
 
   const submitChat = () => {
-    dispatch('submit', {
-      text: chatInputValue,
-    })
-    chatInputValue = ''
-  }
+    dispatch("submit", {
+      text: chatInputValue
+    });
+    chatInputValue = "";
+  };
 </script>
 
 <style lang="scss">
-  @import './variables.scss';
+  @import "./variables.scss";
 
   .message-container {
     width: calc(100% - 10px);
@@ -50,7 +50,7 @@
     height: calc(100% - 60px);
     overflow-y: auto;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       height: calc(100% - 40px);
     }
   }
@@ -63,7 +63,7 @@
     padding: 10px;
     height: 40px;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       width: calc(100% - 20px);
     }
 
@@ -105,8 +105,8 @@
     type="[text]"
     maxlength="600"
     bind:value={chatInputValue}
-    on:keydown={(e) => {
-      if (e.keyCode == 13) submitChat()
+    on:keydown={e => {
+      if (e.keyCode == 13) submitChat();
     }} />
   <button on:click={submitChat}>Send</button>
 </div>
