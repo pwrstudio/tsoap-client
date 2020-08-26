@@ -194,6 +194,7 @@
       // .add("avatarTwo", "/avatar2.png")
       // .add("avatarThree", "/avatar3.png")
       .load((loader, resources) => {
+        console.dir(resources.map.texture)
         let map = new PIXI.Sprite(resources.map.texture);
         map.width = 5000;
         map.height = 5000;
@@ -201,7 +202,7 @@
 
         console.dir(resources)
 
-        sheet.push(resources["/sprites/avatar-x.json"]);
+        sheet.push(resources["/sprites/avatar-x.json"].spritesheet);
 
         // const avatarList = [
         //   resources.avatarOne.texture,
@@ -217,19 +218,26 @@
         // CREATE PLAYER
         const createPlayer = (playerOptions, sessionId) => {
 
-          console.dir(sheet[0].data.animations["avatar-x-front"])
+          console.dir(sheet[0])
 
           let avatar = new PIXI.Container()
-          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].data.animations["avatar-x-front"]));
-          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].data.animations["avatar-x-back"]));
-          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].data.animations["avatar-x-left"]));
-          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].data.animations["avatar-x-right"]));
+          // avatar.addChild(new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-back"]));
+          // avatar.addChild(new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-left"]));
+          // avatar.addChild(new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-right"]));
+          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-left"]));
           avatar.x = playerOptions.x
           avatar.y = playerOptions.y
-          avatar.anchor.set(0.5);
+          // avatar.height = 80
+          // avatar.width = 60
+          avatar.scale.set(0.5)
+          avatar.pivot.x =  57
+          avatar.pivot.y =  75
           avatar.interactive = true
 
-          console.dir(avatar)
+          console.dir(avatar.children)
+
+          avatar.children[0].animationSpeed = 0.05; 
+          avatar.children[0].play();
 
           let player = {
             avatar: avatar,
@@ -238,6 +246,7 @@
             name: playerOptions.name,
             uuid: playerOptions.uuid,
             ip: playerOptions.ip,
+            tint: playerOptions.tint,
             connected: playerOptions.connected,
             authenticated: playerOptions.authenticated,
             id: sessionId,
