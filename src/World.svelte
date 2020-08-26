@@ -104,6 +104,7 @@
   let viewport = {};
   let loader = {};
   let ticker = {};
+  let sheet = []
 
   // GAME LOOP
   const updatePositions = t => {
@@ -111,8 +112,8 @@
     for (let key in moveQ) {
       if (localPlayers[key] && moveQ[key].length > 0) {
         let step = moveQ[key].shift();
-        localPlayers[key].x = step.x;
-        localPlayers[key].y = step.y;
+        localPlayers[key].avatar.x = step.x;
+        localPlayers[key].avatar.y = step.y;
       } else {
         if (key === $localUserSessionID) {
           inMotion = false;
@@ -124,9 +125,9 @@
         for (let k in localPlayers) {
           if (
             !localPlayers[k].isSelf &&
-            Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
+            Math.abs(localPlayers[k].avatar.x - localPlayers[$localUserSessionID].avatar.x) <
               200 &&
-            Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
+            Math.abs(localPlayers[k].avatar.y - localPlayers[$localUserSessionID].avatar.y) <
               200
           ) {
             playersInProximity.push(localPlayers[k]);
@@ -189,7 +190,7 @@
     // http://localhost:5000/
     loader
       .add("map", "/hkw-map-no-house-smaller.png")
-      .add("/sprites/spritesheet.json")
+      .add("/sprites/avatar-x.json")
       // .add("avatarTwo", "/avatar2.png")
       // .add("avatarThree", "/avatar3.png")
       .load((loader, resources) => {
@@ -198,7 +199,9 @@
         map.height = 5000;
         viewport.addChild(map);
 
-        let sheet = PIXI.loader.resources["images/spritesheet.json"];
+        console.dir(resources)
+
+        sheet.push(resources["/sprites/avatar-x.json"]);
 
         // const avatarList = [
         //   resources.avatarOne.texture,
@@ -209,67 +212,67 @@
         // let avatarIndex = sample([0, 1, 2]);
         let avatarIndex = 0;
 
+        // console.dir(sheet)
+
         // CREATE PLAYER
-        const createPlayer = (player, sessionId) => {
-          let avatar = {
-            sprite: {
-              front: new PIXI.AnimatedSprite(
-                sheet.animations["avatar-x-front"]
-              ),
-              back: new PIXI.AnimatedSprite(sheet.animations["avatar-x-back"]),
-              left: new PIXI.AnimatedSprite(sheet.animations["avatar-x-left"]),
-              right: new PIXI.AnimatedSprite(sheet.animations["avatar-x-right"])
-            },
-            x: player.x,
-            y: player.y,
+        const createPlayer = (playerOptions, sessionId) => {
+
+          console.dir(sheet[0].data.animations["avatar-x-front"])
+
+          let avatar = new PIXI.Container()
+          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].data.animations["avatar-x-front"]));
+          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].data.animations["avatar-x-back"]));
+          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].data.animations["avatar-x-left"]));
+          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].data.animations["avatar-x-right"]));
+          avatar.x = playerOptions.x
+          avatar.y = playerOptions.y
+          avatar.anchor.set(0.5);
+          avatar.interactive = true
+
+          console.dir(avatar)
+
+          let player = {
+            avatar: avatar,
             waypoints: [],
-            area: player.area,
-            tint: player.tint,
-            name: player.name,
-            uuid: player.uuid,
-            ip: player.ip,
-            connected: player.connected,
-            authenticated: player.authenticated,
+            area: playerOptions.area,
+            name: playerOptions.name,
+            uuid: playerOptions.uuid,
+            ip: playerOptions.ip,
+            connected: playerOptions.connected,
+            authenticated: playerOptions.authenticated,
             id: sessionId,
-            zIndex: 10,
-            isSelf: player.uuid == $localUserUUID,
-            interactive: true
+            isSelf: playerOptions.uuid == $localUserUUID,
           };
 
-          // anchor.set(0.5);
-          // scale.set(0.5);
-
-          // console.dir(avatar.isSelf);
-
           const onDown = e => {
-            startPrivateChat(avatar);
+            startPrivateChat(player);
             e.stopPropagation();
           };
 
           const onEnter = () => {
-            popUpText = avatar.name;
+            popUpText = player.name;
           };
 
           const onLeave = () => {
             popUpText = false;
           };
 
-          avatar.on("mousedown", onDown);
-          avatar.on("touchstart", onDown);
-          avatar.on("mouseover", onEnter);
-          avatar.on("mouseout", onLeave);
+          player.avatar.on("mousedown", onDown);
+          player.avatar.on("touchstart", onDown);
+          player.avatar.on("mouseover", onEnter);
+          player.avatar.on("mouseout", onLeave);
 
-          viewport.addChild(avatar);
+          viewport.addChild(player.avatar);
 
-          if (avatar.isSelf) {
-            viewport.follow(avatar);
+          if (player.isSelf) {
+            viewport.follow(player.avatar);
             userLoaded = true;
-            localUserTint.set(avatar.tint);
-            localUserName.set(avatar.name);
-            localUserSessionID.set(avatar.id);
+            localUserTint.set(playerOptions.tint);
+            localUserName.set(player.name);
+            localUserSessionID.set(player.id);
           }
 
-          return avatar;
+          return player;
         };
 
         // ADD CASE STUDIES
@@ -390,18 +393,18 @@
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
                 }
-                localPlayers[sessionId].x = player.x;
-                localPlayers[sessionId].y = player.y;
+                localPlayers[sessionId].avatar.x = player.x;
+                localPlayers[sessionId].avatar.y = player.y;
 
                 playersInProximity = [];
                 for (let k in localPlayers) {
                   if (
                     !localPlayers[k].isSelf &&
                     Math.abs(
-                      localPlayers[k].x - localPlayers[$localUserSessionID].x
+                      localPlayers[k].avatar.x - localPlayers[$localUserSessionID].avatar.x
                     ) < 200 &&
                     Math.abs(
-                      localPlayers[k].y - localPlayers[$localUserSessionID].y
+                      localPlayers[k].avatar.y - localPlayers[$localUserSessionID].avatar.y
                     ) < 200
                   ) {
                     playersInProximity.push(localPlayers[k]);
