@@ -117,7 +117,7 @@
         if (key === $localUserSessionID) {
           inMotion = false;
           hideTarget();
-          if (debug) hidePath();
+          // if (debug) hidePath();
         }
         delete moveQ[key];
         playersInProximity = [];
@@ -189,42 +189,55 @@
     // http://localhost:5000/
     loader
       .add("map", "/hkw-map-no-house-smaller.png")
-      .add("avatarOne", "/avatar1.png")
-      .add("avatarTwo", "/avatar2.png")
-      .add("avatarThree", "/avatar3.png")
+      .add("/sprites/spritesheet.json")
+      // .add("avatarTwo", "/avatar2.png")
+      // .add("avatarThree", "/avatar3.png")
       .load((loader, resources) => {
         let map = new PIXI.Sprite(resources.map.texture);
         map.width = 5000;
         map.height = 5000;
         viewport.addChild(map);
 
-        const avatarList = [
-          resources.avatarOne.texture,
-          resources.avatarTwo.texture,
-          resources.avatarThree.texture
-        ];
+        let sheet = PIXI.loader.resources["images/spritesheet.json"];
 
-        let avatarIndex = sample([0, 1, 2]);
+        // const avatarList = [
+        //   resources.avatarOne.texture,
+        //   resources.avatarTwo.texture,
+        //   resources.avatarThree.texture
+        // ];
+
+        // let avatarIndex = sample([0, 1, 2]);
+        let avatarIndex = 0;
 
         // CREATE PLAYER
         const createPlayer = (player, sessionId) => {
-          let avatar = new PIXI.Sprite(avatarList[player.avatar]);
-          avatar.x = player.x;
-          avatar.y = player.y;
-          avatar.waypoints = [];
-          avatar.area = player.area;
-          avatar.anchor.set(0.5);
-          avatar.scale.set(0.5);
-          avatar.tint = player.tint;
-          avatar.name = player.name;
-          avatar.uuid = player.uuid;
-          avatar.ip = player.ip;
-          avatar.connected = player.connected;
-          avatar.authenticated = player.authenticated;
-          avatar.id = sessionId;
-          avatar.zIndex = 10;
-          avatar.isSelf = player.uuid == $localUserUUID;
-          avatar.interactive = true;
+          let avatar = {
+            sprite: {
+              front: new PIXI.AnimatedSprite(
+                sheet.animations["avatar-x-front"]
+              ),
+              back: new PIXI.AnimatedSprite(sheet.animations["avatar-x-back"]),
+              left: new PIXI.AnimatedSprite(sheet.animations["avatar-x-left"]),
+              right: new PIXI.AnimatedSprite(sheet.animations["avatar-x-right"])
+            },
+            x: player.x,
+            y: player.y,
+            waypoints: [],
+            area: player.area,
+            tint: player.tint,
+            name: player.name,
+            uuid: player.uuid,
+            ip: player.ip,
+            connected: player.connected,
+            authenticated: player.authenticated,
+            id: sessionId,
+            zIndex: 10,
+            isSelf: player.uuid == $localUserUUID,
+            interactive: true
+          };
+
+          // anchor.set(0.5);
+          // scale.set(0.5);
 
           // console.dir(avatar.isSelf);
 
