@@ -39,7 +39,7 @@
   // PROPS
   export let authenticate = false;
   export let login = false;
-  export let debug = false;
+  export let debug = true;
   // export let position = false
   // export let x = 0
   // export let y = 0
@@ -94,9 +94,9 @@
   let pathGraphics = {};
 
   // COLYSEUS
-  // const client = new Colyseus.Client('ws://localhost:2567')
+  const client = new Colyseus.Client("ws://localhost:2567");
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
+  // const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
 
   // PIXI
   let app = {};

@@ -20,8 +20,8 @@
 </style>
 
 <Router>
-  <Route path="/" component={World} />
+  <Route path="/" component={World} debug={true} />
   <Route path="/authenticate/:sso/:sig" component={World} authenticate={true} />
-  <Route path="/login" component={World} login={true} />
+  <Route path="/login" component={World} login={true} debug={true} />
   <Route path="/debug" component={World} debug={true} />
 </Router>
