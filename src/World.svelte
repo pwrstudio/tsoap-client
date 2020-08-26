@@ -13,8 +13,10 @@
   import Chance from "chance";
   import get from "lodash/get";
   import sample from "lodash/sample";
+  import tail from 'lodash/tail'
   import { fade, fly } from "svelte/transition";
   const chance = new Chance();
+  import Tweener from 'tweener'
 
   // COMPONENTS
   import Chat from "./Chat.svelte";
@@ -92,11 +94,12 @@
 
   let targetGraphics = {};
   let pathGraphics = {};
+  let wayPointGraphics = {}
 
   // COLYSEUS
-  // const client = new Colyseus.Client("ws://localhost:2567");
+  const client = new Colyseus.Client("ws://localhost:2567");
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
+  // const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
 
   // PIXI
   let app = {};
@@ -107,35 +110,36 @@
   let sheet = []
 
   // GAME LOOP
-  const updatePositions = t => {
-    // console.log(t);
-    for (let key in moveQ) {
-      if (localPlayers[key] && moveQ[key].length > 0) {
-        let step = moveQ[key].shift();
-        localPlayers[key].avatar.x = step.x;
-        localPlayers[key].avatar.y = step.y;
-      } else {
-        if (key === $localUserSessionID) {
-          inMotion = false;
-          hideTarget();
-          // if (debug) hidePath();
-        }
-        delete moveQ[key];
-        playersInProximity = [];
-        for (let k in localPlayers) {
-          if (
-            !localPlayers[k].isSelf &&
-            Math.abs(localPlayers[k].avatar.x - localPlayers[$localUserSessionID].avatar.x) <
-              200 &&
-            Math.abs(localPlayers[k].avatar.y - localPlayers[$localUserSessionID].avatar.y) <
-              200
-          ) {
-            playersInProximity.push(localPlayers[k]);
-          }
-        }
-      }
-    }
-  };
+  // const updatePositions = t => {
+  //   // console.log(t);
+  //   for (let key in moveQ) {
+  //     if (localPlayers[key] && moveQ[key].length > 0) {
+  //       let step = moveQ[key].shift();
+  //       localPlayers[key].avatar.x = step.x;
+  //       localPlayers[key].avatar.y = step.y;
+  //     } else {
+  //       if (key === $localUserSessionID) {
+  //         inMotion = false;
+  //         hideTarget();
+  //         hidePath()
+  //         // if (debug) hidePath();
+  //       }
+  //       delete moveQ[key];
+  //       playersInProximity = [];
+  //       for (let k in localPlayers) {
+  //         if (
+  //           !localPlayers[k].isSelf &&
+  //           Math.abs(localPlayers[k].avatar.x - localPlayers[$localUserSessionID].avatar.x) <
+  //             200 &&
+  //           Math.abs(localPlayers[k].avatar.y - localPlayers[$localUserSessionID].avatar.y) <
+  //             200
+  //         ) {
+  //           playersInProximity.push(localPlayers[k]);
+  //         }
+  //       }
+  //     }
+  //   }
+  // };
 
   const showTarget = (x, y) => {
     let graphics = new PIXI.Graphics();
@@ -153,13 +157,30 @@
     targetGraphics = {};
   };
 
+  const showWaypoints = path => {
+    try {
+      let wayPointMarkers = new PIXI.Graphics();
+      wayPointMarkers.beginFill(0xff0000);
+      wayPointMarkers.alpha = 0.9;
+      wayPointMarkers.zIndex = 1;
+      path.forEach(p => {
+        wayPointMarkers.drawCircle(p.x, p.y, 12);
+      });
+      wayPointMarkers.endFill();
+      viewport.addChild(wayPointMarkers);
+      wayPointGraphics = wayPointMarkers;
+    } catch (err) {
+      Sentry.captureException(err);
+    }
+  };
+
   const showPath = path => {
     try {
       let line = new PIXI.Graphics();
       line.lineStyle(3, 0xff0000, 0.6);
       line.moveTo(
-        localPlayers[$localUserSessionID].x,
-        localPlayers[$localUserSessionID].y
+        localPlayers[$localUserSessionID].avatar.x,
+        localPlayers[$localUserSessionID].avatar.y
       );
       path.forEach(p => {
         line.lineTo(p.x, p.y);
@@ -174,6 +195,11 @@
   const hidePath = () => {
     viewport.removeChild(pathGraphics);
     pathGraphics = {};
+  };
+
+  const hideWaypoints = () => {
+    viewport.removeChild(wayPointGraphics);
+    wayPointGraphics = {};
   };
 
   // FUNCTIONS
@@ -220,11 +246,33 @@
 
           console.dir(sheet[0])
 
+          let front = new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-front"]);
+          let back = new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-back"]);
+          let left = new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-left"]);
+          let right = new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-right"]);
+
+          front.name = 'front'
+          back.name = 'back'
+          left.name = 'left'
+          right.name = 'right'
+
+          front.visible = true
+          back.visible = false
+          left.visible = false
+          right.visible = false
+
+          front.tint = playerOptions.tint
+          back.tint = playerOptions.tint
+          left.tint = playerOptions.tint
+          right.tint = playerOptions.tint
+
+          front.animationSpeed = 0.05; 
+          back.animationSpeed = 0.05; 
+          left.animationSpeed = 0.05; 
+          right.animationSpeed = 0.05; 
+
           let avatar = new PIXI.Container()
-          // avatar.addChild(new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-back"]));
-          // avatar.addChild(new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-left"]));
-          // avatar.addChild(new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-right"]));
-          avatar.addChild(new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-left"]));
+          avatar.addChild(left, right, back, front);
           avatar.x = playerOptions.x
           avatar.y = playerOptions.y
           // avatar.height = 80
@@ -236,8 +284,7 @@
 
           console.dir(avatar.children)
 
-          avatar.children[0].animationSpeed = 0.05; 
-          avatar.children[0].play();
+          avatar.children[3].play();
 
           let player = {
             avatar: avatar,
@@ -394,9 +441,30 @@
               if (player.path.waypoints.length > 0) {
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
-                  if (debug) showPath(player.path.waypoints);
+                  if (debug) {
+                    showPath(player.path.waypoints);
+                    showWaypoints(player.path.waypoints);
+                  }
                 }
-                moveQ[sessionId] = player.path.waypoints;
+                // moveQ[sessionId] = player.path.waypoints;
+
+                const tweener = new Tweener(1/60);
+                console.dir(tweener)
+                const tweenPath = waypoints => {
+                  tweener
+                    .add(localPlayers[sessionId].avatar)
+                    .to(waypoints.shift(), 0.15)
+                    .then(() => {
+                      console.dir(waypoints)
+                      if(waypoints.length > 0) {
+                        tweenPath(waypoints)
+                    } else {
+                      hideTarget();
+                      inMotion = false;
+                    }});
+                }
+                tweenPath(tail(player.path.waypoints))
+
               } else {
                 // TELEPORT
                 if (localPlayers[sessionId].isSelf) {
@@ -580,7 +648,7 @@
 
     app.stage.addChild(viewport);
     ticker.start();
-    ticker.add(updatePositions);
+    // ticker.add(updatePositions);
 
     rendererHeight = app.screen.height;
     rendererWidth = app.screen.width;
