@@ -249,8 +249,6 @@
 
         // CREATE PLAYER
         const createPlayer = (playerOptions, sessionId) => {
-          console.dir(sheet[0]);
-
           let front = new PIXI.AnimatedSprite(
             sheet[0].animations["avatar-x-front"]
           );
@@ -301,17 +299,8 @@
           avatar.addChild(left, right, back, front, rest);
           avatar.motionState = "rest";
           avatar.setAnimation = direction => {
-            console.log(direction);
             avatar.motionState = direction;
-            console.dir(avatar.children);
             avatar.children.forEach(c => {
-              // if (c.name == direction) {
-              //   c.visible = true;
-              //   // c.play();
-              // } else {
-              //   c.visible = false;
-              //   // c.stop();
-              // }
               c.visible = c.name == direction ? true : false;
             });
           };
@@ -486,38 +475,58 @@
                     showWaypoints(player.path.waypoints);
                   }
                 }
-                // moveQ[sessionId] = player.path.waypoints;
 
                 const tweener = new Tweener(1 / 60);
-                // console.dir(tweener);
-                const tweenPath = waypoints => {
-                  let currentWaypoint = waypoints.shift();
-                  if (waypoints.length > 0) {
-                    localPlayers[sessionId].avatar.setAnimation(
-                      currentWaypoint.direction
-                    );
-                    console.log("direction:", currentWaypoint.direction);
-                    console.log("steps:", currentWaypoint.steps);
-                  }
-                  let duration = currentWaypoint.steps * 0.01;
-                  console.log("duration:", duration);
+                const SPEED = 0.01;
+
+                const tweenPath = (index = 0) => {
+                  let targetWaypoint = player.path.waypoints[index];
+
+                  console.log("=> TARGET WAYPOINT:", index);
+                  console.log("–– X:", targetWaypoint.x);
+                  console.log("–– Y:", targetWaypoint.y);
+                  console.log("–– Direction:", targetWaypoint.direction);
+                  console.log("–– Steps:", targetWaypoint.steps);
+                  console.log("= = = = =");
+
+                  localPlayers[sessionId].avatar.setAnimation(
+                    targetWaypoint.direction
+                  );
+
+                  // let duration = targetWaypoint.steps * SPEED;
+                  // console.log("duration:", duration);
 
                   tweener
                     .add(localPlayers[sessionId].avatar)
-                    .to(currentWaypoint, duration)
+                    .to(targetWaypoint, targetWaypoint.steps * SPEED)
                     .then(() => {
-                      if (waypoints.length > 0) {
-                        tweenPath(waypoints);
-                      } else {
+                      console.log("! ARRIVED AT:", index);
+                      console.log("= = = = =");
+                      if (index === player.path.waypoints.length - 1) {
+                        console.log("# # # # # #");
+                        console.log("DONE");
+                        console.log("# # # # # #");
                         hideTarget();
                         hideWaypoints();
                         hidePath();
                         localPlayers[sessionId].avatar.setAnimation("rest");
                         inMotion = false;
+                      } else {
+                        tweenPath(index + 1);
                       }
                     });
                 };
-                tweenPath(player.path.waypoints);
+
+                console.log(
+                  "! ! ! starting X:",
+                  localPlayers[sessionId].avatar.x
+                );
+                console.log(
+                  "! ! ! starting Y:",
+                  localPlayers[sessionId].avatar.y
+                );
+
+                tweenPath();
               } else {
                 // TELEPORT
                 if (localPlayers[sessionId].isSelf) {
