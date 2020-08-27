@@ -13,10 +13,11 @@
   import Chance from "chance";
   import get from "lodash/get";
   import sample from "lodash/sample";
-  import tail from 'lodash/tail'
+  import tail from "lodash/tail";
   import { fade, fly } from "svelte/transition";
   const chance = new Chance();
-  import Tweener from 'tweener'
+  import Tweener from "tweener";
+  import inRange from "lodash/inRange";
 
   // COMPONENTS
   import Chat from "./Chat.svelte";
@@ -94,7 +95,7 @@
 
   let targetGraphics = {};
   let pathGraphics = {};
-  let wayPointGraphics = {}
+  let wayPointGraphics = {};
 
   // COLYSEUS
   const client = new Colyseus.Client("ws://localhost:2567");
@@ -107,7 +108,7 @@
   let viewport = {};
   let loader = {};
   let ticker = {};
-  let sheet = []
+  let sheet = [];
 
   // GAME LOOP
   // const updatePositions = t => {
@@ -153,18 +154,24 @@
   };
 
   const hideTarget = () => {
+    // const tweener = new Tweener(1 / 60);
+    // tweener
+    //   .add(targetGraphics)
+    //   .to({ alpha: 0 }, 0.5)
+    //   .then(() => {
     viewport.removeChild(targetGraphics);
     targetGraphics = {};
+    // });
   };
 
   const showWaypoints = path => {
     try {
       let wayPointMarkers = new PIXI.Graphics();
-      wayPointMarkers.beginFill(0xff0000);
+      wayPointMarkers.beginFill(0x0000ff);
       wayPointMarkers.alpha = 0.9;
       wayPointMarkers.zIndex = 1;
       path.forEach(p => {
-        wayPointMarkers.drawCircle(p.x, p.y, 12);
+        wayPointMarkers.drawCircle(p.x, p.y, 8);
       });
       wayPointMarkers.endFill();
       viewport.addChild(wayPointMarkers);
@@ -177,7 +184,7 @@
   const showPath = path => {
     try {
       let line = new PIXI.Graphics();
-      line.lineStyle(3, 0xff0000, 0.6);
+      line.lineStyle(2, 0xff0000, 0.6);
       line.moveTo(
         localPlayers[$localUserSessionID].avatar.x,
         localPlayers[$localUserSessionID].avatar.y
@@ -216,19 +223,19 @@
     // http://localhost:5000/
     loader
       .add("map", "/hkw-map-no-house-smaller.png")
-      .add("/sprites/avatar-x.json")
+      .add("/sprites/avatar.json")
       // .add("avatarTwo", "/avatar2.png")
       // .add("avatarThree", "/avatar3.png")
       .load((loader, resources) => {
-        console.dir(resources.map.texture)
+        // console.dir(resources.map.texture);
         let map = new PIXI.Sprite(resources.map.texture);
         map.width = 5000;
         map.height = 5000;
         viewport.addChild(map);
 
-        console.dir(resources)
+        // console.dir(resources);
 
-        sheet.push(resources["/sprites/avatar-x.json"].spritesheet);
+        sheet.push(resources["/sprites/avatar.json"].spritesheet);
 
         // const avatarList = [
         //   resources.avatarOne.texture,
@@ -243,48 +250,82 @@
 
         // CREATE PLAYER
         const createPlayer = (playerOptions, sessionId) => {
+          console.dir(sheet[0]);
 
-          console.dir(sheet[0])
+          let front = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-front"]
+          );
+          let back = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-back"]
+          );
+          let left = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-left"]
+          );
+          let right = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-right"]
+          );
+          let rest = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-rest"]
+          );
 
-          let front = new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-front"]);
-          let back = new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-back"]);
-          let left = new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-left"]);
-          let right = new PIXI.AnimatedSprite(sheet[0].animations["avatar-x-right"]);
+          rest.name = "rest";
+          front.name = "front";
+          back.name = "back";
+          left.name = "left";
+          right.name = "right";
 
-          front.name = 'front'
-          back.name = 'back'
-          left.name = 'left'
-          right.name = 'right'
+          rest.visible = true;
+          front.visible = false;
+          back.visible = false;
+          left.visible = false;
+          right.visible = false;
 
-          front.visible = true
-          back.visible = false
-          left.visible = false
-          right.visible = false
+          rest.tint = playerOptions.tint;
+          front.tint = playerOptions.tint;
+          back.tint = playerOptions.tint;
+          left.tint = playerOptions.tint;
+          right.tint = playerOptions.tint;
 
-          front.tint = playerOptions.tint
-          back.tint = playerOptions.tint
-          left.tint = playerOptions.tint
-          right.tint = playerOptions.tint
+          rest.animationSpeed = 0.02;
+          front.animationSpeed = 0.1;
+          back.animationSpeed = 0.1;
+          left.animationSpeed = 0.1;
+          right.animationSpeed = 0.1;
 
-          front.animationSpeed = 0.05; 
-          back.animationSpeed = 0.05; 
-          left.animationSpeed = 0.05; 
-          right.animationSpeed = 0.05; 
+          rest.play();
+          front.play();
+          back.play();
+          left.play();
+          right.play();
 
-          let avatar = new PIXI.Container()
-          avatar.addChild(left, right, back, front);
-          avatar.x = playerOptions.x
-          avatar.y = playerOptions.y
+          let avatar = new PIXI.Container();
+          avatar.addChild(left, right, back, front, rest);
+          avatar.motionState = "rest";
+          avatar.setAnimation = direction => {
+            console.log(direction);
+            avatar.motionState = direction;
+            console.dir(avatar.children);
+            avatar.children.forEach(c => {
+              // if (c.name == direction) {
+              //   c.visible = true;
+              //   // c.play();
+              // } else {
+              //   c.visible = false;
+              //   // c.stop();
+              // }
+              c.visible = c.name == direction ? true : false;
+            });
+          };
+          avatar.x = playerOptions.x;
+          avatar.y = playerOptions.y;
           // avatar.height = 80
           // avatar.width = 60
-          avatar.scale.set(0.5)
-          avatar.pivot.x =  57
-          avatar.pivot.y =  75
-          avatar.interactive = true
+          avatar.scale.set(0.5);
+          avatar.pivot.x = 57;
+          avatar.pivot.y = 75;
+          avatar.interactive = true;
 
-          console.dir(avatar.children)
-
-          avatar.children[3].play();
+          // console.dir(avatar.children);
 
           let player = {
             avatar: avatar,
@@ -297,7 +338,7 @@
             connected: playerOptions.connected,
             authenticated: playerOptions.authenticated,
             id: sessionId,
-            isSelf: playerOptions.uuid == $localUserUUID,
+            isSelf: playerOptions.uuid == $localUserUUID
           };
 
           const onDown = e => {
@@ -448,23 +489,53 @@
                 }
                 // moveQ[sessionId] = player.path.waypoints;
 
-                const tweener = new Tweener(1/60);
-                console.dir(tweener)
+                const tweener = new Tweener(1 / 60);
+                // console.dir(tweener);
                 const tweenPath = waypoints => {
+                  let currentWaypoint = waypoints.shift();
+                  if (waypoints.length > 0) {
+                    // Determine direction
+                    // let delta_x = touch_x - center_x;
+                    // let delta_y = center_y - touch_y
+                    // let delta_x = start_x - target_x;
+                    // let delta_y = target_y - start_y;
+                    let delta_x = currentWaypoint.x - waypoints[0].x;
+                    let delta_y = waypoints[0].y - currentWaypoint.y;
+                    let theta_radians = Math.atan2(delta_y, delta_x);
+                    let theta_degrees = theta_radians * (180 / Math.PI);
+                    console.log("degrees:", theta_degrees);
+                    if (inRange(theta_degrees, -20, -181)) {
+                      console.log("direction: back");
+                      localPlayers[sessionId].avatar.setAnimation("back");
+                    } else if (inRange(theta_degrees, 20, 160)) {
+                      console.log("direction: front");
+                      localPlayers[sessionId].avatar.setAnimation("front");
+                    } else if (inRange(theta_degrees, 160, 181)) {
+                      console.log("direction: right");
+                      localPlayers[sessionId].avatar.setAnimation("right");
+                    } else if (inRange(theta_degrees, -20, 20)) {
+                      console.log("direction: left");
+                      localPlayers[sessionId].avatar.setAnimation("left");
+                    } else {
+                      console.log("!!! No direction matched");
+                    }
+                  }
                   tweener
                     .add(localPlayers[sessionId].avatar)
-                    .to(waypoints.shift(), 0.15)
+                    .to(currentWaypoint, 0.2)
                     .then(() => {
-                      console.dir(waypoints)
-                      if(waypoints.length > 0) {
-                        tweenPath(waypoints)
-                    } else {
-                      hideTarget();
-                      inMotion = false;
-                    }});
-                }
-                tweenPath(tail(player.path.waypoints))
-
+                      if (waypoints.length > 0) {
+                        tweenPath(waypoints);
+                      } else {
+                        hideTarget();
+                        hideWaypoints();
+                        hidePath();
+                        localPlayers[sessionId].avatar.setAnimation("rest");
+                        inMotion = false;
+                      }
+                    });
+                };
+                tweenPath(player.path.waypoints);
               } else {
                 // TELEPORT
                 if (localPlayers[sessionId].isSelf) {
@@ -478,10 +549,12 @@
                   if (
                     !localPlayers[k].isSelf &&
                     Math.abs(
-                      localPlayers[k].avatar.x - localPlayers[$localUserSessionID].avatar.x
+                      localPlayers[k].avatar.x -
+                        localPlayers[$localUserSessionID].avatar.x
                     ) < 200 &&
                     Math.abs(
-                      localPlayers[k].avatar.y - localPlayers[$localUserSessionID].avatar.y
+                      localPlayers[k].avatar.y -
+                        localPlayers[$localUserSessionID].avatar.y
                     ) < 200
                   ) {
                     playersInProximity.push(localPlayers[k]);
