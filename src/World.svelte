@@ -17,7 +17,6 @@
   import { fade, fly } from "svelte/transition";
   const chance = new Chance();
   import Tweener from "tweener";
-  import inRange from "lodash/inRange";
 
   // COMPONENTS
   import Chat from "./Chat.svelte";
@@ -494,35 +493,18 @@
                 const tweenPath = waypoints => {
                   let currentWaypoint = waypoints.shift();
                   if (waypoints.length > 0) {
-                    // Determine direction
-                    // let delta_x = touch_x - center_x;
-                    // let delta_y = center_y - touch_y
-                    // let delta_x = start_x - target_x;
-                    // let delta_y = target_y - start_y;
-                    let delta_x = currentWaypoint.x - waypoints[0].x;
-                    let delta_y = waypoints[0].y - currentWaypoint.y;
-                    let theta_radians = Math.atan2(delta_y, delta_x);
-                    let theta_degrees = theta_radians * (180 / Math.PI);
-                    console.log("degrees:", theta_degrees);
-                    if (inRange(theta_degrees, -20, -181)) {
-                      console.log("direction: back");
-                      localPlayers[sessionId].avatar.setAnimation("back");
-                    } else if (inRange(theta_degrees, 20, 160)) {
-                      console.log("direction: front");
-                      localPlayers[sessionId].avatar.setAnimation("front");
-                    } else if (inRange(theta_degrees, 160, 181)) {
-                      console.log("direction: right");
-                      localPlayers[sessionId].avatar.setAnimation("right");
-                    } else if (inRange(theta_degrees, -20, 20)) {
-                      console.log("direction: left");
-                      localPlayers[sessionId].avatar.setAnimation("left");
-                    } else {
-                      console.log("!!! No direction matched");
-                    }
+                    localPlayers[sessionId].avatar.setAnimation(
+                      currentWaypoint.direction
+                    );
+                    console.log("direction:", currentWaypoint.direction);
+                    console.log("steps:", currentWaypoint.steps);
                   }
+                  let duration = currentWaypoint.steps * 0.01;
+                  console.log("duration:", duration);
+
                   tweener
                     .add(localPlayers[sessionId].avatar)
-                    .to(currentWaypoint, 0.2)
+                    .to(currentWaypoint, duration)
                     .then(() => {
                       if (waypoints.length > 0) {
                         tweenPath(waypoints);
