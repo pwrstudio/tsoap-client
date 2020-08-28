@@ -94,6 +94,7 @@
 
   let targetGraphics = {};
   let pathGraphics = {};
+  let fullPathGraphics = {};
   let wayPointGraphics = {};
 
   // COLYSEUS
@@ -143,10 +144,10 @@
 
   const showTarget = (x, y) => {
     let graphics = new PIXI.Graphics();
-    graphics.beginFill($localUserTint);
-    graphics.alpha = 0.7;
+    graphics.beginFill(0xff0000);
+    graphics.alpha = 0.8;
     graphics.zIndex = 1;
-    graphics.drawCircle(x, y, 32);
+    graphics.drawCircle(x, y, 10);
     graphics.endFill();
     viewport.addChild(graphics);
     targetGraphics = graphics;
@@ -201,6 +202,29 @@
   const hidePath = () => {
     viewport.removeChild(pathGraphics);
     pathGraphics = {};
+  };
+
+  const showFullPath = path => {
+    try {
+      let line = new PIXI.Graphics();
+      line.lineStyle(10, 0xff7db9, 0.6);
+      line.moveTo(
+        localPlayers[$localUserSessionID].avatar.x,
+        localPlayers[$localUserSessionID].avatar.y
+      );
+      path.forEach(p => {
+        line.lineTo(p.x, p.y);
+      });
+      viewport.addChild(line);
+      fullPathGraphics = line;
+    } catch (err) {
+      Sentry.captureException(err);
+    }
+  };
+
+  const hideFullPath = () => {
+    viewport.removeChild(fullPathGraphics);
+    fullPathGraphics = {};
   };
 
   const hideWaypoints = () => {
@@ -467,6 +491,12 @@
             gameRoom.state.players.onChange = function(player, sessionId) {
               // console.dir(localPlayers);
               // console.log(sessionId);
+              if (player.fullPath.waypoints.length > 0) {
+                console.log("FULL PATH");
+                console.dir(player.fullPath.waypoints);
+                showFullPath(player.fullPath.waypoints);
+              }
+
               if (player.path.waypoints.length > 0) {
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
@@ -509,6 +539,7 @@
                         hideTarget();
                         hideWaypoints();
                         hidePath();
+                        hideFullPath();
                         localPlayers[sessionId].avatar.setAnimation("rest");
                         inMotion = false;
                       } else {
