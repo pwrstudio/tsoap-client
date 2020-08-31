@@ -100,7 +100,7 @@
       {player.name}
       {#if player.authenticated}(&#9733;){/if}
     </div>
-    <div class="mid">{player.x}</div>
-    <div class="mid">{player.y}</div>
+    <div class="mid">{player.avatar.x}</div>
+    <div class="mid">{player.avatar.y}</div>
   {/if}
 </div>

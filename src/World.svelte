@@ -13,8 +13,10 @@
   import Chance from "chance";
   import get from "lodash/get";
   import sample from "lodash/sample";
+  import tail from "lodash/tail";
   import { fade, fly } from "svelte/transition";
   const chance = new Chance();
+  import Tweener from "tweener";
 
   // COMPONENTS
   import Chat from "./Chat.svelte";
@@ -39,7 +41,7 @@
   // PROPS
   export let authenticate = false;
   export let login = false;
-  export let debug = true;
+  export let debug = false;
   // export let position = false
   // export let x = 0
   // export let y = 0
@@ -92,6 +94,8 @@
 
   let targetGraphics = {};
   let pathGraphics = {};
+  let fullPathGraphics = {};
+  let wayPointGraphics = {};
 
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567");
@@ -104,61 +108,54 @@
   let viewport = {};
   let loader = {};
   let ticker = {};
-
-  // GAME LOOP
-  const updatePositions = t => {
-    // console.log(t);
-    for (let key in moveQ) {
-      if (localPlayers[key] && moveQ[key].length > 0) {
-        let step = moveQ[key].shift();
-        localPlayers[key].x = step.x;
-        localPlayers[key].y = step.y;
-      } else {
-        if (key === $localUserSessionID) {
-          inMotion = false;
-          hideTarget();
-          if (debug) hidePath();
-        }
-        delete moveQ[key];
-        playersInProximity = [];
-        for (let k in localPlayers) {
-          if (
-            !localPlayers[k].isSelf &&
-            Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
-              200 &&
-            Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
-              200
-          ) {
-            playersInProximity.push(localPlayers[k]);
-          }
-        }
-      }
-    }
-  };
+  let sheet = [];
 
   const showTarget = (x, y) => {
     let graphics = new PIXI.Graphics();
-    graphics.beginFill($localUserTint);
-    graphics.alpha = 0.7;
+    graphics.beginFill(0xff0000);
+    graphics.alpha = 0.8;
     graphics.zIndex = 1;
-    graphics.drawCircle(x, y, 32);
+    graphics.drawCircle(x, y, 10);
     graphics.endFill();
     viewport.addChild(graphics);
     targetGraphics = graphics;
   };
 
   const hideTarget = () => {
+    // const tweener = new Tweener(1 / 60);
+    // tweener
+    //   .add(targetGraphics)
+    //   .to({ alpha: 0 }, 0.5)
+    //   .then(() => {
     viewport.removeChild(targetGraphics);
     targetGraphics = {};
+    // });
+  };
+
+  const showWaypoints = path => {
+    try {
+      let wayPointMarkers = new PIXI.Graphics();
+      wayPointMarkers.beginFill(0x0000ff);
+      wayPointMarkers.alpha = 0.9;
+      wayPointMarkers.zIndex = 1;
+      path.forEach(p => {
+        wayPointMarkers.drawCircle(p.x, p.y, 8);
+      });
+      wayPointMarkers.endFill();
+      viewport.addChild(wayPointMarkers);
+      wayPointGraphics = wayPointMarkers;
+    } catch (err) {
+      Sentry.captureException(err);
+    }
   };
 
   const showPath = path => {
     try {
       let line = new PIXI.Graphics();
-      line.lineStyle(3, 0xff0000, 0.6);
+      line.lineStyle(2, 0xff0000, 0.6);
       line.moveTo(
-        localPlayers[$localUserSessionID].x,
-        localPlayers[$localUserSessionID].y
+        localPlayers[$localUserSessionID].avatar.x,
+        localPlayers[$localUserSessionID].avatar.y
       );
       path.forEach(p => {
         line.lineTo(p.x, p.y);
@@ -175,6 +172,34 @@
     pathGraphics = {};
   };
 
+  const showFullPath = path => {
+    try {
+      let line = new PIXI.Graphics();
+      line.lineStyle(10, 0xff7db9, 0.6);
+      line.moveTo(
+        localPlayers[$localUserSessionID].avatar.x,
+        localPlayers[$localUserSessionID].avatar.y
+      );
+      path.forEach(p => {
+        line.lineTo(p.x, p.y);
+      });
+      viewport.addChild(line);
+      fullPathGraphics = line;
+    } catch (err) {
+      Sentry.captureException(err);
+    }
+  };
+
+  const hideFullPath = () => {
+    viewport.removeChild(fullPathGraphics);
+    fullPathGraphics = {};
+  };
+
+  const hideWaypoints = () => {
+    viewport.removeChild(wayPointGraphics);
+    wayPointGraphics = {};
+  };
+
   // FUNCTIONS
   let teleportTo = () => {};
   let submitChat = () => {};
@@ -189,74 +214,142 @@
     // http://localhost:5000/
     loader
       .add("map", "/hkw-map-no-house-smaller.png")
-      .add("avatarOne", "/avatar1.png")
-      .add("avatarTwo", "/avatar2.png")
-      .add("avatarThree", "/avatar3.png")
+      .add("/sprites/avatar.json")
+      // .add("avatarTwo", "/avatar2.png")
+      // .add("avatarThree", "/avatar3.png")
       .load((loader, resources) => {
+        // console.dir(resources.map.texture);
         let map = new PIXI.Sprite(resources.map.texture);
         map.width = 5000;
         map.height = 5000;
         viewport.addChild(map);
 
-        const avatarList = [
-          resources.avatarOne.texture,
-          resources.avatarTwo.texture,
-          resources.avatarThree.texture
-        ];
+        // console.dir(resources);
 
-        let avatarIndex = sample([0, 1, 2]);
+        sheet.push(resources["/sprites/avatar.json"].spritesheet);
+
+        // const avatarList = [
+        //   resources.avatarOne.texture,
+        //   resources.avatarTwo.texture,
+        //   resources.avatarThree.texture
+        // ];
+
+        // let avatarIndex = sample([0, 1, 2]);
+        let avatarIndex = 0;
+
+        // console.dir(sheet)
 
         // CREATE PLAYER
-        const createPlayer = (player, sessionId) => {
-          let avatar = new PIXI.Sprite(avatarList[player.avatar]);
-          avatar.x = player.x;
-          avatar.y = player.y;
-          avatar.waypoints = [];
-          avatar.area = player.area;
-          avatar.anchor.set(0.5);
+        const createPlayer = (playerOptions, sessionId) => {
+          let front = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-front"]
+          );
+          let back = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-back"]
+          );
+          let left = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-left"]
+          );
+          let right = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-right"]
+          );
+          let rest = new PIXI.AnimatedSprite(
+            sheet[0].animations["avatar-x-rest"]
+          );
+
+          rest.name = "rest";
+          front.name = "front";
+          back.name = "back";
+          left.name = "left";
+          right.name = "right";
+
+          rest.visible = true;
+          front.visible = false;
+          back.visible = false;
+          left.visible = false;
+          right.visible = false;
+
+          rest.tint = playerOptions.tint;
+          front.tint = playerOptions.tint;
+          back.tint = playerOptions.tint;
+          left.tint = playerOptions.tint;
+          right.tint = playerOptions.tint;
+
+          rest.animationSpeed = 0.02;
+          front.animationSpeed = 0.1;
+          back.animationSpeed = 0.1;
+          left.animationSpeed = 0.1;
+          right.animationSpeed = 0.1;
+
+          rest.play();
+          front.play();
+          back.play();
+          left.play();
+          right.play();
+
+          let avatar = new PIXI.Container();
+          avatar.addChild(left, right, back, front, rest);
+          avatar.motionState = "rest";
+          avatar.setAnimation = direction => {
+            avatar.motionState = direction;
+            avatar.children.forEach(c => {
+              c.visible = c.name == direction ? true : false;
+            });
+          };
+          avatar.x = playerOptions.x;
+          avatar.y = playerOptions.y;
+          // avatar.height = 80
+          // avatar.width = 60
           avatar.scale.set(0.5);
-          avatar.tint = player.tint;
-          avatar.name = player.name;
-          avatar.uuid = player.uuid;
-          avatar.ip = player.ip;
-          avatar.connected = player.connected;
-          avatar.authenticated = player.authenticated;
-          avatar.id = sessionId;
-          avatar.zIndex = 10;
-          avatar.isSelf = player.uuid == $localUserUUID;
+          avatar.pivot.x = 57;
+          avatar.pivot.y = 75;
           avatar.interactive = true;
 
-          // console.dir(avatar.isSelf);
+          // console.dir(avatar.children);
+
+          let player = {
+            avatar: avatar,
+            waypoints: [],
+            area: playerOptions.area,
+            name: playerOptions.name,
+            uuid: playerOptions.uuid,
+            ip: playerOptions.ip,
+            tint: playerOptions.tint,
+            connected: playerOptions.connected,
+            authenticated: playerOptions.authenticated,
+            id: sessionId,
+            isSelf: playerOptions.uuid == $localUserUUID
+          };
 
           const onDown = e => {
-            startPrivateChat(avatar);
+            startPrivateChat(player);
             e.stopPropagation();
           };
 
           const onEnter = () => {
-            popUpText = avatar.name;
+            popUpText = player.name;
           };
 
           const onLeave = () => {
             popUpText = false;
           };
 
-          avatar.on("mousedown", onDown);
-          avatar.on("touchstart", onDown);
-          avatar.on("mouseover", onEnter);
-          avatar.on("mouseout", onLeave);
+          player.avatar.on("mousedown", onDown);
+          player.avatar.on("touchstart", onDown);
+          player.avatar.on("mouseover", onEnter);
+          player.avatar.on("mouseout", onLeave);
 
-          viewport.addChild(avatar);
+          viewport.addChild(player.avatar);
 
-          if (avatar.isSelf) {
-            viewport.follow(avatar);
+          if (player.isSelf) {
+            viewport.follow(player.avatar);
             userLoaded = true;
-            localUserTint.set(avatar.tint);
-            localUserName.set(avatar.name);
-            localUserSessionID.set(avatar.id);
+            localUserTint.set(playerOptions.tint);
+            localUserName.set(player.name);
+            localUserSessionID.set(player.id);
           }
 
-          return avatar;
+          return player;
         };
 
         // ADD CASE STUDIES
@@ -326,7 +419,9 @@
           .joinOrCreate("game", playerObject)
           .then(gameRoom => {
             // HACK
-            history.replaceState({}, "CONNECTED", "/");
+            if(authenticate) {
+              history.replaceState({}, "CONNECTED", "/");
+            }
 
             // ******
             // PLAYER
@@ -345,9 +440,6 @@
 
             // PLAYER: ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
-              // console.log('onAdd player')
-              // console.dir(player)
-              // console.log(sessionId);
               localPlayers[sessionId] = createPlayer(player, sessionId);
             };
 
@@ -364,31 +456,94 @@
 
             // PLAYER: STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
-              // console.dir(localPlayers);
-              // console.log(sessionId);
+
+              if (player.fullPath.waypoints.length > 0) {
+                console.log("FULL PATH");
+                console.dir(player.fullPath.waypoints);
+                if (debug) {
+                  showFullPath(player.fullPath.waypoints);
+                }
+              }
+
               if (player.path.waypoints.length > 0) {
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
-                  if (debug) showPath(player.path.waypoints);
+                  if (debug) {
+                    showPath(player.path.waypoints);
+                    showWaypoints(player.path.waypoints);
+                  }
                 }
-                moveQ[sessionId] = player.path.waypoints;
+
+                const tweener = new Tweener(1 / 60);
+                const SPEED = 0.0075;
+
+                const tweenPath = (index = 0) => {
+                  let targetWaypoint = player.path.waypoints[index];
+
+                  console.log("=> TARGET WAYPOINT:", index);
+                  console.log("–– X:", targetWaypoint.x);
+                  console.log("–– Y:", targetWaypoint.y);
+                  console.log("–– Direction:", targetWaypoint.direction);
+                  console.log("–– Steps:", targetWaypoint.steps);
+                  console.log("= = = = =");
+
+                  localPlayers[sessionId].avatar.setAnimation(
+                    targetWaypoint.direction
+                  );
+
+                  tweener
+                    .add(localPlayers[sessionId].avatar)
+                    .to(targetWaypoint, targetWaypoint.steps * SPEED)
+                    .then(() => {
+                      console.log("! ARRIVED AT:", index);
+                      console.log("= = = = =");
+                      if (index === player.path.waypoints.length - 1) {
+                        console.log("# # # # # #");
+                        console.log("DONE");
+                        console.log("# # # # # #");
+                        hideTarget();
+                        if (debug) {
+                          hideWaypoints();
+                          hidePath();
+                          hideFullPath();
+                        }
+                        localPlayers[sessionId].avatar.setAnimation("rest");
+                        inMotion = false;
+                      } else {
+                        tweenPath(index + 1);
+                      }
+                    });
+                };
+
+                console.log(
+                  "! ! ! starting X:",
+                  localPlayers[sessionId].avatar.x
+                );
+                console.log(
+                  "! ! ! starting Y:",
+                  localPlayers[sessionId].avatar.y
+                );
+
+                tweenPath();
               } else {
                 // TELEPORT
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
                 }
-                localPlayers[sessionId].x = player.x;
-                localPlayers[sessionId].y = player.y;
+                localPlayers[sessionId].avatar.x = player.x;
+                localPlayers[sessionId].avatar.y = player.y;
 
                 playersInProximity = [];
                 for (let k in localPlayers) {
                   if (
                     !localPlayers[k].isSelf &&
                     Math.abs(
-                      localPlayers[k].x - localPlayers[$localUserSessionID].x
+                      localPlayers[k].avatar.x -
+                        localPlayers[$localUserSessionID].avatar.x
                     ) < 200 &&
                     Math.abs(
-                      localPlayers[k].y - localPlayers[$localUserSessionID].y
+                      localPlayers[k].avatar.y -
+                        localPlayers[$localUserSessionID].avatar.y
                     ) < 200
                   ) {
                     playersInProximity.push(localPlayers[k]);
@@ -555,7 +710,7 @@
 
     app.stage.addChild(viewport);
     ticker.start();
-    ticker.add(updatePositions);
+    // ticker.add(updatePositions);
 
     rendererHeight = app.screen.height;
     rendererWidth = app.screen.width;
