@@ -41,7 +41,7 @@
   // PROPS
   export let authenticate = false;
   export let login = false;
-  export let debug = true;
+  export let debug = false;
   // export let position = false
   // export let x = 0
   // export let y = 0
@@ -98,9 +98,9 @@
   let wayPointGraphics = {};
 
   // COLYSEUS
-  const client = new Colyseus.Client("ws://localhost:2567");
+  // const client = new Colyseus.Client("ws://localhost:2567");
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  // const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
+  const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
 
   // PIXI
   let app = {};
@@ -109,38 +109,6 @@
   let loader = {};
   let ticker = {};
   let sheet = [];
-
-  // GAME LOOP
-  // const updatePositions = t => {
-  //   // console.log(t);
-  //   for (let key in moveQ) {
-  //     if (localPlayers[key] && moveQ[key].length > 0) {
-  //       let step = moveQ[key].shift();
-  //       localPlayers[key].avatar.x = step.x;
-  //       localPlayers[key].avatar.y = step.y;
-  //     } else {
-  //       if (key === $localUserSessionID) {
-  //         inMotion = false;
-  //         hideTarget();
-  //         hidePath()
-  //         // if (debug) hidePath();
-  //       }
-  //       delete moveQ[key];
-  //       playersInProximity = [];
-  //       for (let k in localPlayers) {
-  //         if (
-  //           !localPlayers[k].isSelf &&
-  //           Math.abs(localPlayers[k].avatar.x - localPlayers[$localUserSessionID].avatar.x) <
-  //             200 &&
-  //           Math.abs(localPlayers[k].avatar.y - localPlayers[$localUserSessionID].avatar.y) <
-  //             200
-  //         ) {
-  //           playersInProximity.push(localPlayers[k]);
-  //         }
-  //       }
-  //     }
-  //   }
-  // };
 
   const showTarget = (x, y) => {
     let graphics = new PIXI.Graphics();
@@ -451,7 +419,9 @@
           .joinOrCreate("game", playerObject)
           .then(gameRoom => {
             // HACK
-            history.replaceState({}, "CONNECTED", "/");
+            if(authenticate) {
+              history.replaceState({}, "CONNECTED", "/");
+            }
 
             // ******
             // PLAYER
@@ -470,9 +440,6 @@
 
             // PLAYER: ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
-              // console.log('onAdd player')
-              // console.dir(player)
-              // console.log(sessionId);
               localPlayers[sessionId] = createPlayer(player, sessionId);
             };
 
@@ -489,12 +456,13 @@
 
             // PLAYER: STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
-              // console.dir(localPlayers);
-              // console.log(sessionId);
+
               if (player.fullPath.waypoints.length > 0) {
                 console.log("FULL PATH");
                 console.dir(player.fullPath.waypoints);
-                showFullPath(player.fullPath.waypoints);
+                if (debug) {
+                  showFullPath(player.fullPath.waypoints);
+                }
               }
 
               if (player.path.waypoints.length > 0) {
@@ -507,7 +475,7 @@
                 }
 
                 const tweener = new Tweener(1 / 60);
-                const SPEED = 0.01;
+                const SPEED = 0.0075;
 
                 const tweenPath = (index = 0) => {
                   let targetWaypoint = player.path.waypoints[index];
@@ -523,9 +491,6 @@
                     targetWaypoint.direction
                   );
 
-                  // let duration = targetWaypoint.steps * SPEED;
-                  // console.log("duration:", duration);
-
                   tweener
                     .add(localPlayers[sessionId].avatar)
                     .to(targetWaypoint, targetWaypoint.steps * SPEED)
@@ -537,9 +502,11 @@
                         console.log("DONE");
                         console.log("# # # # # #");
                         hideTarget();
-                        hideWaypoints();
-                        hidePath();
-                        hideFullPath();
+                        if (debug) {
+                          hideWaypoints();
+                          hidePath();
+                          hideFullPath();
+                        }
                         localPlayers[sessionId].avatar.setAnimation("rest");
                         inMotion = false;
                       } else {
