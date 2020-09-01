@@ -57,6 +57,8 @@
     colorTrans
   } from "./global.js";
 
+  const SPEED = 0.01;
+
   // DEBUG VARIABLES
   let worldX = 0;
   let worldY = 0;
@@ -66,6 +68,12 @@
   let rendererWidth = 0;
   let viewportHeight = 0;
   let viewportWidth = 0;
+  let debugWaypointIndex = 0;
+  let debugWaypointTotal = 0;
+  let debugWaypointX = 0;
+  let debugWaypointY = 0;
+  let debugWaypointDirection  = '';
+  let debugWaypointSteps = 0;
 
   // DOM REFERENCES
   let gameContainer = {};
@@ -139,7 +147,7 @@
       wayPointMarkers.alpha = 0.9;
       wayPointMarkers.zIndex = 1;
       path.forEach(p => {
-        wayPointMarkers.drawCircle(p.x, p.y, 8);
+        wayPointMarkers.drawCircle(p.x, p.y, 2);
       });
       wayPointMarkers.endFill();
       viewport.addChild(wayPointMarkers);
@@ -475,7 +483,8 @@
                 }
 
                 const tweener = new Tweener(1 / 60);
-                const SPEED = 0.0075;
+
+                debugWaypointTotal = player.path.waypoints.length - 1;
 
                 const tweenPath = (index = 0) => {
                   let targetWaypoint = player.path.waypoints[index];
@@ -486,6 +495,12 @@
                   console.log("–– Direction:", targetWaypoint.direction);
                   console.log("–– Steps:", targetWaypoint.steps);
                   console.log("= = = = =");
+
+                  debugWaypointIndex = index;
+                  debugWaypointX = targetWaypoint.x;
+                  debugWaypointY = targetWaypoint.y;
+                  debugWaypointDirection  = targetWaypoint.direction;
+                  debugWaypointSteps = targetWaypoint.steps;
 
                   localPlayers[sessionId].avatar.setAnimation(
                     targetWaypoint.direction
@@ -509,6 +524,12 @@
                         }
                         localPlayers[sessionId].avatar.setAnimation("rest");
                         inMotion = false;
+                        debugWaypointIndex = 0;
+                        debugWaypointTotal = 0;
+                        debugWaypointX = 0;
+                        debugWaypointY = 0;
+                        debugWaypointDirection  = '';
+                        debugWaypointSteps = 0;
                       } else {
                         tweenPath(index + 1);
                       }
@@ -785,6 +806,13 @@
     @include screen-size("small") {
       top: unset;
       bottom: 20px;
+    }
+
+    &.waypoint {
+      top: unset;
+      bottom: 10px;
+      right: unset;
+      left: 430px;
     }
 
     &.tiny {
@@ -1242,6 +1270,39 @@
     <div>
       <strong>Screen Y:</strong>
       {screenY}
+    </div>
+  </div>
+{/if}
+
+{#if debug && inMotion}
+  <div class="pop waypoint tiny" in:fade>
+    <div>
+      <strong>TARGET WAYPOINT:</strong>
+      {debugWaypointIndex}/{debugWaypointTotal}
+    </div>
+    <div>
+      <strong>X:</strong>
+      {debugWaypointX}
+    </div>
+    <div>
+      <strong>Y:</strong>
+      {debugWaypointY}
+    </div>
+    <div>
+      <strong>Direction:</strong>
+      {debugWaypointDirection}
+    </div>
+    <div>
+      <strong>Steps:</strong>
+      {debugWaypointSteps}
+    </div>
+    <div>
+      <strong>Speed:</strong>
+      {SPEED}
+    </div>
+    <div>
+      <strong>Duration:</strong>
+      {SPEED * debugWaypointSteps * 1000}ms
     </div>
   </div>
 {/if}
