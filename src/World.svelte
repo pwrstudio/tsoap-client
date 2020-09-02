@@ -16,7 +16,7 @@
   import tail from "lodash/tail";
   import { fade, fly } from "svelte/transition";
   const chance = new Chance();
-  import Tweener from "tweener";
+  // import Tweener from "tweener";
 
   // COMPONENTS
   import Chat from "./Chat.svelte";
@@ -58,6 +58,7 @@
   } from "./global.js";
 
   const SPEED = 0.01;
+  // const tweener = new Tweener(1 / 60);
 
   // DEBUG VARIABLES
   let worldX = 0;
@@ -72,7 +73,7 @@
   let debugWaypointTotal = 0;
   let debugWaypointX = 0;
   let debugWaypointY = 0;
-  let debugWaypointDirection  = '';
+  let debugWaypointDirection = "";
   let debugWaypointSteps = 0;
 
   // DOM REFERENCES
@@ -117,6 +118,51 @@
   let loader = {};
   let ticker = {};
   let sheet = [];
+
+  // GAME LOOP
+  const updatePositions = t => {
+    // console.log(t);
+    // console.dir(moveQ);
+    for (let key in moveQ) {
+      if (localPlayers[key] && moveQ[key].length > 0) {
+        let step = moveQ[key].shift();
+        console.log(step.direction);
+        localPlayers[key].avatar.setAnimation(step.direction);
+        localPlayers[key].avatar.x = step.x;
+        localPlayers[key].avatar.y = step.y;
+        if (key === $localUserSessionID) {
+          debugWaypointX = step.x;
+          debugWaypointY = step.y;
+          debugWaypointDirection = step.direction;
+          debugWaypointSteps = step.steps;
+        }
+      } else {
+        localPlayers[key].avatar.setAnimation("rest");
+        if (key === $localUserSessionID) {
+          inMotion = false;
+          hideTarget();
+          if (debug) {
+            hidePath();
+            hideFullPath();
+            hideWaypoints();
+          }
+        }
+        delete moveQ[key];
+        playersInProximity = [];
+        for (let k in localPlayers) {
+          if (
+            !localPlayers[k].isSelf &&
+            Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
+              200 &&
+            Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
+              200
+          ) {
+            playersInProximity.push(localPlayers[k]);
+          }
+        }
+      }
+    }
+  };
 
   const showTarget = (x, y) => {
     let graphics = new PIXI.Graphics();
@@ -427,7 +473,7 @@
           .joinOrCreate("game", playerObject)
           .then(gameRoom => {
             // HACK
-            if(authenticate) {
+            if (authenticate) {
               history.replaceState({}, "CONNECTED", "/");
             }
 
@@ -464,88 +510,74 @@
 
             // PLAYER: STATE CHANGE
             gameRoom.state.players.onChange = function(player, sessionId) {
-
-              if (player.fullPath.waypoints.length > 0) {
-                console.log("FULL PATH");
-                console.dir(player.fullPath.waypoints);
-                if (debug) {
-                  showFullPath(player.fullPath.waypoints);
-                }
-              }
-
               if (player.path.waypoints.length > 0) {
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
+                  debugWaypointTotal = player.path.waypoints.length - 1;
                   if (debug) {
+                    showFullPath(player.fullPath.waypoints);
                     showPath(player.path.waypoints);
                     showWaypoints(player.path.waypoints);
                   }
                 }
+                // console.dir(player.path.waypoints[0].x);
+                moveQ[sessionId] = player.path.waypoints;
 
-                const tweener = new Tweener(1 / 60);
+                // const tweenPath = (index = 0) => {
+                //   let targetWaypoint = player.path.waypoints[index];
 
-                debugWaypointTotal = player.path.waypoints.length - 1;
+                //   if (localPlayers[sessionId].isSelf) {
+                //     console.log("=> TARGET WAYPOINT:", index);
+                //     console.log("–– X:", targetWaypoint.x);
+                //     console.log("–– Y:", targetWaypoint.y);
+                //     console.log("–– Direction:", targetWaypoint.direction);
+                //     console.log("–– Steps:", targetWaypoint.steps);
+                //     console.log("= = = = =");
 
-                const tweenPath = (index = 0) => {
-                  let targetWaypoint = player.path.waypoints[index];
+                //     debugWaypointIndex = index;
+                //     debugWaypointX = targetWaypoint.x;
+                //     debugWaypointY = targetWaypoint.y;
+                //     debugWaypointDirection = targetWaypoint.direction;
+                //     debugWaypointSteps = targetWaypoint.steps;
+                //   }
 
-                  console.log("=> TARGET WAYPOINT:", index);
-                  console.log("–– X:", targetWaypoint.x);
-                  console.log("–– Y:", targetWaypoint.y);
-                  console.log("–– Direction:", targetWaypoint.direction);
-                  console.log("–– Steps:", targetWaypoint.steps);
-                  console.log("= = = = =");
+                //   localPlayers[sessionId].avatar.setAnimation(
+                //     targetWaypoint.direction
+                //   );
 
-                  debugWaypointIndex = index;
-                  debugWaypointX = targetWaypoint.x;
-                  debugWaypointY = targetWaypoint.y;
-                  debugWaypointDirection  = targetWaypoint.direction;
-                  debugWaypointSteps = targetWaypoint.steps;
+                //   tweener
+                //     .add(localPlayers[sessionId].avatar)
+                //     .to(targetWaypoint, targetWaypoint.steps * SPEED)
+                //     .then(() => {
+                //       if (localPlayers[sessionId].isSelf) {
+                //         console.log("! ARRIVED AT:", index);
+                //         console.log("= = = = =");
+                //       }
+                //       if (index === player.path.waypoints.length - 1) {
+                //         if (localPlayers[sessionId].isSelf) {
+                //           hideWaypoints();
+                //           hidePath();
+                //           hideFullPath();
+                //           console.log("# # # # # #");
+                //           console.log("DONE");
+                //           console.log("# # # # # #");
+                //           hideTarget();
+                //           inMotion = false;
+                //           debugWaypointIndex = 0;
+                //           debugWaypointTotal = 0;
+                //           debugWaypointX = 0;
+                //           debugWaypointY = 0;
+                //           debugWaypointDirection = "";
+                //           debugWaypointSteps = 0;
+                //         }
+                //         localPlayers[sessionId].avatar.setAnimation("rest");
+                //       } else {
+                //         tweenPath(index + 1);
+                //       }
+                //     });
+                // };
 
-                  localPlayers[sessionId].avatar.setAnimation(
-                    targetWaypoint.direction
-                  );
-
-                  tweener
-                    .add(localPlayers[sessionId].avatar)
-                    .to(targetWaypoint, targetWaypoint.steps * SPEED)
-                    .then(() => {
-                      console.log("! ARRIVED AT:", index);
-                      console.log("= = = = =");
-                      if (index === player.path.waypoints.length - 1) {
-                        console.log("# # # # # #");
-                        console.log("DONE");
-                        console.log("# # # # # #");
-                        hideTarget();
-                        if (debug) {
-                          hideWaypoints();
-                          hidePath();
-                          hideFullPath();
-                        }
-                        localPlayers[sessionId].avatar.setAnimation("rest");
-                        inMotion = false;
-                        debugWaypointIndex = 0;
-                        debugWaypointTotal = 0;
-                        debugWaypointX = 0;
-                        debugWaypointY = 0;
-                        debugWaypointDirection  = '';
-                        debugWaypointSteps = 0;
-                      } else {
-                        tweenPath(index + 1);
-                      }
-                    });
-                };
-
-                console.log(
-                  "! ! ! starting X:",
-                  localPlayers[sessionId].avatar.x
-                );
-                console.log(
-                  "! ! ! starting Y:",
-                  localPlayers[sessionId].avatar.y
-                );
-
-                tweenPath();
+                // tweenPath();
               } else {
                 // TELEPORT
                 if (localPlayers[sessionId].isSelf) {
@@ -731,7 +763,7 @@
 
     app.stage.addChild(viewport);
     ticker.start();
-    // ticker.add(updatePositions);
+    ticker.add(updatePositions);
 
     rendererHeight = app.screen.height;
     rendererWidth = app.screen.width;
