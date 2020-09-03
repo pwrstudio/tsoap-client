@@ -16,7 +16,7 @@
   import tail from "lodash/tail";
   import { fade, fly } from "svelte/transition";
   const chance = new Chance();
-  // import Tweener from "tweener";
+  import Tweener from "tweener";
 
   // COMPONENTS
   import Chat from "./Chat.svelte";
@@ -57,8 +57,8 @@
     colorTrans
   } from "./global.js";
 
-  const SPEED = 0.01;
-  // const tweener = new Tweener(1 / 60);
+  const SPEED = 8;
+  const tweener = new Tweener();
 
   // DEBUG VARIABLES
   let worldX = 0;
@@ -107,9 +107,9 @@
   let wayPointGraphics = {};
 
   // COLYSEUS
-  // const client = new Colyseus.Client("ws://localhost:2567");
+  const client = new Colyseus.Client("ws://localhost:2567");
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
+  // const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
 
   // PIXI
   let app = {};
@@ -119,49 +119,53 @@
   let ticker = {};
   let sheet = [];
 
+
   // GAME LOOP
-  const updatePositions = t => {
-    // console.log(t);
+  const updatePositions = delta => {
+
+    // console.log(ticker.elapsedMS)
+    tweener.update(ticker.elapsedMS);
+    // console.log(delta);
     // console.dir(moveQ);
-    for (let key in moveQ) {
-      if (localPlayers[key] && moveQ[key].length > 0) {
-        let step = moveQ[key].shift();
-        console.log(step.direction);
-        localPlayers[key].avatar.setAnimation(step.direction);
-        localPlayers[key].avatar.x = step.x;
-        localPlayers[key].avatar.y = step.y;
-        if (key === $localUserSessionID) {
-          debugWaypointX = step.x;
-          debugWaypointY = step.y;
-          debugWaypointDirection = step.direction;
-          debugWaypointSteps = step.steps;
-        }
-      } else {
-        localPlayers[key].avatar.setAnimation("rest");
-        if (key === $localUserSessionID) {
-          inMotion = false;
-          hideTarget();
-          if (debug) {
-            hidePath();
-            hideFullPath();
-            hideWaypoints();
-          }
-        }
-        delete moveQ[key];
-        playersInProximity = [];
-        for (let k in localPlayers) {
-          if (
-            !localPlayers[k].isSelf &&
-            Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
-              200 &&
-            Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
-              200
-          ) {
-            playersInProximity.push(localPlayers[k]);
-          }
-        }
-      }
-    }
+    // for (let key in moveQ) {
+    //   if (localPlayers[key] && moveQ[key].length > 0) {
+    //     let step = moveQ[key].shift();
+    //     console.log(step.direction);
+    //     localPlayers[key].avatar.setAnimation(step.direction);
+    //     localPlayers[key].avatar.x = step.x;
+    //     localPlayers[key].avatar.y = step.y;
+    //     if (key === $localUserSessionID) {
+    //       debugWaypointX = step.x;
+    //       debugWaypointY = step.y;
+    //       debugWaypointDirection = step.direction;
+    //       debugWaypointSteps = step.steps;
+    //     }
+    //   } else {
+    //     localPlayers[key].avatar.setAnimation("rest");
+    //     if (key === $localUserSessionID) {
+    //       inMotion = false;
+    //       hideTarget();
+    //       if (debug) {
+    //         hidePath();
+    //         hideFullPath();
+    //         hideWaypoints();
+    //       }
+    //     }
+    //     delete moveQ[key];
+        // playersInProximity = [];
+        // for (let k in localPlayers) {
+        //   if (
+        //     !localPlayers[k].isSelf &&
+        //     Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
+        //       200 &&
+        //     Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
+        //       200
+        //   ) {
+        //     playersInProximity.push(localPlayers[k]);
+        //   }
+        // }
+      // }
+    // }
   };
 
   const showTarget = (x, y) => {
@@ -483,6 +487,7 @@
 
             // PLAYER: REMOVE
             gameRoom.state.players.onRemove = (player, sessionId) => {
+              console.dir('REMOVE')
               try {
                 viewport.removeChild(localPlayers[sessionId]);
                 delete localPlayers[sessionId];
@@ -521,63 +526,75 @@
                   }
                 }
                 // console.dir(player.path.waypoints[0].x);
-                moveQ[sessionId] = player.path.waypoints;
 
-                // const tweenPath = (index = 0) => {
-                //   let targetWaypoint = player.path.waypoints[index];
+                // let ipWaypoints = []
+                // for(let z = 0; z < player.path.waypoints.length - 1; z++) {
+                //   ipWaypoints.push(player.path.waypoints[z])
 
-                //   if (localPlayers[sessionId].isSelf) {
-                //     console.log("=> TARGET WAYPOINT:", index);
-                //     console.log("–– X:", targetWaypoint.x);
-                //     console.log("–– Y:", targetWaypoint.y);
-                //     console.log("–– Direction:", targetWaypoint.direction);
-                //     console.log("–– Steps:", targetWaypoint.steps);
-                //     console.log("= = = = =");
+                //   if(player.path.waypoints[z + 1].direction === 'front') {
+                //     push({})
+                //   } 
 
-                //     debugWaypointIndex = index;
-                //     debugWaypointX = targetWaypoint.x;
-                //     debugWaypointY = targetWaypoint.y;
-                //     debugWaypointDirection = targetWaypoint.direction;
-                //     debugWaypointSteps = targetWaypoint.steps;
-                //   }
 
-                //   localPlayers[sessionId].avatar.setAnimation(
-                //     targetWaypoint.direction
-                //   );
+                // }
 
-                //   tweener
-                //     .add(localPlayers[sessionId].avatar)
-                //     .to(targetWaypoint, targetWaypoint.steps * SPEED)
-                //     .then(() => {
-                //       if (localPlayers[sessionId].isSelf) {
-                //         console.log("! ARRIVED AT:", index);
-                //         console.log("= = = = =");
-                //       }
-                //       if (index === player.path.waypoints.length - 1) {
-                //         if (localPlayers[sessionId].isSelf) {
-                //           hideWaypoints();
-                //           hidePath();
-                //           hideFullPath();
-                //           console.log("# # # # # #");
-                //           console.log("DONE");
-                //           console.log("# # # # # #");
-                //           hideTarget();
-                //           inMotion = false;
-                //           debugWaypointIndex = 0;
-                //           debugWaypointTotal = 0;
-                //           debugWaypointX = 0;
-                //           debugWaypointY = 0;
-                //           debugWaypointDirection = "";
-                //           debugWaypointSteps = 0;
-                //         }
-                //         localPlayers[sessionId].avatar.setAnimation("rest");
-                //       } else {
-                //         tweenPath(index + 1);
-                //       }
-                //     });
-                // };
+                // moveQ[sessionId] = player.path.waypoints;
 
-                // tweenPath();
+                const tweenPath = (index = 0) => {
+                  let targetWaypoint = player.path.waypoints[index];
+
+                  if (localPlayers[sessionId].isSelf) {
+                    console.log("=> TARGET WAYPOINT:", index);
+                    console.log("–– X:", targetWaypoint.x);
+                    console.log("–– Y:", targetWaypoint.y);
+                    console.log("–– Direction:", targetWaypoint.direction);
+                    console.log("–– Steps:", targetWaypoint.steps);
+                    console.log("= = = = =");
+
+                    debugWaypointIndex = index;
+                    debugWaypointX = targetWaypoint.x;
+                    debugWaypointY = targetWaypoint.y;
+                    debugWaypointDirection = targetWaypoint.direction;
+                    debugWaypointSteps = targetWaypoint.steps;
+                  }
+
+                  localPlayers[sessionId].avatar.setAnimation(
+                    targetWaypoint.direction
+                  );
+
+                  tweener
+                    .add(localPlayers[sessionId].avatar)
+                    .to(targetWaypoint, targetWaypoint.steps * SPEED)
+                    .then(() => {
+                      if (localPlayers[sessionId].isSelf) {
+                        console.log("! ARRIVED AT:", index);
+                        console.log("= = = = =");
+                      }
+                      if (index === player.path.waypoints.length - 1) {
+                        if (localPlayers[sessionId].isSelf) {
+                          hideWaypoints();
+                          hidePath();
+                          hideFullPath();
+                          console.log("# # # # # #");
+                          console.log("DONE");
+                          console.log("# # # # # #");
+                          hideTarget();
+                          inMotion = false;
+                          debugWaypointIndex = 0;
+                          debugWaypointTotal = 0;
+                          debugWaypointX = 0;
+                          debugWaypointY = 0;
+                          debugWaypointDirection = "";
+                          debugWaypointSteps = 0;
+                        }
+                        localPlayers[sessionId].avatar.setAnimation("rest");
+                      } else {
+                        tweenPath(index + 1);
+                      }
+                    });
+                };
+
+                tweenPath();
               } else {
                 // TELEPORT
                 if (localPlayers[sessionId].isSelf) {
@@ -762,7 +779,6 @@
     ticker = PIXI.Ticker.shared;
 
     app.stage.addChild(viewport);
-    ticker.start();
     ticker.add(updatePositions);
 
     rendererHeight = app.screen.height;
@@ -1334,7 +1350,7 @@
     </div>
     <div>
       <strong>Duration:</strong>
-      {SPEED * debugWaypointSteps * 1000}ms
+      {SPEED * debugWaypointSteps}ms
     </div>
   </div>
 {/if}
