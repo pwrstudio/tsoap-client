@@ -7,7 +7,6 @@
 
   // IMPORTS
   import get from "lodash/get";
-  import { fly } from "svelte/transition";
   import { createEventDispatcher } from "svelte";
 
   const dispatch = createEventDispatcher();
@@ -21,15 +20,9 @@
   @import "./variables.scss";
 
   .folder {
-    position: fixed;
-    width: 400px;
-    background: $grey;
     height: auto;
     line-height: 100px;
     text-align: center;
-    top: 10px;
-    right: 10px;
-    padding: 20px;
     line-height: 1.4em;
     border-radius: 10px;
     z-index: 1000;
@@ -49,7 +42,6 @@
 
 <div
   class="folder"
-  transition:fly={{ y: 200 }}
   on:click={() => {
     dispatch('closeCaseStudy');
   }}>

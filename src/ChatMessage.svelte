@@ -10,7 +10,7 @@
   import get from "lodash/get";
 
   // GLOBALS
-  import { formattedDate } from "./global.js";
+  import { formattedChatDate } from "./global.js";
 
   // PROPS
   export let message = {};
@@ -22,21 +22,19 @@
   .chat-message {
     margin-bottom: 10px;
     padding-bottom: 10px;
-    border-bottom: 1px solid $lightgrey;
+    color: $COLOR_DARK;
 
     .meta {
       width: 100%;
       display: inline-block;
-      font-size: $font_size_small;
+      font-size: $FONT_SIZE_SMALL;
 
       .name {
-        font-weight: bold;
         float: left;
       }
 
       .date {
         float: right;
-        color: white;
       }
 
       .color-code {
@@ -49,7 +47,7 @@
     }
 
     .body {
-      font-size: $font_size_normal;
+      font-size: $FONT_SIZE_BASE;
     }
   }
 </style>
@@ -60,7 +58,7 @@
       class="color-code"
       style={'background-color:' + get(message, 'tint', '0XFF0000').replace('0X', '#')} />
     <span class="name">{message.name}</span>
-    <span class="date">{formattedDate(message.timestamp)}</span>
+    <span class="date">{formattedChatDate(message.timestamp)}</span>
   </div>
   <div class="body">{message.text}</div>
 </div>

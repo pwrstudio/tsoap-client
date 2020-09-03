@@ -1,4 +1,6 @@
-import { format, getYear } from "date-fns";
+import { format, getYear, formatDistanceToNow } from "date-fns";
+
+export const SANITY_PROJECT_ID = 'bu5rnal5'
 
 export const caseStudyList = [
     { title: "CASE STUDY #1", content: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.", x: 550, y: 1400 },
@@ -24,13 +26,28 @@ export const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"];
 export const WIDTH = 5000;
 export const HEIGHT = 5000;
 
-export const formattedDate = (start, end) => {
+// const mainFormat = "MMM dd yyyy – HH:mm"
+// const mainFormat = "MMM dd – HH:mm"
+const mainFormat = "MMM dd yyyy"
 
-    // const startDate = start ? Date.parse(start) : Date.now();
-    const startDate = start ? start : Date.now();
+
+export const formattedDate = (start, end) => {
+    if (!start) {
+        return false;
+    }
+
+    console.log('start', start)
+
+    const startDate = Date.parse(start);
+
+    console.log('parsed', startDate)
+
+    if (!startDate) {
+        return false;
+    }
 
     if (!end) {
-        return format(startDate, "HH:mm:ss");
+        return format(startDate, mainFormat);
     }
 
     const endDate = Date.parse(end);
@@ -44,4 +61,9 @@ export const formattedDate = (start, end) => {
     const endFormat = "dd.MM.yyyy";
 
     return format(startDate, startFormat) + " – " + format(endDate, endFormat);
+};
+
+export const formattedChatDate = (start) => {
+    const startDate = start ? start : Date.now();
+    return format(startDate, "HH:mm:ss");
 };

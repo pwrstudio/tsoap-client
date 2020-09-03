@@ -1,12 +1,8 @@
 // TYPOGRAPHY
-$sans-stack: Helvetica, Arial, sans-serif;
-$serif-stack: "times new roman", times, serif;
+
 $font_size_small: 12px;
 $font_size_normal: 16px;
 $font_size_large: 24px;
-
-// ANIMATION
-$transition: cubic-bezier(0.23, 1, 0.32, 1);
 
 // COLOR
 $grey: #e5e5e5;
@@ -14,6 +10,26 @@ $lightgrey: #f5f5f5;
 $lightergrey: #fafafa;
 $darkgrey: #555555;
 $darkergrey: #444444;
+
+// NEW ======>
+
+// TYPOGRAPHY
+$mono-stack: "IBM Plex Mono", monospace;
+$sans-stack: "IBM Plex Sans", sans;
+$serif-stack: "IBM Plex Serif", serif;
+$font_size_base: 16px;
+$FONT_SIZE_SMALL: 11px;
+$FONT_SIZE_BASE: 13px;
+
+// COLOR
+$COLOR_DARK: #222222;
+$COLOR_MID_1: #c5c5c5;
+$COLOR_MID_2: #999999;
+$COLOR_MID_3: #555555;
+$COLOR_LIGHT: #f0f0f0;
+
+// TRANSITIONS
+$transition: cubic-bezier(0.23, 1, 0.32, 1);
 
 // RESPONSIVE
 $breakpoints: (

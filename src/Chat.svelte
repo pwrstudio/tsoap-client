@@ -44,10 +44,15 @@
 <style lang="scss">
   @import "./variables.scss";
 
+  .chat-container {
+    position: relative;
+    height: 100%;
+  }
+
   .message-container {
     width: calc(100% - 10px);
     width: 100%;
-    height: calc(100% - 60px);
+    height: calc(100% - 50px);
     overflow-y: auto;
 
     @include screen-size("small") {
@@ -59,8 +64,8 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    width: calc(100% - 20px);
-    padding: 10px;
+    width: 100%;
+    padding-top: 10px;
     height: 40px;
 
     @include screen-size("small") {
@@ -95,18 +100,21 @@
   }
 </style>
 
-<div class="message-container" bind:this={messageContainerEl}>
-  {#each chatMessages as message (message.msgId)}
-    <ChatMessage {message} />
-  {/each}
-</div>
-<div class="input-container">
-  <input
-    type="[text]"
-    maxlength="600"
-    bind:value={chatInputValue}
-    on:keydown={e => {
-      if (e.keyCode == 13) submitChat();
-    }} />
-  <button on:click={submitChat}>Send</button>
+<div class="chat-container">
+
+  <div class="message-container" bind:this={messageContainerEl}>
+    {#each chatMessages as message (message.msgId)}
+      <ChatMessage {message} />
+    {/each}
+  </div>
+  <div class="input-container">
+    <input
+      type="[text]"
+      maxlength="600"
+      bind:value={chatInputValue}
+      on:keydown={e => {
+        if (e.keyCode == 13) submitChat();
+      }} />
+    <button on:click={submitChat}>Send</button>
+  </div>
 </div>

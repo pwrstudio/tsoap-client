@@ -12,9 +12,13 @@
   import { Viewport } from "pixi-viewport";
   import Chance from "chance";
   import get from "lodash/get";
+  import has from "lodash/has";
   import sample from "lodash/sample";
   import tail from "lodash/tail";
-  import { fade, fly } from "svelte/transition";
+  import { fade, fly, scale } from "svelte/transition";
+  import { urlFor, loadData, renderBlockText } from "./sanity.js";
+  import { links } from "svelte-routing";
+
   const chance = new Chance();
   // import Tweener from "tweener";
 
@@ -50,6 +54,7 @@
 
   // GLOBAL
   import {
+    formattedDate,
     caseStudyList,
     KEYBOARD,
     WIDTH,
@@ -59,6 +64,24 @@
 
   const SPEED = 0.01;
   // const tweener = new Tweener(1 / 60);
+
+  // ** SANITY
+  // const query = "*[slug.current == $slug]{..., author[]->{title, slug}}[0]";
+  // const params = { slug: slug };
+  const query = "*[_type == 'event']";
+
+  let events = loadData(query);
+  let caseStudies = loadData("*[_type == 'caseStudy']");
+
+  events.then(events => {
+    console.log("EVENTS");
+    console.dir(events);
+  });
+
+  caseStudies.then(caseStudies => {
+    console.log("CASE STUDIES");
+    console.dir(caseStudies);
+  });
 
   // DEBUG VARIABLES
   let worldX = 0;
@@ -95,7 +118,13 @@
   let caseStudyActive = false;
   let currentCaseStudy = {};
 
+  let caseStudyBoxActive = false;
+
   let audioChatActive = false;
+
+  let sidebarHidden = false;
+
+  let eventActive = false;
 
   let localPlayers = {};
   let chatMessages = [];
@@ -513,6 +542,7 @@
               if (player.path.waypoints.length > 0) {
                 if (localPlayers[sessionId].isSelf) {
                   localUserArea.set(player.area);
+                  localUserArea.set(2);
                   debugWaypointTotal = player.path.waypoints.length - 1;
                   if (debug) {
                     showFullPath(player.fullPath.waypoints);
@@ -771,9 +801,11 @@
     viewportWidth = viewport.screenWidth;
 
     window.onresize = () => {
-      responsiveWidth = window.matchMedia("(max-width: 700px)").matches
-        ? window.innerWidth
-        : window.innerWidth - 420;
+      responsiveWidth =
+        window.matchMedia("(max-width: 700px)").matches || sidebarHidden
+          ? window.innerWidth
+          : window.innerWidth - 400;
+
       viewport.resize(responsiveWidth, window.innerHeight);
       app.renderer.resize(responsiveWidth, window.innerHeight);
 
@@ -800,27 +832,7 @@
 
   * {
     box-sizing: border-box;
-  }
-
-  .game {
-    width: calc(100vw - 420px);
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    right: 0;
-    overflow: hidden;
-    float: right;
-    opacity: 0;
-    transition: opacity 1s ease-out;
-
-    &.loaded {
-      opacity: 1;
-    }
-
-    @include screen-size("small") {
-      width: 100vw;
-      right: 0;
-    }
+    font-family: $mono-stack;
   }
 
   .pop {
@@ -914,42 +926,19 @@
   .current-area {
     position: fixed;
     width: auto;
-    background: $grey;
+    background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
     text-align: center;
-    bottom: 10px;
-    right: 10px;
-    padding: 20px;
+    top: 10px;
+    left: 10px;
+    padding: 10px;
     border-radius: 10px;
+    border-radius: 4px;
+    font-size: $FONT_SIZE_BASE;
     @include screen-size("small") {
       top: unset;
       bottom: 20px;
-      display: none;
-    }
-
-    &.tiny {
-      border-radius: 5px;
-      opacity: 0.7;
-      // padding: 5px;
-      font-size: 10px;
-      line-height: 1.2em;
-      pointer-events: none;
-    }
-  }
-
-  .stream-test {
-    position: fixed;
-    width: auto;
-    background: $grey;
-    height: auto;
-    line-height: 2em;
-    text-align: center;
-    top: 50px;
-    width: 360px;
-    left: 430px;
-    border-radius: 10px;
-    @include screen-size("small") {
       display: none;
     }
   }
@@ -1084,6 +1073,7 @@
     overflow: scroll;
     padding-bottom: 200px;
     z-index: 100;
+    transform: scale(0.8);
 
     @include screen-size("small") {
       width: 100vw;
@@ -1099,53 +1089,492 @@
       }
     }
   }
+
+  .game {
+    width: calc(100vw - 400px);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    float: right;
+    opacity: 0;
+    transition: opacity 1s ease-out;
+
+    &.loaded {
+      opacity: 1;
+    }
+
+    @include screen-size("small") {
+      width: 100vw;
+      right: 0;
+    }
+
+    &.expanded {
+      width: 100vw;
+    }
+  }
+
+  .hide-button {
+    position: fixed;
+    top: 10px;
+    right: 350px;
+    width: 40px;
+    height: 40px;
+    line-height: 36px;
+    font-size: 22px;
+    text-align: center;
+    border-radius: 20px;
+    color: $COLOR_MID_2;
+    background: $COLOR_LIGHT;
+    user-select: none;
+    cursor: pointer;
+    transition: background 0.3s $transition;
+    z-index: 1000;
+
+    &:hover {
+      background: $COLOR_MID_1;
+    }
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 100vh;
+    padding: 0;
+    overflow: hidden;
+    z-index: 100;
+    // display: flex;
+    // flex-direction: column;
+    transform: translateX(0);
+    transition: transform 0.5s $transition;
+
+    .minimap {
+      background: $COLOR_MID_2;
+      height: 250px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .map-container {
+        height: 250px;
+        width: 250px;
+        position: relative;
+        img {
+          height: 250px;
+          width: 250px;
+        }
+        .map-marker {
+          height: 10px;
+          width: 10px;
+          border-radius: 5px;
+          background: red;
+          position: absolute;
+          top: 0;
+          left: 0;
+          z-index: 100;
+        }
+      }
+    }
+
+    .calendar {
+      background: $COLOR_LIGHT;
+      height: calc(100% - 610px);
+      color: $COLOR_DARK;
+      font-size: $FONT_SIZE_BASE;
+      background: $COLOR_LIGHT;
+      // padding-bottom: 60px;
+
+      .calendar-item {
+        // padding-left: 20px;
+        // padding-right: 20px;
+        // padding-top: 10px;
+        // padding-bottom: 10px;
+        padding: 10px;
+        background: red;
+        // display: inline-block;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 20px;
+        padding-top: 20px;
+        background: $COLOR_LIGHT;
+        cursor: pointer;
+
+        .title {
+          // float: left;
+          white-space: nowrap;
+        }
+
+        .elips {
+          // float: left;
+          // font-size: $FONT_SIZE_SMALL;
+          margin-left: 10px;
+          margin-right: 10px;
+          width: 50%;
+          white-space: nowrap;
+          overflow: hidden;
+          flex-shrink: 4;
+          // text-overflow: ellipsis;
+        }
+
+        .date {
+          white-space: nowrap;
+
+          // float: right;
+        }
+
+        transition: background 0.5s $transition;
+
+        &:hover {
+          background: $COLOR_MID_1;
+        }
+      }
+    }
+    .chat {
+      background: $COLOR_MID_1;
+      height: 300px;
+      padding: 10px;
+    }
+    .menu {
+      color: $COLOR_DARK;
+      font-size: $FONT_SIZE_BASE;
+      background: $COLOR_LIGHT;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+
+      .menu-item {
+        padding-right: 20px;
+        float: left;
+        cursor: pointer;
+        color: $COLOR_DARK;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      .login {
+        padding-right: 0px;
+        justify-self: end;
+      }
+    }
+
+    &.hidden {
+      transform: translateX(370px);
+      cursor: pointer;
+    }
+  }
+
+  .passive-content-slot {
+    position: fixed;
+    bottom: 10px;
+    right: 410px;
+    width: 500px;
+    height: calc(100vh - 330px);
+    padding: 10px;
+    background: $COLOR_MID_1;
+    z-index: 100;
+    overflow-y: auto;
+    font-size: $FONT_SIZE_BASE;
+    color: $COLOR_DARK;
+    padding-bottom: 60px;
+    border-radius: 4px;
+    // display: flex;
+    // flex-direction: column;
+    // transform: translateX(0);
+    // transition: transform 0.5s $transition;
+
+    img {
+      max-width: 80%;
+      height: 260px;
+      object-fit: cover;
+    }
+
+    .title {
+      margin-bottom: 20px;
+    }
+    .date {
+      margin-bottom: 20px;
+    }
+
+    .cs-item {
+      width: 200px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      float: left;
+      img,
+      video {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+      }
+    }
+  }
+
+  .active-content-slot {
+    background: $COLOR_MID_1;
+    z-index: 100;
+    font-size: $FONT_SIZE_BASE;
+    color: $COLOR_DARK;
+    position: fixed;
+    width: auto;
+    background: $grey;
+    height: auto;
+    line-height: 2em;
+    top: 10px;
+    width: 500px;
+    height: 300px;
+    right: 410px;
+    border-radius: 4px;
+
+    @include screen-size("small") {
+      display: none;
+    }
+
+    img,
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .title {
+      margin-bottom: 20px;
+    }
+    .date {
+      margin-bottom: 20px;
+    }
+  }
 </style>
 
-<!-- TOP BAR -->
-<div class="top-bar">
-  <a class="interact link" href="login">Login</a>
+{#if !sidebarHidden}
   <div
-    class="link interact green"
+    class="hide-button"
+    in:scale={{ delay: 500 }}
     on:click={() => {
-      teleportTo('green');
+      sidebarHidden = !sidebarHidden;
+      window.dispatchEvent(new Event('resize'));
     }}>
-    GOTO: Green
+    »
   </div>
-  <div
-    class="link interact blue"
-    on:click={() => {
-      teleportTo('blue');
-    }}>
-    GOTO: Blue
-  </div>
-  <div
-    class="link interact yellow"
-    on:click={() => {
-      teleportTo('yellow');
-    }}>
-    GOTO: Yellow
-  </div>
-  <div
-    class="link interact red"
-    on:click={() => {
-      teleportTo('red');
-    }}>
-    GOTO: Red
-  </div>
+{/if}
 
-  <div
-    class="link audio-chat interact"
-    on:click={() => {
-      audioChatActive = true;
-    }}>
-    ~ ~ Test audio chat ~ ~
+<!-- SIDEBAR -->
+<div
+  class="sidebar"
+  use:links
+  class:hidden={sidebarHidden}
+  on:click={() => {
+    if (sidebarHidden) {
+      sidebarHidden = false;
+      window.dispatchEvent(new Event('resize'));
+    }
+  }}>
+
+  <!-- MINIMAP -->
+  <div class="minimap">
+    {#if $localUserSessionID && localPlayers && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].avatar && localPlayers[$localUserSessionID].avatar.y}
+      <div class="map-container">
+        <img src="hkw-map-mini.png" />
+        <div
+          class="map-marker"
+          style={'top: ' + Math.round(localPlayers[$localUserSessionID].avatar.y / 20 - 5) + 'px; left: ' + Math.round(localPlayers[$localUserSessionID].avatar.x / 20 - 5) + 'px;'} />
+      </div>
+    {/if}
+  </div>
+  <!-- CALENDAR -->
+  <div class="calendar">
+    {#await events then events}
+      {#each events as event, index (event._id)}
+        <div
+          class="calendar-item"
+          in:fade={{ delay: 100 * index }}
+          on:click={() => {
+            if (eventActive && eventActive._id === event._id) {
+              eventActive = false;
+            } else {
+              eventActive = event;
+            }
+          }}>
+          <div class="title">{event.title}</div>
+          <div class="elips">
+            .........................................................
+          </div>
+          <div class="date">{formattedDate(event.startDate)}</div>
+        </div>
+      {/each}
+    {/await}
+  </div>
+  <!-- CHAT -->
+  <div class="chat">
+    <Chat {chatMessages} on:submit={submitChat} phoneActive={showChat} />
+  </div>
+  <!-- MENU -->
+  <div class="menu">
+    <div>
+      <div
+        class="menu-item"
+        on:click={() => {
+          caseStudyBoxActive = !caseStudyBoxActive;
+        }}>
+        Case-Studies
+      </div>
+      <div class="menu-item">About</div>
+      <div class="menu-item">Help</div>
+    </div>
+    <div class="menu-item login">
+      <a href="/login">Login</a>
+    </div>
   </div>
 </div>
 
-{#if banned}
-  <Banned />
+<!-- GAME WORLD -->
+<div
+  class="game"
+  class:expanded={sidebarHidden}
+  class:loaded={userLoaded}
+  bind:this={gameContainer} />
+
+<!-- PASSIVE CONTENT: CASE STUDY -->
+{#if caseStudyActive}
+  <div class="passive-content-slot" transition:fly={{ y: 200 }}>
+    <CaseStudy
+      caseStudy={currentCaseStudy}
+      on:closeCaseStudy={e => {
+        caseStudyActive = false;
+      }} />
+  </div>
 {/if}
 
+<!-- PASSIVE CONTENT: CASE STUDY OVERVIEW -->
+{#if caseStudyBoxActive}
+  <div
+    class="passive-content-slot"
+    transition:fly={{ y: 200 }}
+    on:click={() => {
+      caseStudyBoxActive = !caseStudyBoxActive;
+    }}>
+    <div>
+      <!-- TITLE -->
+      <div class="title">
+        <strong>Case studies</strong>
+      </div>
+
+      {#await caseStudies then caseStudies}
+        {#each caseStudies as cs, index (cs._id)}
+          <div class="cs-item" in:fade={{ delay: 100 * index }}>
+            <div class="title">{cs.title}</div>
+            <img
+              src={urlFor(cs.mainImage.asset)
+                .width(200)
+                .height(200)
+                .quality(90)
+                .auto('format')
+                .url()} />
+          </div>
+        {/each}
+      {/await}
+
+    </div>
+  </div>
+{/if}
+
+<!-- PASSIVE CONTENT: EVENT -->
+{#if eventActive}
+  <div
+    class="passive-content-slot"
+    in:fly={{ y: 200, duration: 300 }}
+    out:fly={{ y: 200, duration: 300 }}
+    on:click={() => {
+      eventActive = false;
+    }}>
+    <div>
+      <!-- TITLE -->
+      <div class="title">
+        <strong>{eventActive.title}</strong>
+      </div>
+
+      <div class="date">{formattedDate(eventActive.startDate)}</div>
+
+      <!-- IMAGE -->
+      <div>
+        <img
+          src={urlFor(eventActive.mainImage.asset)
+            .width(600)
+            .quality(90)
+            .auto('format')
+            .url()} />
+      </div>
+
+      <!-- TEXT -->
+      <div>
+        {#if eventActive.content.content}
+          {@html renderBlockText(eventActive.content.content)}
+        {/if}
+      </div>
+      <div />
+    </div>
+  </div>
+{/if}
+
+<!-- ACTIVE CONTENT: STREAM -->
+{#if $localUserArea === 2}
+  <div class="active-content-slot" transition:fly={{ y: -200 }}>
+    <video src="/test.mp4" muted autoplay loop />
+  </div>
+{/if}
+
+<!-- PROXIMITY -->
+{#if playersInProximity.length > 0}
+  <div class="proximity" transition:fly={{ y: 200 }}>
+    <div>
+      <strong>Players nearby</strong>
+    </div>
+    {#each playersInProximity as player}
+      <div>
+        {player.name}
+        <button
+          on:click={e => {
+            startPrivateChat(player);
+          }}>
+          Start chat
+        </button>
+      </div>
+    {/each}
+  </div>
+{/if}
+
+<!-- CURRENT AREA BOX -->
+{#if $localUserArea}
+  <div class="current-area tiny">
+    Currently in
+    <strong>{colorTrans[$localUserArea]}</strong>
+    area
+  </div>
+{/if}
+
+<!-- PRIVATE CHAT -->
+<!-- {#if $inPrivateChat}
+  <div transition:fade class="privateChatContainer" on:click={leavePrivateChat}>
+    <div class="box">
+      <Chat {chatMessages} on:submit={submitChat} />
+    </div>
+  </div>
+{/if} -->
+
+<!-- POP UP -->
+{#if popUpText && !caseStudyActive}
+  <div class="pop" in:fade>{popUpText}</div>
+{/if}
+
+<!-- LOGIN -->
 {#if login && !loggedIn}
   <Login
     {sso}
@@ -1188,84 +1617,23 @@
   </div>
 </div>
 
-<!-- USER LIST -->
-<div class="mainUserListContainer" class:phone={showUserList}>
-  <UserList playerList={localPlayers} phoneActive={showUserList} />
-</div>
-
-<!-- CHAT -->
-<div class="mainChatContainer" class:phone={showChat}>
-  <Chat {chatMessages} on:submit={submitChat} phoneActive={showChat} />
-</div>
-
-<!-- PRIVATE CHAT -->
-{#if $inPrivateChat}
-  <div transition:fade class="privateChatContainer" on:click={leavePrivateChat}>
-    <div class="box">
-      <Chat {chatMessages} on:submit={submitChat} />
-    </div>
-  </div>
+<!-- BANNED -->
+{#if banned}
+  <Banned />
 {/if}
 
-<!-- GAME WORLD -->
-<div class="game" class:loaded={userLoaded} bind:this={gameContainer} />
+<!-- !!!!!!! DEBUG !!!!!!! -->
+<!-- !!!!!!! DEBUG !!!!!!! -->
+<!-- !!!!!!! DEBUG !!!!!!! -->
+<!-- !!!!!!! DEBUG !!!!!!! -->
 
-<!-- POP UP -->
-{#if popUpText && !caseStudyActive}
-  <div class="pop" in:fade>{popUpText}</div>
-{/if}
-
-<!-- FOLDER  -->
-{#if caseStudyActive}
-  <CaseStudy
-    caseStudy={currentCaseStudy}
-    on:closeCaseStudy={e => {
-      caseStudyActive = false;
-    }} />
-{/if}
-
-<!-- CURRENT AREA BOX -->
-{#if $localUserArea}
-  <div class="current-area tiny">
-    Currently in
-    <strong>{colorTrans[$localUserArea]}</strong>
-    area
-  </div>
-{/if}
-
-<!-- STREAM TEST -->
-{#if $localUserArea === 2}
-  <video
-    class="stream-test"
-    src="/test.mp4"
-    muted
-    autoplay
-    loop
-    transition:fly={{ y: 200 }} />
-{/if}
-
-<!-- PROXIMITY -->
-{#if playersInProximity.length > 0}
-  <div class="proximity" transition:fly={{ y: 200 }}>
-    <div>
-      <strong>Players nearby</strong>
-    </div>
-    {#each playersInProximity as player}
-      <div>
-        {player.name}
-        <button
-          on:click={e => {
-            startPrivateChat(player);
-          }}>
-          Start chat
-        </button>
-      </div>
-    {/each}
-  </div>
-{/if}
-
-<!-- DEBUG -->
 {#if debug}
+  <!-- USER LIST -->
+  <div class="mainUserListContainer" class:phone={showUserList}>
+    <UserList playerList={localPlayers} phoneActive={showUserList} />
+  </div>
+
+  <!-- DEBUG: RENDERING INFO -->
   <div class="pop tiny" in:fade>
     <div>
       <strong>Renderer width:</strong>
@@ -1304,37 +1672,79 @@
       {screenY}
     </div>
   </div>
-{/if}
 
-{#if debug && inMotion}
-  <div class="pop waypoint tiny" in:fade>
-    <div>
-      <strong>TARGET WAYPOINT:</strong>
-      {debugWaypointIndex}/{debugWaypointTotal}
+  <!-- DEBUG: WAYPOINT INFO -->
+  {#if inMotion}
+    <div class="pop waypoint tiny" in:fade>
+      <div>
+        <strong>TARGET WAYPOINT:</strong>
+        {debugWaypointIndex}/{debugWaypointTotal}
+      </div>
+      <div>
+        <strong>X:</strong>
+        {debugWaypointX}
+      </div>
+      <div>
+        <strong>Y:</strong>
+        {debugWaypointY}
+      </div>
+      <div>
+        <strong>Direction:</strong>
+        {debugWaypointDirection}
+      </div>
+      <div>
+        <strong>Steps:</strong>
+        {debugWaypointSteps}
+      </div>
+      <div>
+        <strong>Speed:</strong>
+        {SPEED}
+      </div>
+      <div>
+        <strong>Duration:</strong>
+        {SPEED * debugWaypointSteps * 1000}ms
+      </div>
     </div>
-    <div>
-      <strong>X:</strong>
-      {debugWaypointX}
+  {/if}
+
+  <!-- DEBUG: TOP BAR -->
+  <div class="top-bar">
+    <a class="interact link" href="login">Login</a>
+    <div
+      class="link interact green"
+      on:click={() => {
+        teleportTo('green');
+      }}>
+      GOTO: Green
     </div>
-    <div>
-      <strong>Y:</strong>
-      {debugWaypointY}
+    <div
+      class="link interact blue"
+      on:click={() => {
+        teleportTo('blue');
+      }}>
+      GOTO: Blue
     </div>
-    <div>
-      <strong>Direction:</strong>
-      {debugWaypointDirection}
+    <div
+      class="link interact yellow"
+      on:click={() => {
+        teleportTo('yellow');
+      }}>
+      GOTO: Yellow
     </div>
-    <div>
-      <strong>Steps:</strong>
-      {debugWaypointSteps}
+    <div
+      class="link interact red"
+      on:click={() => {
+        teleportTo('red');
+      }}>
+      GOTO: Red
     </div>
-    <div>
-      <strong>Speed:</strong>
-      {SPEED}
-    </div>
-    <div>
-      <strong>Duration:</strong>
-      {SPEED * debugWaypointSteps * 1000}ms
+
+    <div
+      class="link audio-chat interact"
+      on:click={() => {
+        audioChatActive = true;
+      }}>
+      ~ ~ Test audio chat ~ ~
     </div>
   </div>
 {/if}
