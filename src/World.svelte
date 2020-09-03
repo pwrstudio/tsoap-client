@@ -72,16 +72,18 @@
 
   let events = loadData(query)
   let caseStudies = loadData("*[_type == 'caseStudy']")
+  let graphicsSettings = loadData("*[_id == 'graphics-settings']{..., activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]")
 
-  events.then((events) => {
-    console.log('EVENTS')
-    console.dir(events)
-  })
+  // events.then((events) => {
+  //   console.log('EVENTS')
+  //   console.dir(events)
+  // })
 
-  caseStudies.then((caseStudies) => {
-    console.log('CASE STUDIES')
-    console.dir(caseStudies)
-  })
+  // caseStudies.then((caseStudies) => {
+  //   console.log('CASE STUDIES')
+  //   console.dir(caseStudies)
+  // })
+
 
   // DEBUG VARIABLES
   let worldX = 0
@@ -155,7 +157,6 @@
     for (let key in moveQ) {
       if (localPlayers[key] && moveQ[key].length > 0) {
         let step = moveQ[key].shift()
-        console.log(step.direction)
         localPlayers[key].avatar.setAnimation(step.direction)
         localPlayers[key].avatar.x = step.x
         localPlayers[key].avatar.y = step.y
@@ -295,466 +296,474 @@
 
     // LOADER
     // http://localhost:5000/
-    loader
-      .add('map', '/hkw-map-no-house-smaller.png')
-      .add('/sprites/avatar.json')
-      // .add("avatarTwo", "/avatar2.png")
-      // .add("avatarThree", "/avatar3.png")
-      .load((loader, resources) => {
-        // console.dir(resources.map.texture);
-        let map = new PIXI.Sprite(resources.map.texture)
-        map.width = 5000
-        map.height = 5000
-        viewport.addChild(map)
 
-        // console.dir(resources);
+    graphicsSettings.then(graphicsSettings => {
+      console.dir(graphicsSettings)
 
-        sheet.push(resources['/sprites/avatar.json'].spritesheet)
+      let spriteUrl = get(graphicsSettings, 'activeAvatars[0].spriteJsonURL', '/sprites/avatar.json')
+      console.log(spriteUrl)
 
-        // const avatarList = [
-        //   resources.avatarOne.texture,
-        //   resources.avatarTwo.texture,
-        //   resources.avatarThree.texture
-        // ];
+      loader
+        .add('map', '/hkw-map-no-house-smaller.png')
+        .add('avatar', spriteUrl)
+        // .add("avatarTwo", "/avatar2.png")
+        // .add("avatarThree", "/avatar3.png")
+        .load((loader, resources) => {
+          // console.dir(resources.map.texture);
+          let map = new PIXI.Sprite(resources.map.texture)
+          map.width = 5000
+          map.height = 5000
+          viewport.addChild(map)
 
-        // let avatarIndex = sample([0, 1, 2]);
-        let avatarIndex = 0
+          console.dir(resources);
 
-        // console.dir(sheet)
+          sheet.push(resources['avatar'].spritesheet)
 
-        // CREATE PLAYER
-        const createPlayer = (playerOptions, sessionId) => {
-          let front = new PIXI.AnimatedSprite(
-            sheet[0].animations['avatar-x-front']
-          )
-          let back = new PIXI.AnimatedSprite(
-            sheet[0].animations['avatar-x-back']
-          )
-          let left = new PIXI.AnimatedSprite(
-            sheet[0].animations['avatar-x-left']
-          )
-          let right = new PIXI.AnimatedSprite(
-            sheet[0].animations['avatar-x-right']
-          )
-          let rest = new PIXI.AnimatedSprite(
-            sheet[0].animations['avatar-x-rest']
-          )
+          // const avatarList = [
+          //   resources.avatarOne.texture,
+          //   resources.avatarTwo.texture,
+          //   resources.avatarThree.texture
+          // ];
 
-          rest.name = 'rest'
-          front.name = 'front'
-          back.name = 'back'
-          left.name = 'left'
-          right.name = 'right'
+          // let avatarIndex = sample([0, 1, 2]);
+          let avatarIndex = 0
 
-          rest.visible = true
-          front.visible = false
-          back.visible = false
-          left.visible = false
-          right.visible = false
+          console.dir(sheet)
 
-          rest.tint = playerOptions.tint
-          front.tint = playerOptions.tint
-          back.tint = playerOptions.tint
-          left.tint = playerOptions.tint
-          right.tint = playerOptions.tint
+          // CREATE PLAYER
+          const createPlayer = (playerOptions, sessionId) => {
+            let front = new PIXI.AnimatedSprite(
+              sheet[0].animations['front']
+            )
+            let back = new PIXI.AnimatedSprite(
+              sheet[0].animations['back']
+            )
+            let left = new PIXI.AnimatedSprite(
+              sheet[0].animations['left']
+            )
+            let right = new PIXI.AnimatedSprite(
+              sheet[0].animations['right']
+            )
+            let rest = new PIXI.AnimatedSprite(
+              sheet[0].animations['rest']
+            )
 
-          rest.animationSpeed = 0.02
-          front.animationSpeed = 0.1
-          back.animationSpeed = 0.1
-          left.animationSpeed = 0.1
-          right.animationSpeed = 0.1
+            rest.name = 'rest'
+            front.name = 'front'
+            back.name = 'back'
+            left.name = 'left'
+            right.name = 'right'
 
-          rest.play()
-          front.play()
-          back.play()
-          left.play()
-          right.play()
+            rest.visible = true
+            front.visible = false
+            back.visible = false
+            left.visible = false
+            right.visible = false
 
-          let avatar = new PIXI.Container()
-          avatar.addChild(left, right, back, front, rest)
-          avatar.motionState = 'rest'
-          avatar.setAnimation = (direction) => {
-            avatar.motionState = direction
-            avatar.children.forEach((c) => {
-              c.visible = c.name == direction ? true : false
-            })
-          }
-          avatar.x = playerOptions.x
-          avatar.y = playerOptions.y
-          // avatar.height = 80
-          // avatar.width = 60
-          avatar.scale.set(0.5)
-          avatar.pivot.x = 57
-          avatar.pivot.y = 75
-          avatar.interactive = true
+            rest.tint = playerOptions.tint
+            front.tint = playerOptions.tint
+            back.tint = playerOptions.tint
+            left.tint = playerOptions.tint
+            right.tint = playerOptions.tint
 
-          // console.dir(avatar.children);
+            rest.animationSpeed = 0.02
+            front.animationSpeed = 0.1
+            back.animationSpeed = 0.1
+            left.animationSpeed = 0.1
+            right.animationSpeed = 0.1
 
-          let player = {
-            avatar: avatar,
-            waypoints: [],
-            area: playerOptions.area,
-            name: playerOptions.name,
-            uuid: playerOptions.uuid,
-            ip: playerOptions.ip,
-            tint: playerOptions.tint,
-            connected: playerOptions.connected,
-            authenticated: playerOptions.authenticated,
-            id: sessionId,
-            isSelf: playerOptions.uuid == $localUserUUID,
-          }
+            rest.play()
+            front.play()
+            back.play()
+            left.play()
+            right.play()
 
-          const onDown = (e) => {
-            startPrivateChat(player)
-            e.stopPropagation()
-          }
-
-          const onEnter = () => {
-            popUpText = player.name
-          }
-
-          const onLeave = () => {
-            popUpText = false
-          }
-
-          player.avatar.on('mousedown', onDown)
-          player.avatar.on('touchstart', onDown)
-          player.avatar.on('mouseover', onEnter)
-          player.avatar.on('mouseout', onLeave)
-
-          viewport.addChild(player.avatar)
-
-          if (player.isSelf) {
-            viewport.follow(player.avatar)
-            userLoaded = true
-            localUserTint.set(playerOptions.tint)
-            localUserName.set(player.name)
-            localUserSessionID.set(player.id)
-          }
-
-          return player
-        }
-
-        // ADD CASE STUDIES
-        caseStudyList.forEach((h, i) => {
-          let graphics = new PIXI.Graphics()
-          graphics.beginFill(0xff0000)
-          graphics.alpha = 1
-          graphics.drawRect(h.x, h.y, 140, 140)
-          graphics.endFill()
-          graphics.title = h.title
-          graphics.index = i
-          graphics.interactive = true
-
-          const onDown = (e) => {
-            caseStudyActive = true
-            currentCaseStudy = caseStudyList[graphics.index]
-            e.stopPropagation()
-          }
-
-          const onEnter = (e) => {
-            popUpText = graphics.title
-          }
-
-          const onLeave = (e) => {
-            popUpText = false
-          }
-
-          graphics.on('mousedown', onDown)
-          graphics.on('touchstart', onDown)
-          graphics.on('mouseover', onEnter)
-          graphics.on('mouseout', onLeave)
-
-          viewport.addChild(graphics)
-        })
-
-        let playerObject = {}
-
-        if (authenticate && sso && sig) {
-          playerObject = {
-            sso: sso,
-            sig: sig,
-            uuid: $localUserUUID,
-            avatar: avatarIndex,
-            tint:
-              newUserColor.replace('#', '0x').toUpperCase() ||
-              chance.color({ format: 'hex' }).replace('#', '0x').toUpperCase(),
-          }
-        } else {
-          playerObject = {
-            uuid: $localUserUUID,
-            name: newUserName || chance.name(),
-            avatar: avatarIndex,
-            tint:
-              newUserColor.replace('#', '0x').toUpperCase() ||
-              chance.color({ format: 'hex' }).replace('#', '0x').toUpperCase(),
-          }
-        }
-
-        // => GAME ROOM
-        client
-          .joinOrCreate('game', playerObject)
-          .then((gameRoom) => {
-            // HACK
-            if (authenticate) {
-              history.replaceState({}, 'CONNECTED', '/')
-            }
-
-            // ******
-            // PLAYER
-            // ******
-
-            // PLAYER: REMOVE
-            gameRoom.state.players.onRemove = (player, sessionId) => {
-              try {
-                viewport.removeChild(localPlayers[sessionId])
-                delete localPlayers[sessionId]
-                localPlayers = localPlayers
-              } catch (err) {
-                Sentry.captureException(err)
-              }
-            }
-
-            // PLAYER: ADD
-            gameRoom.state.players.onAdd = (player, sessionId) => {
-              localPlayers[sessionId] = createPlayer(player, sessionId)
-            }
-
-            // PLAYER: BANNED
-            gameRoom.onMessage('banned', (message) => {
-              banned = true
-            })
-
-            // PLAYER: ILLEGAL MOVE
-            gameRoom.onMessage('illegalMove', (message) => {
-              hideTarget()
-              inMotion = false
-            })
-
-            // PLAYER: STATE CHANGE
-            gameRoom.state.players.onChange = function (player, sessionId) {
-              if (player.path.waypoints.length > 0) {
-                if (localPlayers[sessionId].isSelf) {
-                  localUserArea.set(player.area)
-                  debugWaypointTotal = player.path.waypoints.length - 1
-                  if (debug) {
-                    showFullPath(player.fullPath.waypoints)
-                    showPath(player.path.waypoints)
-                    showWaypoints(player.path.waypoints)
-                  }
-                }
-                // console.dir(player.path.waypoints[0].x);
-                moveQ[sessionId] = player.path.waypoints
-
-                // const tweenPath = (index = 0) => {
-                //   let targetWaypoint = player.path.waypoints[index];
-
-                //   if (localPlayers[sessionId].isSelf) {
-                //     console.log("=> TARGET WAYPOINT:", index);
-                //     console.log("–– X:", targetWaypoint.x);
-                //     console.log("–– Y:", targetWaypoint.y);
-                //     console.log("–– Direction:", targetWaypoint.direction);
-                //     console.log("–– Steps:", targetWaypoint.steps);
-                //     console.log("= = = = =");
-
-                //     debugWaypointIndex = index;
-                //     debugWaypointX = targetWaypoint.x;
-                //     debugWaypointY = targetWaypoint.y;
-                //     debugWaypointDirection = targetWaypoint.direction;
-                //     debugWaypointSteps = targetWaypoint.steps;
-                //   }
-
-                //   localPlayers[sessionId].avatar.setAnimation(
-                //     targetWaypoint.direction
-                //   );
-
-                //   tweener
-                //     .add(localPlayers[sessionId].avatar)
-                //     .to(targetWaypoint, targetWaypoint.steps * SPEED)
-                //     .then(() => {
-                //       if (localPlayers[sessionId].isSelf) {
-                //         console.log("! ARRIVED AT:", index);
-                //         console.log("= = = = =");
-                //       }
-                //       if (index === player.path.waypoints.length - 1) {
-                //         if (localPlayers[sessionId].isSelf) {
-                //           hideWaypoints();
-                //           hidePath();
-                //           hideFullPath();
-                //           console.log("# # # # # #");
-                //           console.log("DONE");
-                //           console.log("# # # # # #");
-                //           hideTarget();
-                //           inMotion = false;
-                //           debugWaypointIndex = 0;
-                //           debugWaypointTotal = 0;
-                //           debugWaypointX = 0;
-                //           debugWaypointY = 0;
-                //           debugWaypointDirection = "";
-                //           debugWaypointSteps = 0;
-                //         }
-                //         localPlayers[sessionId].avatar.setAnimation("rest");
-                //       } else {
-                //         tweenPath(index + 1);
-                //       }
-                //     });
-                // };
-
-                // tweenPath();
-              } else {
-                // TELEPORT
-                if (localPlayers[sessionId].isSelf) {
-                  localUserArea.set(player.area)
-                }
-                localPlayers[sessionId].avatar.x = player.x
-                localPlayers[sessionId].avatar.y = player.y
-
-                playersInProximity = []
-                for (let k in localPlayers) {
-                  if (
-                    !localPlayers[k].isSelf &&
-                    Math.abs(
-                      localPlayers[k].avatar.x -
-                        localPlayers[$localUserSessionID].avatar.x
-                    ) < 200 &&
-                    Math.abs(
-                      localPlayers[k].avatar.y -
-                        localPlayers[$localUserSessionID].avatar.y
-                    ) < 200
-                  ) {
-                    playersInProximity.push(localPlayers[k])
-                  }
-                }
-              }
-            }
-
-            // PLAYER: CLICK / TAP
-            viewport.on('clicked', (e) => {
-              if (!inMotion) {
-                gameRoom.send('go', {
-                  x: Math.round(e.world.x),
-                  y: Math.round(e.world.y),
-                })
-
-                inMotion = true
-
-                screenX = Math.round(e.screen.x)
-                screenY = Math.round(e.screen.y)
-                worldX = Math.round(e.world.x)
-                worldY = Math.round(e.world.y)
-
-                showTarget(Math.round(e.world.x), Math.round(e.world.y))
-              }
-            })
-
-            // PLAYER: TELEPORT
-            teleportTo = (area) => {
-              // console.log(area)
-              gameRoom.send('teleport', {
-                area: area,
+            let avatar = new PIXI.Container()
+            avatar.addChild(left, right, back, front, rest)
+            avatar.motionState = 'rest'
+            avatar.setAnimation = (direction) => {
+              avatar.motionState = direction
+              avatar.children.forEach((c) => {
+                c.visible = c.name == direction ? true : false
               })
             }
+            avatar.x = playerOptions.x
+            avatar.y = playerOptions.y
+            // avatar.height = 80
+            // avatar.width = 60
+            avatar.scale.set(0.5)
+            avatar.pivot.x = 57
+            avatar.pivot.y = 75
+            avatar.interactive = true
 
-            // *******
-            // MESSAGE
-            // *******
+            // console.dir(avatar.children);
 
-            // MESSAGE: ADD
-            gameRoom.state.messages.onAdd = (message) => {
-              chatMessages = [...chatMessages, message]
+            let player = {
+              avatar: avatar,
+              waypoints: [],
+              area: playerOptions.area,
+              name: playerOptions.name,
+              uuid: playerOptions.uuid,
+              ip: playerOptions.ip,
+              tint: playerOptions.tint,
+              connected: playerOptions.connected,
+              authenticated: playerOptions.authenticated,
+              id: sessionId,
+              isSelf: playerOptions.uuid == $localUserUUID,
             }
 
-            // MESSAGE: REMOVE
-            gameRoom.state.messages.onRemove = (message) => {
-              try {
-                const itemIndex = chatMessages.findIndex((m) => m === message)
-                chatMessages.splice(itemIndex, 1)
-                chatMessages = chatMessages
-              } catch (err) {
-                Sentry.captureException(err)
+            const onDown = (e) => {
+              startPrivateChat(player)
+              e.stopPropagation()
+            }
+
+            const onEnter = () => {
+              popUpText = player.name
+            }
+
+            const onLeave = () => {
+              popUpText = false
+            }
+
+            player.avatar.on('mousedown', onDown)
+            player.avatar.on('touchstart', onDown)
+            player.avatar.on('mouseover', onEnter)
+            player.avatar.on('mouseout', onLeave)
+
+            viewport.addChild(player.avatar)
+
+            if (player.isSelf) {
+              viewport.follow(player.avatar)
+              userLoaded = true
+              localUserTint.set(playerOptions.tint)
+              localUserName.set(player.name)
+              localUserSessionID.set(player.id)
+            }
+
+            return player
+          }
+
+          // ADD CASE STUDIES
+          caseStudyList.forEach((h, i) => {
+            let graphics = new PIXI.Graphics()
+            graphics.beginFill(0xff0000)
+            graphics.alpha = 1
+            graphics.drawRect(h.x, h.y, 140, 140)
+            graphics.endFill()
+            graphics.title = h.title
+            graphics.index = i
+            graphics.interactive = true
+
+            const onDown = (e) => {
+              caseStudyActive = true
+              currentCaseStudy = caseStudyList[graphics.index]
+              e.stopPropagation()
+            }
+
+            const onEnter = (e) => {
+              popUpText = graphics.title
+            }
+
+            const onLeave = (e) => {
+              popUpText = false
+            }
+
+            graphics.on('mousedown', onDown)
+            graphics.on('touchstart', onDown)
+            graphics.on('mouseover', onEnter)
+            graphics.on('mouseout', onLeave)
+
+            viewport.addChild(graphics)
+          })
+
+          let playerObject = {}
+
+          if (authenticate && sso && sig) {
+            playerObject = {
+              sso: sso,
+              sig: sig,
+              uuid: $localUserUUID,
+              avatar: avatarIndex,
+              tint:
+                newUserColor.replace('#', '0x').toUpperCase() ||
+                chance.color({ format: 'hex' }).replace('#', '0x').toUpperCase(),
+            }
+          } else {
+            playerObject = {
+              uuid: $localUserUUID,
+              name: newUserName || chance.name(),
+              avatar: avatarIndex,
+              tint:
+                newUserColor.replace('#', '0x').toUpperCase() ||
+                chance.color({ format: 'hex' }).replace('#', '0x').toUpperCase(),
+            }
+          }
+
+          // => GAME ROOM
+          client
+            .joinOrCreate('game', playerObject)
+            .then((gameRoom) => {
+              // HACK
+              if (authenticate) {
+                history.replaceState({}, 'CONNECTED', '/')
               }
-            }
 
-            // MESSAGE: SUBMIT
-            submitChat = (event) => {
-              try {
-                gameRoom.send('submitChatMessage', {
-                  msgId: chance.guid(),
-                  uuid: $localUserUUID,
-                  name: $localUserName,
-                  text: event.detail.text,
-                  tint: $localUserTint,
-                })
-              } catch (err) {
-                Sentry.captureException(err)
+              // ******
+              // PLAYER
+              // ******
+
+              // PLAYER: REMOVE
+              gameRoom.state.players.onRemove = (player, sessionId) => {
+                try {
+                  viewport.removeChild(localPlayers[sessionId])
+                  delete localPlayers[sessionId]
+                  localPlayers = localPlayers
+                } catch (err) {
+                  Sentry.captureException(err)
+                }
               }
-            }
 
-            // ************
-            // PRIVATE ROOM
-            // ************
+              // PLAYER: ADD
+              gameRoom.state.players.onAdd = (player, sessionId) => {
+                localPlayers[sessionId] = createPlayer(player, sessionId)
+              }
 
-            // PRIVATE ROOM: START
-            startPrivateChat = (partner) => {
-              try {
-                client.create('chat', { partner: partner.id }).then((r) => {
-                  gameRoom.send('createPrivateRoom', {
-                    roomId: r.id,
-                    partner: partner.id,
+              // PLAYER: BANNED
+              gameRoom.onMessage('banned', (message) => {
+                banned = true
+              })
+
+              // PLAYER: ILLEGAL MOVE
+              gameRoom.onMessage('illegalMove', (message) => {
+                hideTarget()
+                inMotion = false
+              })
+
+              // PLAYER: STATE CHANGE
+              gameRoom.state.players.onChange = function (player, sessionId) {
+                if (player.path.waypoints.length > 0) {
+                  if (localPlayers[sessionId].isSelf) {
+                    localUserArea.set(player.area)
+                    debugWaypointTotal = player.path.waypoints.length - 1
+                    if (debug) {
+                      showFullPath(player.fullPath.waypoints)
+                      showPath(player.path.waypoints)
+                      showWaypoints(player.path.waypoints)
+                    }
+                  }
+                  // console.dir(player.path.waypoints[0].x);
+                  moveQ[sessionId] = player.path.waypoints
+
+                  // const tweenPath = (index = 0) => {
+                  //   let targetWaypoint = player.path.waypoints[index];
+
+                  //   if (localPlayers[sessionId].isSelf) {
+                  //     console.log("=> TARGET WAYPOINT:", index);
+                  //     console.log("–– X:", targetWaypoint.x);
+                  //     console.log("–– Y:", targetWaypoint.y);
+                  //     console.log("–– Direction:", targetWaypoint.direction);
+                  //     console.log("–– Steps:", targetWaypoint.steps);
+                  //     console.log("= = = = =");
+
+                  //     debugWaypointIndex = index;
+                  //     debugWaypointX = targetWaypoint.x;
+                  //     debugWaypointY = targetWaypoint.y;
+                  //     debugWaypointDirection = targetWaypoint.direction;
+                  //     debugWaypointSteps = targetWaypoint.steps;
+                  //   }
+
+                  //   localPlayers[sessionId].avatar.setAnimation(
+                  //     targetWaypoint.direction
+                  //   );
+
+                  //   tweener
+                  //     .add(localPlayers[sessionId].avatar)
+                  //     .to(targetWaypoint, targetWaypoint.steps * SPEED)
+                  //     .then(() => {
+                  //       if (localPlayers[sessionId].isSelf) {
+                  //         console.log("! ARRIVED AT:", index);
+                  //         console.log("= = = = =");
+                  //       }
+                  //       if (index === player.path.waypoints.length - 1) {
+                  //         if (localPlayers[sessionId].isSelf) {
+                  //           hideWaypoints();
+                  //           hidePath();
+                  //           hideFullPath();
+                  //           console.log("# # # # # #");
+                  //           console.log("DONE");
+                  //           console.log("# # # # # #");
+                  //           hideTarget();
+                  //           inMotion = false;
+                  //           debugWaypointIndex = 0;
+                  //           debugWaypointTotal = 0;
+                  //           debugWaypointX = 0;
+                  //           debugWaypointY = 0;
+                  //           debugWaypointDirection = "";
+                  //           debugWaypointSteps = 0;
+                  //         }
+                  //         localPlayers[sessionId].avatar.setAnimation("rest");
+                  //       } else {
+                  //         tweenPath(index + 1);
+                  //       }
+                  //     });
+                  // };
+
+                  // tweenPath();
+                } else {
+                  // TELEPORT
+                  if (localPlayers[sessionId].isSelf) {
+                    localUserArea.set(player.area)
+                  }
+                  localPlayers[sessionId].avatar.x = player.x
+                  localPlayers[sessionId].avatar.y = player.y
+
+                  playersInProximity = []
+                  for (let k in localPlayers) {
+                    if (
+                      !localPlayers[k].isSelf &&
+                      Math.abs(
+                        localPlayers[k].avatar.x -
+                          localPlayers[$localUserSessionID].avatar.x
+                      ) < 200 &&
+                      Math.abs(
+                        localPlayers[k].avatar.y -
+                          localPlayers[$localUserSessionID].avatar.y
+                      ) < 200
+                    ) {
+                      playersInProximity.push(localPlayers[k])
+                    }
+                  }
+                }
+              }
+
+              // PLAYER: CLICK / TAP
+              viewport.on('clicked', (e) => {
+                if (!inMotion) {
+                  gameRoom.send('go', {
+                    x: Math.round(e.world.x),
+                    y: Math.round(e.world.y),
                   })
 
-                  inPrivateChat.set(true)
+                  inMotion = true
 
-                  // PRIVATE ROOM: LEAVE
-                  leavePrivateChat = () => {
-                    r.leave()
+                  screenX = Math.round(e.screen.x)
+                  screenY = Math.round(e.screen.y)
+                  worldX = Math.round(e.world.x)
+                  worldY = Math.round(e.world.y)
 
-                    gameRoom.send('leavePrivateRoom', {
+                  showTarget(Math.round(e.world.x), Math.round(e.world.y))
+                }
+              })
+
+              // PLAYER: TELEPORT
+              teleportTo = (area) => {
+                // console.log(area)
+                gameRoom.send('teleport', {
+                  area: area,
+                })
+              }
+
+              // *******
+              // MESSAGE
+              // *******
+
+              // MESSAGE: ADD
+              gameRoom.state.messages.onAdd = (message) => {
+                chatMessages = [...chatMessages, message]
+              }
+
+              // MESSAGE: REMOVE
+              gameRoom.state.messages.onRemove = (message) => {
+                try {
+                  const itemIndex = chatMessages.findIndex((m) => m === message)
+                  chatMessages.splice(itemIndex, 1)
+                  chatMessages = chatMessages
+                } catch (err) {
+                  Sentry.captureException(err)
+                }
+              }
+
+              // MESSAGE: SUBMIT
+              submitChat = (event) => {
+                try {
+                  gameRoom.send('submitChatMessage', {
+                    msgId: chance.guid(),
+                    uuid: $localUserUUID,
+                    name: $localUserName,
+                    text: event.detail.text,
+                    tint: $localUserTint,
+                  })
+                } catch (err) {
+                  Sentry.captureException(err)
+                }
+              }
+
+              // ************
+              // PRIVATE ROOM
+              // ************
+
+              // PRIVATE ROOM: START
+              startPrivateChat = (partner) => {
+                try {
+                  client.create('chat', { partner: partner.id }).then((r) => {
+                    gameRoom.send('createPrivateRoom', {
                       roomId: r.id,
+                      partner: partner.id,
                     })
 
-                    inPrivateChat.set(false)
-                  }
-                })
-              } catch (err) {
-                Sentry.captureException(err)
+                    inPrivateChat.set(true)
+
+                    // PRIVATE ROOM: LEAVE
+                    leavePrivateChat = () => {
+                      r.leave()
+
+                      gameRoom.send('leavePrivateRoom', {
+                        roomId: r.id,
+                      })
+
+                      inPrivateChat.set(false)
+                    }
+                  })
+                } catch (err) {
+                  Sentry.captureException(err)
+                }
               }
-            }
 
-            // PRIVATE ROOM: ADD
-            gameRoom.state.privateRooms.onAdd = (message) => {
-              // console.log('add private room')
-              // console.dir(gameRoom.state.privateRooms)
-              // console.dir(message)
-            }
+              // PRIVATE ROOM: ADD
+              gameRoom.state.privateRooms.onAdd = (message) => {
+                // console.log('add private room')
+                // console.dir(gameRoom.state.privateRooms)
+                // console.dir(message)
+              }
 
-            // PRIVATE ROOM: REMOVE
-            gameRoom.state.privateRooms.onRemove = (message) => {
-              // console.log('remove private room')
-              // console.dir(gameRoom.state.privateRooms)
-            }
+              // PRIVATE ROOM: REMOVE
+              gameRoom.state.privateRooms.onRemove = (message) => {
+                // console.log('remove private room')
+                // console.dir(gameRoom.state.privateRooms)
+              }
 
-            // ************
-            // GENERAL
-            // ************
+              // ************
+              // GENERAL
+              // ************
 
-            // GENNERAL: ERROR
-            gameRoom.onError((code, message) => {
-              console.error('!!! COLYSEUS ERROR:')
-              console.error(message)
-              Sentry.captureException(err)
+              // GENNERAL: ERROR
+              gameRoom.onError((code, message) => {
+                console.error('!!! COLYSEUS ERROR:')
+                console.error(message)
+                Sentry.captureException(err)
+              })
             })
-          })
-          .catch((e) => {
-            if (e.code == 4215) {
-              console.log('BANNED')
-              banned = true
-            } else {
-              console.log('GAME ROOM: JOIN ERROR', e)
-              Sentry.captureException(e)
-            }
-          })
-      })
+            .catch((e) => {
+              if (e.code == 4215) {
+                console.log('BANNED')
+                banned = true
+              } else {
+                console.log('GAME ROOM: JOIN ERROR', e)
+                Sentry.captureException(e)
+              }
+            })
+        })
+    })
   }
 
   onMount(async () => {
@@ -816,7 +825,7 @@
 
     if (!login) {
       makeNewUser(sso, sig)
-    }
+    }    
   })
 </script>
 
