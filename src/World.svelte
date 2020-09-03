@@ -155,7 +155,8 @@
     // console.log(t);
     // console.dir(moveQ);
     for (let key in moveQ) {
-      if (localPlayers[key] && moveQ[key].length > 0) {
+      if (localPlayers[key]) {
+      if (moveQ[key].length > 0) {
         let step = moveQ[key].shift()
         localPlayers[key].avatar.setAnimation(step.direction)
         localPlayers[key].avatar.x = step.x
@@ -166,30 +167,34 @@
           debugWaypointDirection = step.direction
           debugWaypointSteps = step.steps
         }
+        } else {
+          localPlayers[key].avatar.setAnimation('rest')
+          if (key === $localUserSessionID) {
+            inMotion = false
+            hideTarget()
+            if (debug) {
+              hidePath()
+              hideFullPath()
+              hideWaypoints()
+            }
+          }
+          delete moveQ[key]
+          playersInProximity = []
+          for (let k in localPlayers) {
+            if (
+              !localPlayers[k].isSelf &&
+              Math.abs(localPlayers[k].avatar.x - localPlayers[$localUserSessionID].avatar.x) <
+                200 &&
+              Math.abs(localPlayers[k].avatar.y - localPlayers[$localUserSessionID].avatar.y) <
+                200
+            ) {
+              playersInProximity.push(localPlayers[k])
+            }
+          }
+          console.dir(playersInProximity)
+        }
       } else {
-        localPlayers[key].avatar.setAnimation('rest')
-        if (key === $localUserSessionID) {
-          inMotion = false
-          hideTarget()
-          if (debug) {
-            hidePath()
-            hideFullPath()
-            hideWaypoints()
-          }
-        }
         delete moveQ[key]
-        playersInProximity = []
-        for (let k in localPlayers) {
-          if (
-            !localPlayers[k].isSelf &&
-            Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
-              200 &&
-            Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
-              200
-          ) {
-            playersInProximity.push(localPlayers[k])
-          }
-        }
       }
     }
   }
@@ -444,19 +449,22 @@
           }
 
           // ADD CASE STUDIES
-          caseStudyList.forEach((h, i) => {
+
+        caseStudies.then((caseStudies) => {
+          console.dir(caseStudies)
+          caseStudies.forEach((cs, i) => {
             let graphics = new PIXI.Graphics()
-            graphics.beginFill(0xff0000)
+            graphics.beginFill(0XF012D5)
             graphics.alpha = 1
-            graphics.drawRect(h.x, h.y, 140, 140)
+            graphics.drawRect(cs.x, cs.y, 140, 140)
             graphics.endFill()
-            graphics.title = h.title
+            graphics.title = cs.title
             graphics.index = i
             graphics.interactive = true
 
             const onDown = (e) => {
               caseStudyActive = true
-              currentCaseStudy = caseStudyList[graphics.index]
+              currentCaseStudy = caseStudies[graphics.index]
               e.stopPropagation()
             }
 
@@ -475,6 +483,7 @@
 
             viewport.addChild(graphics)
           })
+        })
 
           let playerObject = {}
 
@@ -514,10 +523,19 @@
 
               // PLAYER: REMOVE
               gameRoom.state.players.onRemove = (player, sessionId) => {
+                // console.log('REMOVE')
+                // console.dir(sessionId)
+                // console.dir(localPlayers[sessionId])
+                // console.dir(localPlayers)
                 try {
-                  viewport.removeChild(localPlayers[sessionId])
-                  delete localPlayers[sessionId]
-                  localPlayers = localPlayers
+                  // console.dir(viewport)
+                  viewport.removeChild(localPlayers[sessionId].avatar)
+                  // HACK
+                  setTimeout(() => {
+                    delete localPlayers[sessionId]
+                    localPlayers = localPlayers
+                    // console.dir(localPlayers)
+                  }, 500)
                 } catch (err) {
                   Sentry.captureException(err)
                 }
@@ -776,11 +794,11 @@
 
     responsiveWidth = window.matchMedia('(max-width: 700px)').matches
       ? window.innerWidth
-      : window.innerWidth - 420
+      : window.innerWidth - 400
 
     // PIXI: VIEWPORT
     viewport = new Viewport({
-      screenWidth: responsiveWidth,
+      screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
       worldWidth: WIDTH,
       worldHeight: HEIGHT,
@@ -844,8 +862,8 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    top: 50px;
-    right: 10px;
+    top: 10px;
+    right: 410px;
     padding: 20px;
     border-radius: 10px;
 
@@ -856,9 +874,8 @@
 
     &.waypoint {
       top: unset;
-      bottom: 10px;
-      right: unset;
-      left: 430px;
+      bottom: 50px;
+      right: 410px;
     }
 
     &.tiny {
@@ -872,14 +889,15 @@
   }
 
   .proximity {
+    font-size: $FONT_SIZE_BASE;
     position: fixed;
     width: auto;
-    background: $grey;
+    background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
-    text-align: center;
+    // text-align: center;
     bottom: 10px;
-    left: 430px;
+    left: 10px;
     padding: 20px;
     border-radius: 10px;
   }
@@ -947,8 +965,8 @@
 
   .top-bar {
     position: fixed;
-    top: 0%;
-    right: 0;
+    bottom: 0%;
+    left: 0;
     width: calc(100vw - 420px);
     height: 40px;
     background: #a4a4a4;
@@ -1437,12 +1455,30 @@
 
 <!-- PASSIVE CONTENT: CASE STUDY -->
 {#if caseStudyActive}
-  <div class="passive-content-slot" transition:fly={{ y: 200 }}>
-    <CaseStudy
-      caseStudy={currentCaseStudy}
-      on:closeCaseStudy={(e) => {
-        caseStudyActive = false
-      }} />
+  <div class="passive-content-slot" transition:fly={{ y: 200 }} on:click={(e) => {
+    caseStudyActive = false
+  }}>
+    <div>
+      <!-- TITLE -->
+      <div class="title"><strong>{currentCaseStudy.title}</strong></div>
+
+      <!-- IMAGE -->
+      <div>
+        <img
+          src={urlFor(currentCaseStudy.mainImage.asset)
+            .width(600)
+            .quality(90)
+            .auto('format')
+            .url()} />
+      </div>
+
+        <!-- TEXT -->
+        <div>
+          {#if currentCaseStudy.content && currentCaseStudy.content.content}
+            {@html renderBlockText(currentCaseStudy.content.content)}
+          {/if}
+        </div>
+    </div>
   </div>
 {/if}
 
@@ -1613,9 +1649,9 @@
 
 {#if debug}
   <!-- USER LIST -->
-  <div class="mainUserListContainer" class:phone={showUserList}>
+  <!-- <div class="mainUserListContainer" class:phone={showUserList}>
     <UserList playerList={localPlayers} phoneActive={showUserList} />
-  </div>
+  </div> -->
 
   <!-- DEBUG: RENDERING INFO -->
   <div class="pop tiny" in:fade>
