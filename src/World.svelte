@@ -1013,34 +1013,6 @@
     }
   }
 
-  .mainChatContainer {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    width: 420px;
-    height: 50vh;
-    background: #a4a4a4;
-    padding: 10px;
-    overflow: scroll;
-    font-size: 12px;
-    z-index: 100;
-
-    @include screen-size('small') {
-      top: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.5 ease-out;
-      padding-top: 80px;
-
-      &.phone {
-        opacity: 1;
-        pointer-events: all;
-      }
-    }
-  }
-
   .privateChatContainer {
     position: fixed;
     top: 0;
@@ -1155,19 +1127,31 @@
 
     .minimap {
       background: $COLOR_MID_2;
-      height: 250px;
+      height: 200px;
       display: flex;
       justify-content: center;
       align-items: center;
+
+      @include screen-size('short') {
+        height: 150px;
+      }
 
       .map-container {
         height: 250px;
         width: 250px;
         position: relative;
+
+        transform: scale(0.8);
+
+        @include screen-size('short') {
+          transform: scale(0.5);
+        }
+
         img {
           height: 250px;
           width: 250px;
         }
+
         .map-marker {
           height: 10px;
           width: 10px;
@@ -1179,15 +1163,21 @@
           z-index: 100;
         }
       }
+
+
     }
 
     .calendar {
       background: $COLOR_LIGHT;
-      height: calc(100% - 610px);
+      height: calc(50% - 130px);
       color: $COLOR_DARK;
       font-size: $FONT_SIZE_BASE;
       background: $COLOR_LIGHT;
+      overflow: hidden;
       // padding-bottom: 60px;
+      @include screen-size('short') {
+        height: calc(50% - 65px);
+      }
 
       .calendar-item {
         // padding-left: 20px;
@@ -1237,8 +1227,12 @@
     }
     .chat {
       background: $COLOR_MID_1;
-      height: 300px;
+      height: calc(50% - 130px);
+
       padding: 10px;
+      @include screen-size('short') {
+        height: calc(50% - 65px);
+      }
     }
     .menu {
       color: $COLOR_DARK;
@@ -1430,7 +1424,7 @@
       <div class="menu-item">About</div>
       <div class="menu-item">Help</div>
     </div>
-    <div class="menu-item login"><a href="/login">Login</a></div>
+    <a href="/login" class="menu-item login">Login</a>
   </div>
 </div>
 
