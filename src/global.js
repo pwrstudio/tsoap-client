@@ -35,12 +35,7 @@ export const formattedDate = (start, end) => {
     if (!start) {
         return false;
     }
-
-    console.log('start', start)
-
     const startDate = Date.parse(start);
-
-    console.log('parsed', startDate)
 
     if (!startDate) {
         return false;

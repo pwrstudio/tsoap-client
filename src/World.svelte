@@ -30,6 +30,51 @@
   import Banned from "./Banned.svelte";
   import AudioChat from "./AudioChat.svelte";
 
+  // Set the name of the hidden property and the change event for visibility
+  var hidden, visibilityChange;
+  if (typeof document.hidden !== "undefined") {
+    // Opera 12.10 and Firefox 18 and later support
+    hidden = "hidden";
+    visibilityChange = "visibilitychange";
+  } else if (typeof document.msHidden !== "undefined") {
+    hidden = "msHidden";
+    visibilityChange = "msvisibilitychange";
+  } else if (typeof document.webkitHidden !== "undefined") {
+    hidden = "webkitHidden";
+    visibilityChange = "webkitvisibilitychange";
+  }
+
+  let deltaJump = 0;
+  let hiddenTime = 0;
+
+  // If the page is hidden, pause the video;
+  // if the page is shown, play the video
+  function handleVisibilityChange() {
+    if (document[hidden]) {
+      // console.log('HIDDDEN')
+      hiddenTime = Date.now();
+      // console.log(hiddenTime)
+      // pageVisible = false
+    } else {
+      console.log("SHOWN");
+      let timeDiff = Date.now() - hiddenTime;
+      deltaJump = Math.round(timeDiff / 16.6666);
+      console.log(deltaJump);
+    }
+  }
+
+  // Warn if the browser doesn't support addEventListener or the Page Visibility API
+  if (
+    typeof document.addEventListener === "undefined" ||
+    hidden === undefined
+  ) {
+    console.log(
+      "This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API."
+    );
+  } else {
+    // Handle page visibility change
+    document.addEventListener(visibilityChange, handleVisibilityChange, false);
+  }
   // STORES
   import {
     localUserUUID,
@@ -72,16 +117,19 @@
 
   let events = loadData(query);
   let caseStudies = loadData("*[_type == 'caseStudy']");
+  let graphicsSettings = loadData(
+    "*[_id == 'graphics-settings']{..., activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
+  );
 
-  events.then(events => {
-    console.log("EVENTS");
-    console.dir(events);
-  });
+  // events.then((events) => {
+  //   console.log('EVENTS')
+  //   console.dir(events)
+  // })
 
-  caseStudies.then(caseStudies => {
-    console.log("CASE STUDIES");
-    console.dir(caseStudies);
-  });
+  // caseStudies.then((caseStudies) => {
+  //   console.log('CASE STUDIES')
+  //   console.dir(caseStudies)
+  // })
 
   // DEBUG VARIABLES
   let worldX = 0;
@@ -149,46 +197,69 @@
   let sheet = [];
 
   // GAME LOOP
-  const updatePositions = t => {
-    // console.log(t);
-    // console.dir(moveQ);
+  const updatePositions = delta => {
+    let deltaRounded = Math.round(delta) + deltaJump;
+    deltaJump = 0;
+
+    if (deltaRounded > 10) {
+      console.log("HIGH DELTA:", deltaRounded);
+    }
+
     for (let key in moveQ) {
-      if (localPlayers[key] && moveQ[key].length > 0) {
-        let step = moveQ[key].shift();
-        console.log(step.direction);
-        localPlayers[key].avatar.setAnimation(step.direction);
-        localPlayers[key].avatar.x = step.x;
-        localPlayers[key].avatar.y = step.y;
-        if (key === $localUserSessionID) {
-          debugWaypointX = step.x;
-          debugWaypointY = step.y;
-          debugWaypointDirection = step.direction;
-          debugWaypointSteps = step.steps;
+      if (localPlayers[key]) {
+        if (moveQ[key].length > 0) {
+          if (moveQ[key].length - deltaRounded < 0) {
+            // console.log('d diff', moveQ[key].length - deltaRounded)
+            let step = moveQ[key][moveQ[key].length - 1];
+            localPlayers[key].avatar.setAnimation(step.direction);
+            localPlayers[key].avatar.x = step.x;
+            localPlayers[key].avatar.y = step.y;
+            moveQ[key] = [];
+          } else {
+            moveQ[key].splice(0, deltaRounded - 1);
+            let step = moveQ[key].shift();
+            localPlayers[key].avatar.setAnimation(step.direction);
+            localPlayers[key].avatar.x = step.x;
+            localPlayers[key].avatar.y = step.y;
+            if (key === $localUserSessionID) {
+              debugWaypointX = step.x;
+              debugWaypointY = step.y;
+              debugWaypointDirection = step.direction;
+              debugWaypointSteps = step.steps;
+            }
+          }
+        } else {
+          localPlayers[key].avatar.setAnimation("rest");
+          if (key === $localUserSessionID) {
+            inMotion = false;
+            hideTarget();
+            if (debug) {
+              hidePath();
+              hideFullPath();
+              hideWaypoints();
+            }
+          }
+          delete moveQ[key];
+          playersInProximity = [];
+          for (let k in localPlayers) {
+            if (
+              !localPlayers[k].isSelf &&
+              Math.abs(
+                localPlayers[k].avatar.x -
+                  localPlayers[$localUserSessionID].avatar.x
+              ) < 200 &&
+              Math.abs(
+                localPlayers[k].avatar.y -
+                  localPlayers[$localUserSessionID].avatar.y
+              ) < 200
+            ) {
+              playersInProximity.push(localPlayers[k]);
+            }
+          }
+          console.dir(playersInProximity);
         }
       } else {
-        localPlayers[key].avatar.setAnimation("rest");
-        if (key === $localUserSessionID) {
-          inMotion = false;
-          hideTarget();
-          if (debug) {
-            hidePath();
-            hideFullPath();
-            hideWaypoints();
-          }
-        }
         delete moveQ[key];
-        playersInProximity = [];
-        for (let k in localPlayers) {
-          if (
-            !localPlayers[k].isSelf &&
-            Math.abs(localPlayers[k].x - localPlayers[$localUserSessionID].x) <
-              200 &&
-            Math.abs(localPlayers[k].y - localPlayers[$localUserSessionID].y) <
-              200
-          ) {
-            playersInProximity.push(localPlayers[k]);
-          }
-        }
       }
     }
   };
@@ -295,472 +366,487 @@
 
     // LOADER
     // http://localhost:5000/
-    loader
-      .add("map", "/hkw-map-no-house-smaller.png")
-      .add("/sprites/avatar.json")
-      // .add("avatarTwo", "/avatar2.png")
-      // .add("avatarThree", "/avatar3.png")
-      .load((loader, resources) => {
-        // console.dir(resources.map.texture);
-        let map = new PIXI.Sprite(resources.map.texture);
-        map.width = 5000;
-        map.height = 5000;
-        viewport.addChild(map);
 
-        // console.dir(resources);
+    graphicsSettings.then(graphicsSettings => {
+      console.dir(graphicsSettings);
 
-        sheet.push(resources["/sprites/avatar.json"].spritesheet);
+      let spriteUrl = get(
+        graphicsSettings,
+        "activeAvatars[0].spriteJsonURL",
+        "/sprites/avatar.json"
+      );
+      console.log(spriteUrl);
 
-        // const avatarList = [
-        //   resources.avatarOne.texture,
-        //   resources.avatarTwo.texture,
-        //   resources.avatarThree.texture
-        // ];
+      loader
+        .add("map", "/hkw-map-no-house-smaller.png")
+        .add("avatar", spriteUrl)
+        // .add("avatarTwo", "/avatar2.png")
+        // .add("avatarThree", "/avatar3.png")
+        .load((loader, resources) => {
+          // console.dir(resources.map.texture);
+          let map = new PIXI.Sprite(resources.map.texture);
+          map.width = 5000;
+          map.height = 5000;
+          viewport.addChild(map);
 
-        // let avatarIndex = sample([0, 1, 2]);
-        let avatarIndex = 0;
+          console.dir(resources);
 
-        // console.dir(sheet)
+          sheet.push(resources["avatar"].spritesheet);
 
-        // CREATE PLAYER
-        const createPlayer = (playerOptions, sessionId) => {
-          let front = new PIXI.AnimatedSprite(
-            sheet[0].animations["avatar-x-front"]
-          );
-          let back = new PIXI.AnimatedSprite(
-            sheet[0].animations["avatar-x-back"]
-          );
-          let left = new PIXI.AnimatedSprite(
-            sheet[0].animations["avatar-x-left"]
-          );
-          let right = new PIXI.AnimatedSprite(
-            sheet[0].animations["avatar-x-right"]
-          );
-          let rest = new PIXI.AnimatedSprite(
-            sheet[0].animations["avatar-x-rest"]
-          );
+          // const avatarList = [
+          //   resources.avatarOne.texture,
+          //   resources.avatarTwo.texture,
+          //   resources.avatarThree.texture
+          // ];
 
-          rest.name = "rest";
-          front.name = "front";
-          back.name = "back";
-          left.name = "left";
-          right.name = "right";
+          // let avatarIndex = sample([0, 1, 2]);
+          let avatarIndex = 0;
 
-          rest.visible = true;
-          front.visible = false;
-          back.visible = false;
-          left.visible = false;
-          right.visible = false;
+          console.dir(sheet);
 
-          rest.tint = playerOptions.tint;
-          front.tint = playerOptions.tint;
-          back.tint = playerOptions.tint;
-          left.tint = playerOptions.tint;
-          right.tint = playerOptions.tint;
+          // CREATE PLAYER
+          const createPlayer = (playerOptions, sessionId) => {
+            let front = new PIXI.AnimatedSprite(sheet[0].animations["front"]);
+            let back = new PIXI.AnimatedSprite(sheet[0].animations["back"]);
+            let left = new PIXI.AnimatedSprite(sheet[0].animations["left"]);
+            let right = new PIXI.AnimatedSprite(sheet[0].animations["right"]);
+            let rest = new PIXI.AnimatedSprite(sheet[0].animations["rest"]);
 
-          rest.animationSpeed = 0.02;
-          front.animationSpeed = 0.1;
-          back.animationSpeed = 0.1;
-          left.animationSpeed = 0.1;
-          right.animationSpeed = 0.1;
+            rest.name = "rest";
+            front.name = "front";
+            back.name = "back";
+            left.name = "left";
+            right.name = "right";
 
-          rest.play();
-          front.play();
-          back.play();
-          left.play();
-          right.play();
+            rest.visible = true;
+            front.visible = false;
+            back.visible = false;
+            left.visible = false;
+            right.visible = false;
 
-          let avatar = new PIXI.Container();
-          avatar.addChild(left, right, back, front, rest);
-          avatar.motionState = "rest";
-          avatar.setAnimation = direction => {
-            avatar.motionState = direction;
-            avatar.children.forEach(c => {
-              c.visible = c.name == direction ? true : false;
-            });
-          };
-          avatar.x = playerOptions.x;
-          avatar.y = playerOptions.y;
-          // avatar.height = 80
-          // avatar.width = 60
-          avatar.scale.set(0.5);
-          avatar.pivot.x = 57;
-          avatar.pivot.y = 75;
-          avatar.interactive = true;
+            rest.tint = playerOptions.tint;
+            front.tint = playerOptions.tint;
+            back.tint = playerOptions.tint;
+            left.tint = playerOptions.tint;
+            right.tint = playerOptions.tint;
 
-          // console.dir(avatar.children);
+            rest.animationSpeed = 0.02;
+            front.animationSpeed = 0.1;
+            back.animationSpeed = 0.1;
+            left.animationSpeed = 0.1;
+            right.animationSpeed = 0.1;
 
-          let player = {
-            avatar: avatar,
-            waypoints: [],
-            area: playerOptions.area,
-            name: playerOptions.name,
-            uuid: playerOptions.uuid,
-            ip: playerOptions.ip,
-            tint: playerOptions.tint,
-            connected: playerOptions.connected,
-            authenticated: playerOptions.authenticated,
-            id: sessionId,
-            isSelf: playerOptions.uuid == $localUserUUID
-          };
+            rest.play();
+            front.play();
+            back.play();
+            left.play();
+            right.play();
 
-          const onDown = e => {
-            startPrivateChat(player);
-            e.stopPropagation();
-          };
-
-          const onEnter = () => {
-            popUpText = player.name;
-          };
-
-          const onLeave = () => {
-            popUpText = false;
-          };
-
-          player.avatar.on("mousedown", onDown);
-          player.avatar.on("touchstart", onDown);
-          player.avatar.on("mouseover", onEnter);
-          player.avatar.on("mouseout", onLeave);
-
-          viewport.addChild(player.avatar);
-
-          if (player.isSelf) {
-            viewport.follow(player.avatar);
-            userLoaded = true;
-            localUserTint.set(playerOptions.tint);
-            localUserName.set(player.name);
-            localUserSessionID.set(player.id);
-          }
-
-          return player;
-        };
-
-        // ADD CASE STUDIES
-        caseStudyList.forEach((h, i) => {
-          let graphics = new PIXI.Graphics();
-          graphics.beginFill(0xff0000);
-          graphics.alpha = 1;
-          graphics.drawRect(h.x, h.y, 140, 140);
-          graphics.endFill();
-          graphics.title = h.title;
-          graphics.index = i;
-          graphics.interactive = true;
-
-          const onDown = e => {
-            caseStudyActive = true;
-            currentCaseStudy = caseStudyList[graphics.index];
-            e.stopPropagation();
-          };
-
-          const onEnter = e => {
-            popUpText = graphics.title;
-          };
-
-          const onLeave = e => {
-            popUpText = false;
-          };
-
-          graphics.on("mousedown", onDown);
-          graphics.on("touchstart", onDown);
-          graphics.on("mouseover", onEnter);
-          graphics.on("mouseout", onLeave);
-
-          viewport.addChild(graphics);
-        });
-
-        let playerObject = {};
-
-        if (authenticate && sso && sig) {
-          playerObject = {
-            sso: sso,
-            sig: sig,
-            uuid: $localUserUUID,
-            avatar: avatarIndex,
-            tint:
-              newUserColor.replace("#", "0x").toUpperCase() ||
-              chance
-                .color({ format: "hex" })
-                .replace("#", "0x")
-                .toUpperCase()
-          };
-        } else {
-          playerObject = {
-            uuid: $localUserUUID,
-            name: newUserName || chance.name(),
-            avatar: avatarIndex,
-            tint:
-              newUserColor.replace("#", "0x").toUpperCase() ||
-              chance
-                .color({ format: "hex" })
-                .replace("#", "0x")
-                .toUpperCase()
-          };
-        }
-
-        // => GAME ROOM
-        client
-          .joinOrCreate("game", playerObject)
-          .then(gameRoom => {
-            // HACK
-            if (authenticate) {
-              history.replaceState({}, "CONNECTED", "/");
-            }
-
-            // ******
-            // PLAYER
-            // ******
-
-            // PLAYER: REMOVE
-            gameRoom.state.players.onRemove = (player, sessionId) => {
-              try {
-                viewport.removeChild(localPlayers[sessionId]);
-                delete localPlayers[sessionId];
-                localPlayers = localPlayers;
-              } catch (err) {
-                Sentry.captureException(err);
-              }
-            };
-
-            // PLAYER: ADD
-            gameRoom.state.players.onAdd = (player, sessionId) => {
-              localPlayers[sessionId] = createPlayer(player, sessionId);
-            };
-
-            // PLAYER: BANNED
-            gameRoom.onMessage("banned", message => {
-              banned = true;
-            });
-
-            // PLAYER: ILLEGAL MOVE
-            gameRoom.onMessage("illegalMove", message => {
-              hideTarget();
-              inMotion = false;
-            });
-
-            // PLAYER: STATE CHANGE
-            gameRoom.state.players.onChange = function(player, sessionId) {
-              if (player.path.waypoints.length > 0) {
-                if (localPlayers[sessionId].isSelf) {
-                  localUserArea.set(player.area);
-                  debugWaypointTotal = player.path.waypoints.length - 1;
-                  if (debug) {
-                    showFullPath(player.fullPath.waypoints);
-                    showPath(player.path.waypoints);
-                    showWaypoints(player.path.waypoints);
-                  }
-                }
-                // console.dir(player.path.waypoints[0].x);
-                moveQ[sessionId] = player.path.waypoints;
-
-                // const tweenPath = (index = 0) => {
-                //   let targetWaypoint = player.path.waypoints[index];
-
-                //   if (localPlayers[sessionId].isSelf) {
-                //     console.log("=> TARGET WAYPOINT:", index);
-                //     console.log("–– X:", targetWaypoint.x);
-                //     console.log("–– Y:", targetWaypoint.y);
-                //     console.log("–– Direction:", targetWaypoint.direction);
-                //     console.log("–– Steps:", targetWaypoint.steps);
-                //     console.log("= = = = =");
-
-                //     debugWaypointIndex = index;
-                //     debugWaypointX = targetWaypoint.x;
-                //     debugWaypointY = targetWaypoint.y;
-                //     debugWaypointDirection = targetWaypoint.direction;
-                //     debugWaypointSteps = targetWaypoint.steps;
-                //   }
-
-                //   localPlayers[sessionId].avatar.setAnimation(
-                //     targetWaypoint.direction
-                //   );
-
-                //   tweener
-                //     .add(localPlayers[sessionId].avatar)
-                //     .to(targetWaypoint, targetWaypoint.steps * SPEED)
-                //     .then(() => {
-                //       if (localPlayers[sessionId].isSelf) {
-                //         console.log("! ARRIVED AT:", index);
-                //         console.log("= = = = =");
-                //       }
-                //       if (index === player.path.waypoints.length - 1) {
-                //         if (localPlayers[sessionId].isSelf) {
-                //           hideWaypoints();
-                //           hidePath();
-                //           hideFullPath();
-                //           console.log("# # # # # #");
-                //           console.log("DONE");
-                //           console.log("# # # # # #");
-                //           hideTarget();
-                //           inMotion = false;
-                //           debugWaypointIndex = 0;
-                //           debugWaypointTotal = 0;
-                //           debugWaypointX = 0;
-                //           debugWaypointY = 0;
-                //           debugWaypointDirection = "";
-                //           debugWaypointSteps = 0;
-                //         }
-                //         localPlayers[sessionId].avatar.setAnimation("rest");
-                //       } else {
-                //         tweenPath(index + 1);
-                //       }
-                //     });
-                // };
-
-                // tweenPath();
-              } else {
-                // TELEPORT
-                if (localPlayers[sessionId].isSelf) {
-                  localUserArea.set(player.area);
-                }
-                localPlayers[sessionId].avatar.x = player.x;
-                localPlayers[sessionId].avatar.y = player.y;
-
-                playersInProximity = [];
-                for (let k in localPlayers) {
-                  if (
-                    !localPlayers[k].isSelf &&
-                    Math.abs(
-                      localPlayers[k].avatar.x -
-                        localPlayers[$localUserSessionID].avatar.x
-                    ) < 200 &&
-                    Math.abs(
-                      localPlayers[k].avatar.y -
-                        localPlayers[$localUserSessionID].avatar.y
-                    ) < 200
-                  ) {
-                    playersInProximity.push(localPlayers[k]);
-                  }
-                }
-              }
-            };
-
-            // PLAYER: CLICK / TAP
-            viewport.on("clicked", e => {
-              if (!inMotion) {
-                gameRoom.send("go", {
-                  x: Math.round(e.world.x),
-                  y: Math.round(e.world.y)
-                });
-
-                inMotion = true;
-
-                screenX = Math.round(e.screen.x);
-                screenY = Math.round(e.screen.y);
-                worldX = Math.round(e.world.x);
-                worldY = Math.round(e.world.y);
-
-                showTarget(Math.round(e.world.x), Math.round(e.world.y));
-              }
-            });
-
-            // PLAYER: TELEPORT
-            teleportTo = area => {
-              // console.log(area)
-              gameRoom.send("teleport", {
-                area: area
+            let avatar = new PIXI.Container();
+            avatar.addChild(left, right, back, front, rest);
+            avatar.motionState = "rest";
+            avatar.setAnimation = direction => {
+              avatar.motionState = direction;
+              avatar.children.forEach(c => {
+                c.visible = c.name == direction ? true : false;
               });
             };
+            avatar.x = playerOptions.x;
+            avatar.y = playerOptions.y;
+            // avatar.height = 80
+            // avatar.width = 60
+            avatar.scale.set(0.5);
+            avatar.pivot.x = 57;
+            avatar.pivot.y = 75;
+            avatar.interactive = true;
 
-            // *******
-            // MESSAGE
-            // *******
+            // console.dir(avatar.children);
 
-            // MESSAGE: ADD
-            gameRoom.state.messages.onAdd = message => {
-              chatMessages = [...chatMessages, message];
+            let player = {
+              avatar: avatar,
+              waypoints: [],
+              area: playerOptions.area,
+              name: playerOptions.name,
+              uuid: playerOptions.uuid,
+              ip: playerOptions.ip,
+              tint: playerOptions.tint,
+              connected: playerOptions.connected,
+              authenticated: playerOptions.authenticated,
+              id: sessionId,
+              isSelf: playerOptions.uuid == $localUserUUID
             };
 
-            // MESSAGE: REMOVE
-            gameRoom.state.messages.onRemove = message => {
-              try {
-                const itemIndex = chatMessages.findIndex(m => m === message);
-                chatMessages.splice(itemIndex, 1);
-                chatMessages = chatMessages;
-              } catch (err) {
-                Sentry.captureException(err);
+            const onDown = e => {
+              startPrivateChat(player);
+              e.stopPropagation();
+            };
+
+            const onEnter = () => {
+              popUpText = player.name;
+            };
+
+            const onLeave = () => {
+              popUpText = false;
+            };
+
+            player.avatar.on("mousedown", onDown);
+            player.avatar.on("touchstart", onDown);
+            player.avatar.on("mouseover", onEnter);
+            player.avatar.on("mouseout", onLeave);
+
+            viewport.addChild(player.avatar);
+
+            if (player.isSelf) {
+              viewport.follow(player.avatar);
+              userLoaded = true;
+              localUserTint.set(playerOptions.tint);
+              localUserName.set(player.name);
+              localUserSessionID.set(player.id);
+            }
+
+            return player;
+          };
+
+          // ADD CASE STUDIES
+
+          caseStudies.then(caseStudies => {
+            console.dir(caseStudies);
+            caseStudies.forEach((cs, i) => {
+              let graphics = new PIXI.Graphics();
+              graphics.beginFill(0xf012d5);
+              graphics.alpha = 1;
+              graphics.drawRect(cs.x, cs.y, 140, 140);
+              graphics.endFill();
+              graphics.title = cs.title;
+              graphics.index = i;
+              graphics.interactive = true;
+
+              const onDown = e => {
+                caseStudyActive = true;
+                currentCaseStudy = caseStudies[graphics.index];
+                e.stopPropagation();
+              };
+
+              const onEnter = e => {
+                popUpText = graphics.title;
+              };
+
+              const onLeave = e => {
+                popUpText = false;
+              };
+
+              graphics.on("mousedown", onDown);
+              graphics.on("touchstart", onDown);
+              graphics.on("mouseover", onEnter);
+              graphics.on("mouseout", onLeave);
+
+              viewport.addChild(graphics);
+            });
+          });
+
+          let playerObject = {};
+
+          if (authenticate && sso && sig) {
+            playerObject = {
+              sso: sso,
+              sig: sig,
+              uuid: $localUserUUID,
+              avatar: avatarIndex,
+              tint:
+                newUserColor.replace("#", "0x").toUpperCase() ||
+                chance
+                  .color({ format: "hex" })
+                  .replace("#", "0x")
+                  .toUpperCase()
+            };
+          } else {
+            playerObject = {
+              uuid: $localUserUUID,
+              name: newUserName || chance.name(),
+              avatar: avatarIndex,
+              tint:
+                newUserColor.replace("#", "0x").toUpperCase() ||
+                chance
+                  .color({ format: "hex" })
+                  .replace("#", "0x")
+                  .toUpperCase()
+            };
+          }
+
+          // => GAME ROOM
+          client
+            .joinOrCreate("game", playerObject)
+            .then(gameRoom => {
+              // HACK
+              if (authenticate) {
+                history.replaceState({}, "CONNECTED", "/");
               }
-            };
 
-            // MESSAGE: SUBMIT
-            submitChat = event => {
-              try {
-                gameRoom.send("submitChatMessage", {
-                  msgId: chance.guid(),
-                  uuid: $localUserUUID,
-                  name: $localUserName,
-                  text: event.detail.text,
-                  tint: $localUserTint
-                });
-              } catch (err) {
-                Sentry.captureException(err);
-              }
-            };
+              // ******
+              // PLAYER
+              // ******
 
-            // ************
-            // PRIVATE ROOM
-            // ************
+              // PLAYER: REMOVE
+              gameRoom.state.players.onRemove = (player, sessionId) => {
+                // console.log('REMOVE')
+                // console.dir(sessionId)
+                // console.dir(localPlayers[sessionId])
+                // console.dir(localPlayers)
+                try {
+                  // console.dir(viewport)
+                  viewport.removeChild(localPlayers[sessionId].avatar);
+                  // HACK
+                  setTimeout(() => {
+                    delete localPlayers[sessionId];
+                    localPlayers = localPlayers;
+                    // console.dir(localPlayers)
+                  }, 500);
+                } catch (err) {
+                  Sentry.captureException(err);
+                }
+              };
 
-            // PRIVATE ROOM: START
-            startPrivateChat = partner => {
-              try {
-                client.create("chat", { partner: partner.id }).then(r => {
-                  gameRoom.send("createPrivateRoom", {
-                    roomId: r.id,
-                    partner: partner.id
+              // PLAYER: ADD
+              gameRoom.state.players.onAdd = (player, sessionId) => {
+                localPlayers[sessionId] = createPlayer(player, sessionId);
+              };
+
+              // PLAYER: BANNED
+              gameRoom.onMessage("banned", message => {
+                banned = true;
+              });
+
+              // PLAYER: ILLEGAL MOVE
+              gameRoom.onMessage("illegalMove", message => {
+                hideTarget();
+                inMotion = false;
+              });
+
+              // PLAYER: STATE CHANGE
+              gameRoom.state.players.onChange = function(player, sessionId) {
+                if (player.path.waypoints.length > 0) {
+                  if (localPlayers[sessionId].isSelf) {
+                    localUserArea.set(player.area);
+                    debugWaypointTotal = player.path.waypoints.length - 1;
+                    if (debug) {
+                      showFullPath(player.fullPath.waypoints);
+                      showPath(player.path.waypoints);
+                      showWaypoints(player.path.waypoints);
+                    }
+                  }
+                  // console.dir(player.path.waypoints[0].x);
+                  moveQ[sessionId] = player.path.waypoints;
+
+                  // const tweenPath = (index = 0) => {
+                  //   let targetWaypoint = player.path.waypoints[index];
+
+                  //   if (localPlayers[sessionId].isSelf) {
+                  //     console.log("=> TARGET WAYPOINT:", index);
+                  //     console.log("–– X:", targetWaypoint.x);
+                  //     console.log("–– Y:", targetWaypoint.y);
+                  //     console.log("–– Direction:", targetWaypoint.direction);
+                  //     console.log("–– Steps:", targetWaypoint.steps);
+                  //     console.log("= = = = =");
+
+                  //     debugWaypointIndex = index;
+                  //     debugWaypointX = targetWaypoint.x;
+                  //     debugWaypointY = targetWaypoint.y;
+                  //     debugWaypointDirection = targetWaypoint.direction;
+                  //     debugWaypointSteps = targetWaypoint.steps;
+                  //   }
+
+                  //   localPlayers[sessionId].avatar.setAnimation(
+                  //     targetWaypoint.direction
+                  //   );
+
+                  //   tweener
+                  //     .add(localPlayers[sessionId].avatar)
+                  //     .to(targetWaypoint, targetWaypoint.steps * SPEED)
+                  //     .then(() => {
+                  //       if (localPlayers[sessionId].isSelf) {
+                  //         console.log("! ARRIVED AT:", index);
+                  //         console.log("= = = = =");
+                  //       }
+                  //       if (index === player.path.waypoints.length - 1) {
+                  //         if (localPlayers[sessionId].isSelf) {
+                  //           hideWaypoints();
+                  //           hidePath();
+                  //           hideFullPath();
+                  //           console.log("# # # # # #");
+                  //           console.log("DONE");
+                  //           console.log("# # # # # #");
+                  //           hideTarget();
+                  //           inMotion = false;
+                  //           debugWaypointIndex = 0;
+                  //           debugWaypointTotal = 0;
+                  //           debugWaypointX = 0;
+                  //           debugWaypointY = 0;
+                  //           debugWaypointDirection = "";
+                  //           debugWaypointSteps = 0;
+                  //         }
+                  //         localPlayers[sessionId].avatar.setAnimation("rest");
+                  //       } else {
+                  //         tweenPath(index + 1);
+                  //       }
+                  //     });
+                  // };
+
+                  // tweenPath();
+                } else {
+                  // TELEPORT
+                  if (localPlayers[sessionId].isSelf) {
+                    localUserArea.set(player.area);
+                  }
+                  localPlayers[sessionId].avatar.x = player.x;
+                  localPlayers[sessionId].avatar.y = player.y;
+
+                  playersInProximity = [];
+                  for (let k in localPlayers) {
+                    if (
+                      !localPlayers[k].isSelf &&
+                      Math.abs(
+                        localPlayers[k].avatar.x -
+                          localPlayers[$localUserSessionID].avatar.x
+                      ) < 200 &&
+                      Math.abs(
+                        localPlayers[k].avatar.y -
+                          localPlayers[$localUserSessionID].avatar.y
+                      ) < 200
+                    ) {
+                      playersInProximity.push(localPlayers[k]);
+                    }
+                  }
+                }
+              };
+
+              // PLAYER: CLICK / TAP
+              viewport.on("clicked", e => {
+                if (!inMotion) {
+                  gameRoom.send("go", {
+                    x: Math.round(e.world.x),
+                    y: Math.round(e.world.y)
                   });
 
-                  inPrivateChat.set(true);
+                  inMotion = true;
 
-                  // PRIVATE ROOM: LEAVE
-                  leavePrivateChat = () => {
-                    r.leave();
+                  screenX = Math.round(e.screen.x);
+                  screenY = Math.round(e.screen.y);
+                  worldX = Math.round(e.world.x);
+                  worldY = Math.round(e.world.y);
 
-                    gameRoom.send("leavePrivateRoom", {
-                      roomId: r.id
+                  showTarget(Math.round(e.world.x), Math.round(e.world.y));
+                }
+              });
+
+              // PLAYER: TELEPORT
+              teleportTo = area => {
+                // console.log(area)
+                gameRoom.send("teleport", {
+                  area: area
+                });
+              };
+
+              // *******
+              // MESSAGE
+              // *******
+
+              // MESSAGE: ADD
+              gameRoom.state.messages.onAdd = message => {
+                chatMessages = [...chatMessages, message];
+              };
+
+              // MESSAGE: REMOVE
+              gameRoom.state.messages.onRemove = message => {
+                try {
+                  const itemIndex = chatMessages.findIndex(m => m === message);
+                  chatMessages.splice(itemIndex, 1);
+                  chatMessages = chatMessages;
+                } catch (err) {
+                  Sentry.captureException(err);
+                }
+              };
+
+              // MESSAGE: SUBMIT
+              submitChat = event => {
+                try {
+                  gameRoom.send("submitChatMessage", {
+                    msgId: chance.guid(),
+                    uuid: $localUserUUID,
+                    name: $localUserName,
+                    text: event.detail.text,
+                    tint: $localUserTint
+                  });
+                } catch (err) {
+                  Sentry.captureException(err);
+                }
+              };
+
+              // ************
+              // PRIVATE ROOM
+              // ************
+
+              // PRIVATE ROOM: START
+              startPrivateChat = partner => {
+                try {
+                  client.create("chat", { partner: partner.id }).then(r => {
+                    gameRoom.send("createPrivateRoom", {
+                      roomId: r.id,
+                      partner: partner.id
                     });
 
-                    inPrivateChat.set(false);
-                  };
-                });
-              } catch (err) {
+                    inPrivateChat.set(true);
+
+                    // PRIVATE ROOM: LEAVE
+                    leavePrivateChat = () => {
+                      r.leave();
+
+                      gameRoom.send("leavePrivateRoom", {
+                        roomId: r.id
+                      });
+
+                      inPrivateChat.set(false);
+                    };
+                  });
+                } catch (err) {
+                  Sentry.captureException(err);
+                }
+              };
+
+              // PRIVATE ROOM: ADD
+              gameRoom.state.privateRooms.onAdd = message => {
+                // console.log('add private room')
+                // console.dir(gameRoom.state.privateRooms)
+                // console.dir(message)
+              };
+
+              // PRIVATE ROOM: REMOVE
+              gameRoom.state.privateRooms.onRemove = message => {
+                // console.log('remove private room')
+                // console.dir(gameRoom.state.privateRooms)
+              };
+
+              // ************
+              // GENERAL
+              // ************
+
+              // GENNERAL: ERROR
+              gameRoom.onError((code, message) => {
+                console.error("!!! COLYSEUS ERROR:");
+                console.error(message);
                 Sentry.captureException(err);
+              });
+            })
+            .catch(e => {
+              if (e.code == 4215) {
+                console.log("BANNED");
+                banned = true;
+              } else {
+                console.log("GAME ROOM: JOIN ERROR", e);
+                Sentry.captureException(e);
               }
-            };
-
-            // PRIVATE ROOM: ADD
-            gameRoom.state.privateRooms.onAdd = message => {
-              // console.log('add private room')
-              // console.dir(gameRoom.state.privateRooms)
-              // console.dir(message)
-            };
-
-            // PRIVATE ROOM: REMOVE
-            gameRoom.state.privateRooms.onRemove = message => {
-              // console.log('remove private room')
-              // console.dir(gameRoom.state.privateRooms)
-            };
-
-            // ************
-            // GENERAL
-            // ************
-
-            // GENNERAL: ERROR
-            gameRoom.onError((code, message) => {
-              console.error("!!! COLYSEUS ERROR:");
-              console.error(message);
-              Sentry.captureException(err);
             });
-          })
-          .catch(e => {
-            if (e.code == 4215) {
-              console.log("BANNED");
-              banned = true;
-            } else {
-              console.log("GAME ROOM: JOIN ERROR", e);
-              Sentry.captureException(e);
-            }
-          });
-      });
+        });
+    });
   };
 
   onMount(async () => {
@@ -773,11 +859,11 @@
 
     responsiveWidth = window.matchMedia("(max-width: 700px)").matches
       ? window.innerWidth
-      : window.innerWidth - 420;
+      : window.innerWidth - 400;
 
     // PIXI: VIEWPORT
     viewport = new Viewport({
-      screenWidth: responsiveWidth,
+      screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
       worldWidth: WIDTH,
       worldHeight: HEIGHT,
@@ -841,8 +927,8 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    top: 50px;
-    right: 10px;
+    top: 10px;
+    right: 410px;
     padding: 20px;
     border-radius: 10px;
 
@@ -853,9 +939,8 @@
 
     &.waypoint {
       top: unset;
-      bottom: 10px;
-      right: unset;
-      left: 430px;
+      bottom: 50px;
+      right: 410px;
     }
 
     &.tiny {
@@ -869,14 +954,15 @@
   }
 
   .proximity {
+    font-size: $FONT_SIZE_BASE;
     position: fixed;
     width: auto;
-    background: $grey;
+    background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
-    text-align: center;
+    // text-align: center;
     bottom: 10px;
-    left: 430px;
+    left: 10px;
     padding: 20px;
     border-radius: 10px;
   }
@@ -944,8 +1030,8 @@
 
   .top-bar {
     position: fixed;
-    top: 0%;
-    right: 0;
+    bottom: 0%;
+    left: 0;
     width: calc(100vw - 420px);
     height: 40px;
     background: #a4a4a4;
@@ -1006,34 +1092,6 @@
         &:hover {
           opacity: 1;
         }
-      }
-    }
-  }
-
-  .mainChatContainer {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    width: 420px;
-    height: 50vh;
-    background: #a4a4a4;
-    padding: 10px;
-    overflow: scroll;
-    font-size: 12px;
-    z-index: 100;
-
-    @include screen-size("small") {
-      top: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.5 ease-out;
-      padding-top: 80px;
-
-      &.phone {
-        opacity: 1;
-        pointer-events: all;
       }
     }
   }
@@ -1152,19 +1210,31 @@
 
     .minimap {
       background: $COLOR_MID_2;
-      height: 250px;
+      height: 200px;
       display: flex;
       justify-content: center;
       align-items: center;
+
+      @include screen-size("short") {
+        height: 150px;
+      }
 
       .map-container {
         height: 250px;
         width: 250px;
         position: relative;
+
+        transform: scale(0.8);
+
+        @include screen-size("short") {
+          transform: scale(0.5);
+        }
+
         img {
           height: 250px;
           width: 250px;
         }
+
         .map-marker {
           height: 10px;
           width: 10px;
@@ -1180,11 +1250,15 @@
 
     .calendar {
       background: $COLOR_LIGHT;
-      height: calc(100% - 610px);
+      height: calc(50% - 130px);
       color: $COLOR_DARK;
       font-size: $FONT_SIZE_BASE;
       background: $COLOR_LIGHT;
+      overflow: hidden;
       // padding-bottom: 60px;
+      @include screen-size("short") {
+        height: calc(50% - 65px);
+      }
 
       .calendar-item {
         // padding-left: 20px;
@@ -1234,8 +1308,12 @@
     }
     .chat {
       background: $COLOR_MID_1;
-      height: 300px;
+      height: calc(50% - 130px);
+
       padding: 10px;
+      @include screen-size("short") {
+        height: calc(50% - 65px);
+      }
     }
     .menu {
       color: $COLOR_DARK;
@@ -1427,9 +1505,7 @@
       <div class="menu-item">About</div>
       <div class="menu-item">Help</div>
     </div>
-    <div class="menu-item login">
-      <a href="/login">Login</a>
-    </div>
+    <a href="/login" class="menu-item login">Login</a>
   </div>
 </div>
 
@@ -1442,12 +1518,35 @@
 
 <!-- PASSIVE CONTENT: CASE STUDY -->
 {#if caseStudyActive}
-  <div class="passive-content-slot" transition:fly={{ y: 200 }}>
-    <CaseStudy
-      caseStudy={currentCaseStudy}
-      on:closeCaseStudy={e => {
-        caseStudyActive = false;
-      }} />
+  <div
+    class="passive-content-slot"
+    transition:fly={{ y: 200 }}
+    on:click={e => {
+      caseStudyActive = false;
+    }}>
+    <div>
+      <!-- TITLE -->
+      <div class="title">
+        <strong>{currentCaseStudy.title}</strong>
+      </div>
+
+      <!-- IMAGE -->
+      <div>
+        <img
+          src={urlFor(currentCaseStudy.mainImage.asset)
+            .width(600)
+            .quality(90)
+            .auto('format')
+            .url()} />
+      </div>
+
+      <!-- TEXT -->
+      <div>
+        {#if currentCaseStudy.content && currentCaseStudy.content.content}
+          {@html renderBlockText(currentCaseStudy.content.content)}
+        {/if}
+      </div>
+    </div>
   </div>
 {/if}
 
@@ -1626,9 +1725,9 @@
 
 {#if debug}
   <!-- USER LIST -->
-  <div class="mainUserListContainer" class:phone={showUserList}>
+  <!-- <div class="mainUserListContainer" class:phone={showUserList}>
     <UserList playerList={localPlayers} phoneActive={showUserList} />
-  </div>
+  </div> -->
 
   <!-- DEBUG: RENDERING INFO -->
   <div class="pop tiny" in:fade>
