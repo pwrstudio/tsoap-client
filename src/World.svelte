@@ -424,11 +424,11 @@
             left.visible = false;
             right.visible = false;
 
-            rest.tint = playerOptions.tint;
-            front.tint = playerOptions.tint;
-            back.tint = playerOptions.tint;
-            left.tint = playerOptions.tint;
-            right.tint = playerOptions.tint;
+            // rest.tint = playerOptions.tint;
+            // front.tint = playerOptions.tint;
+            // back.tint = playerOptions.tint;
+            // left.tint = playerOptions.tint;
+            // right.tint = playerOptions.tint;
 
             rest.animationSpeed = 0.02;
             front.animationSpeed = 0.1;
