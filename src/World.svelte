@@ -178,9 +178,9 @@ if (typeof document.addEventListener === "undefined" || hidden === undefined) {
   let wayPointGraphics = {}
 
   // COLYSEUS
-  const client = new Colyseus.Client("ws://localhost:2567");
+  // const client = new Colyseus.Client("ws://localhost:2567");
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  // const client = new Colyseus.Client('wss://gameserver.tsoap.dev')
+  const client = new Colyseus.Client('wss://gameserver.tsoap.dev')
 
   // PIXI
   let app = {}
