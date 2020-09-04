@@ -721,21 +721,29 @@
 
               // PLAYER: CLICK / TAP
               viewport.on("clicked", e => {
-                if (!inMotion) {
-                  gameRoom.send("go", {
-                    x: Math.round(e.world.x),
-                    y: Math.round(e.world.y)
-                  });
-
-                  inMotion = true;
-
-                  screenX = Math.round(e.screen.x);
-                  screenY = Math.round(e.screen.y);
-                  worldX = Math.round(e.world.x);
-                  worldY = Math.round(e.world.y);
-
-                  showTarget(Math.round(e.world.x), Math.round(e.world.y));
+                hideTarget();
+                if (debug) {
+                  hidePath();
+                  hideFullPath();
+                  hideWaypoints();
                 }
+                // if (!inMotion) {
+                gameRoom.send("go", {
+                  x: Math.round(e.world.x),
+                  y: Math.round(e.world.y),
+                  originX: localPlayers[$localUserSessionID].avatar.x,
+                  originY: localPlayers[$localUserSessionID].avatar.y
+                });
+
+                inMotion = true;
+
+                screenX = Math.round(e.screen.x);
+                screenY = Math.round(e.screen.y);
+                worldX = Math.round(e.world.x);
+                worldY = Math.round(e.world.y);
+
+                showTarget(Math.round(e.world.x), Math.round(e.world.y));
+                // }
               });
 
               // PLAYER: TELEPORT
