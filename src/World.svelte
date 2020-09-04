@@ -30,6 +30,46 @@
   import Banned from './Banned.svelte'
   import AudioChat from './AudioChat.svelte'
 
+  // Set the name of the hidden property and the change event for visibility
+var hidden, visibilityChange; 
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+  hidden = "hidden";
+  visibilityChange = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+  hidden = "msHidden";
+  visibilityChange = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+  hidden = "webkitHidden";
+  visibilityChange = "webkitvisibilitychange";
+}
+ 
+let deltaJump = 0
+let hiddenTime = 0
+
+// If the page is hidden, pause the video;
+// if the page is shown, play the video
+function handleVisibilityChange() {
+  if (document[hidden]) {
+    // console.log('HIDDDEN')
+    hiddenTime = Date.now()
+    // console.log(hiddenTime)
+    // pageVisible = false
+  } else {
+    console.log('SHOWN')
+    let timeDiff = Date.now() - hiddenTime
+    deltaJump = Math.round(timeDiff / 16.6666)
+    console.log(deltaJump)
+  }
+}
+
+// Warn if the browser doesn't support addEventListener or the Page Visibility API
+if (typeof document.addEventListener === "undefined" || hidden === undefined) {
+  console.log("This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API.");
+} else {
+  // Handle page visibility change   
+  document.addEventListener(visibilityChange, handleVisibilityChange, false);
+
+}
   // STORES
   import {
     localUserUUID,
@@ -138,9 +178,9 @@
   let wayPointGraphics = {}
 
   // COLYSEUS
-  // const client = new Colyseus.Client("ws://localhost:2567");
+  const client = new Colyseus.Client("ws://localhost:2567");
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  const client = new Colyseus.Client('wss://gameserver.tsoap.dev')
+  // const client = new Colyseus.Client('wss://gameserver.tsoap.dev')
 
   // PIXI
   let app = {}
@@ -151,21 +191,37 @@
   let sheet = []
 
   // GAME LOOP
-  const updatePositions = (t) => {
-    // console.log(t);
-    // console.dir(moveQ);
+  const updatePositions = (delta) => {
+
+    let deltaRounded = Math.round(delta) + deltaJump;
+    deltaJump = 0;
+
+    if(deltaRounded > 10) {
+      console.log('HIGH DELTA:', deltaRounded)
+    }
+
     for (let key in moveQ) {
       if (localPlayers[key]) {
       if (moveQ[key].length > 0) {
-        let step = moveQ[key].shift()
-        localPlayers[key].avatar.setAnimation(step.direction)
-        localPlayers[key].avatar.x = step.x
-        localPlayers[key].avatar.y = step.y
-        if (key === $localUserSessionID) {
-          debugWaypointX = step.x
-          debugWaypointY = step.y
-          debugWaypointDirection = step.direction
-          debugWaypointSteps = step.steps
+        if(moveQ[key].length - deltaRounded < 0 ) {
+          // console.log('d diff', moveQ[key].length - deltaRounded)
+          let step = moveQ[key][moveQ[key].length - 1]
+          localPlayers[key].avatar.setAnimation(step.direction)
+          localPlayers[key].avatar.x = step.x
+          localPlayers[key].avatar.y = step.y
+          moveQ[key] = []
+        } else {
+          moveQ[key].splice(0, deltaRounded - 1)
+          let step = moveQ[key].shift()
+          localPlayers[key].avatar.setAnimation(step.direction)
+          localPlayers[key].avatar.x = step.x
+          localPlayers[key].avatar.y = step.y
+          if (key === $localUserSessionID) {
+            debugWaypointX = step.x
+            debugWaypointY = step.y
+            debugWaypointDirection = step.direction
+            debugWaypointSteps = step.steps
+          }
         }
         } else {
           localPlayers[key].avatar.setAnimation('rest')
