@@ -6,74 +6,74 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { onMount } from "svelte";
-  import * as Colyseus from "colyseus.js";
-  import * as PIXI from "pixi.js";
-  import { Viewport } from "pixi-viewport";
-  import Chance from "chance";
-  import get from "lodash/get";
-  import has from "lodash/has";
-  import sample from "lodash/sample";
-  import tail from "lodash/tail";
-  import { fade, fly, scale } from "svelte/transition";
-  import { urlFor, loadData, renderBlockText } from "./sanity.js";
-  import { links } from "svelte-routing";
+  import { onMount } from 'svelte'
+  import * as Colyseus from 'colyseus.js'
+  import * as PIXI from 'pixi.js'
+  import { Viewport } from 'pixi-viewport'
+  import Chance from 'chance'
+  import get from 'lodash/get'
+  import has from 'lodash/has'
+  import sample from 'lodash/sample'
+  import tail from 'lodash/tail'
+  import { fade, fly, scale } from 'svelte/transition'
+  import { urlFor, loadData, renderBlockText } from './sanity.js'
+  import { links } from 'svelte-routing'
 
-  const chance = new Chance();
+  const chance = new Chance()
   // import Tweener from "tweener";
 
   // COMPONENTS
-  import Chat from "./Chat.svelte";
-  import UserList from "./UserList.svelte";
-  import Login from "./Login.svelte";
-  import CaseStudy from "./CaseStudy.svelte";
-  import Banned from "./Banned.svelte";
-  import AudioChat from "./AudioChat.svelte";
+  import Chat from './Chat.svelte'
+  import UserList from './UserList.svelte'
+  import Login from './Login.svelte'
+  import CaseStudy from './CaseStudy.svelte'
+  import Banned from './Banned.svelte'
+  import AudioChat from './AudioChat.svelte'
 
   // Set the name of the hidden property and the change event for visibility
-  var hidden, visibilityChange;
-  if (typeof document.hidden !== "undefined") {
+  var hidden, visibilityChange
+  if (typeof document.hidden !== 'undefined') {
     // Opera 12.10 and Firefox 18 and later support
-    hidden = "hidden";
-    visibilityChange = "visibilitychange";
-  } else if (typeof document.msHidden !== "undefined") {
-    hidden = "msHidden";
-    visibilityChange = "msvisibilitychange";
-  } else if (typeof document.webkitHidden !== "undefined") {
-    hidden = "webkitHidden";
-    visibilityChange = "webkitvisibilitychange";
+    hidden = 'hidden'
+    visibilityChange = 'visibilitychange'
+  } else if (typeof document.msHidden !== 'undefined') {
+    hidden = 'msHidden'
+    visibilityChange = 'msvisibilitychange'
+  } else if (typeof document.webkitHidden !== 'undefined') {
+    hidden = 'webkitHidden'
+    visibilityChange = 'webkitvisibilitychange'
   }
 
-  let deltaJump = 0;
-  let hiddenTime = 0;
+  let deltaJump = 0
+  let hiddenTime = 0
 
   // If the page is hidden, pause the video;
   // if the page is shown, play the video
   function handleVisibilityChange() {
     if (document[hidden]) {
       // console.log('HIDDDEN')
-      hiddenTime = Date.now();
+      hiddenTime = Date.now()
       // console.log(hiddenTime)
       // pageVisible = false
     } else {
-      console.log("SHOWN");
-      let timeDiff = Date.now() - hiddenTime;
-      deltaJump = Math.round(timeDiff / 16.6666);
-      console.log(deltaJump);
+      console.log('SHOWN')
+      let timeDiff = Date.now() - hiddenTime
+      deltaJump = Math.round(timeDiff / 16.6666)
+      console.log(deltaJump)
     }
   }
 
   // Warn if the browser doesn't support addEventListener or the Page Visibility API
   if (
-    typeof document.addEventListener === "undefined" ||
+    typeof document.addEventListener === 'undefined' ||
     hidden === undefined
   ) {
     console.log(
-      "This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API."
-    );
+      'This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API.'
+    )
   } else {
     // Handle page visibility change
-    document.addEventListener(visibilityChange, handleVisibilityChange, false);
+    document.addEventListener(visibilityChange, handleVisibilityChange, false)
   }
   // STORES
   import {
@@ -82,20 +82,20 @@
     localUserTint,
     localUserSessionID,
     localUserArea,
-    inPrivateChat
-  } from "./stores.js";
+    inPrivateChat,
+  } from './stores.js'
 
-  localUserUUID.set(chance.guid());
+  localUserUUID.set(chance.guid())
 
   // PROPS
-  export let authenticate = false;
-  export let login = false;
-  export let debug = false;
+  export let authenticate = false
+  export let login = false
+  export let debug = false
   // export let position = false
   // export let x = 0
   // export let y = 0
-  export let sso = false;
-  export let sig = false;
+  export let sso = false
+  export let sig = false
 
   // GLOBAL
   import {
@@ -103,19 +103,21 @@
     KEYBOARD,
     MAP_WIDTH,
     MAP_HEIGHT,
-    colorTrans
-  } from "./global.js";
+    colorTrans,
+  } from './global.js'
 
   // const tweener = new Tweener(1 / 60);
 
   // ** SANITY
   // const query = "*[slug.current == $slug]{..., author[]->{title, slug}}[0]";
   // const params = { slug: slug };
-  let events = loadData("*[_type == 'event']");
-  let caseStudies = loadData("*[_type == 'caseStudy']");
+  let events = loadData("*[_type == 'event']")
+  let caseStudies = loadData(
+    "*[_type == 'caseStudy']{..., spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}"
+  )
   let graphicsSettings = loadData(
-    "*[_id == 'graphics-settings']{..., activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
-  );
+    "*[_id == 'graphics-settings']{..., mapLink->{'mainImageUrl': mainImage.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
+  )
 
   // events.then((events) => {
   //   console.log('EVENTS')
@@ -128,77 +130,79 @@
   // })
 
   // DEBUG VARIABLES
-  let worldX = 0;
-  let worldY = 0;
-  let screenX = 0;
-  let screenY = 0;
-  let rendererHeight = 0;
-  let rendererWidth = 0;
-  let viewportHeight = 0;
-  let viewportWidth = 0;
-  let debugWaypointIndex = 0;
-  let debugWaypointTotal = 0;
-  let debugWaypointX = 0;
-  let debugWaypointY = 0;
-  let debugWaypointDirection = "";
-  let debugWaypointSteps = 0;
+  let worldX = 0
+  let worldY = 0
+  let screenX = 0
+  let screenY = 0
+  let rendererHeight = 0
+  let rendererWidth = 0
+  let viewportHeight = 0
+  let viewportWidth = 0
+  let debugWaypointIndex = 0
+  let debugWaypointTotal = 0
+  let debugWaypointX = 0
+  let debugWaypointY = 0
+  let debugWaypointDirection = ''
+  let debugWaypointSteps = 0
 
   // DOM REFERENCES
-  let gameContainer = {};
+  let gameContainer = {}
 
   // VARIABLES
-  let popUpText = false;
-  let playersInProximity = [];
-  let newUserName = "";
-  let newUserColor = "";
-  let newUserAvatar = 1;
-  let loggedIn = false;
-  let userLoaded = false;
-  let showUserList = false;
-  let showChat = false;
-  let banned = false;
-  let inMotion = false;
+  let popUpText = false
+  let playersInProximity = []
+  let newUserName = ''
+  let newUserColor = ''
+  let newUserAvatar = 1
+  let loggedIn = false
+  let userLoaded = false
+  let showUserList = false
+  let showChat = false
+  let banned = false
+  let inMotion = false
 
-  let caseStudyActive = false;
-  let currentCaseStudy = {};
+  let caseStudyActive = false
+  let currentCaseStudy = {}
 
-  let caseStudyBoxActive = false;
+  let caseStudyBoxActive = false
 
-  let audioChatActive = false;
+  let audioChatActive = false
 
-  let sidebarHidden = false;
+  let sidebarHidden = false
 
-  let eventActive = false;
+  let eventActive = false
 
-  let localPlayers = {};
-  let chatMessages = [];
-  let moveQ = [];
+  let miniImg = false
 
-  let targetGraphics = {};
-  let pathGraphics = {};
-  let fullPathGraphics = {};
-  let wayPointGraphics = {};
+  let localPlayers = {}
+  let chatMessages = []
+  let moveQ = []
+
+  let targetGraphics = {}
+  let pathGraphics = {}
+  let fullPathGraphics = {}
+  let wayPointGraphics = {}
 
   // COLYSEUS
-  // const client = new Colyseus.Client("ws://localhost:2567");
+  const client = new Colyseus.Client('ws://localhost:2567')
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
+  // const client = new Colyseus.Client('wss://gameserver.tsoap.dev')
 
   // PIXI
-  let app = {};
-  let responsiveWidth = 0;
-  let viewport = {};
-  let loader = {};
-  let ticker = {};
-  let sheet = [];
+  let app = {}
+  let responsiveWidth = 0
+  let viewport = {}
+  let loader = {}
+  let ticker = {}
+  let sheet = []
 
   // GAME LOOP
-  const updatePositions = delta => {
-    let deltaRounded = Math.round(delta) + deltaJump;
-    deltaJump = 0;
+  const updatePositions = (delta) => {
+    let deltaRounded = Math.round(delta) + deltaJump
+    deltaJump = 0
 
     if (deltaRounded > 10) {
-      console.log("HIGH DELTA:", deltaRounded);
+      console.log('HIGH DELTA:', deltaRounded)
     }
 
     for (let key in moveQ) {
@@ -206,37 +210,37 @@
         if (moveQ[key].length > 0) {
           if (moveQ[key].length - deltaRounded < 0) {
             // console.log('d diff', moveQ[key].length - deltaRounded)
-            let step = moveQ[key][moveQ[key].length - 1];
-            localPlayers[key].avatar.setAnimation(step.direction);
-            localPlayers[key].avatar.x = step.x;
-            localPlayers[key].avatar.y = step.y;
-            moveQ[key] = [];
+            let step = moveQ[key][moveQ[key].length - 1]
+            localPlayers[key].avatar.setAnimation(step.direction)
+            localPlayers[key].avatar.x = step.x
+            localPlayers[key].avatar.y = step.y
+            moveQ[key] = []
           } else {
-            moveQ[key].splice(0, deltaRounded - 1);
-            let step = moveQ[key].shift();
-            localPlayers[key].avatar.setAnimation(step.direction);
-            localPlayers[key].avatar.x = step.x;
-            localPlayers[key].avatar.y = step.y;
+            moveQ[key].splice(0, deltaRounded - 1)
+            let step = moveQ[key].shift()
+            localPlayers[key].avatar.setAnimation(step.direction)
+            localPlayers[key].avatar.x = step.x
+            localPlayers[key].avatar.y = step.y
             if (key === $localUserSessionID) {
-              debugWaypointX = step.x;
-              debugWaypointY = step.y;
-              debugWaypointDirection = step.direction;
-              debugWaypointSteps = step.steps;
+              debugWaypointX = step.x
+              debugWaypointY = step.y
+              debugWaypointDirection = step.direction
+              debugWaypointSteps = step.steps
             }
           }
         } else {
-          localPlayers[key].avatar.setAnimation("rest");
+          localPlayers[key].avatar.setAnimation('rest')
           if (key === $localUserSessionID) {
-            inMotion = false;
-            hideTarget();
+            inMotion = false
+            hideTarget()
             if (debug) {
-              hidePath();
-              hideFullPath();
-              hideWaypoints();
+              hidePath()
+              hideFullPath()
+              hideWaypoints()
             }
           }
-          delete moveQ[key];
-          playersInProximity = [];
+          delete moveQ[key]
+          playersInProximity = []
           for (let k in localPlayers) {
             if (
               !localPlayers[k].isSelf &&
@@ -249,216 +253,193 @@
                   localPlayers[$localUserSessionID].avatar.y
               ) < 200
             ) {
-              playersInProximity.push(localPlayers[k]);
+              playersInProximity.push(localPlayers[k])
             }
           }
-          console.dir(playersInProximity);
+          console.dir(playersInProximity)
         }
       } else {
-        delete moveQ[key];
+        delete moveQ[key]
       }
     }
-  };
+  }
 
   const showTarget = (x, y) => {
-    let graphics = new PIXI.Graphics();
-    graphics.beginFill(0xff0000);
-    graphics.alpha = 0.8;
-    graphics.zIndex = 1;
-    graphics.drawCircle(x, y, 10);
-    graphics.endFill();
-    viewport.addChild(graphics);
-    targetGraphics = graphics;
-  };
+    let graphics = new PIXI.Graphics()
+    graphics.beginFill(0xff0000)
+    graphics.alpha = 0.8
+    graphics.zIndex = 1
+    graphics.drawCircle(x, y, 10)
+    graphics.endFill()
+    viewport.addChild(graphics)
+    targetGraphics = graphics
+  }
 
   const hideTarget = () => {
-    // const tweener = new Tweener(1 / 60);
-    // tweener
-    //   .add(targetGraphics)
-    //   .to({ alpha: 0 }, 0.5)
-    //   .then(() => {
-    viewport.removeChild(targetGraphics);
-    targetGraphics = {};
-    // });
-  };
+    viewport.removeChild(targetGraphics)
+    targetGraphics = {}
+  }
 
-  const showWaypoints = path => {
+  const showWaypoints = (path) => {
     try {
-      let wayPointMarkers = new PIXI.Graphics();
-      wayPointMarkers.beginFill(0x0000ff);
-      wayPointMarkers.alpha = 0.9;
-      wayPointMarkers.zIndex = 1;
-      path.forEach(p => {
-        wayPointMarkers.drawCircle(p.x, p.y, 2);
-      });
-      wayPointMarkers.endFill();
-      viewport.addChild(wayPointMarkers);
-      wayPointGraphics = wayPointMarkers;
+      let wayPointMarkers = new PIXI.Graphics()
+      wayPointMarkers.beginFill(0x0000ff)
+      wayPointMarkers.alpha = 0.9
+      wayPointMarkers.zIndex = 1
+      path.forEach((p) => {
+        wayPointMarkers.drawCircle(p.x, p.y, 2)
+      })
+      wayPointMarkers.endFill()
+      viewport.addChild(wayPointMarkers)
+      wayPointGraphics = wayPointMarkers
     } catch (err) {
-      Sentry.captureException(err);
+      Sentry.captureException(err)
     }
-  };
+  }
 
-  const showPath = path => {
+  const showPath = (path) => {
     try {
-      let line = new PIXI.Graphics();
-      line.lineStyle(2, 0xff0000, 0.6);
+      let line = new PIXI.Graphics()
+      line.lineStyle(2, 0xff0000, 0.6)
       line.moveTo(
         localPlayers[$localUserSessionID].avatar.x,
         localPlayers[$localUserSessionID].avatar.y
-      );
-      path.forEach(p => {
-        line.lineTo(p.x, p.y);
-      });
-      viewport.addChild(line);
-      pathGraphics = line;
+      )
+      path.forEach((p) => {
+        line.lineTo(p.x, p.y)
+      })
+      viewport.addChild(line)
+      pathGraphics = line
     } catch (err) {
-      Sentry.captureException(err);
+      Sentry.captureException(err)
     }
-  };
+  }
 
   const hidePath = () => {
-    viewport.removeChild(pathGraphics);
-    pathGraphics = {};
-  };
+    viewport.removeChild(pathGraphics)
+    pathGraphics = {}
+  }
 
-  const showFullPath = path => {
+  const showFullPath = (path) => {
     try {
-      let line = new PIXI.Graphics();
-      line.lineStyle(10, 0xff7db9, 0.6);
+      let line = new PIXI.Graphics()
+      line.lineStyle(10, 0xff7db9, 0.6)
       line.moveTo(
         localPlayers[$localUserSessionID].avatar.x,
         localPlayers[$localUserSessionID].avatar.y
-      );
-      path.forEach(p => {
-        line.lineTo(p.x, p.y);
-      });
-      viewport.addChild(line);
-      fullPathGraphics = line;
+      )
+      path.forEach((p) => {
+        line.lineTo(p.x, p.y)
+      })
+      viewport.addChild(line)
+      fullPathGraphics = line
     } catch (err) {
-      Sentry.captureException(err);
+      Sentry.captureException(err)
     }
-  };
+  }
 
   const hideFullPath = () => {
-    viewport.removeChild(fullPathGraphics);
-    fullPathGraphics = {};
-  };
+    viewport.removeChild(fullPathGraphics)
+    fullPathGraphics = {}
+  }
 
   const hideWaypoints = () => {
-    viewport.removeChild(wayPointGraphics);
-    wayPointGraphics = {};
-  };
+    viewport.removeChild(wayPointGraphics)
+    wayPointGraphics = {}
+  }
 
   // FUNCTIONS
-  let teleportTo = () => {};
-  let submitChat = () => {};
-  let startPrivateChat = () => {};
-  let leavePrivateChat = () => {};
+  let teleportTo = () => {}
+  let submitChat = () => {}
+  let startPrivateChat = () => {}
+  let leavePrivateChat = () => {}
 
   const makeNewUser = (sso, sig) => {
-    loggedIn = true;
-    gameContainer.appendChild(app.view);
+    loggedIn = true
+    gameContainer.appendChild(app.view)
 
     // LOADER
     // http://localhost:5000/
 
-    graphicsSettings.then(graphicsSettings => {
-      console.dir(graphicsSettings);
+    graphicsSettings.then((graphicsSettings) => {
+      console.dir(graphicsSettings.mapLink.mainImageUrl)
+      miniImg = graphicsSettings.mapLink.mainImageUrl
 
       let spriteUrl = get(
         graphicsSettings,
-        "activeAvatars[0].spriteJsonURL",
-        "/sprites/avatar.json"
-      );
-      console.log(spriteUrl);
+        'activeAvatars[0].spriteJsonURL',
+        '/sprites/avatar.json'
+      )
+      console.log(spriteUrl)
+
+      let mapUrl = get(graphicsSettings, 'mapLink.mainImageUrl', '')
+      console.log(mapUrl)
 
       loader
-        .add("map", "/hkw-map-no-house-smaller.png")
-        .add("avatar", spriteUrl)
-        // .add("avatarTwo", "/avatar2.png")
-        // .add("avatarThree", "/avatar3.png")
+        .add('map', mapUrl)
+        .add('avatar', spriteUrl)
         .load((loader, resources) => {
-          // console.dir(resources.map.texture);
-          let map = new PIXI.Sprite(resources.map.texture);
-          map.width = MAP_WIDTH;
-          map.height = MAP_HEIGHT;
-          viewport.addChild(map);
+          let map = new PIXI.Sprite(resources.map.texture)
+          map.width = MAP_WIDTH
+          map.height = MAP_HEIGHT
+          viewport.addChild(map)
 
-          console.dir(resources);
+          console.dir(resources)
 
-          sheet.push(resources["avatar"].spritesheet);
+          sheet.push(resources['avatar'].spritesheet)
 
-          // const avatarList = [
-          //   resources.avatarOne.texture,
-          //   resources.avatarTwo.texture,
-          //   resources.avatarThree.texture
-          // ];
+          let avatarIndex = 0
 
-          // let avatarIndex = sample([0, 1, 2]);
-          let avatarIndex = 0;
-
-          console.dir(sheet);
+          console.dir(sheet)
 
           // CREATE PLAYER
           const createPlayer = (playerOptions, sessionId) => {
-            let front = new PIXI.AnimatedSprite(sheet[0].animations["front"]);
-            let back = new PIXI.AnimatedSprite(sheet[0].animations["back"]);
-            let left = new PIXI.AnimatedSprite(sheet[0].animations["left"]);
-            let right = new PIXI.AnimatedSprite(sheet[0].animations["right"]);
-            let rest = new PIXI.AnimatedSprite(sheet[0].animations["rest"]);
+            let front = new PIXI.AnimatedSprite(sheet[0].animations['front'])
+            let back = new PIXI.AnimatedSprite(sheet[0].animations['back'])
+            let left = new PIXI.AnimatedSprite(sheet[0].animations['left'])
+            let right = new PIXI.AnimatedSprite(sheet[0].animations['right'])
+            let rest = new PIXI.AnimatedSprite(sheet[0].animations['rest'])
 
-            rest.name = "rest";
-            front.name = "front";
-            back.name = "back";
-            left.name = "left";
-            right.name = "right";
+            rest.name = 'rest'
+            front.name = 'front'
+            back.name = 'back'
+            left.name = 'left'
+            right.name = 'right'
 
-            rest.visible = true;
-            front.visible = false;
-            back.visible = false;
-            left.visible = false;
-            right.visible = false;
+            rest.visible = true
+            front.visible = false
+            back.visible = false
+            left.visible = false
+            right.visible = false
 
-            // rest.tint = playerOptions.tint;
-            // front.tint = playerOptions.tint;
-            // back.tint = playerOptions.tint;
-            // left.tint = playerOptions.tint;
-            // right.tint = playerOptions.tint;
+            rest.animationSpeed = 0.02
+            front.animationSpeed = 0.1
+            back.animationSpeed = 0.1
+            left.animationSpeed = 0.1
+            right.animationSpeed = 0.1
 
-            rest.animationSpeed = 0.02;
-            front.animationSpeed = 0.1;
-            back.animationSpeed = 0.1;
-            left.animationSpeed = 0.1;
-            right.animationSpeed = 0.1;
+            rest.play()
+            front.play()
+            back.play()
+            left.play()
+            right.play()
 
-            rest.play();
-            front.play();
-            back.play();
-            left.play();
-            right.play();
-
-            let avatar = new PIXI.Container();
-            avatar.addChild(left, right, back, front, rest);
-            avatar.motionState = "rest";
-            avatar.setAnimation = direction => {
-              avatar.motionState = direction;
-              avatar.children.forEach(c => {
-                c.visible = c.name == direction ? true : false;
-              });
-            };
-            avatar.x = playerOptions.x;
-            avatar.y = playerOptions.y;
-            // avatar.height = 100;
-            // avatar.width = 100;
-            // avatar.scale.set(5);
-            console.log("height", avatar.height);
-            console.log("width", avatar.width);
-            avatar.pivot.x = avatar.width / 2;
-            avatar.pivot.y = avatar.height / 2;
-            avatar.interactive = true;
-
-            // console.dir(avatar.children);
+            let avatar = new PIXI.Container()
+            avatar.addChild(left, right, back, front, rest)
+            avatar.motionState = 'rest'
+            avatar.setAnimation = (direction) => {
+              avatar.motionState = direction
+              avatar.children.forEach((c) => {
+                c.visible = c.name == direction ? true : false
+              })
+            }
+            avatar.x = playerOptions.x
+            avatar.y = playerOptions.y
+            console.log('height', avatar.height)
+            console.log('width', avatar.width)
+            avatar.pivot.x = avatar.width / 2
+            avatar.pivot.y = avatar.height / 2
+            avatar.interactive = true
 
             let player = {
               avatar: avatar,
@@ -471,78 +452,41 @@
               connected: playerOptions.connected,
               authenticated: playerOptions.authenticated,
               id: sessionId,
-              isSelf: playerOptions.uuid == $localUserUUID
-            };
-
-            const onDown = e => {
-              startPrivateChat(player);
-              e.stopPropagation();
-            };
-
-            const onEnter = () => {
-              popUpText = player.name;
-            };
-
-            const onLeave = () => {
-              popUpText = false;
-            };
-
-            player.avatar.on("mousedown", onDown);
-            player.avatar.on("touchstart", onDown);
-            player.avatar.on("mouseover", onEnter);
-            player.avatar.on("mouseout", onLeave);
-
-            viewport.addChild(player.avatar);
-
-            if (player.isSelf) {
-              viewport.follow(player.avatar);
-              userLoaded = true;
-              localUserTint.set(playerOptions.tint);
-              localUserName.set(player.name);
-              localUserSessionID.set(player.id);
+              isSelf: playerOptions.uuid == $localUserUUID,
             }
 
-            return player;
-          };
+            const onDown = (e) => {
+              startPrivateChat(player)
+              e.stopPropagation()
+            }
 
-          // ADD CASE STUDIES
+            const onEnter = () => {
+              popUpText = player.name
+            }
 
-          caseStudies.then(caseStudies => {
-            console.dir(caseStudies);
-            caseStudies.forEach((cs, i) => {
-              let graphics = new PIXI.Graphics();
-              graphics.beginFill(0xf012d5);
-              graphics.alpha = 1;
-              graphics.drawRect(cs.x, cs.y, 140, 140);
-              graphics.endFill();
-              graphics.title = cs.title;
-              graphics.index = i;
-              graphics.interactive = true;
+            const onLeave = () => {
+              popUpText = false
+            }
 
-              const onDown = e => {
-                caseStudyActive = true;
-                currentCaseStudy = caseStudies[graphics.index];
-                e.stopPropagation();
-              };
+            player.avatar.on('mousedown', onDown)
+            player.avatar.on('touchstart', onDown)
+            player.avatar.on('mouseover', onEnter)
+            player.avatar.on('mouseout', onLeave)
 
-              const onEnter = e => {
-                popUpText = graphics.title;
-              };
+            viewport.addChild(player.avatar)
 
-              const onLeave = e => {
-                popUpText = false;
-              };
+            if (player.isSelf) {
+              viewport.follow(player.avatar)
+              userLoaded = true
+              localUserTint.set(playerOptions.tint)
+              localUserName.set(player.name)
+              localUserSessionID.set(player.id)
+            }
 
-              graphics.on("mousedown", onDown);
-              graphics.on("touchstart", onDown);
-              graphics.on("mouseover", onEnter);
-              graphics.on("mouseout", onLeave);
+            return player
+          }
 
-              viewport.addChild(graphics);
-            });
-          });
-
-          let playerObject = {};
+          let playerObject = {}
 
           if (authenticate && sso && sig) {
             playerObject = {
@@ -551,33 +495,33 @@
               uuid: $localUserUUID,
               avatar: avatarIndex,
               tint:
-                newUserColor.replace("#", "0x").toUpperCase() ||
+                newUserColor.replace('#', '0x').toUpperCase() ||
                 chance
-                  .color({ format: "hex" })
-                  .replace("#", "0x")
-                  .toUpperCase()
-            };
+                  .color({ format: 'hex' })
+                  .replace('#', '0x')
+                  .toUpperCase(),
+            }
           } else {
             playerObject = {
               uuid: $localUserUUID,
               name: newUserName || chance.name(),
               avatar: avatarIndex,
               tint:
-                newUserColor.replace("#", "0x").toUpperCase() ||
+                newUserColor.replace('#', '0x').toUpperCase() ||
                 chance
-                  .color({ format: "hex" })
-                  .replace("#", "0x")
-                  .toUpperCase()
-            };
+                  .color({ format: 'hex' })
+                  .replace('#', '0x')
+                  .toUpperCase(),
+            }
           }
 
           // => GAME ROOM
           client
-            .joinOrCreate("game", playerObject)
-            .then(gameRoom => {
+            .joinOrCreate('game', playerObject)
+            .then((gameRoom) => {
               // HACK
               if (authenticate) {
-                history.replaceState({}, "CONNECTED", "/");
+                history.replaceState({}, 'CONNECTED', '/')
               }
 
               // ******
@@ -586,119 +530,57 @@
 
               // PLAYER: REMOVE
               gameRoom.state.players.onRemove = (player, sessionId) => {
-                // console.log('REMOVE')
-                // console.dir(sessionId)
-                // console.dir(localPlayers[sessionId])
-                // console.dir(localPlayers)
                 try {
-                  // console.dir(viewport)
-                  viewport.removeChild(localPlayers[sessionId].avatar);
+                  viewport.removeChild(localPlayers[sessionId].avatar)
                   // HACK
                   setTimeout(() => {
-                    delete localPlayers[sessionId];
-                    localPlayers = localPlayers;
+                    delete localPlayers[sessionId]
+                    localPlayers = localPlayers
                     // console.dir(localPlayers)
-                  }, 500);
+                  }, 500)
                 } catch (err) {
-                  Sentry.captureException(err);
+                  Sentry.captureException(err)
                 }
-              };
+              }
 
               // PLAYER: ADD
               gameRoom.state.players.onAdd = (player, sessionId) => {
-                localPlayers[sessionId] = createPlayer(player, sessionId);
-              };
+                localPlayers[sessionId] = createPlayer(player, sessionId)
+              }
 
               // PLAYER: BANNED
-              gameRoom.onMessage("banned", message => {
-                banned = true;
-              });
+              gameRoom.onMessage('banned', (message) => {
+                banned = true
+              })
 
               // PLAYER: ILLEGAL MOVE
-              gameRoom.onMessage("illegalMove", message => {
-                hideTarget();
-                inMotion = false;
-              });
+              gameRoom.onMessage('illegalMove', (message) => {
+                hideTarget()
+                inMotion = false
+              })
 
               // PLAYER: STATE CHANGE
-              gameRoom.state.players.onChange = function(player, sessionId) {
+              gameRoom.state.players.onChange = function (player, sessionId) {
                 if (player.path.waypoints.length > 0) {
                   if (localPlayers[sessionId].isSelf) {
-                    localUserArea.set(player.area);
-                    debugWaypointTotal = player.path.waypoints.length - 1;
+                    localUserArea.set(player.area)
+                    debugWaypointTotal = player.path.waypoints.length - 1
                     if (debug) {
-                      showFullPath(player.fullPath.waypoints);
-                      showPath(player.path.waypoints);
-                      showWaypoints(player.path.waypoints);
+                      showFullPath(player.fullPath.waypoints)
+                      showPath(player.path.waypoints)
+                      showWaypoints(player.path.waypoints)
                     }
                   }
-                  // console.dir(player.path.waypoints[0].x);
-                  moveQ[sessionId] = player.path.waypoints;
-
-                  // const tweenPath = (index = 0) => {
-                  //   let targetWaypoint = player.path.waypoints[index];
-
-                  //   if (localPlayers[sessionId].isSelf) {
-                  //     console.log("=> TARGET WAYPOINT:", index);
-                  //     console.log("–– X:", targetWaypoint.x);
-                  //     console.log("–– Y:", targetWaypoint.y);
-                  //     console.log("–– Direction:", targetWaypoint.direction);
-                  //     console.log("–– Steps:", targetWaypoint.steps);
-                  //     console.log("= = = = =");
-
-                  //     debugWaypointIndex = index;
-                  //     debugWaypointX = targetWaypoint.x;
-                  //     debugWaypointY = targetWaypoint.y;
-                  //     debugWaypointDirection = targetWaypoint.direction;
-                  //     debugWaypointSteps = targetWaypoint.steps;
-                  //   }
-
-                  //   localPlayers[sessionId].avatar.setAnimation(
-                  //     targetWaypoint.direction
-                  //   );
-
-                  //   tweener
-                  //     .add(localPlayers[sessionId].avatar)
-                  //     .to(targetWaypoint, targetWaypoint.steps * SPEED)
-                  //     .then(() => {
-                  //       if (localPlayers[sessionId].isSelf) {
-                  //         console.log("! ARRIVED AT:", index);
-                  //         console.log("= = = = =");
-                  //       }
-                  //       if (index === player.path.waypoints.length - 1) {
-                  //         if (localPlayers[sessionId].isSelf) {
-                  //           hideWaypoints();
-                  //           hidePath();
-                  //           hideFullPath();
-                  //           console.log("# # # # # #");
-                  //           console.log("DONE");
-                  //           console.log("# # # # # #");
-                  //           hideTarget();
-                  //           inMotion = false;
-                  //           debugWaypointIndex = 0;
-                  //           debugWaypointTotal = 0;
-                  //           debugWaypointX = 0;
-                  //           debugWaypointY = 0;
-                  //           debugWaypointDirection = "";
-                  //           debugWaypointSteps = 0;
-                  //         }
-                  //         localPlayers[sessionId].avatar.setAnimation("rest");
-                  //       } else {
-                  //         tweenPath(index + 1);
-                  //       }
-                  //     });
-                  // };
-
-                  // tweenPath();
+                  moveQ[sessionId] = player.path.waypoints
                 } else {
                   // TELEPORT
                   if (localPlayers[sessionId].isSelf) {
-                    localUserArea.set(player.area);
+                    localUserArea.set(player.area)
                   }
-                  localPlayers[sessionId].avatar.x = player.x;
-                  localPlayers[sessionId].avatar.y = player.y;
+                  localPlayers[sessionId].avatar.x = player.x
+                  localPlayers[sessionId].avatar.y = player.y
 
-                  playersInProximity = [];
+                  playersInProximity = []
                   for (let k in localPlayers) {
                     if (
                       !localPlayers[k].isSelf &&
@@ -711,125 +593,125 @@
                           localPlayers[$localUserSessionID].avatar.y
                       ) < 200
                     ) {
-                      playersInProximity.push(localPlayers[k]);
+                      playersInProximity.push(localPlayers[k])
                     }
                   }
                 }
-              };
+              }
 
               // PLAYER: CLICK / TAP
-              viewport.on("clicked", e => {
-                hideTarget();
+              viewport.on('clicked', (e) => {
+                hideTarget()
                 if (debug) {
-                  hidePath();
-                  hideFullPath();
-                  hideWaypoints();
+                  hidePath()
+                  hideFullPath()
+                  hideWaypoints()
                 }
                 // if (!inMotion) {
-                gameRoom.send("go", {
+                gameRoom.send('go', {
                   x: Math.round(e.world.x),
                   y: Math.round(e.world.y),
                   originX: localPlayers[$localUserSessionID].avatar.x,
-                  originY: localPlayers[$localUserSessionID].avatar.y
-                });
+                  originY: localPlayers[$localUserSessionID].avatar.y,
+                })
 
-                inMotion = true;
+                inMotion = true
 
-                screenX = Math.round(e.screen.x);
-                screenY = Math.round(e.screen.y);
-                worldX = Math.round(e.world.x);
-                worldY = Math.round(e.world.y);
+                screenX = Math.round(e.screen.x)
+                screenY = Math.round(e.screen.y)
+                worldX = Math.round(e.world.x)
+                worldY = Math.round(e.world.y)
 
-                showTarget(Math.round(e.world.x), Math.round(e.world.y));
+                showTarget(Math.round(e.world.x), Math.round(e.world.y))
                 // }
-              });
+              })
 
               // PLAYER: TELEPORT
-              teleportTo = area => {
+              teleportTo = (area) => {
                 // console.log(area)
-                gameRoom.send("teleport", {
-                  area: area
-                });
-              };
+                gameRoom.send('teleport', {
+                  area: area,
+                })
+              }
 
               // *******
               // MESSAGE
               // *******
 
               // MESSAGE: ADD
-              gameRoom.state.messages.onAdd = message => {
-                chatMessages = [...chatMessages, message];
-              };
+              gameRoom.state.messages.onAdd = (message) => {
+                chatMessages = [...chatMessages, message]
+              }
 
               // MESSAGE: REMOVE
-              gameRoom.state.messages.onRemove = message => {
+              gameRoom.state.messages.onRemove = (message) => {
                 try {
-                  const itemIndex = chatMessages.findIndex(m => m === message);
-                  chatMessages.splice(itemIndex, 1);
-                  chatMessages = chatMessages;
+                  const itemIndex = chatMessages.findIndex((m) => m === message)
+                  chatMessages.splice(itemIndex, 1)
+                  chatMessages = chatMessages
                 } catch (err) {
-                  Sentry.captureException(err);
+                  Sentry.captureException(err)
                 }
-              };
+              }
 
               // MESSAGE: SUBMIT
-              submitChat = event => {
+              submitChat = (event) => {
                 try {
-                  gameRoom.send("submitChatMessage", {
+                  gameRoom.send('submitChatMessage', {
                     msgId: chance.guid(),
                     uuid: $localUserUUID,
                     name: $localUserName,
                     text: event.detail.text,
-                    tint: $localUserTint
-                  });
+                    tint: $localUserTint,
+                  })
                 } catch (err) {
-                  Sentry.captureException(err);
+                  Sentry.captureException(err)
                 }
-              };
+              }
 
               // ************
               // PRIVATE ROOM
               // ************
 
               // PRIVATE ROOM: START
-              startPrivateChat = partner => {
+              startPrivateChat = (partner) => {
                 try {
-                  client.create("chat", { partner: partner.id }).then(r => {
-                    gameRoom.send("createPrivateRoom", {
+                  client.create('chat', { partner: partner.id }).then((r) => {
+                    gameRoom.send('createPrivateRoom', {
                       roomId: r.id,
-                      partner: partner.id
-                    });
+                      partner: partner.id,
+                    })
 
-                    inPrivateChat.set(true);
+                    inPrivateChat.set(true)
 
                     // PRIVATE ROOM: LEAVE
                     leavePrivateChat = () => {
-                      r.leave();
+                      r.leave()
 
-                      gameRoom.send("leavePrivateRoom", {
-                        roomId: r.id
-                      });
+                      gameRoom.send('leavePrivateRoom', {
+                        roomId: r.id,
+                      })
 
-                      inPrivateChat.set(false);
-                    };
-                  });
+                      inPrivateChat.set(false)
+                    }
+                  })
                 } catch (err) {
-                  Sentry.captureException(err);
+                  Sentry.captureException(err)
                 }
-              };
+              }
 
               // PRIVATE ROOM: ADD
-              gameRoom.state.privateRooms.onAdd = message => {
+              gameRoom.state.privateRooms.onAdd = (message) => {
                 // console.log('add private room')
                 // console.dir(gameRoom.state.privateRooms)
                 // console.dir(message)
-              };
+              }
 
               // PRIVATE ROOM: REMOVE
-              gameRoom.state.privateRooms.onRemove = message => {
+              gameRoom.state.privateRooms.onRemove = (message) => {
                 // console.log('remove private room')
                 // console.dir(gameRoom.state.privateRooms)
-              };
+              }
 
               // ************
               // GENERAL
@@ -837,35 +719,80 @@
 
               // GENNERAL: ERROR
               gameRoom.onError((code, message) => {
-                console.error("!!! COLYSEUS ERROR:");
-                console.error(message);
-                Sentry.captureException(err);
-              });
+                console.error('!!! COLYSEUS ERROR:')
+                console.error(message)
+                Sentry.captureException(err)
+              })
             })
-            .catch(e => {
+            .catch((e) => {
               if (e.code == 4215) {
-                console.log("BANNED");
-                banned = true;
+                console.log('BANNED')
+                banned = true
               } else {
-                console.log("GAME ROOM: JOIN ERROR", e);
-                Sentry.captureException(e);
+                console.log('GAME ROOM: JOIN ERROR', e)
+                Sentry.captureException(e)
               }
-            });
-        });
-    });
-  };
+            })
+        })
+
+      // ADD CASE STUDIES
+      // caseStudies.then((caseStudies) => {
+      //   console.dir(caseStudies)
+      //   caseStudies.forEach((cs, i) => {
+      //     console.dir(cs.spriteLink)
+
+      //     let spriteUrl = get(cs, 'spriteLink.spriteJsonURL', '')
+
+      //     loader.add('csSprite', spriteUrl).load((loader, resources) => {
+      //       console.dir(resources)
+      //       let graphics = new PIXI.Graphics()
+      //       graphics.beginFill(0xf012d5)
+      //       graphics.alpha = 1
+      //       graphics.drawRect(cs.x, cs.y, 140, 140)
+      //       graphics.endFill()
+      //       graphics.title = cs.title
+      //       graphics.index = i
+      //       graphics.interactive = true
+
+      //       const onDown = (e) => {
+      //         caseStudyActive = true
+      //         currentCaseStudy = caseStudies[graphics.index]
+      //         e.stopPropagation()
+      //       }
+
+      //       const onEnter = (e) => {
+      //         popUpText = graphics.title
+      //       }
+
+      //       const onLeave = (e) => {
+      //         popUpText = false
+      //       }
+
+      //       graphics.on('mousedown', onDown)
+      //       graphics.on('touchstart', onDown)
+      //       graphics.on('mouseover', onEnter)
+      //       graphics.on('mouseout', onLeave)
+
+      //       viewport.addChild(graphics)
+      //     })
+      //   })
+      // })
+
+      return graphicsSettings
+    })
+  }
 
   onMount(async () => {
     // PIXI: APP
     app = new PIXI.Application({
       width: MAP_WIDTH,
       height: MAP_HEIGHT,
-      resolution: 1
-    });
+      resolution: 1,
+    })
 
-    responsiveWidth = window.matchMedia("(max-width: 700px)").matches
+    responsiveWidth = window.matchMedia('(max-width: 700px)').matches
       ? window.innerWidth
-      : window.innerWidth - 400;
+      : window.innerWidth - 400
 
     // PIXI: VIEWPORT
     viewport = new Viewport({
@@ -873,53 +800,53 @@
       screenHeight: window.innerHeight,
       worldWidth: MAP_WIDTH,
       worldHeight: MAP_HEIGHT,
-      interaction: app.renderer.plugins.interaction
-    });
+      interaction: app.renderer.plugins.interaction,
+    })
 
     // PIXI: LOADER
-    loader = PIXI.Loader.shared;
+    loader = PIXI.Loader.shared
 
     // PIXI: TICKER
-    ticker = PIXI.Ticker.shared;
+    ticker = PIXI.Ticker.shared
 
-    app.stage.addChild(viewport);
-    ticker.start();
-    ticker.add(updatePositions);
+    app.stage.addChild(viewport)
+    ticker.start()
+    ticker.add(updatePositions)
 
-    rendererHeight = app.screen.height;
-    rendererWidth = app.screen.width;
-    viewportHeight = viewport.screenHeight;
-    viewportWidth = viewport.screenWidth;
+    rendererHeight = app.screen.height
+    rendererWidth = app.screen.width
+    viewportHeight = viewport.screenHeight
+    viewportWidth = viewport.screenWidth
 
     window.onresize = () => {
       responsiveWidth =
-        window.matchMedia("(max-width: 700px)").matches || sidebarHidden
+        window.matchMedia('(max-width: 700px)').matches || sidebarHidden
           ? window.innerWidth
-          : window.innerWidth - 400;
+          : window.innerWidth - 400
 
-      viewport.resize(responsiveWidth, window.innerHeight);
-      app.renderer.resize(responsiveWidth, window.innerHeight);
+      viewport.resize(responsiveWidth, window.innerHeight)
+      app.renderer.resize(responsiveWidth, window.innerHeight)
 
-      rendererHeight = app.screen.height;
-      rendererWidth = app.screen.width;
-      viewportHeight = viewport.screenHeight;
-      viewportWidth = viewport.screenWidth;
-    };
+      rendererHeight = app.screen.height
+      rendererWidth = app.screen.width
+      viewportHeight = viewport.screenHeight
+      viewportWidth = viewport.screenWidth
+    }
 
-    window.dispatchEvent(new Event("resize"));
+    window.dispatchEvent(new Event('resize'))
 
-    if (window.matchMedia("(max-width: 700px)").matches) {
-      viewport.setZoom(0.75);
+    if (window.matchMedia('(max-width: 700px)').matches) {
+      viewport.setZoom(0.75)
     }
 
     if (!login) {
-      makeNewUser(sso, sig);
+      makeNewUser(sso, sig)
     }
-  });
+  })
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import './variables.scss';
 
   * {
     box-sizing: border-box;
@@ -938,7 +865,7 @@
     padding: 20px;
     border-radius: 10px;
 
-    @include screen-size("small") {
+    @include screen-size('small') {
       top: unset;
       bottom: 20px;
     }
@@ -984,7 +911,7 @@
     text-align: center;
     display: none;
 
-    @include screen-size("small") {
+    @include screen-size('small') {
       display: block;
     }
 
@@ -1027,7 +954,7 @@
     border-radius: 10px;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
-    @include screen-size("small") {
+    @include screen-size('small') {
       top: unset;
       bottom: 20px;
       display: none;
@@ -1048,7 +975,7 @@
     z-index: 1000;
     user-select: none;
 
-    @include screen-size("small") {
+    @include screen-size('small') {
       display: none;
     }
 
@@ -1138,7 +1065,7 @@
     z-index: 100;
     transform: scale(0.8);
 
-    @include screen-size("small") {
+    @include screen-size('small') {
       width: 100vw;
       height: 100vh;
       pointer-events: none;
@@ -1168,7 +1095,7 @@
       opacity: 1;
     }
 
-    @include screen-size("small") {
+    @include screen-size('small') {
       width: 100vw;
       right: 0;
     }
@@ -1221,24 +1148,25 @@
       justify-content: center;
       align-items: center;
 
-      @include screen-size("short") {
+      @include screen-size('short') {
         height: 150px;
       }
 
       .map-container {
-        height: 250px;
-        width: 250px;
+        height: 200px;
+        width: 200px;
         position: relative;
+        // transform: scale(1.25);
 
-        transform: scale(0.8);
+        // transform: scale(0.8);
 
-        @include screen-size("short") {
+        @include screen-size('short') {
           transform: scale(0.5);
         }
 
         img {
-          height: 250px;
-          width: 250px;
+          height: 200px;
+          width: 200px;
         }
 
         .map-marker {
@@ -1262,7 +1190,7 @@
       background: $COLOR_LIGHT;
       overflow: hidden;
       // padding-bottom: 60px;
-      @include screen-size("short") {
+      @include screen-size('short') {
         height: calc(50% - 65px);
       }
 
@@ -1317,7 +1245,7 @@
       height: calc(50% - 130px);
 
       padding: 10px;
-      @include screen-size("short") {
+      @include screen-size('short') {
         height: calc(50% - 65px);
       }
     }
@@ -1417,7 +1345,7 @@
     right: 410px;
     border-radius: 4px;
 
-    @include screen-size("small") {
+    @include screen-size('small') {
       display: none;
     }
 
@@ -1442,8 +1370,8 @@
     class="hide-button"
     in:scale={{ delay: 500 }}
     on:click={() => {
-      sidebarHidden = !sidebarHidden;
-      window.dispatchEvent(new Event('resize'));
+      sidebarHidden = !sidebarHidden
+      window.dispatchEvent(new Event('resize'))
     }}>
     »
   </div>
@@ -1456,20 +1384,22 @@
   class:hidden={sidebarHidden}
   on:click={() => {
     if (sidebarHidden) {
-      sidebarHidden = false;
-      window.dispatchEvent(new Event('resize'));
+      sidebarHidden = false
+      window.dispatchEvent(new Event('resize'))
     }
   }}>
   <!-- MINIMAP -->
   <div class="minimap">
-    {#if $localUserSessionID && localPlayers && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].avatar && localPlayers[$localUserSessionID].avatar.y}
-      <div class="map-container">
-        <img src="hkw-map-mini.png" />
+    <div class="map-container">
+      <!-- {graphicsSettings.mapLink.mainImageUrl} -->
+      {#if miniImg}<img src={miniImg} />{/if}
+      <!-- <img src={get(graphicsSettings, 'mapLink.mainImageUrl', '')} /> -->
+      {#if $localUserSessionID && localPlayers && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].avatar && localPlayers[$localUserSessionID].avatar.y}
         <div
           class="map-marker"
           style={'top: ' + Math.round(localPlayers[$localUserSessionID].avatar.y / 20 - 5) + 'px; left: ' + Math.round(localPlayers[$localUserSessionID].avatar.x / 20 - 5) + 'px;'} />
-      </div>
-    {/if}
+      {/if}
+    </div>
   </div>
   <!-- CALENDAR -->
   <div class="calendar">
@@ -1480,9 +1410,9 @@
           in:fade={{ delay: 100 * index }}
           on:click={() => {
             if (eventActive && eventActive._id === event._id) {
-              eventActive = false;
+              eventActive = false
             } else {
-              eventActive = event;
+              eventActive = event
             }
           }}>
           <div class="title">{event.title}</div>
@@ -1504,7 +1434,7 @@
       <div
         class="menu-item"
         on:click={() => {
-          caseStudyBoxActive = !caseStudyBoxActive;
+          caseStudyBoxActive = !caseStudyBoxActive
         }}>
         Case-Studies
       </div>
@@ -1527,14 +1457,12 @@
   <div
     class="passive-content-slot"
     transition:fly={{ y: 200 }}
-    on:click={e => {
-      caseStudyActive = false;
+    on:click={(e) => {
+      caseStudyActive = false
     }}>
     <div>
       <!-- TITLE -->
-      <div class="title">
-        <strong>{currentCaseStudy.title}</strong>
-      </div>
+      <div class="title"><strong>{currentCaseStudy.title}</strong></div>
 
       <!-- IMAGE -->
       <div>
@@ -1562,13 +1490,11 @@
     class="passive-content-slot"
     transition:fly={{ y: 200 }}
     on:click={() => {
-      caseStudyBoxActive = !caseStudyBoxActive;
+      caseStudyBoxActive = !caseStudyBoxActive
     }}>
     <div>
       <!-- TITLE -->
-      <div class="title">
-        <strong>Case studies</strong>
-      </div>
+      <div class="title"><strong>Case studies</strong></div>
 
       {#await caseStudies then caseStudies}
         {#each caseStudies as cs, index (cs._id)}
@@ -1595,13 +1521,11 @@
     in:fly={{ y: 200, duration: 300 }}
     out:fly={{ y: 200, duration: 300 }}
     on:click={() => {
-      eventActive = false;
+      eventActive = false
     }}>
     <div>
       <!-- TITLE -->
-      <div class="title">
-        <strong>{eventActive.title}</strong>
-      </div>
+      <div class="title"><strong>{eventActive.title}</strong></div>
 
       <div class="date">{formattedDate(eventActive.startDate)}</div>
 
@@ -1636,15 +1560,13 @@
 <!-- PROXIMITY -->
 {#if playersInProximity.length > 0}
   <div class="proximity" transition:fly={{ y: 200 }}>
-    <div>
-      <strong>Players nearby</strong>
-    </div>
+    <div><strong>Players nearby</strong></div>
     {#each playersInProximity as player}
       <div>
         {player.name}
         <button
-          on:click={e => {
-            startPrivateChat(player);
+          on:click={(e) => {
+            startPrivateChat(player)
           }}>
           Start chat
         </button>
@@ -1656,9 +1578,7 @@
 <!-- CURRENT AREA BOX -->
 {#if $localUserArea}
   <div class="current-area tiny">
-    Currently in
-    <strong>{colorTrans[$localUserArea]}</strong>
-    area
+    Currently in <strong>{colorTrans[$localUserArea]}</strong> area
   </div>
 {/if}
 
@@ -1681,12 +1601,12 @@
   <Login
     {sso}
     {sig}
-    on:newTemporaryUser={e => {
-      console.dir(e);
-      newUserName = e.detail.newUserName;
-      newUserColor = e.detail.newUserColor;
-      loggedIn = true;
-      makeNewUser();
+    on:newTemporaryUser={(e) => {
+      console.dir(e)
+      newUserName = e.detail.newUserName
+      newUserColor = e.detail.newUserColor
+      loggedIn = true
+      makeNewUser()
     }} />
 {/if}
 
@@ -1694,8 +1614,8 @@
 {#if audioChatActive}
   <AudioChat
     name={$localUserName}
-    on:close={e => {
-      audioChatActive = false;
+    on:close={(e) => {
+      audioChatActive = false
     }} />
 {/if}
 
@@ -1704,16 +1624,16 @@
   <div
     class="userlist-nav"
     on:click={() => {
-      showChat = false;
-      showUserList = !showUserList;
+      showChat = false
+      showUserList = !showUserList
     }}>
     USERLIST
   </div>
   <div
     class="chat-nav"
     on:click={() => {
-      showUserList = false;
-      showChat = !showChat;
+      showUserList = false
+      showChat = !showChat
     }}>
     CHAT
   </div>
@@ -1737,42 +1657,15 @@
 
   <!-- DEBUG: RENDERING INFO -->
   <div class="pop tiny" in:fade>
-    <div>
-      <strong>Renderer width:</strong>
-      {rendererWidth}
-    </div>
-    <div>
-      <strong>Renderer Height:</strong>
-      {rendererHeight}
-    </div>
-    <div>
-      <strong>viewport width:</strong>
-      {viewportWidth}
-    </div>
-    <div>
-      <strong>viewport Height:</strong>
-      {viewportHeight}
-    </div>
-    <div>
-      <strong>Pixel ratio:</strong>
-      {window.devicePixelRatio}
-    </div>
-    <div>
-      <strong>World X:</strong>
-      {worldX}
-    </div>
-    <div>
-      <strong>World Y:</strong>
-      {worldY}
-    </div>
-    <div>
-      <strong>Screen X:</strong>
-      {screenX}
-    </div>
-    <div>
-      <strong>Screen Y:</strong>
-      {screenY}
-    </div>
+    <div><strong>Renderer width:</strong> {rendererWidth}</div>
+    <div><strong>Renderer Height:</strong> {rendererHeight}</div>
+    <div><strong>viewport width:</strong> {viewportWidth}</div>
+    <div><strong>viewport Height:</strong> {viewportHeight}</div>
+    <div><strong>Pixel ratio:</strong> {window.devicePixelRatio}</div>
+    <div><strong>World X:</strong> {worldX}</div>
+    <div><strong>World Y:</strong> {worldY}</div>
+    <div><strong>Screen X:</strong> {screenX}</div>
+    <div><strong>Screen Y:</strong> {screenY}</div>
   </div>
 
   <!-- DEBUG: WAYPOINT INFO -->
@@ -1782,22 +1675,10 @@
         <strong>TARGET WAYPOINT:</strong>
         {debugWaypointIndex}/{debugWaypointTotal}
       </div>
-      <div>
-        <strong>X:</strong>
-        {debugWaypointX}
-      </div>
-      <div>
-        <strong>Y:</strong>
-        {debugWaypointY}
-      </div>
-      <div>
-        <strong>Direction:</strong>
-        {debugWaypointDirection}
-      </div>
-      <div>
-        <strong>Steps:</strong>
-        {debugWaypointSteps}
-      </div>
+      <div><strong>X:</strong> {debugWaypointX}</div>
+      <div><strong>Y:</strong> {debugWaypointY}</div>
+      <div><strong>Direction:</strong> {debugWaypointDirection}</div>
+      <div><strong>Steps:</strong> {debugWaypointSteps}</div>
     </div>
   {/if}
 
@@ -1807,28 +1688,28 @@
     <div
       class="link interact green"
       on:click={() => {
-        teleportTo('green');
+        teleportTo('green')
       }}>
       GOTO: Green
     </div>
     <div
       class="link interact blue"
       on:click={() => {
-        teleportTo('blue');
+        teleportTo('blue')
       }}>
       GOTO: Blue
     </div>
     <div
       class="link interact yellow"
       on:click={() => {
-        teleportTo('yellow');
+        teleportTo('yellow')
       }}>
       GOTO: Yellow
     </div>
     <div
       class="link interact red"
       on:click={() => {
-        teleportTo('red');
+        teleportTo('red')
       }}>
       GOTO: Red
     </div>
@@ -1836,7 +1717,7 @@
     <div
       class="link audio-chat interact"
       on:click={() => {
-        audioChatActive = true;
+        audioChatActive = true
       }}>
       ~ ~ Test audio chat ~ ~
     </div>

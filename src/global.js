@@ -12,15 +12,12 @@ export const KEYBOARD = {
 
 export const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"];
 
-// export const MAP_WIDTH = 4096;
-// export const MAP_HEIGHT = 4096;
-export const MAP_WIDTH = 5000;
-export const MAP_HEIGHT = 5000;
+export const MAP_WIDTH = 4000;
+export const MAP_HEIGHT = 4000;
 
 // const mainFormat = "MMM dd yyyy – HH:mm"
 // const mainFormat = "MMM dd – HH:mm"
 const mainFormat = "MMM dd yyyy"
-
 
 export const formattedDate = (start, end) => {
     if (!start) {

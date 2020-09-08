@@ -205,3 +205,60 @@
         //     console.log("CHAT ROOM: JOIN ERROR", e);
         //     Sentry.captureException(e);
         //   });
+
+
+                         // const tweenPath = (index = 0) => {
+                  //   let targetWaypoint = player.path.waypoints[index];
+
+                  //   if (localPlayers[sessionId].isSelf) {
+                  //     console.log("=> TARGET WAYPOINT:", index);
+                  //     console.log("–– X:", targetWaypoint.x);
+                  //     console.log("–– Y:", targetWaypoint.y);
+                  //     console.log("–– Direction:", targetWaypoint.direction);
+                  //     console.log("–– Steps:", targetWaypoint.steps);
+                  //     console.log("= = = = =");
+
+                  //     debugWaypointIndex = index;
+                  //     debugWaypointX = targetWaypoint.x;
+                  //     debugWaypointY = targetWaypoint.y;
+                  //     debugWaypointDirection = targetWaypoint.direction;
+                  //     debugWaypointSteps = targetWaypoint.steps;
+                  //   }
+
+                  //   localPlayers[sessionId].avatar.setAnimation(
+                  //     targetWaypoint.direction
+                  //   );
+
+                  //   tweener
+                  //     .add(localPlayers[sessionId].avatar)
+                  //     .to(targetWaypoint, targetWaypoint.steps * SPEED)
+                  //     .then(() => {
+                  //       if (localPlayers[sessionId].isSelf) {
+                  //         console.log("! ARRIVED AT:", index);
+                  //         console.log("= = = = =");
+                  //       }
+                  //       if (index === player.path.waypoints.length - 1) {
+                  //         if (localPlayers[sessionId].isSelf) {
+                  //           hideWaypoints();
+                  //           hidePath();
+                  //           hideFullPath();
+                  //           console.log("# # # # # #");
+                  //           console.log("DONE");
+                  //           console.log("# # # # # #");
+                  //           hideTarget();
+                  //           inMotion = false;
+                  //           debugWaypointIndex = 0;
+                  //           debugWaypointTotal = 0;
+                  //           debugWaypointX = 0;
+                  //           debugWaypointY = 0;
+                  //           debugWaypointDirection = "";
+                  //           debugWaypointSteps = 0;
+                  //         }
+                  //         localPlayers[sessionId].avatar.setAnimation("rest");
+                  //       } else {
+                  //         tweenPath(index + 1);
+                  //       }
+                  //     });
+                  // };
+
+                  // tweenPath();
