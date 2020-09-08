@@ -1466,6 +1466,13 @@
       <!-- TITLE -->
       <div class="title"><strong>{currentCaseStudy.title}</strong></div>
 
+      <!-- FILES -->
+      {#each currentCaseStudy.files as f, index (f._key)}
+        <div in:fade={{ delay: 100 * index }}>
+          <div class="title">{f.title}</div>
+        </div>
+      {/each}
+
       <!-- IMAGE -->
       <div>
         <img
