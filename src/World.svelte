@@ -56,7 +56,6 @@
       // console.log(hiddenTime)
       // pageVisible = false
     } else {
-      console.log('SHOWN')
       let timeDiff = Date.now() - hiddenTime
       deltaJump = Math.round(timeDiff / 16.6666)
       console.log(deltaJump)
@@ -213,7 +212,7 @@
         playersInProximity.push(localPlayers[k]);
       }
     }
-    console.dir(playersInProximity);
+    // console.dir(playersInProximity);
   }
 
   // GAME LOOP
@@ -366,7 +365,7 @@
     // http://localhost:5000/
 
     graphicsSettings.then((graphicsSettings) => {
-      console.dir(graphicsSettings.mapLink.mainImageUrl)
+      // console.dir(graphicsSettings.mapLink.mainImageUrl)
       miniImg = graphicsSettings.mapLink.mainImageUrl
 
       let spriteUrl = get(
@@ -374,10 +373,10 @@
         'activeAvatars[0].spriteJsonURL',
         '/sprites/avatar.json'
       )
-      console.log(spriteUrl)
+      // console.log(spriteUrl)
 
       let mapUrl = get(graphicsSettings, 'mapLink.mainImageUrl', '')
-      console.log(mapUrl)
+      // console.log(mapUrl)
 
       loader
         .add('map', mapUrl)
@@ -386,15 +385,15 @@
           let map = new PIXI.Sprite(resources.map.texture)
           map.width = MAP_WIDTH
           map.height = MAP_HEIGHT
-          viewport.addChild(map)
+          viewport.addChildAt(map, 0)
 
-          console.dir(resources)
+          // console.dir(resources)
 
           sheet.push(resources['avatar'].spritesheet)
 
           let avatarIndex = 0
 
-          console.dir(sheet)
+          // console.dir(sheet)
 
           // CREATE PLAYER
           const createPlayer = (playerOptions, sessionId) => {
@@ -439,8 +438,8 @@
             }
             avatar.x = playerOptions.x
             avatar.y = playerOptions.y
-            console.log('height', avatar.height)
-            console.log('width', avatar.width)
+            // console.log('height', avatar.height)
+            // console.log('width', avatar.width)
             avatar.pivot.x = avatar.width / 2
             avatar.pivot.y = avatar.height / 2
             avatar.interactive = true
@@ -724,47 +723,62 @@
         })
 
       // ADD CASE STUDIES
-      // caseStudies.then((caseStudies) => {
-      //   console.dir(caseStudies)
-      //   caseStudies.forEach((cs, i) => {
-      //     console.dir(cs.spriteLink)
+      caseStudies.then((caseStudies) => {
+        // console.dir(caseStudies)
+        caseStudies.forEach((cs, i) => {
+          // console.dir(cs.spriteLink)
 
-      //     let spriteUrl = get(cs, 'spriteLink.spriteJsonURL', '')
+          let spriteUrl = get(cs, 'spriteLink.spriteJsonURL', '')
 
-      //     loader.add('csSprite', spriteUrl).load((loader, resources) => {
-      //       console.dir(resources)
-      //       let graphics = new PIXI.Graphics()
-      //       graphics.beginFill(0xf012d5)
-      //       graphics.alpha = 1
-      //       graphics.drawRect(cs.x, cs.y, 140, 140)
-      //       graphics.endFill()
-      //       graphics.title = cs.title
-      //       graphics.index = i
-      //       graphics.interactive = true
+          console.dir(spriteUrl)
 
-      //       const onDown = (e) => {
-      //         caseStudyActive = true
-      //         currentCaseStudy = caseStudies[graphics.index]
-      //         e.stopPropagation()
-      //       }
+          const csLoader = new PIXI.Loader(); 
 
-      //       const onEnter = (e) => {
-      //         popUpText = graphics.title
-      //       }
+          csLoader.add('csSprite', spriteUrl).load((loader, resources) => {
+            // console.dir(resources)
 
-      //       const onLeave = (e) => {
-      //         popUpText = false
-      //       }
+            console.dir(resources['csSprite'].spritesheet.animations['frames'])
 
-      //       graphics.on('mousedown', onDown)
-      //       graphics.on('touchstart', onDown)
-      //       graphics.on('mouseover', onEnter)
-      //       graphics.on('mouseout', onLeave)
+            let frames = new PIXI.AnimatedSprite(resources['csSprite'].spritesheet.animations['frames'])
+            frames.visible = true
+            frames.animationSpeed = 0.02
+            frames.play()
 
-      //       viewport.addChild(graphics)
-      //     })
-      //   })
-      // })
+            let caseStudyLocation = new PIXI.Container()
+            caseStudyLocation.addChild(frames)
+            caseStudyLocation.x = cs.x
+            caseStudyLocation.y = cs.y
+            caseStudyLocation.pivot.x = caseStudyLocation.width / 2
+            caseStudyLocation.pivot.y = caseStudyLocation.height / 2
+            caseStudyLocation.title = cs.title
+            caseStudyLocation.index = i
+            caseStudyLocation.interactive = true
+
+            const onDown = (e) => {
+              caseStudyActive = true
+              currentCaseStudy = caseStudies[caseStudyLocation.index]
+              e.stopPropagation()
+            }
+
+            const onEnter = (e) => {
+              popUpText = caseStudyLocation.title
+            }
+
+            const onLeave = (e) => {
+              popUpText = false
+            }
+
+            caseStudyLocation.on('mousedown', onDown)
+            caseStudyLocation.on('touchstart', onDown)
+            caseStudyLocation.on('mouseover', onEnter)
+            caseStudyLocation.on('mouseout', onLeave)
+
+            console.dir(caseStudyLocation)
+
+            viewport.addChild(caseStudyLocation)
+          })
+        })
+      })
 
       return graphicsSettings
     })
