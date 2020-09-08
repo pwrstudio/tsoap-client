@@ -20,7 +20,6 @@
   import { links } from "svelte-routing";
 
   const chance = new Chance();
-  // import Tweener from "tweener";
 
   // COMPONENTS
   import Chat from "./Chat.svelte";
@@ -107,15 +106,11 @@
     colorTrans
   } from "./global.js";
 
-  const SPEED = 0.01;
-  // const tweener = new Tweener(1 / 60);
-
   // ** SANITY
   // const query = "*[slug.current == $slug]{..., author[]->{title, slug}}[0]";
   // const params = { slug: slug };
-  const query = "*[_type == 'event']";
 
-  let events = loadData(query);
+  let events = loadData("*[_type == 'event']");
   let caseStudies = loadData("*[_type == 'caseStudy']");
   let graphicsSettings = loadData(
     "*[_id == 'graphics-settings']{..., activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
@@ -196,6 +191,26 @@
   let ticker = {};
   let sheet = [];
 
+  const checkPlayerProximity = () => {
+    playersInProximity = [];
+    for (let k in localPlayers) {
+      if (
+        !localPlayers[k].isSelf &&
+        Math.abs(
+          localPlayers[k].avatar.x -
+            localPlayers[$localUserSessionID].avatar.x
+        ) < 200 &&
+        Math.abs(
+          localPlayers[k].avatar.y -
+            localPlayers[$localUserSessionID].avatar.y
+        ) < 200
+      ) {
+        playersInProximity.push(localPlayers[k]);
+      }
+    }
+    console.dir(playersInProximity);
+  }
+
   // GAME LOOP
   const updatePositions = delta => {
     let deltaRounded = Math.round(delta) + deltaJump;
@@ -221,12 +236,12 @@
             localPlayers[key].avatar.setAnimation(step.direction);
             localPlayers[key].avatar.x = step.x;
             localPlayers[key].avatar.y = step.y;
-            if (key === $localUserSessionID) {
-              debugWaypointX = step.x;
-              debugWaypointY = step.y;
-              debugWaypointDirection = step.direction;
-              debugWaypointSteps = step.steps;
-            }
+            // if (key === $localUserSessionID) {
+            //   debugWaypointX = step.x;
+            //   debugWaypointY = step.y;
+            //   debugWaypointDirection = step.direction;
+            //   debugWaypointSteps = step.steps;
+            // }
           }
         } else {
           localPlayers[key].avatar.setAnimation("rest");
@@ -240,23 +255,7 @@
             }
           }
           delete moveQ[key];
-          playersInProximity = [];
-          for (let k in localPlayers) {
-            if (
-              !localPlayers[k].isSelf &&
-              Math.abs(
-                localPlayers[k].avatar.x -
-                  localPlayers[$localUserSessionID].avatar.x
-              ) < 200 &&
-              Math.abs(
-                localPlayers[k].avatar.y -
-                  localPlayers[$localUserSessionID].avatar.y
-              ) < 200
-            ) {
-              playersInProximity.push(localPlayers[k]);
-            }
-          }
-          console.dir(playersInProximity);
+          checkPlayerProximity()
         }
       } else {
         delete moveQ[key];
@@ -276,14 +275,8 @@
   };
 
   const hideTarget = () => {
-    // const tweener = new Tweener(1 / 60);
-    // tweener
-    //   .add(targetGraphics)
-    //   .to({ alpha: 0 }, 0.5)
-    //   .then(() => {
     viewport.removeChild(targetGraphics);
     targetGraphics = {};
-    // });
   };
 
   const showWaypoints = path => {
@@ -365,8 +358,6 @@
     gameContainer.appendChild(app.view);
 
     // LOADER
-    // http://localhost:5000/
-
     graphicsSettings.then(graphicsSettings => {
       console.dir(graphicsSettings);
 
@@ -508,7 +499,6 @@
           };
 
           // ADD CASE STUDIES
-
           caseStudies.then(caseStudies => {
             console.dir(caseStudies);
             caseStudies.forEach((cs, i) => {
@@ -588,18 +578,12 @@
 
               // PLAYER: REMOVE
               gameRoom.state.players.onRemove = (player, sessionId) => {
-                // console.log('REMOVE')
-                // console.dir(sessionId)
-                // console.dir(localPlayers[sessionId])
-                // console.dir(localPlayers)
                 try {
-                  // console.dir(viewport)
                   viewport.removeChild(localPlayers[sessionId].avatar);
                   // HACK
                   setTimeout(() => {
                     delete localPlayers[sessionId];
                     localPlayers = localPlayers;
-                    // console.dir(localPlayers)
                   }, 500);
                 } catch (err) {
                   Sentry.captureException(err);
@@ -699,23 +683,7 @@
                   }
                   localPlayers[sessionId].avatar.x = player.x;
                   localPlayers[sessionId].avatar.y = player.y;
-
-                  playersInProximity = [];
-                  for (let k in localPlayers) {
-                    if (
-                      !localPlayers[k].isSelf &&
-                      Math.abs(
-                        localPlayers[k].avatar.x -
-                          localPlayers[$localUserSessionID].avatar.x
-                      ) < 200 &&
-                      Math.abs(
-                        localPlayers[k].avatar.y -
-                          localPlayers[$localUserSessionID].avatar.y
-                      ) < 200
-                    ) {
-                      playersInProximity.push(localPlayers[k]);
-                    }
-                  }
+                  checkPlayerProximity()
                 }
               };
 
@@ -1795,18 +1763,6 @@
       <div>
         <strong>Direction:</strong>
         {debugWaypointDirection}
-      </div>
-      <div>
-        <strong>Steps:</strong>
-        {debugWaypointSteps}
-      </div>
-      <div>
-        <strong>Speed:</strong>
-        {SPEED}
-      </div>
-      <div>
-        <strong>Duration:</strong>
-        {SPEED * debugWaypointSteps * 1000}ms
       </div>
     </div>
   {/if}
