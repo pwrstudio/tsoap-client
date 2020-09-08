@@ -100,22 +100,18 @@
   // GLOBAL
   import {
     formattedDate,
-    caseStudyList,
     KEYBOARD,
-    WIDTH,
-    HEIGHT,
+    MAP_WIDTH,
+    MAP_HEIGHT,
     colorTrans
   } from "./global.js";
 
-  const SPEED = 0.01;
   // const tweener = new Tweener(1 / 60);
 
   // ** SANITY
   // const query = "*[slug.current == $slug]{..., author[]->{title, slug}}[0]";
   // const params = { slug: slug };
-  const query = "*[_type == 'event']";
-
-  let events = loadData(query);
+  let events = loadData("*[_type == 'event']");
   let caseStudies = loadData("*[_type == 'caseStudy']");
   let graphicsSettings = loadData(
     "*[_id == 'graphics-settings']{..., activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
@@ -385,8 +381,8 @@
         .load((loader, resources) => {
           // console.dir(resources.map.texture);
           let map = new PIXI.Sprite(resources.map.texture);
-          map.width = 5000;
-          map.height = 5000;
+          map.width = MAP_WIDTH;
+          map.height = MAP_HEIGHT;
           viewport.addChild(map);
 
           console.dir(resources);
@@ -453,11 +449,13 @@
             };
             avatar.x = playerOptions.x;
             avatar.y = playerOptions.y;
-            // avatar.height = 80
-            // avatar.width = 60
-            avatar.scale.set(0.5);
-            avatar.pivot.x = 57;
-            avatar.pivot.y = 75;
+            // avatar.height = 100;
+            // avatar.width = 100;
+            // avatar.scale.set(5);
+            console.log("height", avatar.height);
+            console.log("width", avatar.width);
+            avatar.pivot.x = avatar.width / 2;
+            avatar.pivot.y = avatar.height / 2;
             avatar.interactive = true;
 
             // console.dir(avatar.children);
@@ -860,8 +858,8 @@
   onMount(async () => {
     // PIXI: APP
     app = new PIXI.Application({
-      width: WIDTH,
-      height: HEIGHT,
+      width: MAP_WIDTH,
+      height: MAP_HEIGHT,
       resolution: 1
     });
 
@@ -873,8 +871,8 @@
     viewport = new Viewport({
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
-      worldWidth: WIDTH,
-      worldHeight: HEIGHT,
+      worldWidth: MAP_WIDTH,
+      worldHeight: MAP_HEIGHT,
       interaction: app.renderer.plugins.interaction
     });
 
@@ -1799,14 +1797,6 @@
       <div>
         <strong>Steps:</strong>
         {debugWaypointSteps}
-      </div>
-      <div>
-        <strong>Speed:</strong>
-        {SPEED}
-      </div>
-      <div>
-        <strong>Duration:</strong>
-        {SPEED * debugWaypointSteps * 1000}ms
       </div>
     </div>
   {/if}
