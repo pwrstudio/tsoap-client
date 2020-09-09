@@ -56,7 +56,6 @@
       // console.log(hiddenTime)
       // pageVisible = false
     } else {
-      console.log('SHOWN')
       let timeDiff = Date.now() - hiddenTime
       deltaJump = Math.round(timeDiff / 16.6666)
       console.log(deltaJump)
@@ -196,6 +195,24 @@
   let ticker = {}
   let sheet = []
 
+  const checkPlayerProximity = () => {
+    playersInProximity = []
+    for (let k in localPlayers) {
+      if (
+        !localPlayers[k].isSelf &&
+        Math.abs(
+          localPlayers[k].avatar.x - localPlayers[$localUserSessionID].avatar.x
+        ) < 200 &&
+        Math.abs(
+          localPlayers[k].avatar.y - localPlayers[$localUserSessionID].avatar.y
+        ) < 200
+      ) {
+        playersInProximity.push(localPlayers[k])
+      }
+    }
+    // console.dir(playersInProximity);
+  }
+
   // GAME LOOP
   const updatePositions = (delta) => {
     let deltaRounded = Math.round(delta) + deltaJump
@@ -221,12 +238,12 @@
             localPlayers[key].avatar.setAnimation(step.direction)
             localPlayers[key].avatar.x = step.x
             localPlayers[key].avatar.y = step.y
-            if (key === $localUserSessionID) {
-              debugWaypointX = step.x
-              debugWaypointY = step.y
-              debugWaypointDirection = step.direction
-              debugWaypointSteps = step.steps
-            }
+            // if (key === $localUserSessionID) {
+            //   debugWaypointX = step.x;
+            //   debugWaypointY = step.y;
+            //   debugWaypointDirection = step.direction;
+            //   debugWaypointSteps = step.steps;
+            // }
           }
         } else {
           localPlayers[key].avatar.setAnimation('rest')
@@ -240,23 +257,7 @@
             }
           }
           delete moveQ[key]
-          playersInProximity = []
-          for (let k in localPlayers) {
-            if (
-              !localPlayers[k].isSelf &&
-              Math.abs(
-                localPlayers[k].avatar.x -
-                  localPlayers[$localUserSessionID].avatar.x
-              ) < 200 &&
-              Math.abs(
-                localPlayers[k].avatar.y -
-                  localPlayers[$localUserSessionID].avatar.y
-              ) < 200
-            ) {
-              playersInProximity.push(localPlayers[k])
-            }
-          }
-          console.dir(playersInProximity)
+          checkPlayerProximity()
         }
       } else {
         delete moveQ[key]
@@ -362,7 +363,7 @@
     // http://localhost:5000/
 
     graphicsSettings.then((graphicsSettings) => {
-      console.dir(graphicsSettings.mapLink.mainImageUrl)
+      // console.dir(graphicsSettings.mapLink.mainImageUrl)
       miniImg = graphicsSettings.mapLink.mainImageUrl
 
       let spriteUrl = get(
@@ -370,10 +371,10 @@
         'activeAvatars[0].spriteJsonURL',
         '/sprites/avatar.json'
       )
-      console.log(spriteUrl)
+      // console.log(spriteUrl)
 
       let mapUrl = get(graphicsSettings, 'mapLink.mainImageUrl', '')
-      console.log(mapUrl)
+      // console.log(mapUrl)
 
       let gridUrl = get(graphicsSettings, 'mapLink.pathfindingGridUrl', '')
       console.log(gridUrl)
@@ -395,13 +396,13 @@
             viewport.addChild(grid)
           }
 
-          console.dir(resources)
+          // console.dir(resources)
 
           sheet.push(resources['avatar'].spritesheet)
 
           let avatarIndex = 0
 
-          console.dir(sheet)
+          // console.dir(sheet)
 
           // CREATE PLAYER
           const createPlayer = (playerOptions, sessionId) => {
@@ -446,8 +447,8 @@
             }
             avatar.x = playerOptions.x
             avatar.y = playerOptions.y
-            console.log('height', avatar.height)
-            console.log('width', avatar.width)
+            // console.log('height', avatar.height)
+            // console.log('width', avatar.width)
             avatar.pivot.x = avatar.width / 2
             avatar.pivot.y = avatar.height / 2
             avatar.interactive = true
@@ -590,23 +591,7 @@
                   }
                   localPlayers[sessionId].avatar.x = player.x
                   localPlayers[sessionId].avatar.y = player.y
-
-                  playersInProximity = []
-                  for (let k in localPlayers) {
-                    if (
-                      !localPlayers[k].isSelf &&
-                      Math.abs(
-                        localPlayers[k].avatar.x -
-                          localPlayers[$localUserSessionID].avatar.x
-                      ) < 200 &&
-                      Math.abs(
-                        localPlayers[k].avatar.y -
-                          localPlayers[$localUserSessionID].avatar.y
-                      ) < 200
-                    ) {
-                      playersInProximity.push(localPlayers[k])
-                    }
-                  }
+                  checkPlayerProximity()
                 }
               }
 
@@ -747,47 +732,64 @@
         })
 
       // ADD CASE STUDIES
-      // caseStudies.then((caseStudies) => {
-      //   console.dir(caseStudies)
-      //   caseStudies.forEach((cs, i) => {
-      //     console.dir(cs.spriteLink)
+      caseStudies.then((caseStudies) => {
+        // console.dir(caseStudies)
+        caseStudies.forEach((cs, i) => {
+          // console.dir(cs.spriteLink)
 
-      //     let spriteUrl = get(cs, 'spriteLink.spriteJsonURL', '')
+          let spriteUrl = get(cs, 'spriteLink.spriteJsonURL', '')
 
-      //     loader.add('csSprite', spriteUrl).load((loader, resources) => {
-      //       console.dir(resources)
-      //       let graphics = new PIXI.Graphics()
-      //       graphics.beginFill(0xf012d5)
-      //       graphics.alpha = 1
-      //       graphics.drawRect(cs.x, cs.y, 140, 140)
-      //       graphics.endFill()
-      //       graphics.title = cs.title
-      //       graphics.index = i
-      //       graphics.interactive = true
+          console.dir(spriteUrl)
 
-      //       const onDown = (e) => {
-      //         caseStudyActive = true
-      //         currentCaseStudy = caseStudies[graphics.index]
-      //         e.stopPropagation()
-      //       }
+          const csLoader = new PIXI.Loader()
 
-      //       const onEnter = (e) => {
-      //         popUpText = graphics.title
-      //       }
+          csLoader.add('csSprite', spriteUrl).load((loader, resources) => {
+            // console.dir(resources)
 
-      //       const onLeave = (e) => {
-      //         popUpText = false
-      //       }
+            console.dir(resources['csSprite'].spritesheet.animations['frames'])
 
-      //       graphics.on('mousedown', onDown)
-      //       graphics.on('touchstart', onDown)
-      //       graphics.on('mouseover', onEnter)
-      //       graphics.on('mouseout', onLeave)
+            let frames = new PIXI.AnimatedSprite(
+              resources['csSprite'].spritesheet.animations['frames']
+            )
+            frames.visible = true
+            frames.animationSpeed = 0.02
+            frames.play()
 
-      //       viewport.addChild(graphics)
-      //     })
-      //   })
-      // })
+            let caseStudyLocation = new PIXI.Container()
+            caseStudyLocation.addChild(frames)
+            caseStudyLocation.x = cs.x
+            caseStudyLocation.y = cs.y
+            caseStudyLocation.pivot.x = caseStudyLocation.width / 2
+            caseStudyLocation.pivot.y = caseStudyLocation.height / 2
+            caseStudyLocation.title = cs.title
+            caseStudyLocation.index = i
+            caseStudyLocation.interactive = true
+
+            const onDown = (e) => {
+              caseStudyActive = true
+              currentCaseStudy = caseStudies[caseStudyLocation.index]
+              e.stopPropagation()
+            }
+
+            const onEnter = (e) => {
+              popUpText = caseStudyLocation.title
+            }
+
+            const onLeave = (e) => {
+              popUpText = false
+            }
+
+            caseStudyLocation.on('mousedown', onDown)
+            caseStudyLocation.on('touchstart', onDown)
+            caseStudyLocation.on('mouseover', onEnter)
+            caseStudyLocation.on('mouseout', onLeave)
+
+            console.dir(caseStudyLocation)
+
+            viewport.addChild(caseStudyLocation)
+          })
+        })
+      })
 
       return graphicsSettings
     })
@@ -1477,6 +1479,13 @@
     <div>
       <!-- TITLE -->
       <div class="title"><strong>{currentCaseStudy.title}</strong></div>
+
+      <!-- FILES -->
+      {#each currentCaseStudy.files as f, index (f._key)}
+        <div in:fade={{ delay: 100 * index }}>
+          <div class="title">{f.title}</div>
+        </div>
+      {/each}
 
       <!-- IMAGE -->
       <div>
