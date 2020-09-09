@@ -116,7 +116,7 @@
     "*[_type == 'caseStudy']{..., spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}"
   )
   let graphicsSettings = loadData(
-    "*[_id == 'graphics-settings']{..., mapLink->{'mainImageUrl': mainImage.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
+    "*[_id == 'graphics-settings']{..., mapLink->{'mainImageUrl': mainImage.asset->url, 'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
   )
 
   // events.then((events) => {
@@ -375,14 +375,25 @@
       let mapUrl = get(graphicsSettings, 'mapLink.mainImageUrl', '')
       console.log(mapUrl)
 
+      let gridUrl = get(graphicsSettings, 'mapLink.pathfindingGridUrl', '')
+      console.log(gridUrl)
+
       loader
         .add('map', mapUrl)
+        .add('grid', gridUrl)
         .add('avatar', spriteUrl)
         .load((loader, resources) => {
           let map = new PIXI.Sprite(resources.map.texture)
           map.width = MAP_WIDTH
           map.height = MAP_HEIGHT
           viewport.addChild(map)
+          if (debug) {
+            let grid = new PIXI.Sprite(resources.grid.texture)
+            grid.width = MAP_WIDTH
+            grid.height = MAP_HEIGHT
+            grid.alpha = 0.5
+            viewport.addChild(grid)
+          }
 
           console.dir(resources)
 
@@ -783,6 +794,9 @@
   }
 
   onMount(async () => {
+    // GLOBAL SCALE MODE SETTING
+    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
+
     // PIXI: APP
     app = new PIXI.Application({
       width: MAP_WIDTH,
