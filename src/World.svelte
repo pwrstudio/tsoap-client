@@ -1298,6 +1298,11 @@
       transform: translateX(370px);
       cursor: pointer;
     }
+
+    @include screen-size('small') {
+      display: none;
+    }
+
   }
 
   .passive-content-slot {
@@ -1344,6 +1349,11 @@
         object-fit: cover;
       }
     }
+
+    @include screen-size('small') {
+      display: none;
+    }
+
   }
 
   .active-content-slot {
@@ -1379,6 +1389,11 @@
     .date {
       margin-bottom: 20px;
     }
+
+    @include screen-size('small') {
+      display: none;
+    }
+
   }
 </style>
 
