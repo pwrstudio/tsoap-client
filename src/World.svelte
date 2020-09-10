@@ -115,7 +115,7 @@
     "*[_type == 'caseStudy']{..., spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}"
   )
   let graphicsSettings = loadData(
-    "*[_id == 'graphics-settings']{..., mapLink->{'mainImageUrl': mainImage.asset->url, 'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
+    "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
   )
 
   // events.then((events) => {
@@ -364,20 +364,23 @@
 
     graphicsSettings.then((graphicsSettings) => {
       // console.dir(graphicsSettings.mapLink.mainImageUrl)
-      miniImg = graphicsSettings.mapLink.mainImageUrl
+      miniImg = urlFor(graphicsSettings.mapLink.mainImage.asset)
+                .width(200)
+                .height(200)
+                .quality(90)
+                .auto('format')
+                .url()
 
       let spriteUrl = get(
         graphicsSettings,
         'activeAvatars[0].spriteJsonURL',
         '/sprites/avatar.json'
       )
-      // console.log(spriteUrl)
 
-      let mapUrl = get(graphicsSettings, 'mapLink.mainImageUrl', '')
-      // console.log(mapUrl)
-
+      let mapUrl = urlFor(graphicsSettings.mapLink.mainImage.asset).url()
+      console.log('mapUrl', mapUrl)
       let gridUrl = get(graphicsSettings, 'mapLink.pathfindingGridUrl', '')
-      console.log(gridUrl)
+      console.log('gridUrl', gridUrl)
 
       loader
         .add('map', mapUrl)
@@ -392,11 +395,9 @@
             let grid = new PIXI.Sprite(resources.grid.texture)
             grid.width = MAP_WIDTH
             grid.height = MAP_HEIGHT
-            grid.alpha = 0.5
+            grid.alpha = 0.85
             viewport.addChild(grid)
           }
-
-          // console.dir(resources)
 
           sheet.push(resources['avatar'].spritesheet)
 
