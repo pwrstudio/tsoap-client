@@ -193,6 +193,8 @@
   let caseStudyLayer = {}
   let playerLayer = {}
   let landMarkLayer = {}
+  let activeContentClosed = false
+  let passiveContentClosed = false
 
   // COLYSEUS
   // const client = new Colyseus.Client('ws://localhost:2567')
@@ -1414,20 +1416,40 @@
     }
 
     .cs-item {
-      width: 200px;
-      margin-right: 10px;
-      margin-bottom: 10px;
+      width: 160px;
+      margin: 10px;
       float: left;
+      cursor: pointer;
+
       img,
       video {
+        max-width: 100%;
         width: 100%;
         height: auto;
         object-fit: cover;
+      }
+
+      &:hover {
+        background: $COLOR_MID_2;
       }
     }
 
     @include screen-size("small") {
       display: none;
+    }
+
+    .close {
+      margin-bottom: 20px;
+      position: absolute;
+      top: 0px;
+      right: 10px;
+      font-size: 48px;
+      color: black;
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.2);
+      }
     }
   }
 
@@ -1467,6 +1489,20 @@
 
     @include screen-size("small") {
       display: none;
+    }
+
+    .close {
+      margin-bottom: 20px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 48px;
+      color: black;
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.2);
+      }
     }
   }
 </style>
@@ -1560,13 +1596,15 @@
 
 <!-- PASSIVE CONTENT: CASE STUDY -->
 {#if caseStudyActive}
-  <div
-    class="passive-content-slot"
-    transition:fly={{ y: 200 }}
-    on:click={(e) => {
-      caseStudyActive = false
-    }}>
+  <div class="passive-content-slot" transition:fly={{ y: 200 }}>
     <div>
+      <div
+        class="close"
+        on:click={(e) => {
+          caseStudyActive = false
+        }}>
+        ×
+      </div>
       <!-- TITLE -->
       <div class="title"><strong>{currentCaseStudy.title}</strong></div>
 
@@ -1599,19 +1637,28 @@
 
 <!-- PASSIVE CONTENT: CASE STUDY OVERVIEW -->
 {#if caseStudyBoxActive}
-  <div
-    class="passive-content-slot"
-    transition:fly={{ y: 200 }}
-    on:click={() => {
-      caseStudyBoxActive = !caseStudyBoxActive
-    }}>
+  <div class="passive-content-slot" transition:fly={{ y: 200 }}>
     <div>
+      <div
+        class="close"
+        on:click={(e) => {
+          caseStudyBoxActive = false
+        }}>
+        ×
+      </div>
       <!-- TITLE -->
       <div class="title"><strong>Case studies</strong></div>
 
       {#await caseStudies then caseStudies}
         {#each caseStudies as cs, index (cs._id)}
-          <div class="cs-item" in:fade={{ delay: 100 * index }}>
+          <div
+            class="cs-item"
+            in:fade={{ delay: 100 * index }}
+            on:click={(e) => {
+              caseStudyBoxActive = false
+              caseStudyActive = true
+              currentCaseStudy = caseStudies[index]
+            }}>
             <div class="title">{cs.title}</div>
             <img
               src={urlFor(cs.mainImage.asset)
@@ -1632,10 +1679,15 @@
   <div
     class="passive-content-slot"
     in:fly={{ y: 200, duration: 300 }}
-    out:fly={{ y: 200, duration: 300 }}
-    on:click={() => {
-      eventActive = false
-    }}>
+    out:fly={{ y: 200, duration: 300 }}>
+    <div
+      class="close"
+      on:click={(e) => {
+        eventActive = false
+      }}>
+      ×
+    </div>
+
     <div>
       <!-- TITLE -->
       <div class="title"><strong>{eventActive.title}</strong></div>
@@ -1664,9 +1716,16 @@
 {/if}
 
 <!-- ACTIVE CONTENT: STREAM -->
-{#if $localUserArea === 4}
+{#if $localUserArea === 4 && !activeContentClosed}
   <div class="active-content-slot" transition:fly={{ y: -200 }}>
     <video src="/test.mp4" muted autoplay loop />
+    <div
+      class="close"
+      on:click={(e) => {
+        activeContentClosed = true
+      }}>
+      ×
+    </div>
   </div>
 {/if}
 
