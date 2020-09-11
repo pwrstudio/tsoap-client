@@ -189,6 +189,11 @@
   let fullPathGraphics = {}
   let wayPointGraphics = {}
 
+  let mapLayer = {}
+  let caseStudyLayer = {}
+  let playerLayer = {}
+  let landMarkLayer = {}
+
   // COLYSEUS
   // const client = new Colyseus.Client('ws://localhost:2567')
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
@@ -397,13 +402,13 @@
           let map = new PIXI.Sprite(resources.map.texture)
           map.width = MAP_WIDTH
           map.height = MAP_HEIGHT
-          viewport.addChild(map)
+          mapLayer.addChild(map)
           if (debug) {
             let grid = new PIXI.Sprite(resources.grid.texture)
             grid.width = MAP_WIDTH
             grid.height = MAP_HEIGHT
             grid.alpha = 0.85
-            viewport.addChild(grid)
+            mapLayer.addChild(grid)
           }
 
           sheet.push(resources["avatar"].spritesheet)
@@ -432,6 +437,17 @@
             left.visible = false
             right.visible = false
 
+            rest.height = 60
+            rest.width = 60
+            front.height = 60
+            front.width = 60
+            back.height = 60
+            back.width = 60
+            left.height = 60
+            left.width = 60
+            right.height = 60
+            right.width = 60
+
             rest.animationSpeed = 0.02
             front.animationSpeed = 0.1
             back.animationSpeed = 0.1
@@ -455,17 +471,8 @@
             }
             avatar.x = playerOptions.x
             avatar.y = playerOptions.y
-            // avatar.height = avatar.height * 3
-            // avatar.width = avatar.width * 3
-            // console.log("height", avatar.height)
-            // console.log("width", avatar.width)
-            // avatar.scale = 3
             console.log("height", avatar.height)
             console.log("width", avatar.width)
-            // avatar.height = 60
-            // avatar.width = 60
-            // avatar.pivot.x = 30
-            // avatar.pivot.y = 30
             avatar.pivot.x = avatar.width / 2
             avatar.pivot.y = avatar.height / 2
             avatar.interactive = true
@@ -502,7 +509,7 @@
             player.avatar.on("mouseover", onEnter)
             player.avatar.on("mouseout", onLeave)
 
-            viewport.addChild(player.avatar)
+            playerLayer.addChild(player.avatar)
 
             if (player.isSelf) {
               viewport.follow(player.avatar)
@@ -752,21 +759,23 @@
       caseStudies.then((caseStudies) => {
         // console.dir(caseStudies)
         caseStudies.forEach((cs, i) => {
-          // console.dir(cs.spriteLink)
+          console.dir(cs)
 
           let spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
 
-          console.dir(spriteUrl)
+          // console.dir(spriteUrl)
+
+          const spriteId = "caseStudy-" + cs._id
 
           const csLoader = new PIXI.Loader()
 
-          csLoader.add("csSprite", spriteUrl).load((loader, resources) => {
+          csLoader.add(spriteId, spriteUrl).load((loader, resources) => {
             // console.dir(resources)
 
-            console.dir(resources["csSprite"].spritesheet.animations["frames"])
+            // console.dir(resources["csSprite"].spritesheet.animations["frames"])
 
             let frames = new PIXI.AnimatedSprite(
-              resources["csSprite"].spritesheet.animations["frames"]
+              resources[spriteId].spritesheet.animations["frames"]
             )
             frames.visible = true
             frames.animationSpeed = 0.02
@@ -801,9 +810,9 @@
             caseStudyLocation.on("mouseover", onEnter)
             caseStudyLocation.on("mouseout", onLeave)
 
-            console.dir(caseStudyLocation)
+            // console.dir(caseStudyLocation)
 
-            viewport.addChild(caseStudyLocation)
+            caseStudyLayer.addChild(caseStudyLocation)
           })
         })
       })
@@ -812,22 +821,24 @@
       landMarks.then((landMarks) => {
         // console.dir(landMarks)
         landMarks.forEach((lm, i) => {
-          console.dir(lm)
+          // console.dir(lm)
 
           let spriteUrl = get(lm, "spriteJsonURL", "")
           // let spriteUrl = urlFor(lm.spriteLink.spriteJsonURL).url()
 
-          console.log("landmark sprite json url", spriteUrl)
+          // console.log("landmark sprite json url", spriteUrl)
+
+          const spriteId = "landMark-" + lm._id
 
           const lmLoader = new PIXI.Loader()
 
-          lmLoader.add("lmSprite", spriteUrl).load((loader, resources) => {
+          lmLoader.add(spriteId, spriteUrl).load((loader, resources) => {
             console.dir(resources)
 
-            console.dir(resources["lmSprite"].spritesheet.animations["frames"])
+            // console.dir(resources["lmSprite"].spritesheet.animations["frames"])
 
             let frames = new PIXI.AnimatedSprite(
-              resources["lmSprite"].spritesheet.animations["frames"]
+              resources[spriteId].spritesheet.animations["frames"]
             )
             frames.visible = true
             frames.animationSpeed = 0.02
@@ -842,9 +853,9 @@
             landMarkLocation.title = lm.title
             landMarkLocation.index = i
 
-            console.dir(landMarkLocation)
+            // console.dir(landMarkLocation)
 
-            viewport.addChild(landMarkLocation)
+            landMarkLayer.addChild(landMarkLocation)
           })
         })
       })
@@ -886,6 +897,15 @@
     app.stage.addChild(viewport)
     ticker.start()
     ticker.add(updatePositions)
+
+    mapLayer = new PIXI.Container()
+    caseStudyLayer = new PIXI.Container()
+    playerLayer = new PIXI.Container()
+    landMarkLayer = new PIXI.Container()
+    viewport.addChild(mapLayer)
+    viewport.addChild(caseStudyLayer)
+    viewport.addChild(playerLayer)
+    viewport.addChild(landMarkLayer)
 
     rendererHeight = app.screen.height
     rendererWidth = app.screen.width
