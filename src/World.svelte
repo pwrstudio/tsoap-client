@@ -13,8 +13,6 @@
   import Chance from "chance"
   import get from "lodash/get"
   import has from "lodash/has"
-  import sample from "lodash/sample"
-  import tail from "lodash/tail"
   import { fade, fly, scale } from "svelte/transition"
   import { urlFor, loadData, renderBlockText } from "./sanity.js"
   import { links } from "svelte-routing"
@@ -90,9 +88,6 @@
   export let authenticate = false
   export let login = false
   export let debug = false
-  // export let position = false
-  // export let x = 0
-  // export let y = 0
   export let sso = false
   export let sig = false
 
@@ -126,9 +121,9 @@
   //   console.dir(events)
   // })
 
-  landMarks.then((landMarks) => {
-    console.dir(landMarks)
-  })
+  // landMarks.then((landMarks) => {
+  //   console.dir(landMarks)
+  // })
 
   // caseStudies.then((caseStudies) => {
   //   console.log('CASE STUDIES')
@@ -283,7 +278,6 @@
     let graphics = new PIXI.Graphics()
     graphics.beginFill(0xff0000)
     graphics.alpha = 0.8
-    graphics.zIndex = 1
     graphics.drawCircle(x, y, 10)
     graphics.endFill()
     viewport.addChild(graphics)
@@ -300,7 +294,6 @@
       let wayPointMarkers = new PIXI.Graphics()
       wayPointMarkers.beginFill(0x0000ff)
       wayPointMarkers.alpha = 0.9
-      wayPointMarkers.zIndex = 1
       path.forEach((p) => {
         wayPointMarkers.drawCircle(p.x, p.y, 2)
       })
