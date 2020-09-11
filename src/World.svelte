@@ -800,10 +800,12 @@
             }
 
             const onEnter = (e) => {
+              gameContainer.style.cursor = "pointer"
               popUpText = caseStudyLocation.title
             }
 
             const onLeave = (e) => {
+              gameContainer.style.cursor = "default"
               popUpText = false
             }
 
