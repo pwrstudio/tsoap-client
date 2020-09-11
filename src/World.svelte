@@ -6,42 +6,42 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { onMount } from 'svelte'
-  import * as Colyseus from 'colyseus.js'
-  import * as PIXI from 'pixi.js'
-  import { Viewport } from 'pixi-viewport'
-  import Chance from 'chance'
-  import get from 'lodash/get'
-  import has from 'lodash/has'
-  import sample from 'lodash/sample'
-  import tail from 'lodash/tail'
-  import { fade, fly, scale } from 'svelte/transition'
-  import { urlFor, loadData, renderBlockText } from './sanity.js'
-  import { links } from 'svelte-routing'
+  import { onMount } from "svelte"
+  import * as Colyseus from "colyseus.js"
+  import * as PIXI from "pixi.js"
+  import { Viewport } from "pixi-viewport"
+  import Chance from "chance"
+  import get from "lodash/get"
+  import has from "lodash/has"
+  import sample from "lodash/sample"
+  import tail from "lodash/tail"
+  import { fade, fly, scale } from "svelte/transition"
+  import { urlFor, loadData, renderBlockText } from "./sanity.js"
+  import { links } from "svelte-routing"
 
   const chance = new Chance()
   // import Tweener from "tweener";
 
   // COMPONENTS
-  import Chat from './Chat.svelte'
-  import UserList from './UserList.svelte'
-  import Login from './Login.svelte'
-  import CaseStudy from './CaseStudy.svelte'
-  import Banned from './Banned.svelte'
-  import AudioChat from './AudioChat.svelte'
+  import Chat from "./Chat.svelte"
+  import UserList from "./UserList.svelte"
+  import Login from "./Login.svelte"
+  import CaseStudy from "./CaseStudy.svelte"
+  import Banned from "./Banned.svelte"
+  import AudioChat from "./AudioChat.svelte"
 
   // Set the name of the hidden property and the change event for visibility
   var hidden, visibilityChange
-  if (typeof document.hidden !== 'undefined') {
+  if (typeof document.hidden !== "undefined") {
     // Opera 12.10 and Firefox 18 and later support
-    hidden = 'hidden'
-    visibilityChange = 'visibilitychange'
-  } else if (typeof document.msHidden !== 'undefined') {
-    hidden = 'msHidden'
-    visibilityChange = 'msvisibilitychange'
-  } else if (typeof document.webkitHidden !== 'undefined') {
-    hidden = 'webkitHidden'
-    visibilityChange = 'webkitvisibilitychange'
+    hidden = "hidden"
+    visibilityChange = "visibilitychange"
+  } else if (typeof document.msHidden !== "undefined") {
+    hidden = "msHidden"
+    visibilityChange = "msvisibilitychange"
+  } else if (typeof document.webkitHidden !== "undefined") {
+    hidden = "webkitHidden"
+    visibilityChange = "webkitvisibilitychange"
   }
 
   let deltaJump = 0
@@ -64,11 +64,11 @@
 
   // Warn if the browser doesn't support addEventListener or the Page Visibility API
   if (
-    typeof document.addEventListener === 'undefined' ||
+    typeof document.addEventListener === "undefined" ||
     hidden === undefined
   ) {
     console.log(
-      'This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API.'
+      "This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API."
     )
   } else {
     // Handle page visibility change
@@ -82,7 +82,7 @@
     localUserSessionID,
     localUserArea,
     inPrivateChat,
-  } from './stores.js'
+  } from "./stores.js"
 
   localUserUUID.set(chance.guid())
 
@@ -103,7 +103,7 @@
     MAP_WIDTH,
     MAP_HEIGHT,
     colorTrans,
-  } from './global.js'
+  } from "./global.js"
 
   // const tweener = new Tweener(1 / 60);
 
@@ -141,7 +141,7 @@
   let debugWaypointTotal = 0
   let debugWaypointX = 0
   let debugWaypointY = 0
-  let debugWaypointDirection = ''
+  let debugWaypointDirection = ""
   let debugWaypointSteps = 0
 
   // DOM REFERENCES
@@ -150,8 +150,8 @@
   // VARIABLES
   let popUpText = false
   let playersInProximity = []
-  let newUserName = ''
-  let newUserColor = ''
+  let newUserName = ""
+  let newUserColor = ""
   let newUserAvatar = 1
   let loggedIn = false
   let userLoaded = false
@@ -185,7 +185,7 @@
   // COLYSEUS
   // const client = new Colyseus.Client('ws://localhost:2567')
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  const client = new Colyseus.Client('wss://gameserver.tsoap.dev')
+  const client = new Colyseus.Client("wss://gameserver.tsoap.dev")
 
   // PIXI
   let app = {}
@@ -219,7 +219,7 @@
     deltaJump = 0
 
     if (deltaRounded > 10) {
-      console.log('HIGH DELTA:', deltaRounded)
+      console.log("HIGH DELTA:", deltaRounded)
     }
 
     for (let key in moveQ) {
@@ -246,7 +246,7 @@
             // }
           }
         } else {
-          localPlayers[key].avatar.setAnimation('rest')
+          localPlayers[key].avatar.setAnimation("rest")
           if (key === $localUserSessionID) {
             inMotion = false
             hideTarget()
@@ -365,27 +365,27 @@
     graphicsSettings.then((graphicsSettings) => {
       // console.dir(graphicsSettings.mapLink.mainImageUrl)
       miniImg = urlFor(graphicsSettings.mapLink.mainImage.asset)
-                .width(200)
-                .height(200)
-                .quality(90)
-                .auto('format')
-                .url()
+        .width(200)
+        .height(200)
+        .quality(90)
+        .auto("format")
+        .url()
 
       let spriteUrl = get(
         graphicsSettings,
-        'activeAvatars[0].spriteJsonURL',
-        '/sprites/avatar.json'
+        "activeAvatars[0].spriteJsonURL",
+        "/sprites/avatar.json"
       )
 
       let mapUrl = urlFor(graphicsSettings.mapLink.mainImage.asset).url()
-      console.log('mapUrl', mapUrl)
-      let gridUrl = get(graphicsSettings, 'mapLink.pathfindingGridUrl', '')
-      console.log('gridUrl', gridUrl)
+      console.log("mapUrl", mapUrl)
+      let gridUrl = get(graphicsSettings, "mapLink.pathfindingGridUrl", "")
+      console.log("gridUrl", gridUrl)
 
       loader
-        .add('map', mapUrl)
-        .add('grid', gridUrl)
-        .add('avatar', spriteUrl)
+        .add("map", mapUrl)
+        .add("grid", gridUrl)
+        .add("avatar", spriteUrl)
         .load((loader, resources) => {
           let map = new PIXI.Sprite(resources.map.texture)
           map.width = MAP_WIDTH
@@ -399,7 +399,7 @@
             viewport.addChild(grid)
           }
 
-          sheet.push(resources['avatar'].spritesheet)
+          sheet.push(resources["avatar"].spritesheet)
 
           let avatarIndex = 0
 
@@ -407,17 +407,17 @@
 
           // CREATE PLAYER
           const createPlayer = (playerOptions, sessionId) => {
-            let front = new PIXI.AnimatedSprite(sheet[0].animations['front'])
-            let back = new PIXI.AnimatedSprite(sheet[0].animations['back'])
-            let left = new PIXI.AnimatedSprite(sheet[0].animations['left'])
-            let right = new PIXI.AnimatedSprite(sheet[0].animations['right'])
-            let rest = new PIXI.AnimatedSprite(sheet[0].animations['rest'])
+            let front = new PIXI.AnimatedSprite(sheet[0].animations["front"])
+            let back = new PIXI.AnimatedSprite(sheet[0].animations["back"])
+            let left = new PIXI.AnimatedSprite(sheet[0].animations["left"])
+            let right = new PIXI.AnimatedSprite(sheet[0].animations["right"])
+            let rest = new PIXI.AnimatedSprite(sheet[0].animations["rest"])
 
-            rest.name = 'rest'
-            front.name = 'front'
-            back.name = 'back'
-            left.name = 'left'
-            right.name = 'right'
+            rest.name = "rest"
+            front.name = "front"
+            back.name = "back"
+            left.name = "left"
+            right.name = "right"
 
             rest.visible = true
             front.visible = false
@@ -439,7 +439,7 @@
 
             let avatar = new PIXI.Container()
             avatar.addChild(left, right, back, front, rest)
-            avatar.motionState = 'rest'
+            avatar.motionState = "rest"
             avatar.setAnimation = (direction) => {
               avatar.motionState = direction
               avatar.children.forEach((c) => {
@@ -481,10 +481,10 @@
               popUpText = false
             }
 
-            player.avatar.on('mousedown', onDown)
-            player.avatar.on('touchstart', onDown)
-            player.avatar.on('mouseover', onEnter)
-            player.avatar.on('mouseout', onLeave)
+            player.avatar.on("mousedown", onDown)
+            player.avatar.on("touchstart", onDown)
+            player.avatar.on("mouseover", onEnter)
+            player.avatar.on("mouseout", onLeave)
 
             viewport.addChild(player.avatar)
 
@@ -508,10 +508,10 @@
               uuid: $localUserUUID,
               avatar: avatarIndex,
               tint:
-                newUserColor.replace('#', '0x').toUpperCase() ||
+                newUserColor.replace("#", "0x").toUpperCase() ||
                 chance
-                  .color({ format: 'hex' })
-                  .replace('#', '0x')
+                  .color({ format: "hex" })
+                  .replace("#", "0x")
                   .toUpperCase(),
             }
           } else {
@@ -520,21 +520,21 @@
               name: newUserName || chance.name(),
               avatar: avatarIndex,
               tint:
-                newUserColor.replace('#', '0x').toUpperCase() ||
+                newUserColor.replace("#", "0x").toUpperCase() ||
                 chance
-                  .color({ format: 'hex' })
-                  .replace('#', '0x')
+                  .color({ format: "hex" })
+                  .replace("#", "0x")
                   .toUpperCase(),
             }
           }
 
           // => GAME ROOM
           client
-            .joinOrCreate('game', playerObject)
+            .joinOrCreate("game", playerObject)
             .then((gameRoom) => {
               // HACK
               if (authenticate) {
-                history.replaceState({}, 'CONNECTED', '/')
+                history.replaceState({}, "CONNECTED", "/")
               }
 
               // ******
@@ -562,12 +562,12 @@
               }
 
               // PLAYER: BANNED
-              gameRoom.onMessage('banned', (message) => {
+              gameRoom.onMessage("banned", (message) => {
                 banned = true
               })
 
               // PLAYER: ILLEGAL MOVE
-              gameRoom.onMessage('illegalMove', (message) => {
+              gameRoom.onMessage("illegalMove", (message) => {
                 hideTarget()
                 inMotion = false
               })
@@ -597,7 +597,7 @@
               }
 
               // PLAYER: CLICK / TAP
-              viewport.on('clicked', (e) => {
+              viewport.on("clicked", (e) => {
                 hideTarget()
                 if (debug) {
                   hidePath()
@@ -605,7 +605,7 @@
                   hideWaypoints()
                 }
                 // if (!inMotion) {
-                gameRoom.send('go', {
+                gameRoom.send("go", {
                   x: Math.round(e.world.x),
                   y: Math.round(e.world.y),
                   originX: localPlayers[$localUserSessionID].avatar.x,
@@ -626,7 +626,7 @@
               // PLAYER: TELEPORT
               teleportTo = (area) => {
                 // console.log(area)
-                gameRoom.send('teleport', {
+                gameRoom.send("teleport", {
                   area: area,
                 })
               }
@@ -654,7 +654,7 @@
               // MESSAGE: SUBMIT
               submitChat = (event) => {
                 try {
-                  gameRoom.send('submitChatMessage', {
+                  gameRoom.send("submitChatMessage", {
                     msgId: chance.guid(),
                     uuid: $localUserUUID,
                     name: $localUserName,
@@ -673,8 +673,8 @@
               // PRIVATE ROOM: START
               startPrivateChat = (partner) => {
                 try {
-                  client.create('chat', { partner: partner.id }).then((r) => {
-                    gameRoom.send('createPrivateRoom', {
+                  client.create("chat", { partner: partner.id }).then((r) => {
+                    gameRoom.send("createPrivateRoom", {
                       roomId: r.id,
                       partner: partner.id,
                     })
@@ -685,7 +685,7 @@
                     leavePrivateChat = () => {
                       r.leave()
 
-                      gameRoom.send('leavePrivateRoom', {
+                      gameRoom.send("leavePrivateRoom", {
                         roomId: r.id,
                       })
 
@@ -716,17 +716,17 @@
 
               // GENNERAL: ERROR
               gameRoom.onError((code, message) => {
-                console.error('!!! COLYSEUS ERROR:')
+                console.error("!!! COLYSEUS ERROR:")
                 console.error(message)
                 Sentry.captureException(err)
               })
             })
             .catch((e) => {
               if (e.code == 4215) {
-                console.log('BANNED')
+                console.log("BANNED")
                 banned = true
               } else {
-                console.log('GAME ROOM: JOIN ERROR', e)
+                console.log("GAME ROOM: JOIN ERROR", e)
                 Sentry.captureException(e)
               }
             })
@@ -738,19 +738,19 @@
         caseStudies.forEach((cs, i) => {
           // console.dir(cs.spriteLink)
 
-          let spriteUrl = get(cs, 'spriteLink.spriteJsonURL', '')
+          let spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
 
           console.dir(spriteUrl)
 
           const csLoader = new PIXI.Loader()
 
-          csLoader.add('csSprite', spriteUrl).load((loader, resources) => {
+          csLoader.add("csSprite", spriteUrl).load((loader, resources) => {
             // console.dir(resources)
 
-            console.dir(resources['csSprite'].spritesheet.animations['frames'])
+            console.dir(resources["csSprite"].spritesheet.animations["frames"])
 
             let frames = new PIXI.AnimatedSprite(
-              resources['csSprite'].spritesheet.animations['frames']
+              resources["csSprite"].spritesheet.animations["frames"]
             )
             frames.visible = true
             frames.animationSpeed = 0.02
@@ -780,10 +780,10 @@
               popUpText = false
             }
 
-            caseStudyLocation.on('mousedown', onDown)
-            caseStudyLocation.on('touchstart', onDown)
-            caseStudyLocation.on('mouseover', onEnter)
-            caseStudyLocation.on('mouseout', onLeave)
+            caseStudyLocation.on("mousedown", onDown)
+            caseStudyLocation.on("touchstart", onDown)
+            caseStudyLocation.on("mouseover", onEnter)
+            caseStudyLocation.on("mouseout", onLeave)
 
             console.dir(caseStudyLocation)
 
@@ -807,7 +807,7 @@
       resolution: 1,
     })
 
-    responsiveWidth = window.matchMedia('(max-width: 700px)').matches
+    responsiveWidth = window.matchMedia("(max-width: 700px)").matches
       ? window.innerWidth
       : window.innerWidth - 400
 
@@ -837,7 +837,7 @@
 
     window.onresize = () => {
       responsiveWidth =
-        window.matchMedia('(max-width: 700px)').matches || sidebarHidden
+        window.matchMedia("(max-width: 700px)").matches || sidebarHidden
           ? window.innerWidth
           : window.innerWidth - 400
 
@@ -850,9 +850,9 @@
       viewportWidth = viewport.screenWidth
     }
 
-    window.dispatchEvent(new Event('resize'))
+    window.dispatchEvent(new Event("resize"))
 
-    if (window.matchMedia('(max-width: 700px)').matches) {
+    if (window.matchMedia("(max-width: 700px)").matches) {
       viewport.setZoom(0.75)
     }
 
@@ -863,7 +863,7 @@
 </script>
 
 <style lang="scss">
-  @import './variables.scss';
+  @import "./variables.scss";
 
   * {
     box-sizing: border-box;
@@ -882,7 +882,7 @@
     padding: 20px;
     border-radius: 10px;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       top: unset;
       bottom: 20px;
     }
@@ -928,7 +928,7 @@
     text-align: center;
     display: none;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: block;
     }
 
@@ -971,7 +971,7 @@
     border-radius: 10px;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
-    @include screen-size('small') {
+    @include screen-size("small") {
       top: unset;
       bottom: 20px;
       display: none;
@@ -992,7 +992,7 @@
     z-index: 1000;
     user-select: none;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: none;
     }
 
@@ -1082,7 +1082,7 @@
     z-index: 100;
     transform: scale(0.8);
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       width: 100vw;
       height: 100vh;
       pointer-events: none;
@@ -1112,7 +1112,7 @@
       opacity: 1;
     }
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       width: 100vw;
       right: 0;
     }
@@ -1165,7 +1165,7 @@
       justify-content: center;
       align-items: center;
 
-      @include screen-size('short') {
+      @include screen-size("short") {
         height: 150px;
       }
 
@@ -1177,7 +1177,7 @@
 
         // transform: scale(0.8);
 
-        @include screen-size('short') {
+        @include screen-size("short") {
           transform: scale(0.5);
         }
 
@@ -1207,7 +1207,7 @@
       background: $COLOR_LIGHT;
       overflow: hidden;
       // padding-bottom: 60px;
-      @include screen-size('short') {
+      @include screen-size("short") {
         height: calc(50% - 65px);
       }
 
@@ -1262,7 +1262,7 @@
       height: calc(50% - 130px);
 
       padding: 10px;
-      @include screen-size('short') {
+      @include screen-size("short") {
         height: calc(50% - 65px);
       }
     }
@@ -1299,10 +1299,9 @@
       cursor: pointer;
     }
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: none;
     }
-
   }
 
   .passive-content-slot {
@@ -1350,10 +1349,9 @@
       }
     }
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: none;
     }
-
   }
 
   .active-content-slot {
@@ -1372,7 +1370,7 @@
     right: 410px;
     border-radius: 4px;
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: none;
     }
 
@@ -1390,10 +1388,9 @@
       margin-bottom: 20px;
     }
 
-    @include screen-size('small') {
+    @include screen-size("small") {
       display: none;
     }
-
   }
 </style>
 
@@ -1590,7 +1587,7 @@
 {/if}
 
 <!-- ACTIVE CONTENT: STREAM -->
-{#if $localUserArea === 2}
+{#if $localUserArea === 4}
   <div class="active-content-slot" transition:fly={{ y: -200 }}>
     <video src="/test.mp4" muted autoplay loop />
   </div>
