@@ -117,11 +117,18 @@
   let graphicsSettings = loadData(
     "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
   )
+  let landMarks = loadData(
+    "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}"
+  )
 
   // events.then((events) => {
   //   console.log('EVENTS')
   //   console.dir(events)
   // })
+
+  landMarks.then((landMarks) => {
+    console.dir(landMarks)
+  })
 
   // caseStudies.then((caseStudies) => {
   //   console.log('CASE STUDIES')
@@ -448,8 +455,17 @@
             }
             avatar.x = playerOptions.x
             avatar.y = playerOptions.y
-            // console.log('height', avatar.height)
-            // console.log('width', avatar.width)
+            // avatar.height = avatar.height * 3
+            // avatar.width = avatar.width * 3
+            // console.log("height", avatar.height)
+            // console.log("width", avatar.width)
+            // avatar.scale = 3
+            console.log("height", avatar.height)
+            console.log("width", avatar.width)
+            // avatar.height = 60
+            // avatar.width = 60
+            // avatar.pivot.x = 30
+            // avatar.pivot.y = 30
             avatar.pivot.x = avatar.width / 2
             avatar.pivot.y = avatar.height / 2
             avatar.interactive = true
@@ -788,6 +804,47 @@
             console.dir(caseStudyLocation)
 
             viewport.addChild(caseStudyLocation)
+          })
+        })
+      })
+
+      // ADD LANDMARKS
+      landMarks.then((landMarks) => {
+        // console.dir(landMarks)
+        landMarks.forEach((lm, i) => {
+          console.dir(lm)
+
+          let spriteUrl = get(lm, "spriteJsonURL", "")
+          // let spriteUrl = urlFor(lm.spriteLink.spriteJsonURL).url()
+
+          console.log("landmark sprite json url", spriteUrl)
+
+          const lmLoader = new PIXI.Loader()
+
+          lmLoader.add("lmSprite", spriteUrl).load((loader, resources) => {
+            console.dir(resources)
+
+            console.dir(resources["lmSprite"].spritesheet.animations["frames"])
+
+            let frames = new PIXI.AnimatedSprite(
+              resources["lmSprite"].spritesheet.animations["frames"]
+            )
+            frames.visible = true
+            frames.animationSpeed = 0.02
+            frames.play()
+
+            let landMarkLocation = new PIXI.Container()
+            landMarkLocation.addChild(frames)
+            landMarkLocation.x = lm.x
+            landMarkLocation.y = lm.y
+            landMarkLocation.pivot.x = landMarkLocation.width / 2
+            landMarkLocation.pivot.y = landMarkLocation.height / 2
+            landMarkLocation.title = lm.title
+            landMarkLocation.index = i
+
+            console.dir(landMarkLocation)
+
+            viewport.addChild(landMarkLocation)
           })
         })
       })
