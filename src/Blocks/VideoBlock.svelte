@@ -6,89 +6,89 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import { onMount } from "svelte";
-  import has from "lodash/has";
-  import get from "lodash/get";
-  import { urlFor, loadData, renderBlockText } from "../../sanity.js";
+  import { onMount } from "svelte"
+  import has from "lodash/has"
+  import get from "lodash/get"
+  import { urlFor, loadData, renderBlockText } from "../../sanity.js"
 
   // PROPS
-  export let block = {};
+  export let block = {}
 
-  console.dir(block);
+  console.dir(block)
 
   const videoUrl =
     "https://cdn.sanity.io/files/1tpw92x3/production/" +
-    block.videoFile.asset._ref.replace("file-", "").replace("-mp4", ".mp4");
+    block.videoFile.asset._ref.replace("file-", "").replace("-mp4", ".mp4")
 
   // *** DOM REFERENCES
-  let videoEl = {};
+  let videoEl = {}
 
   // *** VARIABLES
-  let time = 0;
-  let duration = 0;
-  let paused = true;
-  let showControls = true;
-  let showControlsTimeout;
-  let controlsTimeoutDuration = 1500;
+  let time = 0
+  let duration = 0
+  let paused = true
+  let showControls = true
+  let showControlsTimeout
+  let controlsTimeoutDuration = 1500
 
   // --- Video controls
   function handleMousemove(e) {
     // Make the controls visible, but fade out after
     // 1.5 seconds of inactivity
-    clearTimeout(showControlsTimeout);
+    clearTimeout(showControlsTimeout)
     showControlsTimeout = setTimeout(
       () => (showControls = false),
       controlsTimeoutDuration
-    );
-    showControls = true;
+    )
+    showControls = true
 
-    if (e.which !== 1) return; // mouse not down
-    if (!duration) return; // video not loaded yet
+    if (e.which !== 1) return // mouse not down
+    if (!duration) return // video not loaded yet
 
-    const { left, right } = this.getBoundingClientRect();
-    time = (duration * (e.clientX - left)) / (right - left);
+    const { left, right } = this.getBoundingClientRect()
+    time = (duration * (e.clientX - left)) / (right - left)
   }
 
   function handleMousedown(e) {
     function handleMouseup() {
       if (paused) {
-        e.target.play();
+        e.target.play()
       } else {
-        e.target.pause();
+        e.target.pause()
       }
-      cancel();
+      cancel()
     }
 
     function cancel() {
-      e.target.removeEventListener("mouseup", handleMouseup);
+      e.target.removeEventListener("mouseup", handleMouseup)
     }
 
-    e.target.addEventListener("mouseup", handleMouseup);
+    e.target.addEventListener("mouseup", handleMouseup)
 
-    setTimeout(cancel, 200);
+    setTimeout(cancel, 200)
   }
 
   function format(seconds) {
-    if (isNaN(seconds)) return "...";
+    if (isNaN(seconds)) return "..."
 
-    const minutes = Math.floor(seconds / 60);
-    seconds = Math.floor(seconds % 60);
-    if (seconds < 10) seconds = "0" + seconds;
+    const minutes = Math.floor(seconds / 60)
+    seconds = Math.floor(seconds % 60)
+    if (seconds < 10) seconds = "0" + seconds
 
-    return `${minutes}:${seconds}`;
+    return `${minutes}:${seconds}`
   }
 
   // *** ON MOUNT
   onMount(async () => {
     if (block.autoPlay) {
-      let promise = videoEl.play();
+      let promise = videoEl.play()
       if (promise !== undefined) {
-        promise.catch(err => {
-          Sentry.captureException(err);
-        });
+        promise.catch((err) => {
+          console.dir(err)
+        })
       }
     }
-  });
+  })
 </script>
 
 <style lang="scss">
@@ -205,7 +205,6 @@
   class:fullwidth={block.fullWidth}
   class:padded={has(block, 'backgroundColor.hex')}
   style={'background: ' + get(block, 'backgroundColor.hex', 'transparent')}>
-
   <video
     class="video-player"
     preload="metadata"
@@ -221,7 +220,6 @@
 
   {#if !block.autoPlay}
     <div class="controls" style="opacity: {duration && showControls ? 1 : 0}">
-
       <!-- <progress value={time / duration || 0} /> -->
 
       <div class="buttons">
@@ -252,8 +250,6 @@
           </svg>
         {/if}
       </div>
-
     </div>
   {/if}
-
 </figure>

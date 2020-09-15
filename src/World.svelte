@@ -192,9 +192,9 @@
   let passiveContentClosed = false
 
   // COLYSEUS
-  // const client = new Colyseus.Client('ws://localhost:2567')
+  const client = new Colyseus.Client("ws://localhost:2567")
   // const client = new Colyseus.Client("ws://18.194.21.39:2567");
-  const client = new Colyseus.Client("wss://gameserver.tsoap.dev")
+  // const client = new Colyseus.Client("wss://gameserver.tsoap.dev")
 
   // PIXI
   let app = {}
@@ -301,7 +301,7 @@
       viewport.addChild(wayPointMarkers)
       wayPointGraphics = wayPointMarkers
     } catch (err) {
-      Sentry.captureException(err)
+      console.dir(err)
     }
   }
 
@@ -319,7 +319,7 @@
       viewport.addChild(line)
       pathGraphics = line
     } catch (err) {
-      Sentry.captureException(err)
+      console.dir(err)
     }
   }
 
@@ -342,7 +342,7 @@
       viewport.addChild(line)
       fullPathGraphics = line
     } catch (err) {
-      Sentry.captureException(err)
+      console.dir(err)
     }
   }
 
@@ -570,7 +570,7 @@
                     // console.dir(localPlayers)
                   }, 500)
                 } catch (err) {
-                  Sentry.captureException(err)
+                  console.dir(err)
                 }
               }
 
@@ -665,7 +665,7 @@
                   chatMessages.splice(itemIndex, 1)
                   chatMessages = chatMessages
                 } catch (err) {
-                  Sentry.captureException(err)
+                  console.dir(err)
                 }
               }
 
@@ -680,7 +680,7 @@
                     tint: $localUserTint,
                   })
                 } catch (err) {
-                  Sentry.captureException(err)
+                  console.dir(err)
                 }
               }
 
@@ -711,7 +711,7 @@
                     }
                   })
                 } catch (err) {
-                  Sentry.captureException(err)
+                  console.dir(err)
                 }
               }
 
@@ -736,7 +736,7 @@
               gameRoom.onError((code, message) => {
                 console.error("!!! COLYSEUS ERROR:")
                 console.error(message)
-                Sentry.captureException(err)
+                console.dir(err)
               })
             })
             .catch((e) => {
@@ -745,117 +745,118 @@
                 banned = true
               } else {
                 console.log("GAME ROOM: JOIN ERROR", e)
-                Sentry.captureException(e)
+                console.dir(e)
+                // Sentry.captureException(err)
               }
             })
         })
 
       // ADD CASE STUDIES
-      caseStudies.then((caseStudies) => {
-        // console.dir(caseStudies)
-        caseStudies.forEach((cs, i) => {
-          console.dir(cs)
+      // caseStudies.then((caseStudies) => {
+      //   // console.dir(caseStudies)
+      //   caseStudies.forEach((cs, i) => {
+      //     console.dir(cs)
 
-          let spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
+      //     let spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
 
-          // console.dir(spriteUrl)
+      //     // console.dir(spriteUrl)
 
-          const spriteId = "caseStudy-" + cs._id
+      //     const spriteId = "caseStudy-" + cs._id
 
-          const csLoader = new PIXI.Loader()
+      //     const csLoader = new PIXI.Loader()
 
-          csLoader.add(spriteId, spriteUrl).load((loader, resources) => {
-            // console.dir(resources)
+      //     csLoader.add(spriteId, spriteUrl).load((loader, resources) => {
+      //       // console.dir(resources)
 
-            // console.dir(resources["csSprite"].spritesheet.animations["frames"])
+      //       // console.dir(resources["csSprite"].spritesheet.animations["frames"])
 
-            let frames = new PIXI.AnimatedSprite(
-              resources[spriteId].spritesheet.animations["frames"]
-            )
-            frames.visible = true
-            frames.animationSpeed = 0.02
-            frames.play()
+      //       let frames = new PIXI.AnimatedSprite(
+      //         resources[spriteId].spritesheet.animations["frames"]
+      //       )
+      //       frames.visible = true
+      //       frames.animationSpeed = 0.02
+      //       frames.play()
 
-            let caseStudyLocation = new PIXI.Container()
-            caseStudyLocation.addChild(frames)
-            caseStudyLocation.x = cs.x
-            caseStudyLocation.y = cs.y
-            caseStudyLocation.pivot.x = caseStudyLocation.width / 2
-            caseStudyLocation.pivot.y = caseStudyLocation.height / 2
-            caseStudyLocation.title = cs.title
-            caseStudyLocation.index = i
-            caseStudyLocation.interactive = true
+      //       let caseStudyLocation = new PIXI.Container()
+      //       caseStudyLocation.addChild(frames)
+      //       caseStudyLocation.x = cs.x
+      //       caseStudyLocation.y = cs.y
+      //       caseStudyLocation.pivot.x = caseStudyLocation.width / 2
+      //       caseStudyLocation.pivot.y = caseStudyLocation.height / 2
+      //       caseStudyLocation.title = cs.title
+      //       caseStudyLocation.index = i
+      //       caseStudyLocation.interactive = true
 
-            const onDown = (e) => {
-              caseStudyActive = true
-              currentCaseStudy = caseStudies[caseStudyLocation.index]
-              e.stopPropagation()
-            }
+      //       const onDown = (e) => {
+      //         caseStudyActive = true
+      //         currentCaseStudy = caseStudies[caseStudyLocation.index]
+      //         e.stopPropagation()
+      //       }
 
-            const onEnter = (e) => {
-              gameContainer.style.cursor = "pointer"
-              popUpText = caseStudyLocation.title
-            }
+      //       const onEnter = (e) => {
+      //         gameContainer.style.cursor = "pointer"
+      //         popUpText = caseStudyLocation.title
+      //       }
 
-            const onLeave = (e) => {
-              gameContainer.style.cursor = "default"
-              popUpText = false
-            }
+      //       const onLeave = (e) => {
+      //         gameContainer.style.cursor = "default"
+      //         popUpText = false
+      //       }
 
-            caseStudyLocation.on("mousedown", onDown)
-            caseStudyLocation.on("touchstart", onDown)
-            caseStudyLocation.on("mouseover", onEnter)
-            caseStudyLocation.on("mouseout", onLeave)
+      //       caseStudyLocation.on("mousedown", onDown)
+      //       caseStudyLocation.on("touchstart", onDown)
+      //       caseStudyLocation.on("mouseover", onEnter)
+      //       caseStudyLocation.on("mouseout", onLeave)
 
-            // console.dir(caseStudyLocation)
+      //       // console.dir(caseStudyLocation)
 
-            caseStudyLayer.addChild(caseStudyLocation)
-          })
-        })
-      })
+      //       caseStudyLayer.addChild(caseStudyLocation)
+      //     })
+      //   })
+      // })
 
       // ADD LANDMARKS
-      landMarks.then((landMarks) => {
-        // console.dir(landMarks)
-        landMarks.forEach((lm, i) => {
-          // console.dir(lm)
+      // landMarks.then((landMarks) => {
+      //   // console.dir(landMarks)
+      //   landMarks.forEach((lm, i) => {
+      //     // console.dir(lm)
 
-          let spriteUrl = get(lm, "spriteJsonURL", "")
-          // let spriteUrl = urlFor(lm.spriteLink.spriteJsonURL).url()
+      //     let spriteUrl = get(lm, "spriteJsonURL", "")
+      //     // let spriteUrl = urlFor(lm.spriteLink.spriteJsonURL).url()
 
-          // console.log("landmark sprite json url", spriteUrl)
+      //     // console.log("landmark sprite json url", spriteUrl)
 
-          const spriteId = "landMark-" + lm._id
+      //     const spriteId = "landMark-" + lm._id
 
-          const lmLoader = new PIXI.Loader()
+      //     const lmLoader = new PIXI.Loader()
 
-          lmLoader.add(spriteId, spriteUrl).load((loader, resources) => {
-            console.dir(resources)
+      //     lmLoader.add(spriteId, spriteUrl).load((loader, resources) => {
+      //       console.dir(resources)
 
-            // console.dir(resources["lmSprite"].spritesheet.animations["frames"])
+      //       // console.dir(resources["lmSprite"].spritesheet.animations["frames"])
 
-            let frames = new PIXI.AnimatedSprite(
-              resources[spriteId].spritesheet.animations["frames"]
-            )
-            frames.visible = true
-            frames.animationSpeed = 0.02
-            frames.play()
+      //       let frames = new PIXI.AnimatedSprite(
+      //         resources[spriteId].spritesheet.animations["frames"]
+      //       )
+      //       frames.visible = true
+      //       frames.animationSpeed = 0.02
+      //       frames.play()
 
-            let landMarkLocation = new PIXI.Container()
-            landMarkLocation.addChild(frames)
-            landMarkLocation.x = lm.x
-            landMarkLocation.y = lm.y
-            landMarkLocation.pivot.x = landMarkLocation.width / 2
-            landMarkLocation.pivot.y = landMarkLocation.height / 2
-            landMarkLocation.title = lm.title
-            landMarkLocation.index = i
+      //       let landMarkLocation = new PIXI.Container()
+      //       landMarkLocation.addChild(frames)
+      //       landMarkLocation.x = lm.x
+      //       landMarkLocation.y = lm.y
+      //       landMarkLocation.pivot.x = landMarkLocation.width / 2
+      //       landMarkLocation.pivot.y = landMarkLocation.height / 2
+      //       landMarkLocation.title = lm.title
+      //       landMarkLocation.index = i
 
-            // console.dir(landMarkLocation)
+      //       // console.dir(landMarkLocation)
 
-            landMarkLayer.addChild(landMarkLocation)
-          })
-        })
-      })
+      //       landMarkLayer.addChild(landMarkLocation)
+      //     })
+      //   })
+      // })
 
       return graphicsSettings
     })

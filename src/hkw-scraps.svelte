@@ -180,7 +180,7 @@
         //         chatMessages.splice(itemIndex, 1);
         //         chatMessages = chatMessages;
         //       } catch (err) {
-        //         Sentry.captureException(err);
+        //         console.dir(err);
         //       }
         //     };
 
