@@ -318,49 +318,21 @@
 
           // CREATE PLAYER
           const createPlayer = (playerOptions, sessionId) => {
-            const front = new PIXI.AnimatedSprite(sheet[0].animations["front"])
-            const back = new PIXI.AnimatedSprite(sheet[0].animations["back"])
-            const left = new PIXI.AnimatedSprite(sheet[0].animations["left"])
-            const right = new PIXI.AnimatedSprite(sheet[0].animations["right"])
-            const rest = new PIXI.AnimatedSprite(sheet[0].animations["rest"])
-
-            rest.name = "rest"
-            front.name = "front"
-            back.name = "back"
-            left.name = "left"
-            right.name = "right"
-
-            rest.visible = true
-            front.visible = false
-            back.visible = false
-            left.visible = false
-            right.visible = false
-
-            rest.height = 60
-            rest.width = 60
-            front.height = 60
-            front.width = 60
-            back.height = 60
-            back.width = 60
-            left.height = 60
-            left.width = 60
-            right.height = 60
-            right.width = 60
-
-            rest.animationSpeed = 0.02
-            front.animationSpeed = 0.1
-            back.animationSpeed = 0.1
-            left.animationSpeed = 0.1
-            right.animationSpeed = 0.1
-
-            rest.play()
-            front.play()
-            back.play()
-            left.play()
-            right.play()
+            const sprites = ["rest", "front", "back", "left", "right"].map(
+              (ms) => {
+                const sprite = new PIXI.AnimatedSprite(sheet[0].animations[ms])
+                sprite.name = ms
+                sprite.visible = ms === "rest" ? true : false
+                sprite.height = 60
+                sprite.width = 60
+                sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1
+                sprite.play()
+                return sprite
+              }
+            )
 
             const avatar = new PIXI.Container()
-            avatar.addChild(left, right, back, front, rest)
+            avatar.addChild(...sprites)
             avatar.motionState = "rest"
             avatar.setAnimation = (direction) => {
               avatar.motionState = direction
