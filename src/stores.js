@@ -1,9 +1,7 @@
-import { writable } from 'svelte/store'
+import { writable } from "svelte/store"
 
 // WRITABLE
-export const localUserUUID = writable('')
-export const localUserTint = writable('')
-export const localUserName = writable('')
-export const localUserSessionID = writable('')
+export const localUserUUID = writable("")
+export const localUserSessionID = writable("")
 export const localUserArea = writable(false)
 export const inPrivateChat = writable(false)

@@ -1,52 +1,85 @@
-import { format, getYear, formatDistanceToNow } from "date-fns";
+import { format, getYear, formatDistanceToNow } from "date-fns"
 
-export const SANITY_PROJECT_ID = 'bu5rnal5'
+export const SANITY_PROJECT_ID = "bu5rnal5"
 
 export const KEYBOARD = {
-    UP: 38,
-    DOWN: 40,
-    LEFT: 37,
-    RIGHT: 39,
-    ENTER: 13
+  UP: 38,
+  DOWN: 40,
+  LEFT: 37,
+  RIGHT: 39,
+  ENTER: 13,
 }
 
-export const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"];
+export const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"]
 
-export const MAP_WIDTH = 4000;
-export const MAP_HEIGHT = 4000;
+export const MAP_WIDTH = 4000
+export const MAP_HEIGHT = 4000
+
+export const QUERY_GRAPHICS_SETTINGS =
+  "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
+export const QUERY_EVENTS = "*[_type == 'event']"
+export const QUERY_CASE_STUDIES =
+  "*[_type == 'caseStudy']{..., spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}"
+export const QUERY_LAND_MARKS =
+  "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}"
 
 // const mainFormat = "MMM dd yyyy – HH:mm"
 // const mainFormat = "MMM dd – HH:mm"
 const mainFormat = "MMM dd yyyy"
 
 export const formattedDate = (start, end) => {
+  try {
     if (!start) {
-        return false;
+      return false
     }
-    const startDate = Date.parse(start);
+    const startDate = Date.parse(start)
 
     if (!startDate) {
-        return false;
+      return false
     }
 
     if (!end) {
-        return format(startDate, mainFormat);
+      return format(startDate, mainFormat)
     }
 
-    const endDate = Date.parse(end);
+    const endDate = Date.parse(end)
 
     if (format(startDate, "dd.MM.yyyy") == format(endDate, "dd.MM.yyyy")) {
-        return format(startDate, "dd.MM.yyyy");
+      return format(startDate, "dd.MM.yyyy")
     }
 
     const startFormat =
-        getYear(startDate) == getYear(endDate) ? "dd.MM" : "dd.MM.yyyy";
-    const endFormat = "dd.MM.yyyy";
+      getYear(startDate) == getYear(endDate) ? "dd.MM" : "dd.MM.yyyy"
+    const endFormat = "dd.MM.yyyy"
 
-    return format(startDate, startFormat) + " – " + format(endDate, endFormat);
-};
+    return format(startDate, startFormat) + " – " + format(endDate, endFormat)
+  } catch (err) {
+    console.dir(err)
+  }
+}
 
 export const formattedChatDate = (start) => {
-    const startDate = start ? start : Date.now();
-    return format(startDate, "HH:mm:ss");
-};
+  try {
+    const startDate = start ? start : Date.now()
+    return format(startDate, "HH:mm:ss")
+  } catch (err) {
+    console.dir(err)
+  }
+}
+
+export let nanoid = (t = 21) => {
+  let e = "",
+    r = crypto.getRandomValues(new Uint8Array(t))
+  for (; t--; ) {
+    let n = 63 & r[t]
+    e +=
+      n < 36
+        ? n.toString(36)
+        : n < 62
+        ? (n - 26).toString(36).toUpperCase()
+        : n < 63
+        ? "_"
+        : "-"
+  }
+  return e
+}

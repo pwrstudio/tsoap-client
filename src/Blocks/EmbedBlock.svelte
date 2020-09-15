@@ -6,12 +6,12 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import has from "lodash/has";
-  import getVideoId from "get-video-id";
-  import { urlFor, loadData, renderBlockText } from "../../sanity.js";
+  import has from "lodash/has"
+  import getVideoId from "get-video-id"
+  import { urlFor, loadData, renderBlockText } from "../../sanity.js"
 
   // PROPS
-  export let block = {};
+  export let block = {}
 </script>
 
 <style lang="scss">
@@ -22,7 +22,7 @@
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    font-size: $font_size_small;
+    font-size: $FONT_SIZE_SMALL;
     line-height: $line-height;
     font-family: $sans-stack;
     margin-bottom: $line-height;
@@ -65,7 +65,6 @@
 </style>
 
 <figure class="embed">
-
   <!-- // YOUTUBE -->
   {#if block.url.includes('youtube')}
     <div class="youtube-container">
@@ -117,5 +116,4 @@
       {@html renderBlockText(block.caption.content)}
     </figcaption>
   {/if}
-
 </figure>

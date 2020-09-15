@@ -10,28 +10,27 @@
   import * as Colyseus from "colyseus.js"
   import * as PIXI from "pixi.js"
   import { Viewport } from "pixi-viewport"
-  import Chance from "chance"
   import get from "lodash/get"
   import has from "lodash/has"
   import { fade, fly, scale } from "svelte/transition"
   import { urlFor, loadData, renderBlockText } from "./sanity.js"
-  import { links } from "svelte-routing"
-
-  const chance = new Chance()
-  // import Tweener from "tweener";
+  import { links, navigate } from "svelte-routing"
 
   // COMPONENTS
   import Chat from "./Chat.svelte"
-  import UserList from "./UserList.svelte"
   import Login from "./Login.svelte"
-  import CaseStudy from "./CaseStudy.svelte"
+  import CaseStudySingle from "./CaseStudySingle.svelte"
+  import CaseStudyListing from "./CaseStudyListing.svelte"
+  import Calendar from "./Calendar.svelte"
+  import EventSingle from "./EventSingle.svelte"
   import Banned from "./Banned.svelte"
+  import LoadingScreen from "./LoadingScreen.svelte"
+  import Error from "./Error.svelte"
   import AudioChat from "./AudioChat.svelte"
 
   // Set the name of the hidden property and the change event for visibility
-  var hidden, visibilityChange
+  let hidden, visibilityChange
   if (typeof document.hidden !== "undefined") {
-    // Opera 12.10 and Firefox 18 and later support
     hidden = "hidden"
     visibilityChange = "visibilitychange"
   } else if (typeof document.msHidden !== "undefined") {
@@ -45,164 +44,170 @@
   let deltaJump = 0
   let hiddenTime = 0
 
-  // If the page is hidden, pause the video;
-  // if the page is shown, play the video
-  function handleVisibilityChange() {
+  const handleVisibilityChange = () => {
     if (document[hidden]) {
-      // console.log('HIDDDEN')
       hiddenTime = Date.now()
-      // console.log(hiddenTime)
-      // pageVisible = false
     } else {
-      let timeDiff = Date.now() - hiddenTime
-      deltaJump = Math.round(timeDiff / 16.6666)
-      console.log(deltaJump)
+      deltaJump = Math.round((Date.now() - hiddenTime) / 16.6666)
     }
   }
 
-  // Warn if the browser doesn't support addEventListener or the Page Visibility API
-  if (
-    typeof document.addEventListener === "undefined" ||
-    hidden === undefined
-  ) {
-    console.log(
-      "This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API."
-    )
-  } else {
-    // Handle page visibility change
-    document.addEventListener(visibilityChange, handleVisibilityChange, false)
-  }
-  // STORES
-  import {
-    localUserUUID,
-    localUserName,
-    localUserTint,
-    localUserSessionID,
-    localUserArea,
-    inPrivateChat,
-  } from "./stores.js"
-
-  localUserUUID.set(chance.guid())
+  document.addEventListener(visibilityChange, handleVisibilityChange, false)
 
   // PROPS
   export let authenticate = false
-  export let login = false
-  export let debug = false
   export let sso = false
   export let sig = false
+  export let section = false
+  export let slug = false
 
   // GLOBAL
   import {
+    nanoid,
     formattedDate,
     KEYBOARD,
     MAP_WIDTH,
     MAP_HEIGHT,
     colorTrans,
+    QUERY_GRAPHICS_SETTINGS,
+    QUERY_EVENTS,
+    QUERY_CASE_STUDIES,
+    QUERY_LAND_MARKS,
   } from "./global.js"
 
-  // const tweener = new Tweener(1 / 60);
+  // STORES
+  import {
+    localUserUUID,
+    localUserSessionID,
+    localUserArea,
+    inPrivateChat,
+  } from "./stores.js"
 
   // ** SANITY
-  // const query = "*[slug.current == $slug]{..., author[]->{title, slug}}[0]";
-  // const params = { slug: slug };
-  let events = loadData("*[_type == 'event']")
-  let caseStudies = loadData(
-    "*[_type == 'caseStudy']{..., spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}"
-  )
-  let graphicsSettings = loadData(
-    "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
-  )
-  let landMarks = loadData(
-    "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}"
-  )
-
-  // events.then((events) => {
-  //   console.log('EVENTS')
-  //   console.dir(events)
-  // })
-
-  // landMarks.then((landMarks) => {
-  //   console.dir(landMarks)
-  // })
-
-  // caseStudies.then((caseStudies) => {
-  //   console.log('CASE STUDIES')
-  //   console.dir(caseStudies)
-  // })
-
-  // DEBUG VARIABLES
-  let worldX = 0
-  let worldY = 0
-  let screenX = 0
-  let screenY = 0
-  let rendererHeight = 0
-  let rendererWidth = 0
-  let viewportHeight = 0
-  let viewportWidth = 0
-  let debugWaypointIndex = 0
-  let debugWaypointTotal = 0
-  let debugWaypointX = 0
-  let debugWaypointY = 0
-  let debugWaypointDirection = ""
-  let debugWaypointSteps = 0
+  const graphicsSettings = loadData(QUERY_GRAPHICS_SETTINGS)
+  const events = loadData(QUERY_EVENTS)
+  const caseStudies = loadData(QUERY_CASE_STUDIES)
+  const landMarks = loadData(QUERY_LAND_MARKS)
 
   // DOM REFERENCES
   let gameContainer = {}
 
   // VARIABLES
-  let popUpText = false
-  let playersInProximity = []
   let newUserName = ""
   let newUserColor = ""
-  let newUserAvatar = 1
-  let loggedIn = false
-  let userLoaded = false
-  let showUserList = false
-  let showChat = false
-  let banned = false
-  let inMotion = false
 
-  let caseStudyActive = false
-  let currentCaseStudy = {}
+  const STATE = {
+    ERROR: 0,
+    READY: 1,
+    LOADING: 2,
+    LOGIN: 3,
+    CASE_STUDY_SINGLE: 4,
+    CASE_STUDY_LISTING: 5,
+    EVENT_SINGLE: 6,
+    BANNED: 7,
+  }
 
-  let caseStudyBoxActive = false
+  // UI STATE
+  const UI = { state: STATE.LOADING, slug: false, errorMessage: false }
 
+  const setUIState = (newState, newSlug = false, errorMessage = false) => {
+    switch (newState) {
+      case STATE.READY:
+        UI.state = STATE.READY
+        UI.slug = false
+        section = false
+        slug = false
+        history.pushState({}, "", "/")
+        break
+      case STATE.LOGIN:
+        UI.state = STATE.LOGIN
+        UI.slug = false
+        section = "login"
+        slug = false
+        history.pushState({}, "", "/login")
+        break
+      case STATE.CASE_STUDY_SINGLE:
+        UI.state = STATE.CASE_STUDY_SINGLE
+        UI.slug = newSlug
+        section = "case-studies"
+        slug = newSlug
+        history.pushState({}, "", "/" + section + "/" + slug)
+        break
+      case STATE.CASE_STUDY_LISTING:
+        UI.state = STATE.CASE_STUDY_LISTING
+        UI.slug = false
+        section = "case-studies"
+        slug = false
+        history.pushState({}, "", "/" + section + "/")
+        break
+      case STATE.EVENT_SINGLE:
+        UI.state = STATE.EVENT_SINGLE
+        UI.slug = newSlug
+        section = "events"
+        slug = newSlug
+        history.pushState({}, "", "/" + section + "/" + newSlug)
+        break
+      case STATE.LOADING:
+        UI.state = STATE.LOADING
+        UI.slug = false
+        section = false
+        slug = false
+        history.pushState({}, "", "/")
+        break
+      case STATE.BANNED:
+        UI.state = STATE.BANNED
+        UI.slug = false
+        section = false
+        slug = false
+        history.pushState({}, "", "/")
+        break
+      default:
+        UI.state = STATE.ERROR
+        UI.slug = false
+        UI.errorMessage = errorMessage
+        section = false
+        slug = false
+        history.pushState({}, "", "/ERROR")
+    }
+  }
+
+  $: {
+    console.log("STATE: ", UI.state)
+  }
+
+  let activeContentClosed = false
   let audioChatActive = false
-
   let sidebarHidden = false
+  let loggedIn = false
 
-  let eventActive = false
-
+  // UI DATA VARIABLES
   let miniImg = false
 
+  // WORLD STATE
+  let playersInProximity = []
   let localPlayers = {}
   let chatMessages = []
   let moveQ = []
 
-  let targetGraphics = {}
-  let pathGraphics = {}
-  let fullPathGraphics = {}
-  let wayPointGraphics = {}
-
-  let mapLayer = {}
-  let caseStudyLayer = {}
-  let playerLayer = {}
-  let landMarkLayer = {}
-  let activeContentClosed = false
-  let passiveContentClosed = false
-
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567")
-  // const client = new Colyseus.Client("ws://18.194.21.39:2567");
   const client = new Colyseus.Client("wss://gameserver.tsoap.dev")
 
   // PIXI
   let app = {}
-  let responsiveWidth = 0
   let viewport = {}
   let loader = {}
   let ticker = {}
   let sheet = []
+
+  // PIXI LAYERS
+  let mapLayer = {}
+  let caseStudyLayer = {}
+  let playerLayer = {}
+  let landMarkLayer = {}
+
+  // PIXI MISC.
+  let targetGraphics = {}
 
   const checkPlayerProximity = () => {
     playersInProximity = []
@@ -219,23 +224,16 @@
         playersInProximity.push(localPlayers[k])
       }
     }
-    // console.dir(playersInProximity);
   }
 
   // GAME LOOP
   const updatePositions = (delta) => {
     let deltaRounded = Math.round(delta) + deltaJump
     deltaJump = 0
-
-    if (deltaRounded > 10) {
-      console.log("HIGH DELTA:", deltaRounded)
-    }
-
     for (let key in moveQ) {
       if (localPlayers[key]) {
         if (moveQ[key].length > 0) {
           if (moveQ[key].length - deltaRounded < 0) {
-            // console.log('d diff', moveQ[key].length - deltaRounded)
             let step = moveQ[key][moveQ[key].length - 1]
             localPlayers[key].avatar.setAnimation(step.direction)
             localPlayers[key].avatar.x = step.x
@@ -247,23 +245,11 @@
             localPlayers[key].avatar.setAnimation(step.direction)
             localPlayers[key].avatar.x = step.x
             localPlayers[key].avatar.y = step.y
-            // if (key === $localUserSessionID) {
-            //   debugWaypointX = step.x;
-            //   debugWaypointY = step.y;
-            //   debugWaypointDirection = step.direction;
-            //   debugWaypointSteps = step.steps;
-            // }
           }
         } else {
           localPlayers[key].avatar.setAnimation("rest")
           if (key === $localUserSessionID) {
-            inMotion = false
             hideTarget()
-            if (debug) {
-              hidePath()
-              hideFullPath()
-              hideWaypoints()
-            }
           }
           delete moveQ[key]
           checkPlayerProximity()
@@ -275,7 +261,7 @@
   }
 
   const showTarget = (x, y) => {
-    let graphics = new PIXI.Graphics()
+    const graphics = new PIXI.Graphics()
     graphics.beginFill(0xff0000)
     graphics.alpha = 0.8
     graphics.drawCircle(x, y, 10)
@@ -289,73 +275,6 @@
     targetGraphics = {}
   }
 
-  const showWaypoints = (path) => {
-    try {
-      let wayPointMarkers = new PIXI.Graphics()
-      wayPointMarkers.beginFill(0x0000ff)
-      wayPointMarkers.alpha = 0.9
-      path.forEach((p) => {
-        wayPointMarkers.drawCircle(p.x, p.y, 2)
-      })
-      wayPointMarkers.endFill()
-      viewport.addChild(wayPointMarkers)
-      wayPointGraphics = wayPointMarkers
-    } catch (err) {
-      console.dir(err)
-    }
-  }
-
-  const showPath = (path) => {
-    try {
-      let line = new PIXI.Graphics()
-      line.lineStyle(2, 0xff0000, 0.6)
-      line.moveTo(
-        localPlayers[$localUserSessionID].avatar.x,
-        localPlayers[$localUserSessionID].avatar.y
-      )
-      path.forEach((p) => {
-        line.lineTo(p.x, p.y)
-      })
-      viewport.addChild(line)
-      pathGraphics = line
-    } catch (err) {
-      console.dir(err)
-    }
-  }
-
-  const hidePath = () => {
-    viewport.removeChild(pathGraphics)
-    pathGraphics = {}
-  }
-
-  const showFullPath = (path) => {
-    try {
-      let line = new PIXI.Graphics()
-      line.lineStyle(10, 0xff7db9, 0.6)
-      line.moveTo(
-        localPlayers[$localUserSessionID].avatar.x,
-        localPlayers[$localUserSessionID].avatar.y
-      )
-      path.forEach((p) => {
-        line.lineTo(p.x, p.y)
-      })
-      viewport.addChild(line)
-      fullPathGraphics = line
-    } catch (err) {
-      console.dir(err)
-    }
-  }
-
-  const hideFullPath = () => {
-    viewport.removeChild(fullPathGraphics)
-    fullPathGraphics = {}
-  }
-
-  const hideWaypoints = () => {
-    viewport.removeChild(wayPointGraphics)
-    wayPointGraphics = {}
-  }
-
   // FUNCTIONS
   let teleportTo = () => {}
   let submitChat = () => {}
@@ -367,10 +286,7 @@
     gameContainer.appendChild(app.view)
 
     // LOADER
-    // http://localhost:5000/
-
     graphicsSettings.then((graphicsSettings) => {
-      // console.dir(graphicsSettings.mapLink.mainImageUrl)
       miniImg = urlFor(graphicsSettings.mapLink.mainImage.asset)
         .width(200)
         .height(200)
@@ -378,47 +294,35 @@
         .auto("format")
         .url()
 
-      let spriteUrl = get(
+      const spriteUrl = get(
         graphicsSettings,
         "activeAvatars[0].spriteJsonURL",
         "/sprites/avatar.json"
       )
 
-      let mapUrl = urlFor(graphicsSettings.mapLink.mainImage.asset).url()
-      console.log("mapUrl", mapUrl)
-      let gridUrl = get(graphicsSettings, "mapLink.pathfindingGridUrl", "")
-      console.log("gridUrl", gridUrl)
+      const mapUrl = urlFor(graphicsSettings.mapLink.mainImage.asset).url()
+      const gridUrl = get(graphicsSettings, "mapLink.pathfindingGridUrl", "")
 
       loader
         .add("map", mapUrl)
         .add("grid", gridUrl)
         .add("avatar", spriteUrl)
         .load((loader, resources) => {
-          let map = new PIXI.Sprite(resources.map.texture)
+          const map = new PIXI.Sprite(resources.map.texture)
           map.width = MAP_WIDTH
           map.height = MAP_HEIGHT
           mapLayer.addChild(map)
-          if (debug) {
-            let grid = new PIXI.Sprite(resources.grid.texture)
-            grid.width = MAP_WIDTH
-            grid.height = MAP_HEIGHT
-            grid.alpha = 0.85
-            mapLayer.addChild(grid)
-          }
-
           sheet.push(resources["avatar"].spritesheet)
 
           let avatarIndex = 0
 
-          // console.dir(sheet)
-
           // CREATE PLAYER
           const createPlayer = (playerOptions, sessionId) => {
-            let front = new PIXI.AnimatedSprite(sheet[0].animations["front"])
-            let back = new PIXI.AnimatedSprite(sheet[0].animations["back"])
-            let left = new PIXI.AnimatedSprite(sheet[0].animations["left"])
-            let right = new PIXI.AnimatedSprite(sheet[0].animations["right"])
-            let rest = new PIXI.AnimatedSprite(sheet[0].animations["rest"])
+            const front = new PIXI.AnimatedSprite(sheet[0].animations["front"])
+            const back = new PIXI.AnimatedSprite(sheet[0].animations["back"])
+            const left = new PIXI.AnimatedSprite(sheet[0].animations["left"])
+            const right = new PIXI.AnimatedSprite(sheet[0].animations["right"])
+            const rest = new PIXI.AnimatedSprite(sheet[0].animations["rest"])
 
             rest.name = "rest"
             front.name = "front"
@@ -455,7 +359,7 @@
             left.play()
             right.play()
 
-            let avatar = new PIXI.Container()
+            const avatar = new PIXI.Container()
             avatar.addChild(left, right, back, front, rest)
             avatar.motionState = "rest"
             avatar.setAnimation = (direction) => {
@@ -466,13 +370,11 @@
             }
             avatar.x = playerOptions.x
             avatar.y = playerOptions.y
-            console.log("height", avatar.height)
-            console.log("width", avatar.width)
             avatar.pivot.x = avatar.width / 2
             avatar.pivot.y = avatar.height / 2
             avatar.interactive = true
 
-            let player = {
+            const player = {
               avatar: avatar,
               waypoints: [],
               area: playerOptions.area,
@@ -483,7 +385,7 @@
               connected: playerOptions.connected,
               authenticated: playerOptions.authenticated,
               id: sessionId,
-              isSelf: playerOptions.uuid == $localUserUUID,
+              isSelf: playerOptions.uuid === $localUserUUID,
             }
 
             const onDown = (e) => {
@@ -492,11 +394,11 @@
             }
 
             const onEnter = () => {
-              popUpText = player.name
+              // popUpText = player.name
             }
 
             const onLeave = () => {
-              popUpText = false
+              // popUpText = false
             }
 
             player.avatar.on("mousedown", onDown)
@@ -508,9 +410,7 @@
 
             if (player.isSelf) {
               viewport.follow(player.avatar)
-              userLoaded = true
-              localUserTint.set(playerOptions.tint)
-              localUserName.set(player.name)
+              setUIState(STATE.READY)
               localUserSessionID.set(player.id)
             }
 
@@ -525,24 +425,14 @@
               sig: sig,
               uuid: $localUserUUID,
               avatar: avatarIndex,
-              tint:
-                newUserColor.replace("#", "0x").toUpperCase() ||
-                chance
-                  .color({ format: "hex" })
-                  .replace("#", "0x")
-                  .toUpperCase(),
+              tint: "0xffff00",
             }
           } else {
             playerObject = {
               uuid: $localUserUUID,
-              name: newUserName || chance.name(),
+              name: "default name",
               avatar: avatarIndex,
-              tint:
-                newUserColor.replace("#", "0x").toUpperCase() ||
-                chance
-                  .color({ format: "hex" })
-                  .replace("#", "0x")
-                  .toUpperCase(),
+              tint: "0xff0000",
             }
           }
 
@@ -567,9 +457,9 @@
                   setTimeout(() => {
                     delete localPlayers[sessionId]
                     localPlayers = localPlayers
-                    // console.dir(localPlayers)
                   }, 500)
                 } catch (err) {
+                  setUIState(STATE.ERROR, false, err)
                   console.dir(err)
                 }
               }
@@ -581,13 +471,12 @@
 
               // PLAYER: BANNED
               gameRoom.onMessage("banned", (message) => {
-                banned = true
+                setUIState(STATE.BANNED)
               })
 
               // PLAYER: ILLEGAL MOVE
               gameRoom.onMessage("illegalMove", (message) => {
                 hideTarget()
-                inMotion = false
               })
 
               // PLAYER: STATE CHANGE
@@ -595,12 +484,6 @@
                 if (player.path.waypoints.length > 0) {
                   if (localPlayers[sessionId].isSelf) {
                     localUserArea.set(player.area)
-                    debugWaypointTotal = player.path.waypoints.length - 1
-                    if (debug) {
-                      showFullPath(player.fullPath.waypoints)
-                      showPath(player.path.waypoints)
-                      showWaypoints(player.path.waypoints)
-                    }
                   }
                   moveQ[sessionId] = player.path.waypoints
                 } else {
@@ -617,33 +500,17 @@
               // PLAYER: CLICK / TAP
               viewport.on("clicked", (e) => {
                 hideTarget()
-                if (debug) {
-                  hidePath()
-                  hideFullPath()
-                  hideWaypoints()
-                }
-                // if (!inMotion) {
                 gameRoom.send("go", {
                   x: Math.round(e.world.x),
                   y: Math.round(e.world.y),
                   originX: localPlayers[$localUserSessionID].avatar.x,
                   originY: localPlayers[$localUserSessionID].avatar.y,
                 })
-
-                inMotion = true
-
-                screenX = Math.round(e.screen.x)
-                screenY = Math.round(e.screen.y)
-                worldX = Math.round(e.world.x)
-                worldY = Math.round(e.world.y)
-
                 showTarget(Math.round(e.world.x), Math.round(e.world.y))
-                // }
               })
 
               // PLAYER: TELEPORT
               teleportTo = (area) => {
-                // console.log(area)
                 gameRoom.send("teleport", {
                   area: area,
                 })
@@ -665,6 +532,7 @@
                   chatMessages.splice(itemIndex, 1)
                   chatMessages = chatMessages
                 } catch (err) {
+                  setUIState(STATE.ERROR, false, err)
                   console.dir(err)
                 }
               }
@@ -673,13 +541,15 @@
               submitChat = (event) => {
                 try {
                   gameRoom.send("submitChatMessage", {
-                    msgId: chance.guid(),
+                    msgId: nanoid(),
                     uuid: $localUserUUID,
-                    name: $localUserName,
+                    name: localPlayers[$localUserSessionID].name,
                     text: event.detail.text,
-                    tint: $localUserTint,
+                    tint: localPlayers[$localUserSessionID].tint,
                   })
                 } catch (err) {
+                  setUIState(STATE.ERROR, false, err)
+
                   console.dir(err)
                 }
               }
@@ -696,22 +566,19 @@
                       roomId: r.id,
                       partner: partner.id,
                     })
-
                     inPrivateChat.set(true)
-
                     // PRIVATE ROOM: LEAVE
                     leavePrivateChat = () => {
                       r.leave()
-
                       gameRoom.send("leavePrivateRoom", {
                         roomId: r.id,
                       })
-
                       inPrivateChat.set(false)
                     }
                   })
                 } catch (err) {
                   console.dir(err)
+                  setUIState(STATE.ERROR, false, err)
                 }
               }
 
@@ -732,8 +599,9 @@
               // GENERAL
               // ************
 
-              // GENNERAL: ERROR
+              // GENERAL: ERROR
               gameRoom.onError((code, message) => {
+                setUIState(STATE.ERROR, false, message)
                 console.error("!!! COLYSEUS ERROR:")
                 console.error(message)
                 console.dir(err)
@@ -742,123 +610,98 @@
             .catch((e) => {
               if (e.code == 4215) {
                 console.log("BANNED")
-                banned = true
+                setUIState(STATE.BANNED)
               } else {
                 console.log("GAME ROOM: JOIN ERROR", e)
-                console.dir(e)
+                setUIState(
+                  STATE.ERROR,
+                  false,
+                  "FAILED TO CONNECT TO GAMESERVER"
+                )
                 // Sentry.captureException(err)
               }
             })
         })
 
       // ADD CASE STUDIES
-      // caseStudies.then((caseStudies) => {
-      //   // console.dir(caseStudies)
-      //   caseStudies.forEach((cs, i) => {
-      //     console.dir(cs)
+      caseStudies.then((caseStudies) => {
+        caseStudies.forEach((cs, i) => {
+          const spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
+          const spriteId = "caseStudy-" + cs._id
+          const csLoader = new PIXI.Loader()
+          csLoader.add(spriteId, spriteUrl).load((loader, resources) => {
+            const frames = new PIXI.AnimatedSprite(
+              resources[spriteId].spritesheet.animations["frames"]
+            )
+            frames.visible = true
+            frames.animationSpeed = 0.02
+            frames.play()
 
-      //     let spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
+            const caseStudyLocation = new PIXI.Container()
+            caseStudyLocation.addChild(frames)
+            caseStudyLocation.x = cs.x
+            caseStudyLocation.y = cs.y
+            caseStudyLocation.pivot.x = caseStudyLocation.width / 2
+            caseStudyLocation.pivot.y = caseStudyLocation.height / 2
+            caseStudyLocation.title = cs.title
+            caseStudyLocation.index = i
+            caseStudyLocation.interactive = true
 
-      //     // console.dir(spriteUrl)
+            const onDown = (e) => {
+              const csSlug = get(cs, "slug.current", false)
+              csSlug
+                ? setUIState(STATE.CASE_STUDY_SINGLE, csSlug)
+                : setUIState(STATE.CASE_STUDY_LISTING)
+              e.stopPropagation()
+            }
 
-      //     const spriteId = "caseStudy-" + cs._id
+            const onEnter = (e) => {
+              gameContainer.style.cursor = "pointer"
+              // popUpText = caseStudyLocation.title
+            }
 
-      //     const csLoader = new PIXI.Loader()
+            const onLeave = (e) => {
+              gameContainer.style.cursor = "default"
+              // popUpText = false
+            }
 
-      //     csLoader.add(spriteId, spriteUrl).load((loader, resources) => {
-      //       // console.dir(resources)
+            caseStudyLocation.on("mousedown", onDown)
+            caseStudyLocation.on("touchstart", onDown)
+            caseStudyLocation.on("mouseover", onEnter)
+            caseStudyLocation.on("mouseout", onLeave)
 
-      //       // console.dir(resources["csSprite"].spritesheet.animations["frames"])
-
-      //       let frames = new PIXI.AnimatedSprite(
-      //         resources[spriteId].spritesheet.animations["frames"]
-      //       )
-      //       frames.visible = true
-      //       frames.animationSpeed = 0.02
-      //       frames.play()
-
-      //       let caseStudyLocation = new PIXI.Container()
-      //       caseStudyLocation.addChild(frames)
-      //       caseStudyLocation.x = cs.x
-      //       caseStudyLocation.y = cs.y
-      //       caseStudyLocation.pivot.x = caseStudyLocation.width / 2
-      //       caseStudyLocation.pivot.y = caseStudyLocation.height / 2
-      //       caseStudyLocation.title = cs.title
-      //       caseStudyLocation.index = i
-      //       caseStudyLocation.interactive = true
-
-      //       const onDown = (e) => {
-      //         caseStudyActive = true
-      //         currentCaseStudy = caseStudies[caseStudyLocation.index]
-      //         e.stopPropagation()
-      //       }
-
-      //       const onEnter = (e) => {
-      //         gameContainer.style.cursor = "pointer"
-      //         popUpText = caseStudyLocation.title
-      //       }
-
-      //       const onLeave = (e) => {
-      //         gameContainer.style.cursor = "default"
-      //         popUpText = false
-      //       }
-
-      //       caseStudyLocation.on("mousedown", onDown)
-      //       caseStudyLocation.on("touchstart", onDown)
-      //       caseStudyLocation.on("mouseover", onEnter)
-      //       caseStudyLocation.on("mouseout", onLeave)
-
-      //       // console.dir(caseStudyLocation)
-
-      //       caseStudyLayer.addChild(caseStudyLocation)
-      //     })
-      //   })
-      // })
+            caseStudyLayer.addChild(caseStudyLocation)
+          })
+        })
+      })
 
       // ADD LANDMARKS
-      // landMarks.then((landMarks) => {
-      //   // console.dir(landMarks)
-      //   landMarks.forEach((lm, i) => {
-      //     // console.dir(lm)
+      landMarks.then((landMarks) => {
+        landMarks.forEach((lm, i) => {
+          const spriteUrl = get(lm, "spriteJsonURL", "")
+          const spriteId = "landMark-" + lm._id
+          const lmLoader = new PIXI.Loader()
 
-      //     let spriteUrl = get(lm, "spriteJsonURL", "")
-      //     // let spriteUrl = urlFor(lm.spriteLink.spriteJsonURL).url()
+          lmLoader.add(spriteId, spriteUrl).load((loader, resources) => {
+            const frames = new PIXI.AnimatedSprite(
+              resources[spriteId].spritesheet.animations["frames"]
+            )
+            frames.visible = true
+            frames.animationSpeed = 0.02
+            frames.play()
 
-      //     // console.log("landmark sprite json url", spriteUrl)
+            const landMarkLocation = new PIXI.Container()
+            landMarkLocation.addChild(frames)
+            landMarkLocation.x = lm.x
+            landMarkLocation.y = lm.y
+            landMarkLocation.pivot.x = landMarkLocation.width / 2
+            landMarkLocation.pivot.y = landMarkLocation.height / 2
+            landMarkLocation.index = i
 
-      //     const spriteId = "landMark-" + lm._id
-
-      //     const lmLoader = new PIXI.Loader()
-
-      //     lmLoader.add(spriteId, spriteUrl).load((loader, resources) => {
-      //       console.dir(resources)
-
-      //       // console.dir(resources["lmSprite"].spritesheet.animations["frames"])
-
-      //       let frames = new PIXI.AnimatedSprite(
-      //         resources[spriteId].spritesheet.animations["frames"]
-      //       )
-      //       frames.visible = true
-      //       frames.animationSpeed = 0.02
-      //       frames.play()
-
-      //       let landMarkLocation = new PIXI.Container()
-      //       landMarkLocation.addChild(frames)
-      //       landMarkLocation.x = lm.x
-      //       landMarkLocation.y = lm.y
-      //       landMarkLocation.pivot.x = landMarkLocation.width / 2
-      //       landMarkLocation.pivot.y = landMarkLocation.height / 2
-      //       landMarkLocation.title = lm.title
-      //       landMarkLocation.index = i
-
-      //       // console.dir(landMarkLocation)
-
-      //       landMarkLayer.addChild(landMarkLocation)
-      //     })
-      //   })
-      // })
-
-      return graphicsSettings
+            landMarkLayer.addChild(landMarkLocation)
+          })
+        })
+      })
     })
   }
 
@@ -873,9 +716,10 @@
       resolution: 1,
     })
 
-    responsiveWidth = window.matchMedia("(max-width: 700px)").matches
-      ? window.innerWidth
-      : window.innerWidth - 400
+    const getResponsiveWidth = () =>
+      window.matchMedia("(max-width: 700px)").matches
+        ? window.innerWidth
+        : window.innerWidth - 400
 
     // PIXI: VIEWPORT
     viewport = new Viewport({
@@ -886,16 +730,9 @@
       interaction: app.renderer.plugins.interaction,
     })
 
-    // PIXI: LOADER
-    loader = PIXI.Loader.shared
-
-    // PIXI: TICKER
-    ticker = PIXI.Ticker.shared
-
     app.stage.addChild(viewport)
-    ticker.start()
-    ticker.add(updatePositions)
 
+    // Create and add layers
     mapLayer = new PIXI.Container()
     caseStudyLayer = new PIXI.Container()
     playerLayer = new PIXI.Container()
@@ -905,24 +742,18 @@
     viewport.addChild(playerLayer)
     viewport.addChild(landMarkLayer)
 
-    rendererHeight = app.screen.height
-    rendererWidth = app.screen.width
-    viewportHeight = viewport.screenHeight
-    viewportWidth = viewport.screenWidth
+    // PIXI: LOADER
+    loader = PIXI.Loader.shared
+
+    // PIXI: TICKER
+    ticker = PIXI.Ticker.shared
+    ticker.start()
+    ticker.add(updatePositions)
 
     window.onresize = () => {
-      responsiveWidth =
-        window.matchMedia("(max-width: 700px)").matches || sidebarHidden
-          ? window.innerWidth
-          : window.innerWidth - 400
-
+      const responsiveWidth = getResponsiveWidth()
       viewport.resize(responsiveWidth, window.innerHeight)
       app.renderer.resize(responsiveWidth, window.innerHeight)
-
-      rendererHeight = app.screen.height
-      rendererWidth = app.screen.width
-      viewportHeight = viewport.screenHeight
-      viewportWidth = viewport.screenWidth
     }
 
     window.dispatchEvent(new Event("resize"))
@@ -931,7 +762,10 @@
       viewport.setZoom(0.75)
     }
 
-    if (!login) {
+    // Give the local user a UUID
+    localUserUUID.set(nanoid())
+
+    if (section !== "login") {
       makeNewUser(sso, sig)
     }
   })
@@ -948,7 +782,7 @@
   .pop {
     position: fixed;
     width: auto;
-    background: $grey;
+    background: $COLOR_MID_2;
     height: auto;
     line-height: 2em;
     text-align: center;
@@ -985,52 +819,10 @@
     background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
-    // text-align: center;
     bottom: 10px;
     left: 10px;
     padding: 20px;
     border-radius: 10px;
-  }
-
-  .phone-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    z-index: 1000;
-    padding: 10px;
-    font-size: $font_size_small;
-    text-align: center;
-    display: none;
-
-    @include screen-size("small") {
-      display: block;
-    }
-
-    .chat-nav {
-      border-radius: 10px;
-      float: right;
-      padding: 15px;
-      background: $darkgrey;
-      cursor: pointer;
-      color: $lightergrey;
-      &:active {
-        background: $darkergrey;
-      }
-    }
-
-    .userlist-nav {
-      border-radius: 10px;
-      float: left;
-      padding: 15px;
-      background: $darkgrey;
-      cursor: pointer;
-      color: $lightergrey;
-
-      &:active {
-        background: $darkergrey;
-      }
-    }
   }
 
   .current-area {
@@ -1043,81 +835,12 @@
     top: 10px;
     left: 10px;
     padding: 10px;
-    border-radius: 10px;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
     @include screen-size("small") {
       top: unset;
       bottom: 20px;
       display: none;
-    }
-  }
-
-  .top-bar {
-    position: fixed;
-    bottom: 0%;
-    left: 0;
-    width: calc(100vw - 420px);
-    height: 40px;
-    background: #a4a4a4;
-    padding: 10px;
-    padding-top: 5px;
-    overflow: scroll;
-    font-size: 12px;
-    z-index: 1000;
-    user-select: none;
-
-    @include screen-size("small") {
-      display: none;
-    }
-
-    .link {
-      text-decoration: none;
-      font-weight: bold;
-      height: 30px;
-      line-height: 10px;
-      padding: 10px;
-      color: black;
-      border-radius: 5px;
-      text-align: center;
-      display: block;
-      float: left;
-      margin-right: 5px;
-      background: lightgray;
-
-      &.audio-chat {
-        float: right;
-        background: #2e2e2e;
-        color: white;
-      }
-
-      &.header {
-        border: 1px solid lightgray;
-        background: transparent;
-      }
-
-      &.green {
-        background: #78f878;
-      }
-      &.blue {
-        background: #7878f8;
-      }
-      &.yellow {
-        background: #f8f878;
-      }
-      &.red {
-        background: #f87878;
-      }
-
-      &.interact {
-        border: none;
-        opacity: 0.7;
-        cursor: pointer;
-
-        &:hover {
-          opacity: 1;
-        }
-      }
     }
   }
 
@@ -1143,35 +866,6 @@
     }
   }
 
-  .mainUserListContainer {
-    position: fixed;
-    top: 0px;
-    left: 0;
-    width: 420px;
-    height: 50vh;
-    background: lightgray;
-    padding: 10px;
-    padding-top: 10px;
-    overflow: scroll;
-    padding-bottom: 200px;
-    z-index: 100;
-    transform: scale(0.8);
-
-    @include screen-size("small") {
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.5 ease-out;
-      padding-top: 80px;
-
-      &.phone {
-        opacity: 1;
-        pointer-events: all;
-      }
-    }
-  }
-
   .game {
     width: calc(100vw - 400px);
     height: 100vh;
@@ -1179,13 +873,8 @@
     top: 0;
     left: 0;
     overflow: hidden;
-    float: right;
-    opacity: 0;
+    opacity: 1;
     transition: opacity 1s ease-out;
-
-    &.loaded {
-      opacity: 1;
-    }
 
     @include screen-size("small") {
       width: 100vw;
@@ -1228,8 +917,6 @@
     padding: 0;
     overflow: hidden;
     z-index: 100;
-    // display: flex;
-    // flex-direction: column;
     transform: translateX(0);
     transition: transform 0.5s $transition;
 
@@ -1248,9 +935,6 @@
         height: 200px;
         width: 200px;
         position: relative;
-        // transform: scale(1.25);
-
-        // transform: scale(0.8);
 
         @include screen-size("short") {
           transform: scale(0.5);
@@ -1275,63 +959,13 @@
     }
 
     .calendar {
-      background: $COLOR_LIGHT;
       height: calc(50% - 130px);
-      color: $COLOR_DARK;
-      font-size: $FONT_SIZE_BASE;
-      background: $COLOR_LIGHT;
       overflow: hidden;
-      // padding-bottom: 60px;
       @include screen-size("short") {
         height: calc(50% - 65px);
       }
-
-      .calendar-item {
-        // padding-left: 20px;
-        // padding-right: 20px;
-        // padding-top: 10px;
-        // padding-bottom: 10px;
-        padding: 10px;
-        background: red;
-        // display: inline-block;
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        padding-bottom: 20px;
-        padding-top: 20px;
-        background: $COLOR_LIGHT;
-        cursor: pointer;
-
-        .title {
-          // float: left;
-          white-space: nowrap;
-        }
-
-        .elips {
-          // float: left;
-          // font-size: $FONT_SIZE_SMALL;
-          margin-left: 10px;
-          margin-right: 10px;
-          width: 50%;
-          white-space: nowrap;
-          overflow: hidden;
-          flex-shrink: 4;
-          // text-overflow: ellipsis;
-        }
-
-        .date {
-          white-space: nowrap;
-
-          // float: right;
-        }
-
-        transition: background 0.5s $transition;
-
-        &:hover {
-          background: $COLOR_MID_1;
-        }
-      }
     }
+
     .chat {
       background: $COLOR_MID_1;
       height: calc(50% - 130px);
@@ -1341,6 +975,7 @@
         height: calc(50% - 65px);
       }
     }
+
     .menu {
       color: $COLOR_DARK;
       font-size: $FONT_SIZE_BASE;
@@ -1393,42 +1028,6 @@
     color: $COLOR_DARK;
     padding-bottom: 60px;
     border-radius: 4px;
-    // display: flex;
-    // flex-direction: column;
-    // transform: translateX(0);
-    // transition: transform 0.5s $transition;
-
-    img {
-      max-width: 80%;
-      height: 260px;
-      object-fit: cover;
-    }
-
-    .title {
-      margin-bottom: 20px;
-    }
-    .date {
-      margin-bottom: 20px;
-    }
-
-    .cs-item {
-      width: 160px;
-      margin: 10px;
-      float: left;
-      cursor: pointer;
-
-      img,
-      video {
-        max-width: 100%;
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-      }
-
-      &:hover {
-        background: $COLOR_MID_2;
-      }
-    }
 
     @include screen-size("small") {
       display: none;
@@ -1455,9 +1054,6 @@
     font-size: $FONT_SIZE_BASE;
     color: $COLOR_DARK;
     position: fixed;
-    width: auto;
-    background: $grey;
-    height: auto;
     line-height: 2em;
     top: 10px;
     width: 500px;
@@ -1474,13 +1070,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-    }
-
-    .title {
-      margin-bottom: 20px;
-    }
-    .date {
-      margin-bottom: 20px;
     }
 
     @include screen-size("small") {
@@ -1529,10 +1118,8 @@
   <!-- MINIMAP -->
   <div class="minimap">
     <div class="map-container">
-      <!-- {graphicsSettings.mapLink.mainImageUrl} -->
       {#if miniImg}<img src={miniImg} />{/if}
-      <!-- <img src={get(graphicsSettings, 'mapLink.mainImageUrl', '')} /> -->
-      {#if $localUserSessionID && localPlayers && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].avatar && localPlayers[$localUserSessionID].avatar.y}
+      {#if get(localPlayers[$localUserSessionID], 'avatar.y', false)}
         <div
           class="map-marker"
           style={'top: ' + Math.round(localPlayers[$localUserSessionID].avatar.y / 20 - 5) + 'px; left: ' + Math.round(localPlayers[$localUserSessionID].avatar.x / 20 - 5) + 'px;'} />
@@ -1542,29 +1129,16 @@
   <!-- CALENDAR -->
   <div class="calendar">
     {#await events then events}
-      {#each events as event, index (event._id)}
-        <div
-          class="calendar-item"
-          in:fade={{ delay: 100 * index }}
-          on:click={() => {
-            if (eventActive && eventActive._id === event._id) {
-              eventActive = false
-            } else {
-              eventActive = event
-            }
-          }}>
-          <div class="title">{event.title}</div>
-          <div class="elips">
-            .........................................................
-          </div>
-          <div class="date">{formattedDate(event.startDate)}</div>
-        </div>
-      {/each}
+      <Calendar
+        {events}
+        on:goToEvent={(e) => {
+          setUIState(STATE.EVENT_SINGLE, e.detail.slug)
+        }} />
     {/await}
   </div>
   <!-- CHAT -->
   <div class="chat">
-    <Chat {chatMessages} on:submit={submitChat} phoneActive={showChat} />
+    <Chat {chatMessages} on:submit={submitChat} />
   </div>
   <!-- MENU -->
   <div class="menu">
@@ -1572,144 +1146,75 @@
       <div
         class="menu-item"
         on:click={() => {
-          caseStudyBoxActive = !caseStudyBoxActive
+          setUIState(STATE.CASE_STUDY_LISTING)
         }}>
         Case-Studies
       </div>
       <div class="menu-item">About</div>
       <div class="menu-item">Help</div>
     </div>
-    <a href="/login" class="menu-item login">Login</a>
+    <div
+      class="menu-item login"
+      on:click={() => {
+        setUIState(STATE.LOGIN)
+      }}>
+      Login
+    </div>
   </div>
 </div>
 
 <!-- GAME WORLD -->
-<div
-  class="game"
-  class:expanded={sidebarHidden}
-  class:loaded={userLoaded}
-  bind:this={gameContainer} />
+<div class="game" class:expanded={sidebarHidden} bind:this={gameContainer} />
 
-<!-- PASSIVE CONTENT: CASE STUDY -->
-{#if caseStudyActive}
-  <div class="passive-content-slot" transition:fly={{ y: 200 }}>
-    <div>
+<!-- CASE STUDIES -->
+{#await caseStudies then caseStudies}
+  {#if section === 'case-studies'}
+    <div class="passive-content-slot" transition:fly={{ y: 200 }}>
       <div
         class="close"
         on:click={(e) => {
-          caseStudyActive = false
+          setUIState(STATE.READY)
         }}>
         ×
       </div>
-      <!-- TITLE -->
-      <div class="title"><strong>{currentCaseStudy.title}</strong></div>
 
-      <!-- FILES -->
-      {#each currentCaseStudy.files as f, index (f._key)}
-        <div in:fade={{ delay: 100 * index }}>
-          <div class="title">{f.title}</div>
-        </div>
-      {/each}
+      <!-- SINGLE CASE STUDY -->
+      {#if UI.state == STATE.CASE_STUDY_SINGLE}
+        <CaseStudySingle
+          caseStudy={caseStudies.find((cs) => cs.slug.current === slug)} />
+      {/if}
 
-      <!-- IMAGE -->
-      <div>
-        <img
-          src={urlFor(currentCaseStudy.mainImage.asset)
-            .width(600)
-            .quality(90)
-            .auto('format')
-            .url()} />
-      </div>
-
-      <!-- TEXT -->
-      <div>
-        {#if currentCaseStudy.content && currentCaseStudy.content.content}
-          {@html renderBlockText(currentCaseStudy.content.content)}
-        {/if}
-      </div>
+      <!-- CASE STUDY LISTING -->
+      {#if UI.state == STATE.CASE_STUDY_LISTING}
+        <CaseStudyListing
+          {caseStudies}
+          on:goToSingle={(e) => {
+            setUIState(STATE.CASE_STUDY_SINGLE, e.detail.slug)
+          }} />
+      {/if}
     </div>
-  </div>
-{/if}
+  {/if}
+{/await}
 
-<!-- PASSIVE CONTENT: CASE STUDY OVERVIEW -->
-{#if caseStudyBoxActive}
-  <div class="passive-content-slot" transition:fly={{ y: 200 }}>
-    <div>
-      <div
-        class="close"
-        on:click={(e) => {
-          caseStudyBoxActive = false
-        }}>
-        ×
-      </div>
-      <!-- TITLE -->
-      <div class="title"><strong>Case studies</strong></div>
-
-      {#await caseStudies then caseStudies}
-        {#each caseStudies as cs, index (cs._id)}
-          <div
-            class="cs-item"
-            in:fade={{ delay: 100 * index }}
-            on:click={(e) => {
-              caseStudyBoxActive = false
-              caseStudyActive = true
-              currentCaseStudy = caseStudies[index]
-            }}>
-            <div class="title">{cs.title}</div>
-            <img
-              src={urlFor(cs.mainImage.asset)
-                .width(200)
-                .height(200)
-                .quality(90)
-                .auto('format')
-                .url()} />
-          </div>
-        {/each}
-      {/await}
-    </div>
-  </div>
-{/if}
-
-<!-- PASSIVE CONTENT: EVENT -->
-{#if eventActive}
-  <div
-    class="passive-content-slot"
-    in:fly={{ y: 200, duration: 300 }}
-    out:fly={{ y: 200, duration: 300 }}>
+<!-- EVENTS -->
+{#await events then events}
+  {#if UI.state == STATE.EVENT_SINGLE}
     <div
-      class="close"
-      on:click={(e) => {
-        eventActive = false
-      }}>
-      ×
-    </div>
-
-    <div>
-      <!-- TITLE -->
-      <div class="title"><strong>{eventActive.title}</strong></div>
-
-      <div class="date">{formattedDate(eventActive.startDate)}</div>
-
-      <!-- IMAGE -->
-      <div>
-        <img
-          src={urlFor(eventActive.mainImage.asset)
-            .width(600)
-            .quality(90)
-            .auto('format')
-            .url()} />
+      class="passive-content-slot"
+      in:fly={{ y: 200, duration: 300 }}
+      out:fly={{ y: 200, duration: 300 }}>
+      <div
+        class="close"
+        on:click={(e) => {
+          setUIState(STATE.READY)
+        }}>
+        ×
       </div>
-
-      <!-- TEXT -->
-      <div>
-        {#if eventActive.content.content}
-          {@html renderBlockText(eventActive.content.content)}
-        {/if}
-      </div>
-      <div />
+      <!-- SINGLE EVENT -->
+      <EventSingle event={events.find((ev) => ev.slug.current === slug)} />
     </div>
-  </div>
-{/if}
+  {/if}
+{/await}
 
 <!-- ACTIVE CONTENT: STREAM -->
 {#if $localUserArea === 4 && !activeContentClosed}
@@ -1759,13 +1264,9 @@
   </div>
 {/if} -->
 
-<!-- POP UP -->
-{#if popUpText && !caseStudyActive}
-  <div class="pop" in:fade>{popUpText}</div>
-{/if}
-
 <!-- LOGIN -->
-{#if login && !loggedIn}
+<!-- {#if section == 'login' && !loggedIn} -->
+{#if UI.state == STATE.LOGIN}
   <Login
     {sso}
     {sig}
@@ -1781,113 +1282,23 @@
 <!-- AUDIO CHAT -->
 {#if audioChatActive}
   <AudioChat
-    name={$localUserName}
+    name={localPlayers[$localUserSessionID].name}
     on:close={(e) => {
       audioChatActive = false
     }} />
 {/if}
 
-<!-- PHONE NAVIGATION -->
-<div class="phone-nav">
-  <div
-    class="userlist-nav"
-    on:click={() => {
-      showChat = false
-      showUserList = !showUserList
-    }}>
-    USERLIST
-  </div>
-  <div
-    class="chat-nav"
-    on:click={() => {
-      showUserList = false
-      showChat = !showChat
-    }}>
-    CHAT
-  </div>
-</div>
-
 <!-- BANNED -->
-{#if banned}
+{#if UI.state == STATE.BANNED}
   <Banned />
 {/if}
 
-<!-- !!!!!!! DEBUG !!!!!!! -->
-<!-- !!!!!!! DEBUG !!!!!!! -->
-<!-- !!!!!!! DEBUG !!!!!!! -->
-<!-- !!!!!!! DEBUG !!!!!!! -->
+<!-- LOADING SCREEN -->
+{#if UI.state == STATE.LOADING}
+  <LoadingScreen />
+{/if}
 
-{#if debug}
-  <!-- USER LIST -->
-  <!-- <div class="mainUserListContainer" class:phone={showUserList}>
-    <UserList playerList={localPlayers} phoneActive={showUserList} />
-  </div> -->
-
-  <!-- DEBUG: RENDERING INFO -->
-  <div class="pop tiny" in:fade>
-    <div><strong>Renderer width:</strong> {rendererWidth}</div>
-    <div><strong>Renderer Height:</strong> {rendererHeight}</div>
-    <div><strong>viewport width:</strong> {viewportWidth}</div>
-    <div><strong>viewport Height:</strong> {viewportHeight}</div>
-    <div><strong>Pixel ratio:</strong> {window.devicePixelRatio}</div>
-    <div><strong>World X:</strong> {worldX}</div>
-    <div><strong>World Y:</strong> {worldY}</div>
-    <div><strong>Screen X:</strong> {screenX}</div>
-    <div><strong>Screen Y:</strong> {screenY}</div>
-  </div>
-
-  <!-- DEBUG: WAYPOINT INFO -->
-  {#if inMotion}
-    <div class="pop waypoint tiny" in:fade>
-      <div>
-        <strong>TARGET WAYPOINT:</strong>
-        {debugWaypointIndex}/{debugWaypointTotal}
-      </div>
-      <div><strong>X:</strong> {debugWaypointX}</div>
-      <div><strong>Y:</strong> {debugWaypointY}</div>
-      <div><strong>Direction:</strong> {debugWaypointDirection}</div>
-      <div><strong>Steps:</strong> {debugWaypointSteps}</div>
-    </div>
-  {/if}
-
-  <!-- DEBUG: TOP BAR -->
-  <div class="top-bar">
-    <a class="interact link" href="login">Login</a>
-    <div
-      class="link interact green"
-      on:click={() => {
-        teleportTo('green')
-      }}>
-      GOTO: Green
-    </div>
-    <div
-      class="link interact blue"
-      on:click={() => {
-        teleportTo('blue')
-      }}>
-      GOTO: Blue
-    </div>
-    <div
-      class="link interact yellow"
-      on:click={() => {
-        teleportTo('yellow')
-      }}>
-      GOTO: Yellow
-    </div>
-    <div
-      class="link interact red"
-      on:click={() => {
-        teleportTo('red')
-      }}>
-      GOTO: Red
-    </div>
-
-    <div
-      class="link audio-chat interact"
-      on:click={() => {
-        audioChatActive = true
-      }}>
-      ~ ~ Test audio chat ~ ~
-    </div>
-  </div>
+<!-- ERROR SCREEN -->
+{#if UI.state == STATE.ERROR}
+  <Error message={UI.errorMessage} />
 {/if}

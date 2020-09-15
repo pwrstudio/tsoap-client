@@ -262,3 +262,40 @@
                   // };
 
                   // tweenPath();
+
+       
+
+        <!-- IMAGE -->
+        <div>
+          <img
+            src={urlFor(currentCaseStudy.mainImage.asset)
+              .width(600)
+              .quality(90)
+              .auto('format')
+              .url()} />
+        </div>
+
+        <!-- TEXT -->
+        <div>
+          {#if currentCaseStudy.content && currentCaseStudy.content.content}
+            {@html renderBlockText(currentCaseStudy.content.content)}
+          {/if}
+        </div>
+
+               on:click={(e) => {
+              section = 'case-studies'
+              slug = get(cs, 'slug.current', '')
+              history.pushState({}, '', '/case-studies/' + slug)
+            }}>
+
+              // Warn if the browser doesn't support addEventListener or the Page Visibility API
+  // if (
+  //   typeof document.addEventListener === "undefined" ||
+  //   hidden === undefined
+  // ) {
+  //   console.log(
+  //     "This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API."
+  //   )
+  // } else {
+  //   document.addEventListener(visibilityChange, handleVisibilityChange, false)
+  // }

@@ -6,17 +6,17 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { createEventDispatcher } from "svelte";
-  const dispatch = createEventDispatcher();
+  import { createEventDispatcher } from "svelte"
+  const dispatch = createEventDispatcher()
 
   // COMPONENTS
-  import ChatMessage from "./ChatMessage.svelte";
+  import ChatMessage from "./ChatMessage.svelte"
 
   // DOM REFERENCES
-  let messageContainerEl = {};
+  let messageContainerEl = {}
 
   // PROPS
-  export let chatMessages = [];
+  export let chatMessages = []
 
   $: {
     if (chatMessages) {
@@ -24,21 +24,21 @@
         messageContainerEl.scrollTo({
           top: messageContainerEl.scrollHeight,
           left: 0,
-          behavior: "smooth"
-        });
-      }, 100);
+          behavior: "smooth",
+        })
+      }, 100)
     }
   }
 
   // VARIABLES
-  let chatInputValue = "";
+  let chatInputValue = ""
 
   const submitChat = () => {
     dispatch("submit", {
-      text: chatInputValue
-    });
-    chatInputValue = "";
-  };
+      text: chatInputValue,
+    })
+    chatInputValue = ""
+  }
 </script>
 
 <style lang="scss">
@@ -77,7 +77,7 @@
       width: calc(100% - 90px);
       display: block;
       margin-bottom: 10px;
-      background: $lightgrey;
+      background: $COLOR_MID_2;
       padding: 10px;
       border: 0;
       outline: none;
@@ -87,21 +87,20 @@
       width: 60px;
       float: right;
       display: block;
-      background: $darkgrey;
+      background: $COLOR_MID_3;
       padding: 10px;
       border: 0;
       outline: none;
       color: white;
       cursor: pointer;
       &:hover {
-        background: $darkergrey;
+        background: $COLOR_MID_2;
       }
     }
   }
 </style>
 
 <div class="chat-container">
-
   <div class="message-container" bind:this={messageContainerEl}>
     {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />
@@ -112,8 +111,8 @@
       type="[text]"
       maxlength="600"
       bind:value={chatInputValue}
-      on:keydown={e => {
-        if (e.keyCode == 13) submitChat();
+      on:keydown={(e) => {
+        if (e.keyCode == 13) submitChat()
       }} />
     <button on:click={submitChat}>Send</button>
   </div>

@@ -6,29 +6,29 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { onMount } from "svelte";
+  import { onMount } from "svelte"
 
-  import { createEventDispatcher } from "svelte";
-  const dispatch = createEventDispatcher();
+  import { createEventDispatcher } from "svelte"
+  const dispatch = createEventDispatcher()
 
-  const SSO_SERVER = "https://sso.tsoap.dev/auth/discourse_sso";
+  const SSO_SERVER = "https://sso.tsoap.dev/auth/discourse_sso"
 
   //   // VARIABLES
-  let newUserName = "";
-  let newUserColor = "";
-  let newUserAvatar = 1;
+  let newUserName = ""
+  let newUserColor = ""
+  let newUserAvatar = 1
 
   const makeTemporaryUser = () => {
     dispatch("newTemporaryUser", {
       newUserName: newUserName,
       newUserColor: newUserColor,
-      newUserAvatar: newUserAvatar
-    });
-  };
+      newUserAvatar: newUserAvatar,
+    })
+  }
 
   const authenticateAccreditedUser = () => {
-    window.location = SSO_SERVER;
-  };
+    window.location = SSO_SERVER
+  }
 </script>
 
 <style lang="scss">
@@ -71,7 +71,7 @@
         display: block;
         width: 100%;
         margin-bottom: 10px;
-        background: $lightgrey;
+        background: $COLOR_MID_1;
         padding: 10px;
         border: 0;
         outline: none;
@@ -86,7 +86,7 @@
         width: 60px;
         // float: right;
         display: block;
-        background: $darkgrey;
+        background: $COLOR_MID_2;
         padding: 10px;
         width: 100%;
         border: 0;
@@ -94,7 +94,7 @@
         color: white;
         cursor: pointer;
         &:hover {
-          background: $darkergrey;
+          background: $COLOR_MID_3;
         }
       }
     }
@@ -102,7 +102,6 @@
 </style>
 
 <div class="login">
-
   <div class="box">
     <div class="section">
       <div class="header">Login as accredited user</div>
@@ -118,6 +117,5 @@
       <input bind:value={newUserColor} type="color" />
       <button on:click={makeTemporaryUser}>Start</button>
     </div>
-
   </div>
 </div>

@@ -6,15 +6,15 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { Router, Route } from "svelte-routing";
+  import { Router, Route } from "svelte-routing"
 
   // ROUTES
-  import World from "./World.svelte";
+  import World from "./World.svelte"
 </script>
 
 <Router>
   <Route path="/" component={World} />
   <Route path="/authenticate/:sso/:sig" component={World} authenticate={true} />
-  <Route path="/login" component={World} login={true} />
-  <Route path="/debug" component={World} debug={true} />
+  <Route path="/:section" component={World} />
+  <Route path="/:section/:slug" component={World} />
 </Router>

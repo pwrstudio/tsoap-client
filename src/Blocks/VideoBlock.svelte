@@ -99,7 +99,7 @@
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    font-size: $font_size_small;
+    font-size: $FONT_SIZE_SMALL;
     line-height: $line-height;
     font-family: $sans-stack;
     margin-bottom: $line-height;
