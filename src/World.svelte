@@ -62,18 +62,7 @@
   export let slug = false
 
   // GLOBAL
-  import {
-    nanoid,
-    formattedDate,
-    KEYBOARD,
-    MAP_WIDTH,
-    MAP_HEIGHT,
-    colorTrans,
-    QUERY_GRAPHICS_SETTINGS,
-    QUERY_EVENTS,
-    QUERY_CASE_STUDIES,
-    QUERY_LAND_MARKS,
-  } from "./global.js"
+  import { nanoid, KEYBOARD, MAP, colorTrans, QUERY } from "./global.js"
 
   // STORES
   import {
@@ -84,10 +73,10 @@
   } from "./stores.js"
 
   // ** SANITY
-  const graphicsSettings = loadData(QUERY_GRAPHICS_SETTINGS)
-  const events = loadData(QUERY_EVENTS)
-  const caseStudies = loadData(QUERY_CASE_STUDIES)
-  const landMarks = loadData(QUERY_LAND_MARKS)
+  const graphicsSettings = loadData(QUERY.GRAPHICS_SETTINGS)
+  const events = loadData(QUERY.EVENTS)
+  const caseStudies = loadData(QUERY.CASE_STUDIES)
+  const landMarks = loadData(QUERY.LAND_MARKS)
 
   // DOM REFERENCES
   let gameContainer = {}
@@ -309,8 +298,8 @@
         .add("avatar", spriteUrl)
         .load((loader, resources) => {
           const map = new PIXI.Sprite(resources.map.texture)
-          map.width = MAP_WIDTH
-          map.height = MAP_HEIGHT
+          map.width = MAP.WIDTH
+          map.height = MAP.HEIGHT
           mapLayer.addChild(map)
           sheet.push(resources["avatar"].spritesheet)
 
@@ -521,7 +510,6 @@
                   })
                 } catch (err) {
                   setUIState(STATE.ERROR, false, err)
-
                   console.dir(err)
                 }
               }
@@ -616,7 +604,6 @@
             caseStudyLocation.pivot.x = caseStudyLocation.width / 2
             caseStudyLocation.pivot.y = caseStudyLocation.height / 2
             caseStudyLocation.title = cs.title
-            caseStudyLocation.index = i
             caseStudyLocation.interactive = true
 
             const onDown = (e) => {
@@ -668,7 +655,6 @@
             landMarkLocation.y = lm.y
             landMarkLocation.pivot.x = landMarkLocation.width / 2
             landMarkLocation.pivot.y = landMarkLocation.height / 2
-            landMarkLocation.index = i
 
             landMarkLayer.addChild(landMarkLocation)
           })
@@ -683,8 +669,8 @@
 
     // PIXI: APP
     app = new PIXI.Application({
-      width: MAP_WIDTH,
-      height: MAP_HEIGHT,
+      width: MAP.WIDTH,
+      height: MAP.HEIGHT,
       resolution: 1,
     })
 
@@ -697,8 +683,8 @@
     viewport = new Viewport({
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
-      worldWidth: MAP_WIDTH,
-      worldHeight: MAP_HEIGHT,
+      worldWidth: MAP.WIDTH,
+      worldHeight: MAP.HEIGHT,
       interaction: app.renderer.plugins.interaction,
     })
 

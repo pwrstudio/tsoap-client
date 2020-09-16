@@ -12,16 +12,17 @@ export const KEYBOARD = {
 
 export const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"]
 
-export const MAP_WIDTH = 4000
-export const MAP_HEIGHT = 4000
+export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
 
-export const QUERY_GRAPHICS_SETTINGS =
-  "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]"
-export const QUERY_EVENTS = "*[_type == 'event']"
-export const QUERY_CASE_STUDIES =
-  "*[_type == 'caseStudy']{..., spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}"
-export const QUERY_LAND_MARKS =
-  "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}"
+export const QUERY = {
+  GRAPHICS_SETTINGS:
+    "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]",
+  EVENTS: "*[_type == 'event']",
+  CASE_STUDIES:
+    "*[_type == 'caseStudy']{..., spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
+  LAND_MARKS:
+    "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
+}
 
 // const mainFormat = "MMM dd yyyy – HH:mm"
 // const mainFormat = "MMM dd – HH:mm"
