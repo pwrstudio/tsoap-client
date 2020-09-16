@@ -104,59 +104,43 @@
       case STATE.READY:
         UI.state = STATE.READY
         UI.slug = false
-        section = false
-        slug = false
         history.pushState({}, "", "/")
         break
       case STATE.LOGIN:
         UI.state = STATE.LOGIN
         UI.slug = false
-        section = "login"
-        slug = false
         history.pushState({}, "", "/login")
         break
       case STATE.CASE_STUDY_SINGLE:
         UI.state = STATE.CASE_STUDY_SINGLE
         UI.slug = newSlug
-        section = "case-studies"
-        slug = newSlug
-        history.pushState({}, "", "/" + section + "/" + slug)
+        history.pushState({}, "", "/case-studies/" + UI.slug)
         break
       case STATE.CASE_STUDY_LISTING:
         UI.state = STATE.CASE_STUDY_LISTING
         UI.slug = false
-        section = "case-studies"
-        slug = false
-        history.pushState({}, "", "/" + section + "/")
+        history.pushState({}, "", "/case-studies/")
         break
       case STATE.EVENT_SINGLE:
         UI.state = STATE.EVENT_SINGLE
         UI.slug = newSlug
-        section = "events"
-        slug = newSlug
-        history.pushState({}, "", "/" + section + "/" + newSlug)
+        history.pushState({}, "", "/events/" + UI.slug)
         break
       case STATE.LOADING:
         UI.state = STATE.LOADING
         UI.slug = false
-        section = false
-        slug = false
         history.pushState({}, "", "/")
         break
       case STATE.BANNED:
         UI.state = STATE.BANNED
         UI.slug = false
-        section = false
-        slug = false
-        history.pushState({}, "", "/")
+        history.pushState({}, "", "/banned")
         break
       default:
         UI.state = STATE.ERROR
         UI.slug = false
         UI.errorMessage = errorMessage
-        section = false
-        slug = false
-        history.pushState({}, "", "/ERROR")
+        history.pushState({}, "", "/error/")
     }
   }
 
@@ -371,8 +355,23 @@
 
             if (player.isSelf) {
               viewport.follow(player.avatar)
-              setUIState(STATE.READY)
               localUserSessionID.set(player.id)
+              switch (section) {
+                case "case-studies":
+                  if (slug) {
+                    setUIState(STATE.CASE_STUDY_SINGLE, slug)
+                    break
+                  }
+                  setUIState(STATE.CASE_STUDY_LISTING)
+                  break
+                case "events":
+                  if (slug) {
+                    setUIState(STATE.EVENT_SINGLE, slug)
+                    break
+                  }
+                default:
+                  setUIState(STATE.READY)
+              }
             }
 
             return player
@@ -593,7 +592,6 @@
             const frames = new PIXI.AnimatedSprite(
               resources[spriteId].spritesheet.animations["frames"]
             )
-            frames.visible = true
             frames.animationSpeed = 0.02
             frames.play()
 
@@ -645,7 +643,7 @@
             const frames = new PIXI.AnimatedSprite(
               resources[spriteId].spritesheet.animations["frames"]
             )
-            frames.visible = true
+            // frames.visible = true
             frames.animationSpeed = 0.02
             frames.play()
 
@@ -723,7 +721,14 @@
     // Give the local user a UUID
     localUserUUID.set(nanoid())
 
-    if (section !== "login") {
+    console.log("CHECKING URL PARAMS ====>")
+    console.log("section", section)
+    console.log("slug", slug)
+
+    if (section === "login") {
+      console.log("LOGIN")
+      setUIState(STATE.LOGIN)
+    } else {
       makeNewUser(sso, sig)
     }
   })
@@ -1126,7 +1131,7 @@
 
 <!-- CASE STUDIES -->
 {#await caseStudies then caseStudies}
-  {#if section === 'case-studies'}
+  {#if UI.state == STATE.CASE_STUDY_SINGLE || UI.state == STATE.CASE_STUDY_LISTING}
     <div class="passive-content-slot" transition:fly={{ y: 200 }}>
       <div
         class="close"
@@ -1139,7 +1144,7 @@
       <!-- SINGLE CASE STUDY -->
       {#if UI.state == STATE.CASE_STUDY_SINGLE}
         <CaseStudySingle
-          caseStudy={caseStudies.find((cs) => cs.slug.current === slug)} />
+          caseStudy={caseStudies.find((cs) => cs.slug.current === UI.slug)} />
       {/if}
 
       <!-- CASE STUDY LISTING -->
@@ -1169,7 +1174,7 @@
         ×
       </div>
       <!-- SINGLE EVENT -->
-      <EventSingle event={events.find((ev) => ev.slug.current === slug)} />
+      <EventSingle event={events.find((ev) => ev.slug.current === UI.slug)} />
     </div>
   {/if}
 {/await}
@@ -1222,8 +1227,16 @@
   </div>
 {/if} -->
 
+<!-- AUDIO CHAT -->
+{#if audioChatActive}
+  <AudioChat
+    name={localPlayers[$localUserSessionID].name}
+    on:close={(e) => {
+      audioChatActive = false
+    }} />
+{/if}
+
 <!-- LOGIN -->
-<!-- {#if section == 'login' && !loggedIn} -->
 {#if UI.state == STATE.LOGIN}
   <Login
     {sso}
@@ -1237,26 +1250,17 @@
     }} />
 {/if}
 
-<!-- AUDIO CHAT -->
-{#if audioChatActive}
-  <AudioChat
-    name={localPlayers[$localUserSessionID].name}
-    on:close={(e) => {
-      audioChatActive = false
-    }} />
-{/if}
-
 <!-- BANNED -->
 {#if UI.state == STATE.BANNED}
   <Banned />
 {/if}
 
-<!-- LOADING SCREEN -->
+<!-- LOADING -->
 {#if UI.state == STATE.LOADING}
   <LoadingScreen />
 {/if}
 
-<!-- ERROR SCREEN -->
+<!-- ERROR -->
 {#if UI.state == STATE.ERROR}
   <Error message={UI.errorMessage} />
 {/if}

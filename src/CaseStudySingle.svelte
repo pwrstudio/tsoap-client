@@ -7,6 +7,7 @@
 
   // *** IMPORTS
   import get from "lodash/get"
+  import { fade } from "svelte/transition"
   import { urlFor, renderBlockText } from "./sanity.js"
 
   // *** PROPS
@@ -33,7 +34,7 @@
   }
 </style>
 
-<div class="case-study-single">
+<div class="case-study-single" in:fade>
   <!-- TITLE -->
   <div class="title">{caseStudy.title}</div>
   <!-- FILES -->

@@ -7,6 +7,7 @@
 
   // *** IMPORTS
   import get from "lodash/get"
+  import { fade } from "svelte/transition"
   import { urlFor, renderBlockText } from "./sanity.js"
 
   // GLOBAL
@@ -36,7 +37,7 @@
   }
 </style>
 
-<div class="event">
+<div class="event" in:fade>
   <!-- TITLE -->
   <div class="title">{event.title}</div>
 
