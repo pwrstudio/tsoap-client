@@ -69,6 +69,7 @@
     MAP,
     COLORMAP,
     QUERY,
+    TEXT_STYLE,
   } from "./global.js"
 
   // STORES
@@ -329,6 +330,10 @@
             }
           )
 
+          console.log(playerOptions.name)
+          const nameText = new PIXI.Text(playerOptions.name, TEXT_STYLE)
+          nameText.anchor.set(0.5)
+
           const avatar = new PIXI.Container()
           avatar.addChild(...sprites)
           avatar.motionState = "rest"
@@ -364,11 +369,15 @@
           }
 
           const onEnter = () => {
-            // popUpText = player.name
+            // console.log("nameText.width", nameText.width)
+            // console.log("nameText.height", nameText.height)
+            nameText.x = avatar.x + 10
+            nameText.y = avatar.y - 40
+            playerLayer.addChild(nameText)
           }
 
           const onLeave = () => {
-            // popUpText = false
+            playerLayer.removeChild(nameText)
           }
 
           player.avatar.on("mousedown", onDown)
@@ -625,6 +634,9 @@
             frames.animationSpeed = 0.02
             frames.play()
 
+            const nameText = new PIXI.Text(cs.title, TEXT_STYLE)
+            nameText.anchor.set(0.5)
+
             const caseStudyLocation = new PIXI.Container()
             caseStudyLocation.addChild(frames)
             caseStudyLocation.x = cs.x
@@ -644,12 +656,14 @@
 
             const onEnter = (e) => {
               gameContainer.style.cursor = "pointer"
-              // popUpText = caseStudyLocation.title
+              nameText.x = caseStudyLocation.x + 10
+              nameText.y = caseStudyLocation.y - 60
+              caseStudyLayer.addChild(nameText)
             }
 
             const onLeave = (e) => {
               gameContainer.style.cursor = "default"
-              // popUpText = false
+              caseStudyLayer.removeChild(nameText)
             }
 
             caseStudyLocation.on("mousedown", onDown)

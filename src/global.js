@@ -24,6 +24,13 @@ export const QUERY = {
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
 }
 
+export const TEXT_STYLE = {
+  fontFamily: "IBM Plex Mono",
+  fontSize: 16,
+  align: "center",
+  fill: "white",
+}
+
 // const mainFormat = "MMM dd yyyy – HH:mm"
 // const mainFormat = "MMM dd – HH:mm"
 const mainFormat = "MMM dd yyyy"

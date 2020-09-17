@@ -6,14 +6,14 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { fade } from "svelte/transition";
-  import get from "lodash/get";
+  import { fade } from "svelte/transition"
+  import get from "lodash/get"
 
   // GLOBALS
-  import { formattedChatDate } from "./global.js";
+  import { formattedChatDate } from "./global.js"
 
   // PROPS
-  export let message = {};
+  export let message = {}
 </script>
 
 <style lang="scss">
@@ -56,7 +56,7 @@
   <div class="meta">
     <span
       class="color-code"
-      style={'background-color:' + get(message, 'tint', '0XFF0000').replace('0X', '#')} />
+      style={'background-color:' + get(message, 'tint', '0xFF0000').replace('0x', '#')} />
     <span class="name">{message.name}</span>
     <span class="date">{formattedChatDate(message.timestamp)}</span>
   </div>
