@@ -445,7 +445,7 @@
             // PLAYER: REMOVE
             gameRoom.state.players.onRemove = (player, sessionId) => {
               try {
-                viewport.removeChild(localPlayers[sessionId].avatar)
+                playerLayer.removeChild(localPlayers[sessionId].avatar)
                 // HACK
                 setTimeout(() => {
                   delete localPlayers[sessionId]
