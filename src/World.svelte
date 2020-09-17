@@ -11,7 +11,7 @@
   import * as PIXI from "pixi.js"
   import { Viewport } from "pixi-viewport"
   import get from "lodash/get"
-  import has from "lodash/has"
+  import sample from "lodash/sample"
   import { fade, fly, scale } from "svelte/transition"
   import { urlFor, loadData, renderBlockText } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
@@ -62,7 +62,14 @@
   export let slug = false
 
   // GLOBAL
-  import { nanoid, KEYBOARD, MAP, colorTrans, QUERY } from "./global.js"
+  import {
+    nanoid,
+    getRandomInt,
+    KEYBOARD,
+    MAP,
+    COLORMAP,
+    QUERY,
+  } from "./global.js"
 
   // STORES
   import {
@@ -169,9 +176,8 @@
   // PIXI
   let app = {}
   let viewport = {}
-  let loader = {}
   let ticker = {}
-  let sheet = []
+  let avatarSpritesheets = {}
 
   // PIXI LAYERS
   let mapLayer = {}
@@ -258,329 +264,353 @@
     loggedIn = true
     gameContainer.appendChild(app.view)
 
-    // LOADER
+    // Load assets
     graphicsSettings.then((graphicsSettings) => {
-      miniImg = urlFor(graphicsSettings.mapLink.mainImage.asset)
-        .width(200)
-        .height(200)
-        .quality(90)
-        .auto("format")
-        .url()
-
-      const spriteUrl = get(
-        graphicsSettings,
-        "activeAvatars[0].spriteJsonURL",
-        "/sprites/avatar.json"
-      )
-
-      const mapUrl = urlFor(graphicsSettings.mapLink.mainImage.asset).url()
-      const gridUrl = get(graphicsSettings, "mapLink.pathfindingGridUrl", "")
-
-      loader
-        .add("map", mapUrl)
-        .add("grid", gridUrl)
-        .add("avatar", spriteUrl)
-        .load((loader, resources) => {
+      // Load map
+      const mapAsset = get(graphicsSettings, "mapLink.mainImage.asset", false)
+      if (mapAsset) {
+        const mapLoader = new PIXI.Loader()
+        const mapUrl = urlFor(mapAsset).url()
+        miniImg = urlFor(graphicsSettings.mapLink.mainImage.asset)
+          .width(200)
+          .height(200)
+          .quality(90)
+          .auto("format")
+          .url()
+        mapLoader.add("map", mapUrl)
+        mapLoader.load((loader, resources) => {
           const map = new PIXI.Sprite(resources.map.texture)
           map.width = MAP.WIDTH
           map.height = MAP.HEIGHT
           mapLayer.addChild(map)
-          sheet.push(resources["avatar"].spritesheet)
-
-          let avatarIndex = 0
-
-          // CREATE PLAYER
-          const createPlayer = (playerOptions, sessionId) => {
-            const sprites = ["rest", "front", "back", "left", "right"].map(
-              (ms) => {
-                const sprite = new PIXI.AnimatedSprite(sheet[0].animations[ms])
-                sprite.name = ms
-                sprite.visible = ms === "rest" ? true : false
-                sprite.height = 60
-                sprite.width = 60
-                sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1
-                sprite.play()
-                return sprite
-              }
-            )
-
-            const avatar = new PIXI.Container()
-            avatar.addChild(...sprites)
-            avatar.motionState = "rest"
-            avatar.setAnimation = (direction) => {
-              avatar.motionState = direction
-              avatar.children.forEach((c) => {
-                c.visible = c.name == direction ? true : false
-              })
-            }
-            avatar.x = playerOptions.x
-            avatar.y = playerOptions.y
-            avatar.pivot.x = avatar.width / 2
-            avatar.pivot.y = avatar.height / 2
-            avatar.interactive = true
-
-            const player = {
-              avatar: avatar,
-              waypoints: [],
-              area: playerOptions.area,
-              name: playerOptions.name,
-              uuid: playerOptions.uuid,
-              ip: playerOptions.ip,
-              tint: playerOptions.tint,
-              connected: playerOptions.connected,
-              authenticated: playerOptions.authenticated,
-              id: sessionId,
-              isSelf: playerOptions.uuid === $localUserUUID,
-            }
-
-            const onDown = (e) => {
-              startPrivateChat(player)
-              e.stopPropagation()
-            }
-
-            const onEnter = () => {
-              // popUpText = player.name
-            }
-
-            const onLeave = () => {
-              // popUpText = false
-            }
-
-            player.avatar.on("mousedown", onDown)
-            player.avatar.on("touchstart", onDown)
-            player.avatar.on("mouseover", onEnter)
-            player.avatar.on("mouseout", onLeave)
-
-            playerLayer.addChild(player.avatar)
-
-            if (player.isSelf) {
-              viewport.follow(player.avatar)
-              localUserSessionID.set(player.id)
-              switch (section) {
-                case "case-studies":
-                  if (slug) {
-                    setUIState(STATE.CASE_STUDY_SINGLE, slug)
-                    break
-                  }
-                  setUIState(STATE.CASE_STUDY_LISTING)
-                  break
-                case "events":
-                  if (slug) {
-                    setUIState(STATE.EVENT_SINGLE, slug)
-                    break
-                  }
-                default:
-                  setUIState(STATE.READY)
-              }
-            }
-
-            return player
-          }
-
-          let playerObject = {}
-
-          if (authenticate && sso && sig) {
-            playerObject = {
-              sso: sso,
-              sig: sig,
-              uuid: $localUserUUID,
-              avatar: avatarIndex,
-              tint: "0xffff00",
-            }
-          } else {
-            playerObject = {
-              uuid: $localUserUUID,
-              name: "default name",
-              avatar: avatarIndex,
-              tint: "0xff0000",
-            }
-          }
-
-          // => GAME ROOM
-          client
-            .joinOrCreate("game", playerObject)
-            .then((gameRoom) => {
-              // HACK
-              if (authenticate) {
-                history.replaceState({}, "CONNECTED", "/")
-              }
-
-              // ******
-              // PLAYER
-              // ******
-
-              // PLAYER: REMOVE
-              gameRoom.state.players.onRemove = (player, sessionId) => {
-                try {
-                  viewport.removeChild(localPlayers[sessionId].avatar)
-                  // HACK
-                  setTimeout(() => {
-                    delete localPlayers[sessionId]
-                    localPlayers = localPlayers
-                  }, 500)
-                } catch (err) {
-                  setUIState(STATE.ERROR, false, err)
-                  console.dir(err)
-                }
-              }
-
-              // PLAYER: ADD
-              gameRoom.state.players.onAdd = (player, sessionId) => {
-                localPlayers[sessionId] = createPlayer(player, sessionId)
-              }
-
-              // PLAYER: BANNED
-              gameRoom.onMessage("banned", (message) => {
-                setUIState(STATE.BANNED)
-              })
-
-              // PLAYER: ILLEGAL MOVE
-              gameRoom.onMessage("illegalMove", (message) => {
-                hideTarget()
-              })
-
-              // PLAYER: STATE CHANGE
-              gameRoom.state.players.onChange = function (player, sessionId) {
-                if (player.path.waypoints.length > 0) {
-                  if (localPlayers[sessionId].isSelf) {
-                    localUserArea.set(player.area)
-                  }
-                  moveQ[sessionId] = player.path.waypoints
-                } else {
-                  // TELEPORT
-                  if (localPlayers[sessionId].isSelf) {
-                    localUserArea.set(player.area)
-                  }
-                  localPlayers[sessionId].avatar.x = player.x
-                  localPlayers[sessionId].avatar.y = player.y
-                  checkPlayerProximity()
-                }
-              }
-
-              // PLAYER: CLICK / TAP
-              viewport.on("clicked", (e) => {
-                hideTarget()
-                gameRoom.send("go", {
-                  x: Math.round(e.world.x),
-                  y: Math.round(e.world.y),
-                  originX: localPlayers[$localUserSessionID].avatar.x,
-                  originY: localPlayers[$localUserSessionID].avatar.y,
-                })
-                showTarget(Math.round(e.world.x), Math.round(e.world.y))
-              })
-
-              // PLAYER: TELEPORT
-              teleportTo = (area) => {
-                gameRoom.send("teleport", {
-                  area: area,
-                })
-              }
-
-              // *******
-              // MESSAGE
-              // *******
-
-              // MESSAGE: ADD
-              gameRoom.state.messages.onAdd = (message) => {
-                chatMessages = [...chatMessages, message]
-              }
-
-              // MESSAGE: REMOVE
-              gameRoom.state.messages.onRemove = (message) => {
-                try {
-                  const itemIndex = chatMessages.findIndex((m) => m === message)
-                  chatMessages.splice(itemIndex, 1)
-                  chatMessages = chatMessages
-                } catch (err) {
-                  setUIState(STATE.ERROR, false, err)
-                  console.dir(err)
-                }
-              }
-
-              // MESSAGE: SUBMIT
-              submitChat = (event) => {
-                try {
-                  gameRoom.send("submitChatMessage", {
-                    msgId: nanoid(),
-                    uuid: $localUserUUID,
-                    name: localPlayers[$localUserSessionID].name,
-                    text: event.detail.text,
-                    tint: localPlayers[$localUserSessionID].tint,
-                  })
-                } catch (err) {
-                  setUIState(STATE.ERROR, false, err)
-                  console.dir(err)
-                }
-              }
-
-              // ************
-              // PRIVATE ROOM
-              // ************
-
-              // PRIVATE ROOM: START
-              startPrivateChat = (partner) => {
-                try {
-                  client.create("chat", { partner: partner.id }).then((r) => {
-                    gameRoom.send("createPrivateRoom", {
-                      roomId: r.id,
-                      partner: partner.id,
-                    })
-                    inPrivateChat.set(true)
-                    // PRIVATE ROOM: LEAVE
-                    leavePrivateChat = () => {
-                      r.leave()
-                      gameRoom.send("leavePrivateRoom", {
-                        roomId: r.id,
-                      })
-                      inPrivateChat.set(false)
-                    }
-                  })
-                } catch (err) {
-                  console.dir(err)
-                  setUIState(STATE.ERROR, false, err)
-                }
-              }
-
-              // PRIVATE ROOM: ADD
-              gameRoom.state.privateRooms.onAdd = (message) => {
-                // console.log('add private room')
-                // console.dir(gameRoom.state.privateRooms)
-                // console.dir(message)
-              }
-
-              // PRIVATE ROOM: REMOVE
-              gameRoom.state.privateRooms.onRemove = (message) => {
-                // console.log('remove private room')
-                // console.dir(gameRoom.state.privateRooms)
-              }
-
-              // ************
-              // GENERAL
-              // ************
-
-              // GENERAL: ERROR
-              gameRoom.onError((code, message) => {
-                setUIState(STATE.ERROR, false, message)
-                console.error("!!! COLYSEUS ERROR:")
-                console.error(message)
-                console.dir(err)
-              })
-            })
-            .catch((e) => {
-              if (e.code == 4215) {
-                console.log("BANNED")
-                setUIState(STATE.BANNED)
-              } else {
-                console.log("GAME ROOM: JOIN ERROR", e)
-                setUIState(
-                  STATE.ERROR,
-                  false,
-                  "FAILED TO CONNECT TO GAMESERVER"
-                )
-                // Sentry.captureException(err)
-              }
-            })
         })
+      } else {
+        setUIState(STATE.ERROR, false, "Unable to load map")
+        throw "Unable to load map"
+      }
+
+      // Load avatars
+      const activeAvatars = get(graphicsSettings, "activeAvatars", false)
+      const avatarLoader = new PIXI.Loader()
+      if (activeAvatars && activeAvatars.length > 0) {
+        activeAvatars.forEach((avatar, index) => {
+          const spriteUrl = get(avatar, "spriteJsonURL", false)
+          if (spriteUrl) {
+            avatarLoader.add(avatar._id, spriteUrl)
+          }
+        })
+      } else {
+        setUIState(STATE.ERROR, false, "Unable to load avatars")
+        throw "Unable to load avatars"
+      }
+
+      avatarLoader.load((loader, resources) => {
+        for (let key of Object.keys(resources)) {
+          if (resources[key].extension === "json") {
+            avatarSpritesheets[key] = resources[key].spritesheet
+          }
+        }
+
+        // CREATE PLAYER
+        const createPlayer = (playerOptions, sessionId) => {
+          console.log("playerOptions", playerOptions)
+          const sprites = ["rest", "front", "back", "left", "right"].map(
+            (ms) => {
+              const sprite = new PIXI.AnimatedSprite(
+                avatarSpritesheets[playerOptions.avatar].animations[ms]
+              )
+              sprite.name = ms
+              sprite.visible = ms === "rest" ? true : false
+              sprite.height = 60
+              sprite.width = 60
+              sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1
+              sprite.play()
+              return sprite
+            }
+          )
+
+          const avatar = new PIXI.Container()
+          avatar.addChild(...sprites)
+          avatar.motionState = "rest"
+          avatar.setAnimation = (direction) => {
+            avatar.motionState = direction
+            avatar.children.forEach((c) => {
+              c.visible = c.name == direction ? true : false
+            })
+          }
+          avatar.x = playerOptions.x
+          avatar.y = playerOptions.y
+          avatar.pivot.x = avatar.width / 2
+          avatar.pivot.y = avatar.height / 2
+          avatar.interactive = true
+
+          const player = {
+            avatar: avatar,
+            waypoints: [],
+            area: playerOptions.area,
+            name: playerOptions.name,
+            uuid: playerOptions.uuid,
+            ip: playerOptions.ip,
+            tint: playerOptions.tint,
+            connected: playerOptions.connected,
+            authenticated: playerOptions.authenticated,
+            id: sessionId,
+            isSelf: playerOptions.uuid === $localUserUUID,
+          }
+
+          const onDown = (e) => {
+            startPrivateChat(player)
+            e.stopPropagation()
+          }
+
+          const onEnter = () => {
+            // popUpText = player.name
+          }
+
+          const onLeave = () => {
+            // popUpText = false
+          }
+
+          player.avatar.on("mousedown", onDown)
+          player.avatar.on("touchstart", onDown)
+          player.avatar.on("mouseover", onEnter)
+          player.avatar.on("mouseout", onLeave)
+
+          playerLayer.addChild(player.avatar)
+
+          if (player.isSelf) {
+            viewport.follow(player.avatar)
+            localUserSessionID.set(player.id)
+            switch (section) {
+              case "case-studies":
+                if (slug) {
+                  setUIState(STATE.CASE_STUDY_SINGLE, slug)
+                  break
+                }
+                setUIState(STATE.CASE_STUDY_LISTING)
+                break
+              case "events":
+                if (slug) {
+                  setUIState(STATE.EVENT_SINGLE, slug)
+                  break
+                }
+              default:
+                setUIState(STATE.READY)
+            }
+          }
+
+          return player
+        }
+
+        let randomAvatar = sample(Object.keys(avatarSpritesheets))
+
+        console.log("randomAvatar", randomAvatar)
+        let name = graphicsSettings.activeAvatars.find(
+          (a) => a._id === randomAvatar
+        ).title
+        console.log("name", name)
+
+        let playerObject = {}
+
+        if (authenticate && sso && sig) {
+          playerObject = {
+            sso: sso,
+            sig: sig,
+            uuid: $localUserUUID,
+            avatar: randomAvatar,
+            tint: "0xffff00",
+          }
+        } else {
+          playerObject = {
+            uuid: $localUserUUID,
+            name: name,
+            avatar: randomAvatar,
+            tint: "0xff0000",
+          }
+        }
+
+        // => GAME ROOM
+        client
+          .joinOrCreate("game", playerObject)
+          .then((gameRoom) => {
+            // HACK
+            if (authenticate) {
+              history.replaceState({}, "CONNECTED", "/")
+            }
+
+            // ******
+            // PLAYER
+            // ******
+
+            // PLAYER: REMOVE
+            gameRoom.state.players.onRemove = (player, sessionId) => {
+              try {
+                viewport.removeChild(localPlayers[sessionId].avatar)
+                // HACK
+                setTimeout(() => {
+                  delete localPlayers[sessionId]
+                  localPlayers = localPlayers
+                }, 500)
+              } catch (err) {
+                setUIState(STATE.ERROR, false, err)
+                console.dir(err)
+              }
+            }
+
+            // PLAYER: ADD
+            gameRoom.state.players.onAdd = (player, sessionId) => {
+              console.dir(player)
+              localPlayers[sessionId] = createPlayer(player, sessionId)
+            }
+
+            // PLAYER: BANNED
+            gameRoom.onMessage("banned", (message) => {
+              setUIState(STATE.BANNED)
+            })
+
+            // PLAYER: ILLEGAL MOVE
+            gameRoom.onMessage("illegalMove", (message) => {
+              hideTarget()
+            })
+
+            // PLAYER: STATE CHANGE
+            gameRoom.state.players.onChange = function (player, sessionId) {
+              if (player.path.waypoints.length > 0) {
+                if (localPlayers[sessionId].isSelf) {
+                  localUserArea.set(player.area)
+                }
+                moveQ[sessionId] = player.path.waypoints
+              } else {
+                // TELEPORT
+                if (localPlayers[sessionId].isSelf) {
+                  localUserArea.set(player.area)
+                }
+                localPlayers[sessionId].avatar.x = player.x
+                localPlayers[sessionId].avatar.y = player.y
+                checkPlayerProximity()
+              }
+            }
+
+            // PLAYER: CLICK / TAP
+            viewport.on("clicked", (e) => {
+              hideTarget()
+              gameRoom.send("go", {
+                x: Math.round(e.world.x),
+                y: Math.round(e.world.y),
+                originX: localPlayers[$localUserSessionID].avatar.x,
+                originY: localPlayers[$localUserSessionID].avatar.y,
+              })
+              showTarget(Math.round(e.world.x), Math.round(e.world.y))
+            })
+
+            // PLAYER: TELEPORT
+            teleportTo = (area) => {
+              gameRoom.send("teleport", {
+                area: area,
+              })
+            }
+
+            // *******
+            // MESSAGE
+            // *******
+
+            // MESSAGE: ADD
+            gameRoom.state.messages.onAdd = (message) => {
+              chatMessages = [...chatMessages, message]
+            }
+
+            // MESSAGE: REMOVE
+            gameRoom.state.messages.onRemove = (message) => {
+              try {
+                const itemIndex = chatMessages.findIndex((m) => m === message)
+                chatMessages.splice(itemIndex, 1)
+                chatMessages = chatMessages
+              } catch (err) {
+                setUIState(STATE.ERROR, false, err)
+                console.dir(err)
+              }
+            }
+
+            // MESSAGE: SUBMIT
+            submitChat = (event) => {
+              try {
+                gameRoom.send("submitChatMessage", {
+                  msgId: nanoid(),
+                  uuid: $localUserUUID,
+                  name: localPlayers[$localUserSessionID].name,
+                  text: event.detail.text,
+                  tint: localPlayers[$localUserSessionID].tint,
+                })
+              } catch (err) {
+                setUIState(STATE.ERROR, false, err)
+                console.dir(err)
+              }
+            }
+
+            // ************
+            // PRIVATE ROOM
+            // ************
+
+            // PRIVATE ROOM: START
+            startPrivateChat = (partner) => {
+              try {
+                client.create("chat", { partner: partner.id }).then((r) => {
+                  gameRoom.send("createPrivateRoom", {
+                    roomId: r.id,
+                    partner: partner.id,
+                  })
+                  inPrivateChat.set(true)
+                  // PRIVATE ROOM: LEAVE
+                  leavePrivateChat = () => {
+                    r.leave()
+                    gameRoom.send("leavePrivateRoom", {
+                      roomId: r.id,
+                    })
+                    inPrivateChat.set(false)
+                  }
+                })
+              } catch (err) {
+                console.dir(err)
+                setUIState(STATE.ERROR, false, err)
+              }
+            }
+
+            // PRIVATE ROOM: ADD
+            gameRoom.state.privateRooms.onAdd = (message) => {
+              // console.log('add private room')
+              // console.dir(gameRoom.state.privateRooms)
+              // console.dir(message)
+            }
+
+            // PRIVATE ROOM: REMOVE
+            gameRoom.state.privateRooms.onRemove = (message) => {
+              // console.log('remove private room')
+              // console.dir(gameRoom.state.privateRooms)
+            }
+
+            // ************
+            // GENERAL
+            // ************
+
+            // GENERAL: ERROR
+            gameRoom.onError((code, message) => {
+              setUIState(STATE.ERROR, false, message)
+              console.error("!!! COLYSEUS ERROR:")
+              console.error(message)
+              console.dir(err)
+            })
+          })
+          .catch((e) => {
+            if (e.code == 4215) {
+              console.log("BANNED")
+              setUIState(STATE.BANNED)
+            } else {
+              console.log("GAME ROOM: JOIN ERROR", e)
+              setUIState(STATE.ERROR, false, "FAILED TO CONNECT TO GAMESERVER")
+              // Sentry.captureException(err)
+            }
+          })
+      })
 
       // ADD CASE STUDIES
       caseStudies.then((caseStudies) => {
@@ -697,9 +727,6 @@
     viewport.addChild(caseStudyLayer)
     viewport.addChild(playerLayer)
     viewport.addChild(landMarkLayer)
-
-    // PIXI: LOADER
-    loader = PIXI.Loader.shared
 
     // PIXI: TICKER
     ticker = PIXI.Ticker.shared
@@ -1180,7 +1207,7 @@
 {/await}
 
 <!-- ACTIVE CONTENT: STREAM -->
-{#if $localUserArea === 4 && !activeContentClosed}
+<!-- {#if $localUserArea === 4 && !activeContentClosed}
   <div class="active-content-slot" transition:fly={{ y: -200 }}>
     <video src="/test.mp4" muted autoplay loop />
     <div
@@ -1191,7 +1218,7 @@
       ×
     </div>
   </div>
-{/if}
+{/if} -->
 
 <!-- PROXIMITY -->
 {#if playersInProximity.length > 0}
@@ -1200,12 +1227,12 @@
     {#each playersInProximity as player}
       <div>
         {player.name}
-        <button
+        <!-- <button
           on:click={(e) => {
             startPrivateChat(player)
           }}>
           Start chat
-        </button>
+        </button> -->
       </div>
     {/each}
   </div>
@@ -1214,7 +1241,7 @@
 <!-- CURRENT AREA BOX -->
 {#if $localUserArea}
   <div class="current-area tiny">
-    Currently in <strong>{colorTrans[$localUserArea]}</strong> area
+    Currently in <strong>{COLORMAP[$localUserArea]}</strong> area
   </div>
 {/if}
 

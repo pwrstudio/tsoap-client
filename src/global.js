@@ -10,13 +10,13 @@ export const KEYBOARD = {
   ENTER: 13,
 }
 
-export const colorTrans = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"]
+export const COLORMAP = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"]
 
 export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
 
 export const QUERY = {
   GRAPHICS_SETTINGS:
-    "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}[0]",
+    "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
   EVENTS: "*[_type == 'event']",
   CASE_STUDIES:
     "*[_type == 'caseStudy']{..., spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
@@ -68,7 +68,7 @@ export const formattedChatDate = (start) => {
   }
 }
 
-export let nanoid = (t = 21) => {
+export const nanoid = (t = 21) => {
   let e = "",
     r = crypto.getRandomValues(new Uint8Array(t))
   for (; t--; ) {
@@ -84,3 +84,7 @@ export let nanoid = (t = 21) => {
   }
   return e
 }
+
+export const getRandomInt = (min, max) =>
+  Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) +
+  Math.ceil(min)
