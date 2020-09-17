@@ -18,6 +18,7 @@ export const QUERY = {
   GRAPHICS_SETTINGS:
     "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
   EVENTS: "*[_type == 'event']",
+  USERS: "*[_type == 'participant']",
   CASE_STUDIES:
     "*[_type == 'caseStudy']{..., spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   LAND_MARKS:

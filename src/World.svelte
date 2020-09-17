@@ -9,6 +9,7 @@
   import { onMount } from "svelte"
   import * as Colyseus from "colyseus.js"
   import * as PIXI from "pixi.js"
+  // import * as PIXI from "./pixi.js"
   import { Viewport } from "pixi-viewport"
   import get from "lodash/get"
   import sample from "lodash/sample"
@@ -20,6 +21,7 @@
   import Chat from "./Chat.svelte"
   import Login from "./Login.svelte"
   import CaseStudySingle from "./CaseStudySingle.svelte"
+  import UserProfileSingle from "./UserProfileSingle.svelte"
   import CaseStudyListing from "./CaseStudyListing.svelte"
   import Calendar from "./Calendar.svelte"
   import EventSingle from "./EventSingle.svelte"
@@ -85,7 +87,17 @@
   const events = loadData(QUERY.EVENTS)
   const caseStudies = loadData(QUERY.CASE_STUDIES)
   const landMarks = loadData(QUERY.LAND_MARKS)
+  const users = loadData(QUERY.USERS)
 
+  users.then((users) => {
+    console.dir(users)
+  })
+
+  Promise.allSettled([graphicsSettings, events, caseStudies, landMarks]).catch(
+    (err) => {
+      console.log("ASDASDASDASDAS")
+    }
+  )
   // DOM REFERENCES
   let gameContainer = {}
 
@@ -101,7 +113,8 @@
     CASE_STUDY_SINGLE: 4,
     CASE_STUDY_LISTING: 5,
     EVENT_SINGLE: 6,
-    BANNED: 7,
+    USER_PROFILE_SINGLE: 7,
+    BANNED: 8,
   }
 
   // UI STATE
@@ -133,6 +146,11 @@
         UI.state = STATE.EVENT_SINGLE
         UI.slug = newSlug
         history.pushState({}, "", "/events/" + UI.slug)
+        break
+      case STATE.USER_PROFILE_SINGLE:
+        UI.state = STATE.USER_PROFILE_SINGLE
+        UI.slug = newSlug
+        history.pushState({}, "", "/profile/" + UI.slug)
         break
       case STATE.LOADING:
         UI.state = STATE.LOADING
@@ -397,6 +415,12 @@
                   break
                 }
                 setUIState(STATE.CASE_STUDY_LISTING)
+                break
+              case "profile":
+                if (slug) {
+                  setUIState(STATE.USER_PROFILE_SINGLE, slug)
+                  break
+                }
                 break
               case "events":
                 if (slug) {
@@ -1216,6 +1240,26 @@
       </div>
       <!-- SINGLE EVENT -->
       <EventSingle event={events.find((ev) => ev.slug.current === UI.slug)} />
+    </div>
+  {/if}
+{/await}
+
+<!-- USERS -->
+{#await users then users}
+  {#if UI.state == STATE.USER_PROFILE_SINGLE}
+    <div
+      class="passive-content-slot"
+      in:fly={{ y: 200, duration: 300 }}
+      out:fly={{ y: 200, duration: 300 }}>
+      <div
+        class="close"
+        on:click={(e) => {
+          setUIState(STATE.READY)
+        }}>
+        ×
+      </div>
+      <!-- SINGLE EVENT -->
+      <UserProfileSingle user={users.find((u) => u.slug.current === UI.slug)} />
     </div>
   {/if}
 {/await}
