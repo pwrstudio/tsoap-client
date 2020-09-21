@@ -977,7 +977,7 @@
           height: 10px;
           width: 10px;
           border-radius: 5px;
-          background: red;
+          background: white;
           position: absolute;
           top: 0;
           left: 0;
