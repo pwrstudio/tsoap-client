@@ -180,7 +180,7 @@
   let loggedIn = false
 
   // UI DATA VARIABLES
-  let miniImg = false
+  let miniImage = false
 
   // WORLD STATE
   let playersInProximity = []
@@ -290,7 +290,7 @@
       if (mapAsset) {
         const mapLoader = new PIXI.Loader()
         const mapUrl = urlFor(mapAsset).url()
-        miniImg = urlFor(graphicsSettings.mapLink.mainImage.asset)
+        miniImage = urlFor(graphicsSettings.mapLink.miniImage.asset)
           .width(200)
           .height(200)
           .quality(90)
@@ -949,7 +949,7 @@
     transition: transform 0.5s $transition;
 
     .minimap {
-      background: $COLOR_MID_2;
+      background: black;
       height: 200px;
       display: flex;
       justify-content: center;
@@ -1146,7 +1146,10 @@
   <!-- MINIMAP -->
   <div class="minimap">
     <div class="map-container">
-      {#if miniImg}<img src={miniImg} />{/if}
+      {#if miniImage}
+        <!-- {#if get(graphicsSettings, 'mapLink.miniImage.asset', false)} -->
+        <img src={miniImage} />
+      {/if}
       {#if get(localPlayers[$localUserSessionID], 'avatar.y', false)}
         <div
           class="map-marker"

@@ -16,7 +16,7 @@ export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
 
 export const QUERY = {
   GRAPHICS_SETTINGS:
-    "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
+    "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'miniImage': miniImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
   EVENTS: "*[_type == 'event']",
   USERS: "*[_type == 'participant']",
   CASE_STUDIES:
