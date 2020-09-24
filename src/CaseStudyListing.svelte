@@ -8,8 +8,6 @@
   // *** IMPORTS
   import get from "lodash/get"
   import { urlFor, renderBlockText } from "./sanity.js"
-  import { createEventDispatcher } from "svelte"
-  const dispatch = createEventDispatcher()
 
   // *** PROPS
   export let caseStudies = []
@@ -43,6 +41,8 @@
       margin: 10px;
       float: left;
       cursor: pointer;
+      text-decoration: none;
+      display: block;
 
       img,
       video {
@@ -64,11 +64,7 @@
   <div class="title">Case studies</div>
 
   {#each caseStudies as cs, index (cs._id)}
-    <div
-      class="item"
-      on:click={(e) => {
-        dispatch('goToSingle', { slug: get(cs, 'slug.current', '') })
-      }}>
+    <a href={'/case-studies/' + get(cs, 'slug.current', '')} class="item">
       <div class="title">{cs.title}</div>
       {#if get(cs, 'mainImage.asset', false)}
         <img
@@ -79,6 +75,6 @@
             .auto('format')
             .url()} />
       {/if}
-    </div>
+    </a>
   {/each}
 </div>

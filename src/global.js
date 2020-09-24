@@ -20,6 +20,7 @@ export const QUERY = {
     "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'miniImage': miniImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
   EVENTS: "*[_type == 'event']{..., participants[]->{slug,name}}",
   USERS: "*[_type == 'participant']",
+  PAGES: "*[_type == 'page']",
   CASE_STUDIES:
     "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., authors[]->{slug,name}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   LAND_MARKS:

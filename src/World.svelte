@@ -21,6 +21,7 @@
   import Chat from "./Chat.svelte"
   import Login from "./Login.svelte"
   import CaseStudySingle from "./CaseStudySingle.svelte"
+  import PageSingle from "./PageSingle.svelte"
   import UserProfileSingle from "./UserProfileSingle.svelte"
   import CaseStudyListing from "./CaseStudyListing.svelte"
   import Calendar from "./Calendar.svelte"
@@ -68,15 +69,15 @@
 
   $: {
     // Split URL parameters
-    // console.log("* * * * * ")
-    // console.log("PARAMS UPDATED")
-    // console.log("– params", params)
+    console.log("* * * * * ")
+    console.log("PARAMS UPDATED")
+    console.log("– params", params)
     const args = get(params, "[*]", "").split("/")
     section = args[0] && args[0].length > 0 ? args[0] : "seed"
     slug = args[1] && args[1].length > 0 ? args[1] : false
-    // console.log("– section", section)
-    // console.log("– slug", slug)
-    // console.log("* * * * * ")
+    console.log("– section", section)
+    console.log("– slug", slug)
+    console.log("* * * * * ")
   }
 
   // GLOBAL
@@ -100,16 +101,15 @@
   const caseStudies = loadData(QUERY.CASE_STUDIES)
   const landMarks = loadData(QUERY.LAND_MARKS)
   const users = loadData(QUERY.USERS)
+  const pages = loadData(QUERY.PAGES)
 
-  users.then((users) => {
-    console.dir(users)
-  })
+  let caseStudiesExhibition = []
+  let caseStudiesEmergent = []
 
-  // Promise.allSettled([graphicsSettings, events, caseStudies, landMarks]).catch(
-  //   (err) => {
-  //     console.log("ASDASDASDASDAS")
-  //   }
-  // )
+  // users.then((users) => {
+  //   console.dir(users)
+  // })
+
   // DOM REFERENCES
   let gameContainer = {}
 
@@ -119,12 +119,7 @@
     ERROR: 0,
     READY: 1,
     LOADING: 2,
-    LOGIN: 3,
-    CASE_STUDY_SINGLE: 4,
-    CASE_STUDY_LISTING: 5,
-    EVENT_SINGLE: 6,
-    USER_PROFILE_SINGLE: 7,
-    BANNED: 8,
+    BANNED: 3,
   }
 
   // UI STATE
@@ -135,48 +130,19 @@
       case STATE.READY:
         UI.state = STATE.READY
         UI.slug = false
-        history.pushState({}, "", "/")
-        break
-      case STATE.LOGIN:
-        UI.state = STATE.LOGIN
-        UI.slug = false
-        history.pushState({}, "", "/login")
-        break
-      case STATE.CASE_STUDY_SINGLE:
-        UI.state = STATE.CASE_STUDY_SINGLE
-        UI.slug = newSlug
-        history.pushState({}, "", "/case-studies/" + UI.slug)
-        break
-      case STATE.CASE_STUDY_LISTING:
-        UI.state = STATE.CASE_STUDY_LISTING
-        UI.slug = false
-        history.pushState({}, "", "/case-studies/")
-        break
-      case STATE.EVENT_SINGLE:
-        UI.state = STATE.EVENT_SINGLE
-        UI.slug = newSlug
-        history.pushState({}, "", "/events/" + UI.slug)
-        break
-      case STATE.USER_PROFILE_SINGLE:
-        UI.state = STATE.USER_PROFILE_SINGLE
-        UI.slug = newSlug
-        history.pushState({}, "", "/profile/" + UI.slug)
         break
       case STATE.LOADING:
         UI.state = STATE.LOADING
         UI.slug = false
-        history.pushState({}, "", "/")
         break
       case STATE.BANNED:
         UI.state = STATE.BANNED
         UI.slug = false
-        history.pushState({}, "", "/banned")
         break
       default:
         UI.state = STATE.ERROR
         UI.slug = false
         UI.errorMessage = errorMessage
-        history.pushState({}, "", "/error/")
     }
   }
 
@@ -343,7 +309,7 @@
 
         // CREATE PLAYER
         const createPlayer = (playerOptions, sessionId) => {
-          console.log("playerOptions", playerOptions)
+          // console.log("playerOptions", playerOptions)
           const sprites = ["rest", "front", "back", "left", "right"].map(
             (ms) => {
               const sprite = new PIXI.AnimatedSprite(
@@ -359,7 +325,7 @@
             }
           )
 
-          console.log(playerOptions.name)
+          // console.log(playerOptions.name)
           const nameText = new PIXI.Text(playerOptions.name, TEXT_STYLE)
           nameText.anchor.set(0.5)
 
@@ -418,28 +384,6 @@
           if (player.isSelf) {
             viewport.follow(player.avatar)
             localUserSessionID.set(player.id)
-            switch (section) {
-              case "case-studies":
-                if (slug) {
-                  setUIState(STATE.CASE_STUDY_SINGLE, slug)
-                  break
-                }
-                setUIState(STATE.CASE_STUDY_LISTING)
-                break
-              case "profile":
-                if (slug) {
-                  setUIState(STATE.USER_PROFILE_SINGLE, slug)
-                  break
-                }
-                break
-              case "events":
-                if (slug) {
-                  setUIState(STATE.EVENT_SINGLE, slug)
-                  break
-                }
-              default:
-                setUIState(STATE.READY)
-            }
           }
 
           return player
@@ -479,6 +423,8 @@
               history.replaceState({}, "CONNECTED", "/")
             }
 
+            setUIState(STATE.READY)
+
             // ******
             // PLAYER
             // ******
@@ -500,7 +446,6 @@
 
             // PLAYER: ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
-              console.dir(player)
               localPlayers[sessionId] = createPlayer(player, sessionId)
             }
 
@@ -668,9 +613,18 @@
           })
       })
 
-      // ADD CASE STUDIES
+      // ADD EXHIBITION CASE STUDIES
       caseStudies.then((caseStudies) => {
-        caseStudies.forEach((cs, i) => {
+        console.dir(caseStudies)
+        caseStudiesExhibition = caseStudies.filter(
+          (cs) => cs._type === "caseStudyExhibition"
+        )
+        caseStudiesEmergent = caseStudies.filter(
+          (cs) => cs._type === "caseStudyEmergent"
+        )
+        console.dir(caseStudiesExhibition)
+
+        caseStudiesExhibition.forEach((cs, i) => {
           const spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
           const spriteId = "caseStudy-" + cs._id
           const csLoader = new PIXI.Loader()
@@ -694,10 +648,7 @@
             caseStudyLocation.interactive = true
 
             const onDown = (e) => {
-              const csSlug = get(cs, "slug.current", false)
-              csSlug
-                ? setUIState(STATE.CASE_STUDY_SINGLE, csSlug)
-                : setUIState(STATE.CASE_STUDY_LISTING)
+              navigate("/case-studies/" + get(cs, "slug.current", false))
               e.stopPropagation()
             }
 
@@ -1085,7 +1036,7 @@
   }
 
   .passive-content-slot {
-    position: fixed;
+    position: absolute;
     bottom: 10px;
     right: 410px;
     width: 500px;
@@ -1113,6 +1064,7 @@
       font-size: 48px;
       color: black;
       cursor: pointer;
+      text-decoration: none;
 
       &:hover {
         transform: scale(1.2);
@@ -1246,23 +1198,11 @@
     <!-- MENUBAR -->
     <div class="menu">
       <div>
-        <div
-          class="menu-item"
-          on:click={() => {
-            setUIState(STATE.CASE_STUDY_LISTING)
-          }}>
-          Case-Studies
-        </div>
-        <div class="menu-item">About</div>
+        <a href="/case-studies" class="menu-item">Case-Studies</a>
+        <a href="/pages/about" class="menu-item">About</a>
         <div class="menu-item">Help</div>
       </div>
-      <div
-        class="menu-item login"
-        on:click={() => {
-          setUIState(STATE.LOGIN)
-        }}>
-        Login
-      </div>
+      <a href="/login" class="menu-item login"> Login </a>
     </div>
   </div>
 {/if}
@@ -1272,29 +1212,16 @@
 
 <!-- CASE STUDIES -->
 {#await caseStudies then caseStudies}
-  {#if UI.state == STATE.CASE_STUDY_SINGLE || UI.state == STATE.CASE_STUDY_LISTING}
-    <div class="passive-content-slot" transition:fly={{ y: 200 }}>
-      <div
-        class="close"
-        on:click={(e) => {
-          setUIState(STATE.READY)
-        }}>
-        ×
-      </div>
-
+  {#if section === 'case-studies'}
+    <div class="passive-content-slot" use:links transition:fly={{ y: 200 }}>
+      <a class="close" href="/">×</a>
       <!-- SINGLE CASE STUDY -->
-      {#if UI.state == STATE.CASE_STUDY_SINGLE}
+      {#if slug}
         <CaseStudySingle
-          caseStudy={caseStudies.find((cs) => cs.slug.current === UI.slug)} />
-      {/if}
-
-      <!-- CASE STUDY LISTING -->
-      {#if UI.state == STATE.CASE_STUDY_LISTING}
-        <CaseStudyListing
-          {caseStudies}
-          on:goToSingle={(e) => {
-            setUIState(STATE.CASE_STUDY_SINGLE, e.detail.slug)
-          }} />
+          caseStudy={caseStudies.find((cs) => cs.slug.current === slug)} />
+      {:else}
+        <!-- LISTING CASE STUDY -->
+        <CaseStudyListing {caseStudies} />
       {/if}
     </div>
   {/if}
@@ -1302,40 +1229,47 @@
 
 <!-- EVENTS -->
 {#await events then events}
-  {#if UI.state == STATE.EVENT_SINGLE}
+  {#if section === 'events' && slug}
     <div
       class="passive-content-slot"
+      use:links
       in:fly={{ y: 200, duration: 300 }}
       out:fly={{ y: 200, duration: 300 }}>
-      <div
-        class="close"
-        on:click={(e) => {
-          setUIState(STATE.READY)
-        }}>
-        ×
-      </div>
+      <a class="close" href="/">×</a>
       <!-- SINGLE EVENT -->
-      <EventSingle event={events.find((ev) => ev.slug.current === UI.slug)} />
+      <EventSingle event={events.find((ev) => ev.slug.current === slug)} />
     </div>
   {/if}
 {/await}
 
 <!-- USERS -->
 {#await users then users}
-  {#if UI.state == STATE.USER_PROFILE_SINGLE}
+  {#if section == 'profiles' && slug}
     <div
       class="passive-content-slot"
+      use:links
       in:fly={{ y: 200, duration: 300 }}
       out:fly={{ y: 200, duration: 300 }}>
-      <div
-        class="close"
-        on:click={(e) => {
-          setUIState(STATE.READY)
-        }}>
-        ×
-      </div>
+      <a class="close" href="/">×</a>
       <!-- SINGLE EVENT -->
-      <UserProfileSingle user={users.find((u) => u.slug.current === UI.slug)} />
+      <UserProfileSingle
+        user={users.find((u) => get(u, 'slug.current', '') === slug)} />
+    </div>
+  {/if}
+{/await}
+
+<!-- PAGES -->
+{#await pages then pages}
+  {#if section == 'pages' && slug}
+    <div
+      class="passive-content-slot"
+      use:links
+      in:fly={{ y: 200, duration: 300 }}
+      out:fly={{ y: 200, duration: 300 }}>
+      <a class="close" href="/">×</a>
+      <!-- SINGLE EVENT -->
+      <PageSingle
+        page={pages.find((p) => get(p, 'slug.current', '') === slug)} />
     </div>
   {/if}
 {/await}
@@ -1392,7 +1326,7 @@
 {/if}
 
 <!-- LOGIN -->
-{#if UI.state == STATE.LOGIN}
+{#if section === 'login'}
   <Login
     {sso}
     {sig}

@@ -8,8 +8,6 @@
   // *** IMPORTS
   import { fade } from "svelte/transition"
   import get from "lodash/get"
-  import { createEventDispatcher } from "svelte"
-  const dispatch = createEventDispatcher()
 
   // *** GLOBAL
   import { formattedDate } from "./global.js"
@@ -44,6 +42,9 @@
       height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
       cursor: pointer;
+      color: $COLOR_DARK;
+      display: block;
+      text-decoration: none;
       // display: flex;
       // align-items: center;
 
@@ -124,12 +125,10 @@
 
   <!-- EVENTS -->
   {#each events as event, index (event._id)}
-    <div
+    <a
       class="calendar-item"
       in:fade={{ delay: 100 * index }}
-      on:click={(e) => {
-        dispatch('goToEvent', { slug: get(event, 'slug.current', '') })
-      }}>
+      href={'/events/' + get(event, 'slug.current', '')}>
       <div class="inner">
         <div class="row">
           <div class="title">{event.title}</div>
@@ -146,7 +145,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </a>
   {/each}
 
   <!-- FOOTER -->

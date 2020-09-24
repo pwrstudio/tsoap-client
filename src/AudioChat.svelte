@@ -14,7 +14,7 @@
   // PROPS
   export let userName = ""
   export let roomName = ""
-  export let roomId = 0
+  export let roomId = 4
 
   const dispatch = createEventDispatcher()
 
@@ -207,7 +207,8 @@
   }
 
   const registerUsername = () => {
-    let register = { request: "join", room: myroom, display: userName }
+    console.log("ROOM ID", roomId)
+    let register = { request: "join", room: roomId, display: userName }
     mixertest.send({ message: register })
   }
 
