@@ -870,28 +870,58 @@
     background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
-    bottom: 10px;
-    left: 10px;
+    top: 15px;
+    left: 15px;
     padding: 20px;
     border-radius: 10px;
   }
 
-  .current-area {
+  .audiochat-box {
     position: fixed;
     width: auto;
     background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
     text-align: center;
-    top: 10px;
-    left: 10px;
+    bottom: 15px;
+    left: 15px;
     padding: 10px;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
+    display: flex;
+
+    padding-left: 15px;
+    padding-right: 15px;
+
+    user-select: none;
+
     @include screen-size("small") {
       top: unset;
       bottom: 20px;
       display: none;
+    }
+
+    .message {
+      // padding-top: 3px;
+      // padding-bottom: 3px;
+      margin-right: 10px;
+    }
+
+    .button {
+      // padding-top: 3px;
+      // padding-bottom: 3px;
+      padding-left: 15px;
+      padding-right: 15px;
+      border: 1px solid $COLOR_MID_2;
+      color: $COLOR_MID_2;
+      border-radius: 10px;
+      text-align: center;
+
+      &:hover {
+        border: 1px solid $COLOR_DARK;
+        color: $COLOR_DARK;
+        cursor: pointer;
+      }
     }
   }
 
@@ -1024,7 +1054,6 @@
 
     .middle-section {
       height: calc(100% - 240px);
-      background: red;
 
       .calendar {
         height: 50%;
@@ -1327,7 +1356,7 @@
 
 <!-- PROXIMITY -->
 {#if playersInProximity.length > 0}
-  <div class="proximity" transition:fly={{ y: 200 }}>
+  <div class="proximity" transition:fly={{ y: -200, duration: 300 }}>
     <div><strong>Players nearby</strong></div>
     {#each playersInProximity as player}
       <div>{player.name}</div>
@@ -1335,23 +1364,28 @@
   </div>
 {/if}
 
-<!-- CURRENT AREA BOX -->
-{#if localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
-  <div class="current-area tiny">
-    Currently in <strong>{COLORMAP[localPlayers[$localUserSessionID].area]}</strong>
-    area
-    <div>Users in area:</div>
-    {#each Object.values(localPlayers).filter((p) => p.area === localPlayers[$localUserSessionID].area && p.uuid != $localUserUUID) as player}
-      <div>{player.name}</div>
-    {/each}
-    <div class="button">Join audioroom</div>
+<!-- AUDIOCHAT BOX  -->
+{#if !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
+  <div class="audiochat-box">
+    <div class="message">
+      Nearby audioroom <strong>{COLORMAP[localPlayers[$localUserSessionID].area]}</strong>
+    </div>
+    <div
+      class="button"
+      on:click={(e) => {
+        audioChatActive = true
+      }}>
+      Join
+    </div>
   </div>
 {/if}
 
 <!-- AUDIO CHAT -->
 {#if audioChatActive}
   <AudioChat
-    name={localPlayers[$localUserSessionID].name}
+    userName={localPlayers[$localUserSessionID].name}
+    roomName={COLORMAP[localPlayers[$localUserSessionID].area]}
+    roomId={localPlayers[$localUserSessionID].area}
     on:close={(e) => {
       audioChatActive = false
     }} />
