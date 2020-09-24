@@ -16,6 +16,7 @@
   import { fade, fly, scale } from "svelte/transition"
   import { urlFor, loadData, renderBlockText } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
+  import { Howl } from "howler"
 
   // COMPONENTS
   import Chat from "./Chat.svelte"
@@ -99,6 +100,7 @@
   const graphicsSettings = loadData(QUERY.GRAPHICS_SETTINGS)
   const events = loadData(QUERY.EVENTS)
   const caseStudies = loadData(QUERY.CASE_STUDIES)
+  const audioInstallations = loadData(QUERY.AUDIO_INSTALLATIONS)
   const landMarks = loadData(QUERY.LAND_MARKS)
   const users = loadData(QUERY.USERS)
   const pages = loadData(QUERY.PAGES)
@@ -178,6 +180,7 @@
   // PIXI LAYERS
   let mapLayer = {}
   let caseStudyLayer = {}
+  let audioInstallationLayer = {}
   let playerLayer = {}
   let landMarkLayer = {}
 
@@ -201,6 +204,38 @@
     }
   }
 
+  const checkAudioProximity = () => {
+    // debounce(() => {
+    // console.log(Date.now())
+    // console.log("checking audio...")
+    audioInstallationLayer.children.forEach((a) => {
+      let dist = Math.sqrt(
+        Math.pow(a.x - localPlayers[$localUserSessionID].avatar.x, 2) +
+          Math.pow(a.y - localPlayers[$localUserSessionID].avatar.y, 2)
+      )
+
+      if (dist < 400) {
+        if (!a.audio.playing()) {
+          console.log(a.title, "starting to play")
+          a.audio.play()
+        }
+        // OldRange = 250
+        // NewRange = 1
+        // NewValue = (dist - 50) / 250
+        console.log(a.title, 1 - (dist - 50) / 400)
+        a.audio.volume(1 - (dist - 50) / 400)
+      }
+
+      if (dist > 400) {
+        if (a.audio.playing()) {
+          console.log(a.title, "stopping")
+          a.audio.pause()
+        }
+      }
+    })
+    // }, 500)
+  }
+
   // GAME LOOP
   const updatePositions = (delta) => {
     let deltaRounded = Math.round(delta) + deltaJump
@@ -222,14 +257,14 @@
             localPlayers[key].avatar.x = step.x
             localPlayers[key].avatar.y = step.y
             localPlayers[key].area = step.area
+            if (key === $localUserSessionID && moveQ[key].length % 10 === 0) {
+              checkAudioProximity()
+            }
           }
         } else {
           localPlayers[key].avatar.setAnimation("rest")
-          if (key === $localUserSessionID) {
-            // hideTarget()
-          }
           delete moveQ[key]
-          checkPlayerProximity()
+          // checkPlayerProximity()
         }
       } else {
         delete moveQ[key]
@@ -674,6 +709,66 @@
         })
       })
 
+      // ADD AUDIO INSTALLATIONS
+      audioInstallations.then((audioInstallations) => {
+        console.dir(audioInstallations)
+
+        audioInstallations.forEach((ai, i) => {
+          const spriteUrl = get(ai, "spriteLink.spriteJsonURL", "")
+          const spriteId = "audioInstallation-" + ai._id
+          const aiLoader = new PIXI.Loader()
+          aiLoader.add(spriteId, spriteUrl).load((loader, resources) => {
+            const frames = new PIXI.AnimatedSprite(
+              resources[spriteId].spritesheet.animations["frames"]
+            )
+            frames.animationSpeed = 0.02
+            frames.play()
+
+            // const nameText = new PIXI.Text(ai.title, TEXT_STYLE)
+            // nameText.anchor.set(0.5)
+
+            const audioInstallationLocation = new PIXI.Container()
+            audioInstallationLocation.addChild(frames)
+            audioInstallationLocation.audio = new Howl({
+              src: [ai.audioURL],
+              loop: true,
+            })
+            audioInstallationLocation.x = ai.x
+            audioInstallationLocation.y = ai.y
+            audioInstallationLocation.pivot.x =
+              audioInstallationLocation.width / 2
+            audioInstallationLocation.pivot.y =
+              audioInstallationLocation.height / 2
+            audioInstallationLocation.title = ai.title
+            audioInstallationLocation.interactive = false
+
+            // const onDown = (e) => {
+            //   navigate("/case-studies/" + get(si, "slug.current", false))
+            //   e.stopPropagation()
+            // }
+
+            // const onEnter = (e) => {
+            // gameContainer.style.cursor = "pointer"
+            // nameText.x = caseStudyLocation.x + 10
+            // nameText.y = caseStudyLocation.y - 60
+            // caseStudyLayer.addChild(nameText)
+            // }
+
+            // const onLeave = (e) => {
+            //   gameContainer.style.cursor = "default"
+            //   caseStudyLayer.removeChild(nameText)
+            // }
+
+            // caseStudyLocation.on("mousedown", onDown)
+            // caseStudyLocation.on("touchstart", onDown)
+            // caseStudyLocation.on("mouseover", onEnter)
+            // caseStudyLocation.on("mouseout", onLeave)
+
+            audioInstallationLayer.addChild(audioInstallationLocation)
+          })
+        })
+      })
+
       // ADD LANDMARKS
       landMarks.then((landMarks) => {
         landMarks.forEach((lm, i) => {
@@ -733,10 +828,12 @@
     // Create and add layers
     mapLayer = new PIXI.Container()
     caseStudyLayer = new PIXI.Container()
+    audioInstallationLayer = new PIXI.Container()
     playerLayer = new PIXI.Container()
     landMarkLayer = new PIXI.Container()
     viewport.addChild(mapLayer)
     viewport.addChild(caseStudyLayer)
+    viewport.addChild(audioInstallationLayer)
     viewport.addChild(playerLayer)
     viewport.addChild(landMarkLayer)
 

@@ -21,6 +21,8 @@ export const QUERY = {
   EVENTS: "*[_type == 'event']{..., participants[]->{slug,name}}",
   USERS: "*[_type == 'participant']",
   PAGES: "*[_type == 'page']",
+  AUDIO_INSTALLATIONS:
+    "*[_type == 'audioInstallation']{..., authors[]->{slug,name}, 'audioURL': soundFile.asset->url,spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   CASE_STUDIES:
     "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., authors[]->{slug,name}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   LAND_MARKS:
@@ -98,3 +100,11 @@ export const nanoid = (t = 21) => {
 export const getRandomInt = (min, max) =>
   Math.floor(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) +
   Math.ceil(min)
+
+export function debounce(fn, wait = 1) {
+  let timeout
+  return function (...args) {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn.call(this, ...args), wait)
+  }
+}
