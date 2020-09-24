@@ -15,8 +15,12 @@
   // DOM REFERENCES
   let messageContainerEl = {}
 
+  // GLOBAL
+  import { COLORMAP } from "./global.js"
+
   // PROPS
   export let chatMessages = []
+  export let currentArea = 4
 
   $: {
     if (chatMessages) {
@@ -47,6 +51,16 @@
   .chat-container {
     position: relative;
     height: 100%;
+  }
+
+  .header {
+    font-size: $FONT_SIZE_SMALL;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 100%;
+    background: $COLOR_DARK;
+    color: $COLOR_LIGHT;
+    text-align: center;
   }
 
   .message-container {
@@ -101,6 +115,7 @@
 </style>
 
 <div class="chat-container">
+  <div class="header">Current room: {COLORMAP[currentArea]}</div>
   <div class="message-container" bind:this={messageContainerEl}>
     {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />

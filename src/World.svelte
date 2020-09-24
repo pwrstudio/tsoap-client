@@ -75,12 +75,7 @@
   } from "./global.js"
 
   // STORES
-  import {
-    localUserUUID,
-    localUserSessionID,
-    localUserArea,
-    inPrivateChat,
-  } from "./stores.js"
+  import { localUserUUID, localUserSessionID } from "./stores.js"
 
   // ** SANITY
   const graphicsSettings = loadData(QUERY.GRAPHICS_SETTINGS)
@@ -93,17 +88,15 @@
     console.dir(users)
   })
 
-  Promise.allSettled([graphicsSettings, events, caseStudies, landMarks]).catch(
-    (err) => {
-      console.log("ASDASDASDASDAS")
-    }
-  )
+  // Promise.allSettled([graphicsSettings, events, caseStudies, landMarks]).catch(
+  //   (err) => {
+  //     console.log("ASDASDASDASDAS")
+  //   }
+  // )
   // DOM REFERENCES
   let gameContainer = {}
 
   // VARIABLES
-  let newUserName = ""
-  let newUserColor = ""
 
   const STATE = {
     ERROR: 0,
@@ -190,6 +183,7 @@
 
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567")
+  // const client = new Colyseus.Client("ws://212.36.170.236:2567")
   const client = new Colyseus.Client("wss://gameserver.tsoap.dev")
 
   // PIXI
@@ -236,6 +230,7 @@
             localPlayers[key].avatar.setAnimation(step.direction)
             localPlayers[key].avatar.x = step.x
             localPlayers[key].avatar.y = step.y
+            localPlayers[key].area = step.area
             moveQ[key] = []
           } else {
             moveQ[key].splice(0, deltaRounded - 1)
@@ -243,11 +238,12 @@
             localPlayers[key].avatar.setAnimation(step.direction)
             localPlayers[key].avatar.x = step.x
             localPlayers[key].avatar.y = step.y
+            localPlayers[key].area = step.area
           }
         } else {
           localPlayers[key].avatar.setAnimation("rest")
           if (key === $localUserSessionID) {
-            hideTarget()
+            // hideTarget()
           }
           delete moveQ[key]
           checkPlayerProximity()
@@ -276,8 +272,6 @@
   // FUNCTIONS
   let teleportTo = () => {}
   let submitChat = () => {}
-  let startPrivateChat = () => {}
-  let leavePrivateChat = () => {}
 
   const makeNewUser = (sso, sig) => {
     loggedIn = true
@@ -382,7 +376,6 @@
           }
 
           const onDown = (e) => {
-            startPrivateChat(player)
             e.stopPropagation()
           }
 
@@ -437,11 +430,9 @@
 
         let randomAvatar = sample(Object.keys(avatarSpritesheets))
 
-        console.log("randomAvatar", randomAvatar)
         let name = graphicsSettings.activeAvatars.find(
           (a) => a._id === randomAvatar
         ).title
-        console.log("name", name)
 
         let playerObject = {}
 
@@ -503,21 +494,16 @@
 
             // PLAYER: ILLEGAL MOVE
             gameRoom.onMessage("illegalMove", (message) => {
-              hideTarget()
+              // hideTarget()
             })
 
             // PLAYER: STATE CHANGE
-            gameRoom.state.players.onChange = function (player, sessionId) {
+            gameRoom.state.players.onChange = (player, sessionId) => {
               if (player.path.waypoints.length > 0) {
-                if (localPlayers[sessionId].isSelf) {
-                  localUserArea.set(player.area)
-                }
                 moveQ[sessionId] = player.path.waypoints
               } else {
                 // TELEPORT
-                if (localPlayers[sessionId].isSelf) {
-                  localUserArea.set(player.area)
-                }
+                localPlayers[sessionId].area = player.area
                 localPlayers[sessionId].avatar.x = player.x
                 localPlayers[sessionId].avatar.y = player.y
                 checkPlayerProximity()
@@ -526,14 +512,14 @@
 
             // PLAYER: CLICK / TAP
             viewport.on("clicked", (e) => {
-              hideTarget()
+              // hideTarget()
               gameRoom.send("go", {
                 x: Math.round(e.world.x),
                 y: Math.round(e.world.y),
                 originX: localPlayers[$localUserSessionID].avatar.x,
                 originY: localPlayers[$localUserSessionID].avatar.y,
               })
-              showTarget(Math.round(e.world.x), Math.round(e.world.y))
+              // showTarget(Math.round(e.world.x), Math.round(e.world.y))
             })
 
             // PLAYER: TELEPORT
@@ -572,6 +558,7 @@
                   uuid: $localUserUUID,
                   name: localPlayers[$localUserSessionID].name,
                   text: event.detail.text,
+                  area: localPlayers[$localUserSessionID].area,
                   tint: localPlayers[$localUserSessionID].tint,
                 })
               } catch (err) {
@@ -581,44 +568,63 @@
             }
 
             // ************
-            // PRIVATE ROOM
+            // CASE STUUDIES
             // ************
 
-            // PRIVATE ROOM: START
-            startPrivateChat = (partner) => {
-              try {
-                client.create("chat", { partner: partner.id }).then((r) => {
-                  gameRoom.send("createPrivateRoom", {
-                    roomId: r.id,
-                    partner: partner.id,
-                  })
-                  inPrivateChat.set(true)
-                  // PRIVATE ROOM: LEAVE
-                  leavePrivateChat = () => {
-                    r.leave()
-                    gameRoom.send("leavePrivateRoom", {
-                      roomId: r.id,
-                    })
-                    inPrivateChat.set(false)
-                  }
+            // CREATE CASE STUDY
+            const createCaseStudy = (caseStudy) => {
+              const nameText = new PIXI.Text(caseStudy.name, TEXT_STYLE)
+              nameText.anchor.set(0.5)
+
+              const graphics = new PIXI.Graphics()
+              graphics.beginFill(caseStudy.tint)
+              graphics.alpha = caseStudy.carriedBy === "" ? 1 : 0
+              graphics.drawRect(caseStudy.x, caseStudy.y, 30, 30)
+              graphics.endFill()
+              graphics.interactive = true
+
+              const onDown = (e) => {
+                gameRoom.send("pickUpCaseStudy", {
+                  uuid: caseStudy.uuid,
                 })
-              } catch (err) {
-                console.dir(err)
-                setUIState(STATE.ERROR, false, err)
+                e.stopPropagation()
               }
+
+              const onEnter = () => {
+                nameText.x = caseStudy.x + 10
+                nameText.y = caseStudy.y - 30
+                viewport.addChild(nameText)
+              }
+
+              const onLeave = () => {
+                viewport.removeChild(nameText)
+              }
+
+              graphics.on("mousedown", onDown)
+              graphics.on("touchstart", onDown)
+              graphics.on("mouseover", onEnter)
+              graphics.on("mouseout", onLeave)
+
+              viewport.addChild(graphics)
             }
 
-            // PRIVATE ROOM: ADD
-            gameRoom.state.privateRooms.onAdd = (message) => {
-              // console.log('add private room')
-              // console.dir(gameRoom.state.privateRooms)
-              // console.dir(message)
+            // CASE STUDY: ADD
+            gameRoom.state.caseStudies.onAdd = (caseStudy, sessionId) => {
+              // console.dir(caseStudy)
+              createCaseStudy(caseStudy)
             }
 
-            // PRIVATE ROOM: REMOVE
-            gameRoom.state.privateRooms.onRemove = (message) => {
-              // console.log('remove private room')
-              // console.dir(gameRoom.state.privateRooms)
+            // CASE STUDY: REMOVE
+            gameRoom.state.caseStudies.onRemove = (caseStudy, sessionId) => {
+              console.dir(caseStudy)
+              // createCaseStudy(caseStudy)
+            }
+
+            // CASE STUDY: STATE CHANGE
+            gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
+              console.log("---- case study state change")
+              console.log(caseStudy.uuid)
+              console.dir(caseStudy)
             }
 
             // ************
@@ -869,28 +875,6 @@
       top: unset;
       bottom: 20px;
       display: none;
-    }
-  }
-
-  .privateChatContainer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100000;
-
-    .box {
-      background: #a4a4a4;
-      width: 400px;
-      padding: 20px;
-      height: 600px;
-      position: relative;
-      z-index: 1000;
     }
   }
 
@@ -1169,7 +1153,12 @@
   </div>
   <!-- CHAT -->
   <div class="chat">
-    <Chat {chatMessages} on:submit={submitChat} />
+    {#if localPlayers[$localUserSessionID]}
+      <Chat
+        chatMessages={chatMessages.filter((m) => m.area === localPlayers[$localUserSessionID].area)}
+        currentArea={localPlayers[$localUserSessionID].area}
+        on:submit={submitChat} />
+    {/if}
   </div>
   <!-- MENU -->
   <div class="menu">
@@ -1286,34 +1275,23 @@
   <div class="proximity" transition:fly={{ y: 200 }}>
     <div><strong>Players nearby</strong></div>
     {#each playersInProximity as player}
-      <div>
-        {player.name}
-        <!-- <button
-          on:click={(e) => {
-            startPrivateChat(player)
-          }}>
-          Start chat
-        </button> -->
-      </div>
+      <div>{player.name}</div>
     {/each}
   </div>
 {/if}
 
 <!-- CURRENT AREA BOX -->
-{#if $localUserArea}
+{#if localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
   <div class="current-area tiny">
-    Currently in <strong>{COLORMAP[$localUserArea]}</strong> area
+    Currently in <strong>{COLORMAP[localPlayers[$localUserSessionID].area]}</strong>
+    area
+    <div>Users in area:</div>
+    {#each Object.values(localPlayers).filter((p) => p.area === localPlayers[$localUserSessionID].area && p.uuid != $localUserUUID) as player}
+      <div>{player.name}</div>
+    {/each}
+    <div class="button">Join audioroom</div>
   </div>
 {/if}
-
-<!-- PRIVATE CHAT -->
-<!-- {#if $inPrivateChat}
-  <div transition:fade class="privateChatContainer" on:click={leavePrivateChat}>
-    <div class="box">
-      <Chat {chatMessages} on:submit={submitChat} />
-    </div>
-  </div>
-{/if} -->
 
 <!-- AUDIO CHAT -->
 {#if audioChatActive}

@@ -9,9 +9,12 @@
   import get from "lodash/get"
   import { fade } from "svelte/transition"
   import { urlFor, renderBlockText } from "./sanity.js"
+  import { links } from "svelte-routing"
 
   // *** PROPS
   export let caseStudy = {}
+
+  console.dir(caseStudy)
 </script>
 
 <style lang="scss">
@@ -34,9 +37,17 @@
   }
 </style>
 
-<div class="case-study-single" in:fade>
+<div class="case-study-single" in:fade use:links>
   <!-- TITLE -->
   <div class="title">{caseStudy.title}</div>
+  {#if caseStudy.authors && Array.isArray(caseStudy.authors)}
+    {#each caseStudy.authors as a (a._key)}
+      <div>
+        <a href={'/profiles/' + a.slug.current} class="title">{a.name}</a>
+      </div>
+    {/each}
+  {/if}
+
   <!-- FILES -->
   {#if Array.isArray(caseStudy.files)}
     {#each caseStudy.files as f, index (f._key)}

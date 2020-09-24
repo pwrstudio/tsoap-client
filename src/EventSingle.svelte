@@ -9,12 +9,16 @@
   import get from "lodash/get"
   import { fade } from "svelte/transition"
   import { urlFor, renderBlockText } from "./sanity.js"
+  import { links } from "svelte-routing"
 
   // GLOBAL
   import { formattedDate } from "./global.js"
+  import { isArray } from "util"
 
   // *** PROPS
   export let event = {}
+
+  console.dir(event)
 </script>
 
 <style lang="scss">
@@ -40,6 +44,14 @@
 <div class="event" in:fade>
   <!-- TITLE -->
   <div class="title">{event.title}</div>
+  <!-- AUTHORS -->
+  {#if event.authors && Array.isArray(event.authors)}
+    {#each event.authors as a (a._key)}
+      <div>
+        <a href={'/profiles/' + a.slug.current} class="title">{a.name}</a>
+      </div>
+    {/each}
+  {/if}
 
   <!-- DATE -->
   <div class="date">{formattedDate(event.startDate)}</div>
