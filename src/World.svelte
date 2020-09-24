@@ -748,7 +748,7 @@
     })
 
     const getResponsiveWidth = () =>
-      window.matchMedia("(max-width: 700px)").matches
+      window.matchMedia("(max-width: 700px)").matches || sidebarHidden
         ? window.innerWidth
         : window.innerWidth - 400
 
@@ -1030,7 +1030,7 @@
     }
 
     &.hidden {
-      transform: translateX(370px);
+      transform: translateX(360px);
       cursor: pointer;
     }
 
