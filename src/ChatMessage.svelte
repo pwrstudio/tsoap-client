@@ -20,9 +20,11 @@
   @import "./variables.scss";
 
   .chat-message {
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    color: $COLOR_DARK;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    color: $COLOR_LIGHT;
 
     .meta {
       width: 100%;
@@ -38,11 +40,14 @@
       }
 
       .color-code {
-        height: 1em;
-        width: 1em;
-        border-radius: 1em;
-        margin-right: 0.35em;
+        height: 0.5em;
+        width: 0.5em;
+        border-radius: 0.5em;
+        margin-right: 1em;
         float: left;
+        background: $COLOR_LIGHT;
+        position: relative;
+        top: 4px;
       }
     }
 
@@ -52,13 +57,13 @@
   }
 </style>
 
-<div class="chat-message" transition:fade>
+<div class="chat-message" transition:fade|local>
   <div class="meta">
-    <span
-      class="color-code"
-      style={'background-color:' + get(message, 'tint', '0xFF0000').replace('0x', '#')} />
+    <span class="color-code" />
     <span class="name">{message.name}</span>
     <span class="date">{formattedChatDate(message.timestamp)}</span>
   </div>
   <div class="body">{message.text}</div>
 </div>
+
+<!-- style={'background-color:' + get(message, 'tint', '0xF0F0F0').replace('0x', '#')} /> -->

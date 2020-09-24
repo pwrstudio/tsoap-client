@@ -11,6 +11,9 @@
   import { urlFor, renderBlockText } from "./sanity.js"
   import { links } from "svelte-routing"
 
+  // COMPONENTS
+  import ParticipantsList from "./ParticipantsList.svelte"
+
   // *** PROPS
   export let caseStudy = {}
 
@@ -40,12 +43,10 @@
 <div class="case-study-single" in:fade use:links>
   <!-- TITLE -->
   <div class="title">{caseStudy.title}</div>
-  {#if caseStudy.authors && Array.isArray(caseStudy.authors)}
-    {#each caseStudy.authors as a (a._key)}
-      <div>
-        <a href={'/profiles/' + a.slug.current} class="title">{a.name}</a>
-      </div>
-    {/each}
+
+  <!-- PARTICIPANTS -->
+  {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
+    <ParticipantsList participants={caseStudy.participants} />
   {/if}
 
   <!-- FILES -->
@@ -56,6 +57,7 @@
       </div>
     {/each}
   {/if}
+
   <!-- IMAGE -->
   {#if get(caseStudy, 'mainImage.asset', false)}
     <div class="image">
@@ -67,6 +69,7 @@
           .url()} />
     </div>
   {/if}
+
   <!-- TEXT -->
   {#if Array.isArray(get(caseStudy, 'content.content', false))}
     <div class="text">

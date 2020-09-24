@@ -6,6 +6,7 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
+  import { slide } from "svelte/transition"
   import { createEventDispatcher } from "svelte"
   const dispatch = createEventDispatcher()
 
@@ -21,6 +22,7 @@
   // PROPS
   export let chatMessages = []
   export let currentArea = 4
+  export let roomName = ""
 
   $: {
     if (chatMessages) {
@@ -55,23 +57,51 @@
 
   .header {
     font-size: $FONT_SIZE_SMALL;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 7px;
+    padding-bottom: 7px;
     width: 100%;
     background: $COLOR_DARK;
     color: $COLOR_LIGHT;
+    border-bottom: 1px solid $COLOR_LIGHT;
     text-align: center;
+    display: flex;
+    justify-content: center;
+
+    .color-code {
+      height: 0.8em;
+      width: 0.8em;
+      border-radius: 0.8em;
+      margin-right: 0.5em;
+      float: left;
+      position: relative;
+      top: 2px;
+
+      &.green {
+        background: #00ff00;
+      }
+      &.blue {
+        background: #0000ff;
+      }
+      &.red {
+        background: #ff0000;
+      }
+      &.yellow {
+        background: #ffff00;
+      }
+    }
   }
 
   .message-container {
-    width: calc(100% - 10px);
     width: 100%;
-    height: calc(100% - 50px);
+    width: 100%;
+    height: calc(100% - 60px);
     overflow-y: auto;
+    padding-bottom: 20px;
+    padding-top: 10px;
 
-    @include screen-size("small") {
-      height: calc(100% - 40px);
-    }
+    // @include screen-size("small") {
+    //   height: calc(100% - 40px);
+    // }
   }
 
   .input-container {
@@ -79,43 +109,61 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    padding-top: 10px;
-    height: 40px;
+    padding-top: 0px;
+    padding-bottom: 10px;
+    height: 50px;
+    padding-left: 7px;
+    padding-right: 10px;
 
-    @include screen-size("small") {
-      width: calc(100% - 20px);
-    }
+    // @include screen-size("small") {
+    //   width: calc(100% - 20px);
+    // }
 
     input {
+      font-family: $mono-stack;
+      font-size: $FONT_SIZE_BASE;
       float: left;
-      width: calc(100% - 90px);
+      width: calc(100% - 70px);
       display: block;
       margin-bottom: 10px;
-      background: $COLOR_MID_2;
+      background: $COLOR_DARK;
+      border: 1px solid $COLOR_LIGHT;
+      color: $COLOR_LIGHT;
+      border-radius: 10px;
       padding: 10px;
-      border: 0;
       outline: none;
+      height: 40px;
     }
 
     button {
+      font-family: $mono-stack;
+      font-size: $FONT_SIZE_BASE;
       width: 60px;
       float: right;
       display: block;
-      background: $COLOR_MID_3;
-      padding: 10px;
-      border: 0;
+      background: $COLOR_DARK;
+      border: 1px solid $COLOR_LIGHT;
+      color: $COLOR_LIGHT;
+      border-radius: 5px;
       outline: none;
-      color: white;
       cursor: pointer;
+      height: 40px;
+      line-height: 40px;
+
       &:hover {
-        background: $COLOR_MID_2;
+        background: $COLOR_LIGHT;
+        color: $COLOR_DARK;
       }
     }
   }
 </style>
 
 <div class="chat-container">
-  <div class="header">Current room: {COLORMAP[currentArea]}</div>
+  <div class="header">
+    <div>
+      <span class="color-code {roomName}" /> Current room: {COLORMAP[currentArea]}
+    </div>
+  </div>
   <div class="message-container" bind:this={messageContainerEl}>
     {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />

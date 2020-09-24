@@ -71,6 +71,7 @@
     MAP,
     COLORMAP,
     QUERY,
+    AREA,
     TEXT_STYLE,
   } from "./global.js"
 
@@ -924,13 +925,19 @@
     position: fixed;
     top: 0;
     right: 0;
-    width: 400px;
+    width: $SIDEBAR_WIDTH;
     height: 100vh;
     padding: 0;
     overflow: hidden;
     z-index: 100;
     transform: translateX(0);
     transition: transform 0.5s $transition;
+
+    // HEIGHTS:
+    // Minimap => 200px
+    // Calendar =>
+    // Chat =>
+    // Menubar => 60px
 
     .minimap {
       background: black;
@@ -939,18 +946,18 @@
       justify-content: center;
       align-items: center;
 
-      @include screen-size("short") {
-        height: 150px;
-      }
+      // @include screen-size("short") {
+      //   height: 150px;
+      // }
 
       .map-container {
         height: 200px;
         width: 200px;
         position: relative;
 
-        @include screen-size("short") {
-          transform: scale(0.5);
-        }
+        // @include screen-size("short") {
+        //   transform: scale(0.5);
+        // }
 
         img {
           height: 200px;
@@ -970,33 +977,16 @@
       }
     }
 
-    .calendar {
-      height: calc(50% - 130px);
-      overflow: hidden;
-      @include screen-size("short") {
-        height: calc(50% - 65px);
-      }
-    }
-
-    .chat {
-      background: $COLOR_MID_1;
-      height: calc(50% - 130px);
-
-      padding: 10px;
-      @include screen-size("short") {
-        height: calc(50% - 65px);
-      }
-    }
-
     .menu {
+      height: 40px;
       color: $COLOR_DARK;
       font-size: $FONT_SIZE_BASE;
       background: $COLOR_LIGHT;
-      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 10px;
+      user-select: none;
 
       .menu-item {
         padding-right: 20px;
@@ -1013,6 +1003,29 @@
       .login {
         padding-right: 0px;
         justify-self: end;
+      }
+    }
+
+    .middle-section {
+      height: calc(100% - 240px);
+      background: red;
+
+      .calendar {
+        height: 50%;
+        overflow: hidden;
+        @include hide-scroll;
+        // @include screen-size("short") {
+        //   height: calc(50% - 65px);
+        // }
+      }
+
+      .chat {
+        background: $COLOR_DARK;
+        height: 50%;
+        @include hide-scroll;
+        // @include screen-size("short") {
+        //   height: calc(50% - 65px);
+        // }
       }
     }
 
@@ -1040,6 +1053,8 @@
     color: $COLOR_DARK;
     padding-bottom: 60px;
     border-radius: 4px;
+
+    @include hide-scroll;
 
     @include screen-size("small") {
       display: none;
@@ -1117,71 +1132,95 @@
 {/if}
 
 <!-- SIDEBAR -->
-<div
-  class="sidebar"
-  use:links
-  class:hidden={sidebarHidden}
-  on:click={() => {
-    if (sidebarHidden) {
-      sidebarHidden = false
-      window.dispatchEvent(new Event('resize'))
-    }
-  }}>
-  <!-- MINIMAP -->
-  <div class="minimap">
-    <div class="map-container">
-      {#if miniImage}
-        <!-- {#if get(graphicsSettings, 'mapLink.miniImage.asset', false)} -->
-        <img src={miniImage} />
-      {/if}
-      {#if get(localPlayers[$localUserSessionID], 'avatar.y', false)}
-        <div
-          class="map-marker"
-          style={'top: ' + Math.round(localPlayers[$localUserSessionID].avatar.y / 20 - 5) + 'px; left: ' + Math.round(localPlayers[$localUserSessionID].avatar.x / 20 - 5) + 'px;'} />
-      {/if}
-    </div>
-  </div>
-  <!-- CALENDAR -->
-  <div class="calendar">
-    {#await events then events}
-      <Calendar
-        {events}
-        on:goToEvent={(e) => {
-          setUIState(STATE.EVENT_SINGLE, e.detail.slug)
-        }} />
-    {/await}
-  </div>
-  <!-- CHAT -->
-  <div class="chat">
-    {#if localPlayers[$localUserSessionID]}
-      <Chat
-        chatMessages={chatMessages.filter((m) => m.area === localPlayers[$localUserSessionID].area)}
-        currentArea={localPlayers[$localUserSessionID].area}
-        on:submit={submitChat} />
-    {/if}
-  </div>
-  <!-- MENU -->
-  <div class="menu">
-    <div>
-      <div
-        class="menu-item"
-        on:click={() => {
-          setUIState(STATE.CASE_STUDY_LISTING)
-        }}>
-        Case-Studies
+{#if localPlayers[$localUserSessionID]}
+  <div
+    class="sidebar"
+    use:links
+    class:hidden={sidebarHidden}
+    on:click={() => {
+      if (sidebarHidden) {
+        sidebarHidden = false
+        window.dispatchEvent(new Event('resize'))
+      }
+    }}>
+    <!-- MINIMAP -->
+    <div class="minimap">
+      <div class="map-container">
+        {#if miniImage}<img src={miniImage} />{/if}
+        {#if get(localPlayers[$localUserSessionID], 'avatar.y', false)}
+          <div
+            class="map-marker"
+            style={'top: ' + Math.round(localPlayers[$localUserSessionID].avatar.y / 20 - 5) + 'px; left: ' + Math.round(localPlayers[$localUserSessionID].avatar.x / 20 - 5) + 'px;'} />
+        {/if}
       </div>
-      <div class="menu-item">About</div>
-      <div class="menu-item">Help</div>
     </div>
-    <div
-      class="menu-item login"
-      on:click={() => {
-        setUIState(STATE.LOGIN)
-      }}>
-      Login
+    <div class="middle-section">
+      <!-- CALENDAR -->
+      <div class="calendar">
+        {#await events then events}
+          <Calendar
+            {events}
+            on:goToEvent={(e) => {
+              setUIState(STATE.EVENT_SINGLE, e.detail.slug)
+            }} />
+        {/await}
+      </div>
+      <!-- CHAT -->
+      <div class="chat">
+        <!-- localPlayers[$localUserSessionID].area -->
+        {#if localPlayers[$localUserSessionID].area === AREA.GREEN}
+          <Chat
+            chatMessages={chatMessages.filter((m) => m.area === AREA.GREEN)}
+            currentArea={AREA.GREEN}
+            roomName="green"
+            on:submit={submitChat} />
+        {/if}
+        {#if localPlayers[$localUserSessionID].area === AREA.YELLOW}
+          <Chat
+            chatMessages={chatMessages.filter((m) => m.area === AREA.YELLOW)}
+            currentArea={AREA.YELLOW}
+            roomName="yellow"
+            on:submit={submitChat} />
+        {/if}
+        {#if localPlayers[$localUserSessionID].area === AREA.RED}
+          <Chat
+            chatMessages={chatMessages.filter((m) => m.area === AREA.RED)}
+            currentArea={AREA.RED}
+            roomName="red"
+            on:submit={submitChat} />
+        {/if}
+        {#if localPlayers[$localUserSessionID].area === AREA.BLUE}
+          <Chat
+            chatMessages={chatMessages.filter((m) => m.area === AREA.BLUE)}
+            currentArea={AREA.BLUE}
+            roomName="blue"
+            on:submit={submitChat} />
+        {/if}
+      </div>
+    </div>
+    <!-- MENUBAR -->
+    <div class="menu">
+      <div>
+        <div
+          class="menu-item"
+          on:click={() => {
+            setUIState(STATE.CASE_STUDY_LISTING)
+          }}>
+          Case-Studies
+        </div>
+        <div class="menu-item">About</div>
+        <div class="menu-item">Help</div>
+      </div>
+      <div
+        class="menu-item login"
+        on:click={() => {
+          setUIState(STATE.LOGIN)
+        }}>
+        Login
+      </div>
     </div>
   </div>
-</div>
+{/if}
 
 <!-- GAME WORLD -->
 <div class="game" class:expanded={sidebarHidden} bind:this={gameContainer} />

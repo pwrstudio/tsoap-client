@@ -5,9 +5,11 @@ $serif-stack: "IBM Plex Serif", serif;
 $font_size_base: 16px;
 $FONT_SIZE_SMALL: 11px;
 $FONT_SIZE_BASE: 13px;
+$FONT_SIZE_MEDIUM: 16px;
+$SIDEBAR_WIDTH: 400px;
 
 // COLOR
-$COLOR_DARK: #222222;
+$COLOR_DARK: #000000;
 $COLOR_MID_1: #c5c5c5;
 $COLOR_MID_2: #999999;
 $COLOR_MID_3: #555555;
@@ -50,4 +52,11 @@ $breakpoints: (
   } @else {
     @error 'No value found for `#{$breakpoint}`. ' + 'Please make sure it is defined in `$breakpoints` map.';
   }
+}
+
+@mixin hide-scroll {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
 }

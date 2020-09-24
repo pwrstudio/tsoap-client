@@ -10,6 +10,7 @@ export const KEYBOARD = {
   ENTER: 13,
 }
 
+export const AREA = { YELLOW: 2, RED: 3, GREEN: 4, BLUE: 5 }
 export const COLORMAP = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"]
 
 export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
@@ -17,7 +18,7 @@ export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
 export const QUERY = {
   GRAPHICS_SETTINGS:
     "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'miniImage': miniImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
-  EVENTS: "*[_type == 'event']{..., authors[]->{slug,name}}",
+  EVENTS: "*[_type == 'event']{..., participants[]->{slug,name}}",
   USERS: "*[_type == 'participant']",
   CASE_STUDIES:
     "*[_type == 'caseStudy']{..., authors[]->{slug,name}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
@@ -34,7 +35,7 @@ export const TEXT_STYLE = {
 
 // const mainFormat = "MMM dd yyyy – HH:mm"
 // const mainFormat = "MMM dd – HH:mm"
-const mainFormat = "MMM dd yyyy"
+const mainFormat = "HH:mm 'CET,' EEE MMM dd"
 
 export const formattedDate = (start, end) => {
   try {
