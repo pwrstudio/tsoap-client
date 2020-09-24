@@ -17,8 +17,6 @@
 
   // *** PROPS
   export let events = []
-
-  console.dir(events)
 </script>
 
 <style lang="scss">

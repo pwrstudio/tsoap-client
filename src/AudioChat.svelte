@@ -225,38 +225,6 @@
 <style lang="scss">
   @import "./variables.scss";
 
-  .audiochat-box {
-    position: fixed;
-    width: auto;
-    background: $COLOR_LIGHT;
-    height: auto;
-    line-height: 2em;
-    text-align: center;
-    bottom: 15px;
-    left: 15px;
-    padding: 10px;
-    border-radius: 4px;
-    font-size: $FONT_SIZE_BASE;
-    display: flex;
-
-    padding-left: 15px;
-    padding-right: 15px;
-
-    user-select: none;
-
-    @include screen-size("small") {
-      top: unset;
-      bottom: 20px;
-      display: none;
-    }
-
-    .message {
-      // padding-top: 3px;
-      // padding-bottom: 3px;
-      margin-right: 15px;
-    }
-  }
-
   .audioChatContainer {
     position: fixed;
     width: auto;
@@ -265,7 +233,7 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    bottom: 15px;
+    top: 15px;
     left: 15px;
     padding: 10px;
     border-radius: 4px;

@@ -13,7 +13,7 @@
   import { Viewport } from "pixi-viewport"
   import get from "lodash/get"
   import sample from "lodash/sample"
-  import { fade, fly, scale } from "svelte/transition"
+  import { draw, fade, fly, scale } from "svelte/transition"
   import { urlFor, loadData, renderBlockText } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
@@ -69,16 +69,16 @@
   let slug = false
 
   $: {
-    // Split URL parameters
-    console.log("* * * * * ")
-    console.log("PARAMS UPDATED")
-    console.log("– params", params)
+    // // Split URL parameters
+    // console.log("* * * * * ")
+    // console.log("PARAMS UPDATED")
+    // console.log("– params", params)
     const args = get(params, "[*]", "").split("/")
     section = args[0] && args[0].length > 0 ? args[0] : "seed"
     slug = args[1] && args[1].length > 0 ? args[1] : false
-    console.log("– section", section)
-    console.log("– slug", slug)
-    console.log("* * * * * ")
+    // console.log("– section", section)
+    // console.log("– slug", slug)
+    // console.log("* * * * * ")
   }
 
   // GLOBAL
@@ -179,7 +179,8 @@
 
   // PIXI LAYERS
   let mapLayer = {}
-  let caseStudyLayer = {}
+  let emergentLayer = {}
+  let exhibitionLayer = {}
   let audioInstallationLayer = {}
   let playerLayer = {}
   let landMarkLayer = {}
@@ -216,7 +217,6 @@
 
       if (dist < 400) {
         if (!a.audio.playing()) {
-          console.log(a.title, "starting to play")
           a.audio.play()
         }
         // OldRange = 250
@@ -228,7 +228,6 @@
 
       if (dist > 400) {
         if (a.audio.playing()) {
-          console.log(a.title, "stopping")
           a.audio.pause()
         }
       }
@@ -290,6 +289,7 @@
   // FUNCTIONS
   let teleportTo = () => {}
   let submitChat = () => {}
+  let dropCaseStudy = () => {}
 
   const makeNewUser = (sso, sig) => {
     loggedIn = true
@@ -467,12 +467,14 @@
             // PLAYER: REMOVE
             gameRoom.state.players.onRemove = (player, sessionId) => {
               try {
-                playerLayer.removeChild(localPlayers[sessionId].avatar)
-                // HACK
-                setTimeout(() => {
-                  delete localPlayers[sessionId]
-                  localPlayers = localPlayers
-                }, 500)
+                if (localPlayers[sessionId] && localPlayers[sessionId].avatar) {
+                  playerLayer.removeChild(localPlayers[sessionId].avatar)
+                  // HACK
+                  setTimeout(() => {
+                    delete localPlayers[sessionId]
+                    localPlayers = localPlayers
+                  }, 500)
+                }
               } catch (err) {
                 setUIState(STATE.ERROR, false, err)
                 console.dir(err)
@@ -496,6 +498,13 @@
 
             // PLAYER: STATE CHANGE
             gameRoom.state.players.onChange = (player, sessionId) => {
+              console.log("player state change")
+              console.dir(player)
+              if ($localUserSessionID === sessionId) {
+                console.log("is self")
+                localPlayers[sessionId].carrying = player.carrying
+                console.log(localPlayers[sessionId].carrying)
+              }
               if (player.path.waypoints.length > 0) {
                 moveQ[sessionId] = player.path.waypoints
               } else {
@@ -568,60 +577,95 @@
             // CASE STUUDIES
             // ************
 
+            dropCaseStudy = () => {
+              gameRoom.send("dropCaseStudy", {
+                uuid: localPlayers[$localUserSessionID].carrying,
+              })
+            }
+
             // CREATE CASE STUDY
             const createCaseStudy = (caseStudy) => {
-              const nameText = new PIXI.Text(caseStudy.name, TEXT_STYLE)
-              nameText.anchor.set(0.5)
+              // const nameText = new PIXI.Text(caseStudy.name, TEXT_STYLE)
+              // nameText.anchor.set(0.5)
+
+              const container = new PIXI.Container()
+              container.x = caseStudy.x
+              container.y = caseStudy.y
+              container.visible = caseStudy.carriedBy === "" ? true : false
+              container.uuid = caseStudy.uuid
+              container.interactive = true
+              container.tint = caseStudy.tint
 
               const graphics = new PIXI.Graphics()
               graphics.beginFill(caseStudy.tint)
-              graphics.alpha = caseStudy.carriedBy === "" ? 1 : 0
-              graphics.drawRect(caseStudy.x, caseStudy.y, 10, 10)
+              graphics.drawRect(0, 0, 15, 15)
               graphics.endFill()
-              graphics.interactive = true
+
+              container.addChild(graphics)
 
               const onDown = (e) => {
-                gameRoom.send("pickUpCaseStudy", {
-                  uuid: caseStudy.uuid,
-                })
+                console.dir(localPlayers[$localUserSessionID].carrying)
+                if (
+                  !localPlayers[$localUserSessionID].carrying ||
+                  localPlayers[$localUserSessionID].carrying == ""
+                ) {
+                  gameRoom.send("pickUpCaseStudy", {
+                    uuid: caseStudy.uuid,
+                  })
+                }
                 e.stopPropagation()
               }
 
               const onEnter = () => {
-                nameText.x = caseStudy.x + 10
-                nameText.y = caseStudy.y - 30
-                viewport.addChild(nameText)
+                // nameText.x = caseStudy.x + 10
+                // nameText.y = caseStudy.y - 30
+                // viewport.addChild(nameText)
+                gameContainer.style.cursor = "grab"
               }
 
               const onLeave = () => {
-                viewport.removeChild(nameText)
+                gameContainer.style.cursor = "default"
+                // viewport.removeChild(nameText)
               }
 
-              graphics.on("mousedown", onDown)
-              graphics.on("touchstart", onDown)
-              graphics.on("mouseover", onEnter)
-              graphics.on("mouseout", onLeave)
+              container.on("mousedown", onDown)
+              container.on("touchstart", onDown)
+              container.on("mouseover", onEnter)
+              container.on("mouseout", onLeave)
 
-              viewport.addChild(graphics)
+              emergentLayer.addChild(container)
             }
 
             // CASE STUDY: ADD
             gameRoom.state.caseStudies.onAdd = (caseStudy, sessionId) => {
+              // console.log("%_%_%_ Case study added")
               // console.dir(caseStudy)
               createCaseStudy(caseStudy)
             }
 
             // CASE STUDY: REMOVE
             gameRoom.state.caseStudies.onRemove = (caseStudy, sessionId) => {
+              // console.log("%_%_%_ Case study removed")
               console.dir(caseStudy)
-              // createCaseStudy(caseStudy)
             }
 
             // CASE STUDY: STATE CHANGE
             gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
-              console.log("---- case study state change")
-              console.log(caseStudy.uuid)
-              console.dir(caseStudy)
+              console.log("%_%_%_ Case study state change", caseStudy)
+              console.log(caseStudy)
+              let g = emergentLayer.children.find(
+                (cs) => cs.uuid === caseStudy.uuid
+              )
+              if (g) {
+                console.dir(g)
+                if (caseStudy.carriedBy === "") {
+                  g.x = caseStudy.x + 20
+                  g.y = caseStudy.y + 20
+                  g.visible = true
+                } else {
+                  g.visible = false
+                }
+              }
             }
 
             // ************
@@ -650,14 +694,12 @@
 
       // ADD EXHIBITION CASE STUDIES
       caseStudies.then((caseStudies) => {
-        console.dir(caseStudies)
         caseStudiesExhibition = caseStudies.filter(
           (cs) => cs._type === "caseStudyExhibition"
         )
         caseStudiesEmergent = caseStudies.filter(
           (cs) => cs._type === "caseStudyEmergent"
         )
-        console.dir(caseStudiesExhibition)
 
         caseStudiesExhibition.forEach((cs, i) => {
           const spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
@@ -691,12 +733,12 @@
               gameContainer.style.cursor = "pointer"
               nameText.x = caseStudyLocation.x + 10
               nameText.y = caseStudyLocation.y - 60
-              caseStudyLayer.addChild(nameText)
+              exhibitionLayer.addChild(nameText)
             }
 
             const onLeave = (e) => {
               gameContainer.style.cursor = "default"
-              caseStudyLayer.removeChild(nameText)
+              exhibitionLayer.removeChild(nameText)
             }
 
             caseStudyLocation.on("mousedown", onDown)
@@ -704,15 +746,13 @@
             caseStudyLocation.on("mouseover", onEnter)
             caseStudyLocation.on("mouseout", onLeave)
 
-            caseStudyLayer.addChild(caseStudyLocation)
+            exhibitionLayer.addChild(caseStudyLocation)
           })
         })
       })
 
       // ADD AUDIO INSTALLATIONS
       audioInstallations.then((audioInstallations) => {
-        console.dir(audioInstallations)
-
         audioInstallations.forEach((ai, i) => {
           const spriteUrl = get(ai, "spriteLink.spriteJsonURL", "")
           const spriteId = "audioInstallation-" + ai._id
@@ -741,28 +781,6 @@
               audioInstallationLocation.height / 2
             audioInstallationLocation.title = ai.title
             audioInstallationLocation.interactive = false
-
-            // const onDown = (e) => {
-            //   navigate("/case-studies/" + get(si, "slug.current", false))
-            //   e.stopPropagation()
-            // }
-
-            // const onEnter = (e) => {
-            // gameContainer.style.cursor = "pointer"
-            // nameText.x = caseStudyLocation.x + 10
-            // nameText.y = caseStudyLocation.y - 60
-            // caseStudyLayer.addChild(nameText)
-            // }
-
-            // const onLeave = (e) => {
-            //   gameContainer.style.cursor = "default"
-            //   caseStudyLayer.removeChild(nameText)
-            // }
-
-            // caseStudyLocation.on("mousedown", onDown)
-            // caseStudyLocation.on("touchstart", onDown)
-            // caseStudyLocation.on("mouseover", onEnter)
-            // caseStudyLocation.on("mouseout", onLeave)
 
             audioInstallationLayer.addChild(audioInstallationLocation)
           })
@@ -827,12 +845,14 @@
 
     // Create and add layers
     mapLayer = new PIXI.Container()
-    caseStudyLayer = new PIXI.Container()
+    emergentLayer = new PIXI.Container()
+    exhibitionLayer = new PIXI.Container()
     audioInstallationLayer = new PIXI.Container()
     playerLayer = new PIXI.Container()
     landMarkLayer = new PIXI.Container()
     viewport.addChild(mapLayer)
-    viewport.addChild(caseStudyLayer)
+    viewport.addChild(exhibitionLayer)
+    viewport.addChild(emergentLayer)
     viewport.addChild(audioInstallationLayer)
     viewport.addChild(playerLayer)
     viewport.addChild(landMarkLayer)
@@ -857,9 +877,9 @@
     // Give the local user a UUID
     localUserUUID.set(nanoid())
 
-    console.log("CHECKING URL PARAMS ====>")
-    console.log("section", section)
-    console.log("slug", slug)
+    // console.log("CHECKING URL PARAMS ====>")
+    // console.log("section", section)
+    // console.log("slug", slug)
 
     if (section === "login") {
       console.log("LOGIN")
@@ -924,7 +944,7 @@
     border-radius: 10px;
   }
 
-  .audiochat-box {
+  .inventory {
     position: fixed;
     width: auto;
     background: $COLOR_LIGHT;
@@ -932,6 +952,66 @@
     line-height: 2em;
     text-align: center;
     bottom: 15px;
+    left: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: $FONT_SIZE_BASE;
+    cursor: pointer;
+
+    padding-left: 15px;
+    padding-right: 15px;
+
+    user-select: none;
+
+    @include screen-size("small") {
+      top: unset;
+      bottom: 20px;
+      display: none;
+    }
+
+    .color-code {
+      height: 0.5em;
+      width: 0.5em;
+      border-radius: 0.5em;
+      margin-right: 1em;
+      float: left;
+      background: $COLOR_LIGHT;
+      position: relative;
+      top: 4px;
+    }
+
+    .message {
+      // padding-top: 3px;
+      // padding-bottom: 3px;
+      margin-right: 10px;
+    }
+
+    .button {
+      // padding-top: 3px;
+      // padding-bottom: 3px;
+      padding-left: 15px;
+      padding-right: 15px;
+      border: 1px solid $COLOR_MID_2;
+      color: $COLOR_MID_2;
+      border-radius: 10px;
+      text-align: center;
+
+      &:hover {
+        border: 1px solid $COLOR_DARK;
+        color: $COLOR_DARK;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .audiochat-box {
+    position: fixed;
+    width: auto;
+    background: $COLOR_LIGHT;
+    height: auto;
+    line-height: 2em;
+    text-align: center;
+    top: 15px;
     left: 15px;
     padding: 10px;
     border-radius: 4px;
@@ -1395,6 +1475,22 @@
   </div>
 {/if}
 
+<!-- INVENTORY -->
+{#if localPlayers && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].carrying}
+  <div
+    class="inventory"
+    transition:fly={{ y: 100, duration: 300 }}
+    on:click={(e) => {
+      dropCaseStudy(localPlayers[$localUserSessionID].carrying)
+    }}>
+    <div>
+      Carrying <span
+        class="color-icon" /><strong>{localPlayers[$localUserSessionID].carrying}</strong>.
+      Press SPACE to <span> drop</span>.
+    </div>
+  </div>
+{/if}
+
 <!-- AUDIOCHAT BOX  -->
 {#if !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
   <div class="audiochat-box">
@@ -1450,3 +1546,11 @@
 {#if UI.state == STATE.ERROR}
   <Error message={UI.errorMessage} />
 {/if}
+
+<svelte:window
+  on:keyup={(e) => {
+    console.log(e.keyCode)
+    if (e.keyCode == 32 && localPlayers[$localUserSessionID].carrying && localPlayers[$localUserSessionID].carrying.length > 0) {
+      dropCaseStudy()
+    }
+  }} />
