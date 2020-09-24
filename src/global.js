@@ -21,7 +21,7 @@ export const QUERY = {
   EVENTS: "*[_type == 'event']{..., participants[]->{slug,name}}",
   USERS: "*[_type == 'participant']",
   CASE_STUDIES:
-    "*[_type == 'caseStudy']{..., authors[]->{slug,name}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
+    "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., authors[]->{slug,name}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   LAND_MARKS:
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
 }

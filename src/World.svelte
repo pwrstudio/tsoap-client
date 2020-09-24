@@ -596,7 +596,7 @@
               const graphics = new PIXI.Graphics()
               graphics.beginFill(caseStudy.tint)
               graphics.alpha = caseStudy.carriedBy === "" ? 1 : 0
-              graphics.drawRect(caseStudy.x, caseStudy.y, 30, 30)
+              graphics.drawRect(caseStudy.x, caseStudy.y, 10, 10)
               graphics.endFill()
               graphics.interactive = true
 

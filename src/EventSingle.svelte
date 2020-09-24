@@ -43,7 +43,7 @@
   }
 </style>
 
-<div class="event" in:fade>
+<div class="event" in:fade use:links>
   <!-- TITLE -->
   <div class="title">{event.title}</div>
 

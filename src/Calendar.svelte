@@ -76,6 +76,7 @@
           }
 
           .participants {
+            pointer-events: none;
           }
         }
       }
