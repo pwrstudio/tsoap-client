@@ -60,8 +60,24 @@
   export let authenticate = false
   export let sso = false
   export let sig = false
-  export let section = false
-  export let slug = false
+  export let params = false
+  // export let slug = false
+
+  let section = false
+  let slug = false
+
+  $: {
+    // Split URL parameters
+    // console.log("* * * * * ")
+    // console.log("PARAMS UPDATED")
+    // console.log("– params", params)
+    const args = get(params, "[*]", "").split("/")
+    section = args[0] && args[0].length > 0 ? args[0] : "seed"
+    slug = args[1] && args[1].length > 0 ? args[1] : false
+    // console.log("– section", section)
+    // console.log("– slug", slug)
+    // console.log("* * * * * ")
+  }
 
   // GLOBAL
   import {
