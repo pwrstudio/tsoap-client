@@ -12,6 +12,18 @@ export const KEYBOARD = {
 
 export const AREA = { YELLOW: 2, RED: 3, GREEN: 4, BLUE: 5 }
 export const COLORMAP = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"]
+export const TINTMAP = [
+  0x111111,
+  0x333333,
+  0x666666,
+  0x777777,
+  0x888888,
+  0x999999,
+  0xaaaaaa,
+  0xcccccc,
+  0xdddddd,
+  0xffffff,
+]
 
 export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
 

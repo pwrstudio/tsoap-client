@@ -88,6 +88,7 @@
     KEYBOARD,
     MAP,
     COLORMAP,
+    TINTMAP,
     QUERY,
     AREA,
     TEXT_STYLE,
@@ -108,9 +109,9 @@
   let caseStudiesExhibition = []
   let caseStudiesEmergent = []
 
-  // users.then((users) => {
-  //   console.dir(users)
-  // })
+  users.then((users) => {
+    console.dir(users)
+  })
 
   // DOM REFERENCES
   let gameContainer = {}
@@ -355,8 +356,11 @@
               )
               sprite.name = ms
               sprite.visible = ms === "rest" ? true : false
-              sprite.height = 60
-              sprite.width = 60
+              sprite.height = 80
+              sprite.width = 80
+              // if (playerOptions.npc) {
+              //   sprite.tint = 0xfc9c42
+              // }
               sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1
               sprite.play()
               return sprite
@@ -397,7 +401,9 @@
           }
 
           const onDown = (e) => {
-            e.stopPropagation()
+            if (player.uuid != $localUserUUID) {
+              e.stopPropagation()
+            }
           }
 
           const onEnter = () => {
@@ -422,6 +428,7 @@
           if (player.isSelf) {
             viewport.follow(player.avatar)
             localUserSessionID.set(player.id)
+            setUIState(STATE.READY)
           }
 
           return player
@@ -461,8 +468,6 @@
               history.replaceState({}, "CONNECTED", "/")
             }
 
-            setUIState(STATE.READY)
-
             // ******
             // PLAYER
             // ******
@@ -486,6 +491,8 @@
 
             // PLAYER: ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
+              console.log("ADD PLAYER")
+              console.dir(player)
               localPlayers[sessionId] = createPlayer(player, sessionId)
             }
 
@@ -664,10 +671,15 @@
                 (cs) => cs.uuid === caseStudy.uuid
               )
               if (g) {
-                console.dir(g)
+                console.dir(g.children[0])
+                console.log(caseStudy.age)
+                console.log(TINTMAP[caseStudy.age - 1])
+                // console.log(0xffffff * (caseStudy.age / 10).toString(16))
+                g.children[0].tint = TINTMAP[caseStudy.age - 1]
+                console.log(g.children[0].tint)
                 if (caseStudy.carriedBy === "") {
-                  g.x = caseStudy.x + getRandomInt(-40, 40)
-                  g.y = caseStudy.y + getRandomInt(-40, 40)
+                  g.x = caseStudy.x
+                  g.y = caseStudy.y
                   g.visible = true
                 } else {
                   g.visible = false
