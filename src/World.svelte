@@ -574,7 +574,7 @@
             }
 
             // ************
-            // CASE STUUDIES
+            // CASE STUDIES
             // ************
 
             dropCaseStudy = () => {
@@ -593,6 +593,8 @@
               container.y = caseStudy.y
               container.visible = caseStudy.carriedBy === "" ? true : false
               container.uuid = caseStudy.uuid
+              container.caseStudyId = caseStudy.caseStudyId
+              container.name = caseStudy.name
               container.interactive = true
               container.tint = caseStudy.tint
 
@@ -609,6 +611,7 @@
                   !localPlayers[$localUserSessionID].carrying ||
                   localPlayers[$localUserSessionID].carrying == ""
                 ) {
+                  gameContainer.style.cursor = "default"
                   gameRoom.send("pickUpCaseStudy", {
                     uuid: caseStudy.uuid,
                   })
@@ -659,8 +662,8 @@
               if (g) {
                 console.dir(g)
                 if (caseStudy.carriedBy === "") {
-                  g.x = caseStudy.x + 20
-                  g.y = caseStudy.y + 20
+                  g.x = caseStudy.x + getRandomInt(-40, 40)
+                  g.y = caseStudy.y + getRandomInt(-40, 40)
                   g.visible = true
                 } else {
                   g.visible = false
@@ -1093,6 +1096,9 @@
     &:hover {
       background: $COLOR_MID_1;
     }
+    @include screen-size("small") {
+      display: none;
+    }
   }
 
   .sidebar {
@@ -1107,6 +1113,10 @@
     transform: translateX(0);
     transition: transform 0.5s $transition;
 
+    @include screen-size("small") {
+      width: 100vw;
+    }
+
     // HEIGHTS:
     // Minimap => 200px
     // Calendar =>
@@ -1119,6 +1129,10 @@
       display: flex;
       justify-content: center;
       align-items: center;
+
+      @include screen-size("small") {
+        display: none;
+      }
 
       // @include screen-size("short") {
       //   height: 150px;
@@ -1162,6 +1176,14 @@
       padding: 10px;
       user-select: none;
 
+      @include screen-size("small") {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        z-index: 1000;
+      }
+
       .menu-item {
         padding-right: 20px;
         float: left;
@@ -1200,15 +1222,14 @@
         //   height: calc(50% - 65px);
         // }
       }
+      @include screen-size("small") {
+        display: none;
+      }
     }
 
     &.hidden {
       transform: translateX(360px);
       cursor: pointer;
-    }
-
-    @include screen-size("small") {
-      display: none;
     }
   }
 
@@ -1219,7 +1240,7 @@
     width: 500px;
     height: calc(100vh - 330px);
     padding: 10px;
-    background: $COLOR_MID_1;
+    background: $COLOR_LIGHT;
     z-index: 100;
     overflow-y: auto;
     font-size: $FONT_SIZE_BASE;
@@ -1230,7 +1251,13 @@
     @include hide-scroll;
 
     @include screen-size("small") {
-      display: none;
+      position: fixed;
+      bottom: unset;
+      top: 0px;
+      right: unset;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
     }
 
     .close {
@@ -1239,7 +1266,7 @@
       top: 0px;
       right: 10px;
       font-size: 48px;
-      color: black;
+      color: $COLOR_MID_2;
       cursor: pointer;
       text-decoration: none;
 
@@ -1250,7 +1277,7 @@
   }
 
   .active-content-slot {
-    background: $COLOR_MID_1;
+    background: $COLOR_LIGHT;
     z-index: 100;
     font-size: $FONT_SIZE_BASE;
     color: $COLOR_DARK;
@@ -1466,14 +1493,14 @@
 {/if} -->
 
 <!-- PROXIMITY -->
-{#if playersInProximity.length > 0}
+<!-- {#if playersInProximity.length > 0}
   <div class="proximity" transition:fly={{ y: -200, duration: 300 }}>
     <div><strong>Players nearby</strong></div>
     {#each playersInProximity as player}
       <div>{player.name}</div>
     {/each}
   </div>
-{/if}
+{/if} -->
 
 <!-- INVENTORY -->
 {#if localPlayers && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].carrying}
@@ -1485,8 +1512,8 @@
     }}>
     <div>
       Carrying <span
-        class="color-icon" /><strong>{localPlayers[$localUserSessionID].carrying}</strong>.
-      Press SPACE to <span> drop</span>.
+        class="color-icon" /><strong>{emergentLayer.children.find((cs) => cs.uuid === localPlayers[$localUserSessionID].carrying).name}</strong>.
+      Press <span class="button">SPACE</span> to <span> drop</span>.
     </div>
   </div>
 {/if}

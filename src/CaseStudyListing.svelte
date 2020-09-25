@@ -17,10 +17,12 @@
   @import "./variables.scss";
 
   .case-study-listing {
-    padding: 10px;
+    display: inline-block;
 
-    .title {
+    .header {
+      margin-bottom: 10px;
       font-weight: bold;
+      margin-bottom: 20px;
     }
 
     .image {
@@ -34,15 +36,17 @@
     }
 
     .item {
-      width: 100px;
-      height: 150px;
-      padding: 5px;
+      width: 140px;
       background: $COLOR_LIGHT;
-      margin: 10px;
-      float: left;
+      margin-right: 10px;
       cursor: pointer;
       text-decoration: none;
-      display: block;
+      display: inline-block;
+      color: $COLOR_DARK;
+
+      .title {
+        margin-bottom: 10px;
+      }
 
       img,
       video {
@@ -53,7 +57,10 @@
       }
 
       &:hover {
-        background: $COLOR_MID_2;
+        text-decoration: underline;
+        img {
+          opacity: 0.8;
+        }
       }
     }
   }
@@ -61,7 +68,7 @@
 
 <div class="case-study-listing">
   <!-- TITLE -->
-  <div class="title">Case studies</div>
+  <div class="header">Case studies</div>
 
   {#each caseStudies as cs, index (cs._id)}
     <a href={'/case-studies/' + get(cs, 'slug.current', '')} class="item">
@@ -69,7 +76,7 @@
       {#if get(cs, 'mainImage.asset', false)}
         <img
           src={urlFor(cs.mainImage.asset)
-            .width(100)
+            .width(140)
             .height(100)
             .quality(100)
             .auto('format')
