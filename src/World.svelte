@@ -261,6 +261,9 @@
             }
           }
         } else {
+          if (key === $localUserSessionID) {
+            hideTarget()
+          }
           localPlayers[key].avatar.setAnimation("rest")
           delete moveQ[key]
           // checkPlayerProximity()
@@ -273,16 +276,16 @@
 
   const showTarget = (x, y) => {
     const graphics = new PIXI.Graphics()
-    graphics.beginFill(0xff0000)
-    graphics.alpha = 0.8
+    graphics.beginFill(0xffffff)
+    graphics.alpha = 0.5
     graphics.drawCircle(x, y, 10)
     graphics.endFill()
-    viewport.addChild(graphics)
+    mapLayer.addChild(graphics)
     targetGraphics = graphics
   }
 
   const hideTarget = () => {
-    viewport.removeChild(targetGraphics)
+    mapLayer.removeChild(targetGraphics)
     targetGraphics = {}
   }
 
@@ -493,7 +496,7 @@
 
             // PLAYER: ILLEGAL MOVE
             gameRoom.onMessage("illegalMove", (message) => {
-              // hideTarget()
+              hideTarget()
             })
 
             // PLAYER: STATE CHANGE
@@ -507,25 +510,26 @@
               }
               if (player.path.waypoints.length > 0) {
                 moveQ[sessionId] = player.path.waypoints
-              } else {
-                // TELEPORT
-                localPlayers[sessionId].area = player.area
-                localPlayers[sessionId].avatar.x = player.x
-                localPlayers[sessionId].avatar.y = player.y
-                checkPlayerProximity()
               }
+              // else {
+              //   // TELEPORT
+              //   localPlayers[sessionId].area = player.area
+              //   localPlayers[sessionId].avatar.x = player.x
+              //   localPlayers[sessionId].avatar.y = player.y
+              //   checkPlayerProximity()
+              // }
             }
 
             // PLAYER: CLICK / TAP
             viewport.on("clicked", (e) => {
-              // hideTarget()
+              hideTarget()
               gameRoom.send("go", {
                 x: Math.round(e.world.x),
                 y: Math.round(e.world.y),
                 originX: localPlayers[$localUserSessionID].avatar.x,
                 originY: localPlayers[$localUserSessionID].avatar.y,
               })
-              // showTarget(Math.round(e.world.x), Math.round(e.world.y))
+              showTarget(Math.round(e.world.x), Math.round(e.world.y))
             })
 
             // PLAYER: TELEPORT
@@ -600,7 +604,7 @@
 
               const graphics = new PIXI.Graphics()
               graphics.beginFill(caseStudy.tint)
-              graphics.drawRect(0, 0, 15, 15)
+              graphics.drawRect(0, 0, 15, 20)
               graphics.endFill()
 
               container.addChild(graphics)
