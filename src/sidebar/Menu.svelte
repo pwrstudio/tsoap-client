@@ -55,7 +55,7 @@
   <div>
     <a href="/case-studies" class="menu-item">Case-Studies</a>
     <a href="/pages/about" class="menu-item">About</a>
-    <div class="menu-item">Help</div>
+    <a href="/pages/help" class="menu-item">Help</a>
   </div>
 
   <a href="/login" class="menu-item login">Login</a>

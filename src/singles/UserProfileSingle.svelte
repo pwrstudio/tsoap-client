@@ -14,7 +14,7 @@
   import { QUERY } from "../global.js"
 
   // COMPONENTS
-  import Calendar from "../sidebar/Calendar.svelte"
+  // import Calendar from "../sidebar/Calendar.svelte"
 
   // *** PROPS
   export let user = {}

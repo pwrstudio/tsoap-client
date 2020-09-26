@@ -1,7 +1,7 @@
 <script>
   // # # # # # # # # # # # # #
   //
-  //  Calendar
+  //  Case Study List
   //
   // # # # # # # # # # # # # #
 
@@ -13,10 +13,10 @@
   import { formattedDate } from "../global.js"
 
   // COMPONENTS
-  import ParticipantsList from "../ParticipantsList.svelte"
+  import ParticipantsList from "./ParticipantsList.svelte"
 
   // *** PROPS
-  export let events = []
+  export let caseStudies = []
   export let related = false
 </script>
 
@@ -25,7 +25,7 @@
 
   $ITEM_HEIGHT: 60px;
 
-  .calendar-container {
+  .case-study-container {
     position: relative;
     height: 100%;
     color: $COLOR_DARK;
@@ -34,7 +34,7 @@
     padding-top: 40px;
     padding-bottom: 40px;
 
-    .calendar-item {
+    .case-study-item {
       padding: 0px 10px;
       padding-top: 10px;
       width: 100%;
@@ -128,9 +128,9 @@
   }
 </style>
 
-<div class="calendar-container">
+<div class="case-study-container">
   <!-- HEADER -->
-  <div class="calendar-item header" class:related>
+  <div class="case-study-item header" class:related>
     <div class="inner">
       <div class="row">
         <div>{related ? 'Related Events' : 'Events'}</div>
@@ -142,7 +142,7 @@
   <!-- EVENTS -->
   {#each events as event, index (event._id)}
     <a
-      class="calendar-item"
+      class="case-study-item"
       class:related
       in:fade={{ delay: 100 * index }}
       href={'/events/' + get(event, 'slug.current', '')}>
@@ -167,7 +167,7 @@
 
   <!-- FOOTER -->
   {#if !related}
-    <div class="calendar-item footer">
+    <div class="case-study-item footer">
       <div class="inner">
         <div class="row">
           <div class="title">Mississippi exhibition</div>

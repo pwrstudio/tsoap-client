@@ -68,13 +68,12 @@
   <div class="divider" />
 
   <!-- TEXT -->
-  <div class="text">
-    {#if Array.isArray(get(page, 'content.content', false))}
+  {#if Array.isArray(get(page, 'content.content', false))}
+    <div class="text">
       {@html renderBlockText(page.content.content)}
-    {/if}
-  </div>
-
-  <div class="divider" />
+    </div>
+    <div class="divider" />
+  {/if}
 
   <!-- RELATED pageS -->
   <!-- <div class="related-case-studies"> -->

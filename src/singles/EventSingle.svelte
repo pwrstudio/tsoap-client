@@ -12,7 +12,7 @@
   import { links } from "svelte-routing"
 
   // COMPONENTS
-  import ParticipantsList from "../ParticipantsList.svelte"
+  import ParticipantsList from "../lists/ParticipantsList.svelte"
 
   // GLOBAL
   import { formattedDate } from "../global.js"

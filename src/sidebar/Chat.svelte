@@ -22,7 +22,6 @@
   // PROPS
   export let chatMessages = []
   export let currentArea = 4
-  export let roomName = ""
 
   $: {
     if (chatMessages) {

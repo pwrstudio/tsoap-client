@@ -14,8 +14,8 @@
   import { FORMATMAP, QUERY } from "../global.js"
 
   // COMPONENTS
-  import ParticipantsList from "../ParticipantsList.svelte"
-  import Calendar from "../sidebar/Calendar.svelte"
+  import ParticipantsList from "../lists/ParticipantsList.svelte"
+  import EventList from "../lists/EventList.svelte"
 
   // *** PROPS
   export let caseStudy = {}
@@ -187,7 +187,7 @@
   <div class="related-events">
     <!-- {await relatedEvents then relatedEvents} -->
     {#if Array.isArray(get(caseStudy, 'connectedEvents', false))}
-      <Calendar events={caseStudy.connectedEvents} related={true} />
+      <EventList events={caseStudy.connectedEvents} related={true} />
     {/if}
     <!-- {/await} -->
   </div>

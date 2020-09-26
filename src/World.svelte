@@ -22,9 +22,10 @@
   // COMPONENTS
   // sidebar
   import Chat from "./sidebar/Chat.svelte"
-  import Calendar from "./sidebar/Calendar.svelte"
   import MiniMap from "./sidebar/MiniMap.svelte"
   import Menu from "./sidebar/Menu.svelte"
+  // lists
+  import EventList from "./lists/EventList.svelte"
   // singles
   import CaseStudySingle from "./singles/CaseStudySingle.svelte"
   import PageSingle from "./singles/PageSingle.svelte"
@@ -1292,39 +1293,19 @@
       <!-- CALENDAR -->
       <div class="calendar">
         {#await events then events}
-          <Calendar {events} />
+          <EventList {events} />
         {/await}
       </div>
       <!-- CHAT -->
       <div class="chat">
-        {#if localPlayers[$localUserSessionID].area === AREA.GREEN}
-          <Chat
-            chatMessages={chatMessages.filter((m) => m.area === AREA.GREEN)}
-            currentArea={AREA.GREEN}
-            roomName="green"
-            on:submit={submitChat} />
-        {/if}
-        {#if localPlayers[$localUserSessionID].area === AREA.YELLOW}
-          <Chat
-            chatMessages={chatMessages.filter((m) => m.area === AREA.YELLOW)}
-            currentArea={AREA.YELLOW}
-            roomName="yellow"
-            on:submit={submitChat} />
-        {/if}
-        {#if localPlayers[$localUserSessionID].area === AREA.RED}
-          <Chat
-            chatMessages={chatMessages.filter((m) => m.area === AREA.RED)}
-            currentArea={AREA.RED}
-            roomName="red"
-            on:submit={submitChat} />
-        {/if}
-        {#if localPlayers[$localUserSessionID].area === AREA.BLUE}
-          <Chat
-            chatMessages={chatMessages.filter((m) => m.area === AREA.BLUE)}
-            currentArea={AREA.BLUE}
-            roomName="blue"
-            on:submit={submitChat} />
-        {/if}
+        {#each Object.values(AREA) as A}
+          {#if localPlayers[$localUserSessionID].area === A}
+            <Chat
+              chatMessages={chatMessages.filter((m) => m.area === A)}
+              currentArea={A}
+              on:submit={submitChat} />
+          {/if}
+        {/each}
       </div>
     </div>
     <!-- MENUBAR -->
