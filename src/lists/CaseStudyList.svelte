@@ -26,13 +26,10 @@
   $ITEM_HEIGHT: 60px;
 
   .case-study-container {
-    position: relative;
     height: 100%;
     color: $COLOR_DARK;
     font-size: $FONT_SIZE_BASE;
     background: $COLOR_LIGHT;
-    padding-top: 40px;
-    padding-bottom: 40px;
 
     .case-study-item {
       padding: 0px 10px;
@@ -93,31 +90,16 @@
         background: $COLOR_MID_1;
       }
 
-      &.footer {
-        height: 40px;
-        border-top: 1px solid $COLOR_MID_1;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        &:hover {
-          background: unset;
-        }
-      }
-
       &.header {
-        position: absolute;
-        height: 40px;
-        border-bottom: 1px solid $COLOR_MID_1;
-        top: 0;
-        left: 0;
+        // position: absolute;
+        // height: 40px;
+        border-bottom: 1px dotted $COLOR_MID_1;
+        // top: 0;
+        // left: 0;
 
         .archive-link {
           color: $COLOR_MID_2;
           text-decoration: underline;
-        }
-
-        &.related {
-          border-bottom: 1px dotted $COLOR_MID_1;
         }
 
         &:hover {
@@ -133,50 +115,34 @@
   <div class="case-study-item header" class:related>
     <div class="inner">
       <div class="row">
-        <div>{related ? 'Related Events' : 'Events'}</div>
-        <div class="archive-link">{related ? 'View All' : 'Event Archive'}</div>
+        <div>{related ? 'Connected Case Studies' : 'Case Studies'}</div>
       </div>
     </div>
   </div>
 
-  <!-- EVENTS -->
-  {#each events as event, index (event._id)}
+  <!-- CASE STUDIES -->
+  {#each caseStudies as caseStudy, index (caseStudy._id)}
     <a
       class="case-study-item"
       class:related
       in:fade={{ delay: 100 * index }}
-      href={'/events/' + get(event, 'slug.current', '')}>
+      href={'/case-studies/' + get(caseStudy, 'slug.current', '')}>
       <div class="inner">
         <div class="row">
-          <div class="title">{event.title}</div>
+          <div class="title">{caseStudy.title}</div>
           <div class="elips">
             .........................................................
           </div>
-          <div class="date">{formattedDate(event.startDate)}</div>
+          <div class="date">Category</div>
         </div>
         <div class="row">
           <div class="participants">
-            {#if get(event, 'participants', false) && Array.isArray(event.participants)}
-              <ParticipantsList participants={event.participants} />
+            {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
+              <ParticipantsList participants={caseStudy.participants} />
             {/if}
           </div>
         </div>
       </div>
     </a>
   {/each}
-
-  <!-- FOOTER -->
-  {#if !related}
-    <div class="case-study-item footer">
-      <div class="inner">
-        <div class="row">
-          <div class="title">Mississippi exhibition</div>
-          <div class="elips">
-            .........................................................
-          </div>
-          <div class="date">Ongoing</div>
-        </div>
-      </div>
-    </div>
-  {/if}
 </div>

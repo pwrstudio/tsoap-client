@@ -26,13 +26,12 @@
   import Menu from "./sidebar/Menu.svelte"
   // lists
   import EventList from "./lists/EventList.svelte"
+  import CaseStudyList from "./lists/CaseStudyList.svelte"
   // singles
   import CaseStudySingle from "./singles/CaseStudySingle.svelte"
   import PageSingle from "./singles/PageSingle.svelte"
   import UserProfileSingle from "./singles/UserProfileSingle.svelte"
   import EventSingle from "./singles/EventSingle.svelte"
-  // listings
-  import CaseStudyListing from "./listings/CaseStudyListing.svelte"
   // overlays
   import Login from "./overlays/Login.svelte"
   import Banned from "./overlays/Banned.svelte"
@@ -115,10 +114,6 @@
 
   let caseStudiesExhibition = []
   let caseStudiesEmergent = []
-
-  users.then((users) => {
-    console.dir(users)
-  })
 
   // DOM REFERENCES
   let gameContainer = {}
@@ -232,7 +227,7 @@
         // OldRange = 250
         // NewRange = 1
         // NewValue = (dist - 50) / 250
-        console.log(a.title, 1 - (dist - 50) / 400)
+        // console.log(a.title, 1 - (dist - 50) / 400)
         a.audio.volume(1 - (dist - 50) / 400)
       }
 
@@ -506,8 +501,8 @@
 
             // PLAYER: ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
-              console.log("ADD PLAYER")
-              console.dir(player)
+              // console.log("ADD PLAYER")
+              // console.dir(player)
               localPlayers[sessionId] = createPlayer(player, sessionId)
             }
 
@@ -523,12 +518,12 @@
 
             // PLAYER: STATE CHANGE
             gameRoom.state.players.onChange = (player, sessionId) => {
-              console.log("player state change")
-              console.dir(player)
+              // console.log("player state change")
+              // console.dir(player)
               if ($localUserSessionID === sessionId) {
-                console.log("is self")
+                // console.log("is self")
                 localPlayers[sessionId].carrying = player.carrying
-                console.log(localPlayers[sessionId].carrying)
+                // console.log(localPlayers[sessionId].carrying)
               }
               if (player.path.waypoints.length > 0) {
                 moveQ[sessionId] = player.path.waypoints
@@ -638,7 +633,7 @@
               container.addChild(graphics)
 
               const onDown = (e) => {
-                console.dir(localPlayers[$localUserSessionID].carrying)
+                // console.dir(localPlayers[$localUserSessionID].carrying)
 
                 // Drop if carrying
                 if (
@@ -692,13 +687,13 @@
 
             // CASE STUDY: REMOVE
             gameRoom.state.caseStudies.onRemove = (caseStudy, sessionId) => {
-              console.log("%_%_%_ Case study removed")
+              // console.log("%_%_%_ Case study removed")
               console.dir(caseStudy)
             }
 
             // CASE STUDY: STATE CHANGE
             gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
-              console.log("%_%_%_ Case study state change", caseStudy)
+              // console.log("%_%_%_ Case study state change", caseStudy)
               let g = emergentLayer.children.find(
                 (cs) => cs.uuid === caseStudy.uuid
               )
@@ -961,12 +956,6 @@
       bottom: 20px;
     }
 
-    &.waypoint {
-      top: unset;
-      bottom: 50px;
-      right: 410px;
-    }
-
     &.tiny {
       border-radius: 5px;
       opacity: 0.7;
@@ -984,8 +973,8 @@
     background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
-    top: 15px;
-    left: 15px;
+    top: 10px;
+    left: 10px;
     padding: 20px;
     border-radius: 10px;
   }
@@ -997,8 +986,8 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    bottom: 15px;
-    left: 15px;
+    bottom: 10px;
+    left: 10px;
     padding: 10px;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
@@ -1053,8 +1042,8 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    top: 15px;
-    left: 15px;
+    top: 10px;
+    left: 10px;
     padding: 10px;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
@@ -1339,7 +1328,10 @@
 <div class="game" class:expanded={sidebarHidden} bind:this={gameContainer} />
 
 {#if ['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}
-  <div class="passive-content-slot" use:links transition:fly={{ y: 200 }}>
+  <div
+    class="passive-content-slot"
+    use:links
+    transition:fly={{ y: 200, duration: 400, easing: quartOut }}>
     <a class="close" href="/">×</a>
     <!-- CASE STUDIES -->
     {#await caseStudies then caseStudies}
@@ -1349,8 +1341,8 @@
           <CaseStudySingle
             caseStudy={caseStudies.find((cs) => cs.slug.current === slug)} />
         {:else}
-          <!-- LISTING CASE STUDY -->
-          <CaseStudyListing {caseStudies} />
+          <!-- LIST CASE STUDY -->
+          <CaseStudyList {caseStudies} />
         {/if}
       {/if}
     {/await}
@@ -1469,7 +1461,6 @@
 
 <svelte:window
   on:keyup={(e) => {
-    console.log(e.keyCode)
     if (e.keyCode == 32 && localPlayers[$localUserSessionID].carrying && localPlayers[$localUserSessionID].carrying.length > 0) {
       dropCaseStudy()
     }

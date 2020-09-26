@@ -78,7 +78,7 @@
   <!-- BIOGRAPHY -->
   {#if Array.isArray(get(user, 'biography.content', false))}
     <div class="text">
-      {@html renderBlockText(user.content.content)}
+      {@html renderBlockText(user.biography.content)}
     </div>
     <div class="divider" />
   {/if}

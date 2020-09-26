@@ -8,19 +8,28 @@
   // *** IMPORTS
   import get from "lodash/get"
   import { fade } from "svelte/transition"
-  import { urlFor, renderBlockText } from "../sanity.js"
+  import { urlFor, renderBlockText, loadData } from "../sanity.js"
   import { links } from "svelte-routing"
 
   // COMPONENTS
   import ParticipantsList from "../lists/ParticipantsList.svelte"
+  import CaseStudyList from "../lists/CaseStudyList.svelte"
 
   // GLOBAL
-  import { formattedDate } from "../global.js"
+  import { formattedDate, QUERY } from "../global.js"
 
   // *** PROPS
   export let event = {}
 
-  console.dir(event)
+  console.dir(event._id)
+
+  const connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
+    id: event._id,
+  })
+
+  connectedCaseStudies.then((connectedCaseStudies) => {
+    console.dir(connectedCaseStudies)
+  })
 </script>
 
 <style lang="scss">
@@ -78,7 +87,7 @@
       line-height: 1.4em;
     }
 
-    .related-events {
+    .connected-case-studies {
       padding: 15px;
     }
   }
@@ -107,6 +116,7 @@
   {#if get(event, 'mainImage.asset', false)}
     <div class="image">
       <img
+        alt={event.title}
         src={urlFor(event.mainImage.asset)
           .width(600)
           .quality(90)
@@ -126,10 +136,8 @@
 
   <!-- CONNCECTED CASE STUDIES -->
   <div class="connected-case-studies">
-    <!-- {await relatedEvents then relatedEvents} -->
-    <!-- {#if Array.isArray(get(event, 'connectedEvents', false))}
-      <Calendar events={event.connectedEvents} related={true} />
-    {/if} -->
-    <!-- {/await} -->
+    {#await connectedCaseStudies then connectedCaseStudies}
+      <CaseStudyList caseStudies={connectedCaseStudies} related={true} />
+    {/await}
   </div>
 </div>
