@@ -165,6 +165,8 @@
   let sidebarHidden = false
   let loggedIn = false
 
+  let intentToPickUp = false
+
   // UI DATA VARIABLES
   let miniImage = false
 
@@ -271,6 +273,11 @@
         } else {
           if (key === $localUserSessionID) {
             hideTarget()
+
+            if (intentToPickUp) {
+              pickUpCaseStudy(intentToPickUp)
+              intentToPickUp = false
+            }
           }
           localPlayers[key].avatar.setAnimation("rest")
           delete moveQ[key]
@@ -301,6 +308,7 @@
   let teleportTo = () => {}
   let submitChat = () => {}
   let dropCaseStudy = () => {}
+  let pickUpCaseStudy = () => {}
 
   const makeNewUser = (sso, sig) => {
     loggedIn = true
@@ -601,6 +609,12 @@
               })
             }
 
+            pickUpCaseStudy = (uuid) => {
+              gameRoom.send("pickUpCaseStudy", {
+                uuid: uuid,
+              })
+            }
+
             // CREATE CASE STUDY
             const createCaseStudy = (caseStudy) => {
               // const nameText = new PIXI.Text(caseStudy.name, TEXT_STYLE)
@@ -625,15 +639,27 @@
 
               const onDown = (e) => {
                 console.dir(localPlayers[$localUserSessionID].carrying)
+
+                // Drop if carrying
                 if (
-                  !localPlayers[$localUserSessionID].carrying ||
-                  localPlayers[$localUserSessionID].carrying == ""
+                  localPlayers[$localUserSessionID].carrying &&
+                  localPlayers[$localUserSessionID].carrying.length > 0
                 ) {
-                  gameContainer.style.cursor = "default"
-                  gameRoom.send("pickUpCaseStudy", {
-                    uuid: caseStudy.uuid,
+                  gameRoom.send("dropCaseStudy", {
+                    uuid: localPlayers[$localUserSessionID].carrying,
                   })
                 }
+                gameContainer.style.cursor = "default"
+                let g = emergentLayer.children.find(
+                  (cs) => cs.uuid === caseStudy.uuid
+                )
+                intentToPickUp = caseStudy.uuid
+                gameRoom.send("go", {
+                  x: g.x,
+                  y: g.y,
+                  originX: localPlayers[$localUserSessionID].avatar.x,
+                  originY: localPlayers[$localUserSessionID].avatar.y,
+                })
                 e.stopPropagation()
               }
 
@@ -666,24 +692,18 @@
 
             // CASE STUDY: REMOVE
             gameRoom.state.caseStudies.onRemove = (caseStudy, sessionId) => {
-              // console.log("%_%_%_ Case study removed")
+              console.log("%_%_%_ Case study removed")
               console.dir(caseStudy)
             }
 
             // CASE STUDY: STATE CHANGE
             gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
               console.log("%_%_%_ Case study state change", caseStudy)
-              console.log(caseStudy)
               let g = emergentLayer.children.find(
                 (cs) => cs.uuid === caseStudy.uuid
               )
               if (g) {
-                console.dir(g.children[0])
-                console.log(caseStudy.age)
-                console.log(TINTMAP[caseStudy.age - 1])
-                // console.log(0xffffff * (caseStudy.age / 10).toString(16))
                 g.children[0].tint = TINTMAP[caseStudy.age - 1]
-                console.log(g.children[0].tint)
                 if (caseStudy.carriedBy === "") {
                   g.x = caseStudy.x
                   g.y = caseStudy.y
