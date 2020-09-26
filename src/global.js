@@ -86,7 +86,7 @@ export const formattedDate = (start, end) => {
 export const formattedChatDate = (start) => {
   try {
     const startDate = start ? start : Date.now()
-    return format(startDate, "HH:mm:ss")
+    return format(startDate, "HH:mm EEE")
   } catch (err) {
     console.dir(err)
   }

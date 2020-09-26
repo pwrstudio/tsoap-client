@@ -1,42 +1,48 @@
 <script>
   // # # # # # # # # # # # # #
   //
-  //  BANNED OVERLAY
+  //  LOADING SCREEN
   //
   // # # # # # # # # # # # # #
+
+  let counter = 0
+
+  const inc = () => {
+    counter++
+    requestAnimationFrame(inc)
+  }
+
+  requestAnimationFrame(inc)
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import "../variables.scss";
 
-  .banned {
+  .loading-screen {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
+    background: black;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 100000;
 
     .box {
-      background: red;
+      font-family: $mono-stack;
       padding: 20px;
-      font-size: 16vw;
+      font-size: 48px;
       text-align: center;
       user-select: none;
-
-      .header {
-        font-weight: bold;
-      }
     }
   }
 </style>
 
-<div class="banned">
+<div class="loading-screen">
   <div class="box">
-    <div class="header">BANNED</div>
+    <div class="header">LOADING: {counter}</div>
   </div>
 </div>

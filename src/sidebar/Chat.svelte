@@ -17,7 +17,7 @@
   let messageContainerEl = {}
 
   // GLOBAL
-  import { COLORMAP } from "./global.js"
+  import { COLORMAP } from "../global.js"
 
   // PROPS
   export let chatMessages = []
@@ -48,7 +48,7 @@
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import "../variables.scss";
 
   .chat-container {
     position: relative;
@@ -57,51 +57,23 @@
 
   .header {
     font-size: $FONT_SIZE_SMALL;
+    padding-left: 10px;
+    padding-right: 10px;
     padding-top: 7px;
     padding-bottom: 7px;
     width: 100%;
     background: $COLOR_DARK;
     color: $COLOR_LIGHT;
     border-bottom: 1px solid $COLOR_LIGHT;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-
-    .color-code {
-      height: 0.8em;
-      width: 0.8em;
-      border-radius: 0.8em;
-      margin-right: 0.5em;
-      float: left;
-      position: relative;
-      top: 2px;
-
-      &.green {
-        background: #00ff00;
-      }
-      &.blue {
-        background: #0000ff;
-      }
-      &.red {
-        background: #ff0000;
-      }
-      &.yellow {
-        background: #ffff00;
-      }
-    }
+    text-align: left;
   }
 
   .message-container {
-    width: 100%;
     width: 100%;
     height: calc(100% - 60px);
     overflow-y: auto;
     padding-bottom: 20px;
     padding-top: 10px;
-
-    // @include screen-size("small") {
-    //   height: calc(100% - 40px);
-    // }
   }
 
   .input-container {
@@ -115,19 +87,15 @@
     padding-left: 7px;
     padding-right: 10px;
 
-    // @include screen-size("small") {
-    //   width: calc(100% - 20px);
-    // }
-
     input {
       font-family: $mono-stack;
-      font-size: $FONT_SIZE_BASE;
+      font-size: $FONT_SIZE_SMALL;
       float: left;
       width: calc(100% - 70px);
       display: block;
       margin-bottom: 10px;
       background: $COLOR_DARK;
-      border: 1px solid $COLOR_LIGHT;
+      border: 1px solid $COLOR_MID_2;
       color: $COLOR_LIGHT;
       border-radius: 10px;
       padding: 10px;
@@ -137,18 +105,18 @@
 
     button {
       font-family: $mono-stack;
-      font-size: $FONT_SIZE_BASE;
+      font-size: $FONT_SIZE_SMALL;
       width: 60px;
       float: right;
       display: block;
       background: $COLOR_DARK;
-      border: 1px solid $COLOR_LIGHT;
+      border: 1px solid $COLOR_MID_2;
       color: $COLOR_LIGHT;
       border-radius: 5px;
       outline: none;
       cursor: pointer;
       height: 40px;
-      line-height: 40px;
+      line-height: 34px;
 
       &:hover {
         background: $COLOR_LIGHT;
@@ -159,11 +127,7 @@
 </style>
 
 <div class="chat-container">
-  <div class="header">
-    <div>
-      <span class="color-code {roomName}" /> Current room: {COLORMAP[currentArea]}
-    </div>
-  </div>
+  <div class="header">You are in: {COLORMAP[currentArea]}</div>
   <div class="message-container" bind:this={messageContainerEl}>
     {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />

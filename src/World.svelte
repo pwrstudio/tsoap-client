@@ -13,23 +13,30 @@
   import { Viewport } from "pixi-viewport"
   import get from "lodash/get"
   import sample from "lodash/sample"
-  import { draw, fade, fly, scale } from "svelte/transition"
-  import { urlFor, loadData, renderBlockText } from "./sanity.js"
+  import { fade, fly, scale } from "svelte/transition"
+  import { urlFor, loadData } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
 
   // COMPONENTS
-  import Chat from "./Chat.svelte"
-  import Login from "./Login.svelte"
-  import CaseStudySingle from "./CaseStudySingle.svelte"
-  import PageSingle from "./PageSingle.svelte"
-  import UserProfileSingle from "./UserProfileSingle.svelte"
-  import CaseStudyListing from "./CaseStudyListing.svelte"
-  import Calendar from "./Calendar.svelte"
-  import EventSingle from "./EventSingle.svelte"
-  import Banned from "./Banned.svelte"
-  import LoadingScreen from "./LoadingScreen.svelte"
-  import Error from "./Error.svelte"
+  // sidebar
+  import Chat from "./sidebar/Chat.svelte"
+  import Calendar from "./sidebar/Calendar.svelte"
+  import MiniMap from "./sidebar/MiniMap.svelte"
+  import Menu from "./sidebar/Menu.svelte"
+  // singles
+  import CaseStudySingle from "./singles/CaseStudySingle.svelte"
+  import PageSingle from "./singles/PageSingle.svelte"
+  import UserProfileSingle from "./singles/UserProfileSingle.svelte"
+  import EventSingle from "./singles/EventSingle.svelte"
+  // listings
+  import CaseStudyListing from "./listings/CaseStudyListing.svelte"
+  // overlays
+  import Login from "./overlays/Login.svelte"
+  import Banned from "./overlays/Banned.svelte"
+  import LoadingScreen from "./overlays/LoadingScreen.svelte"
+  import Error from "./overlays/Error.svelte"
+  // ...
   import AudioChat from "./AudioChat.svelte"
 
   // Set the name of the hidden property and the change event for visibility
@@ -63,7 +70,6 @@
   export let sso = false
   export let sig = false
   export let params = false
-  // export let slug = false
 
   let section = false
   let slug = false
@@ -85,7 +91,6 @@
   import {
     nanoid,
     getRandomInt,
-    KEYBOARD,
     MAP,
     COLORMAP,
     TINTMAP,
@@ -1000,14 +1005,10 @@
     }
 
     .message {
-      // padding-top: 3px;
-      // padding-bottom: 3px;
       margin-right: 10px;
     }
 
     .button {
-      // padding-top: 3px;
-      // padding-bottom: 3px;
       padding-left: 15px;
       padding-right: 15px;
       border: 1px solid $COLOR_MID_2;
@@ -1049,14 +1050,10 @@
     }
 
     .message {
-      // padding-top: 3px;
-      // padding-bottom: 3px;
       margin-right: 10px;
     }
 
     .button {
-      // padding-top: 3px;
-      // padding-bottom: 3px;
       padding-left: 15px;
       padding-right: 15px;
       border: 1px solid $COLOR_MID_2;
@@ -1149,73 +1146,6 @@
       @include screen-size("small") {
         display: none;
       }
-
-      // @include screen-size("short") {
-      //   height: 150px;
-      // }
-
-      .map-container {
-        height: 200px;
-        width: 200px;
-        position: relative;
-
-        // @include screen-size("short") {
-        //   transform: scale(0.5);
-        // }
-
-        img {
-          height: 200px;
-          width: 200px;
-        }
-
-        .map-marker {
-          height: 10px;
-          width: 10px;
-          border-radius: 5px;
-          background: white;
-          position: absolute;
-          top: 0;
-          left: 0;
-          z-index: 100;
-        }
-      }
-    }
-
-    .menu {
-      height: 40px;
-      color: $COLOR_DARK;
-      font-size: $FONT_SIZE_BASE;
-      background: $COLOR_LIGHT;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px;
-      user-select: none;
-
-      @include screen-size("small") {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100vw;
-        z-index: 1000;
-      }
-
-      .menu-item {
-        padding-right: 20px;
-        float: left;
-        cursor: pointer;
-        color: $COLOR_DARK;
-        text-decoration: none;
-
-        &:hover {
-          text-decoration: underline;
-        }
-      }
-
-      .login {
-        padding-right: 0px;
-        justify-self: end;
-      }
     }
 
     .middle-section {
@@ -1225,22 +1155,21 @@
         height: 50%;
         overflow: hidden;
         @include hide-scroll;
-        // @include screen-size("short") {
-        //   height: calc(50% - 65px);
-        // }
       }
 
       .chat {
         background: $COLOR_DARK;
         height: 50%;
         @include hide-scroll;
-        // @include screen-size("short") {
-        //   height: calc(50% - 65px);
-        // }
       }
+
       @include screen-size("small") {
         display: none;
       }
+    }
+
+    .menu {
+      height: 40px;
     }
 
     &.hidden {
@@ -1362,29 +1291,17 @@
     }}>
     <!-- MINIMAP -->
     <div class="minimap">
-      <div class="map-container">
-        {#if miniImage}<img src={miniImage} />{/if}
-        {#if get(localPlayers[$localUserSessionID], 'avatar.y', false)}
-          <div
-            class="map-marker"
-            style={'top: ' + Math.round(localPlayers[$localUserSessionID].avatar.y / 20 - 5) + 'px; left: ' + Math.round(localPlayers[$localUserSessionID].avatar.x / 20 - 5) + 'px;'} />
-        {/if}
-      </div>
+      <MiniMap {miniImage} player={localPlayers[$localUserSessionID]} />
     </div>
     <div class="middle-section">
       <!-- CALENDAR -->
       <div class="calendar">
         {#await events then events}
-          <Calendar
-            {events}
-            on:goToEvent={(e) => {
-              setUIState(STATE.EVENT_SINGLE, e.detail.slug)
-            }} />
+          <Calendar {events} />
         {/await}
       </div>
       <!-- CHAT -->
       <div class="chat">
-        <!-- localPlayers[$localUserSessionID].area -->
         {#if localPlayers[$localUserSessionID].area === AREA.GREEN}
           <Chat
             chatMessages={chatMessages.filter((m) => m.area === AREA.GREEN)}
@@ -1417,12 +1334,7 @@
     </div>
     <!-- MENUBAR -->
     <div class="menu">
-      <div>
-        <a href="/case-studies" class="menu-item">Case-Studies</a>
-        <a href="/pages/about" class="menu-item">About</a>
-        <div class="menu-item">Help</div>
-      </div>
-      <a href="/login" class="menu-item login"> Login </a>
+      <Menu />
     </div>
   </div>
 {/if}
@@ -1563,16 +1475,7 @@
 
 <!-- LOGIN -->
 {#if section === 'login'}
-  <Login
-    {sso}
-    {sig}
-    on:newTemporaryUser={(e) => {
-      console.dir(e)
-      newUserName = e.detail.newUserName
-      newUserColor = e.detail.newUserColor
-      loggedIn = true
-      makeNewUser()
-    }} />
+  <Login {sso} {sig} />
 {/if}
 
 <!-- BANNED -->

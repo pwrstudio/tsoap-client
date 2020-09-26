@@ -8,7 +8,7 @@
   // *** IMPORTS
   import get from "lodash/get"
   import { fade } from "svelte/transition"
-  import { urlFor, renderBlockText } from "./sanity.js"
+  import { urlFor, renderBlockText } from "../sanity.js"
 
   // *** PROPS
   export let page = {}
@@ -17,7 +17,7 @@
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import "../variables.scss";
 
   .page-single {
     .title {

@@ -8,11 +8,11 @@
   // *** IMPORTS
   import get from "lodash/get"
   import { fade } from "svelte/transition"
-  import { urlFor, renderBlockText } from "./sanity.js"
+  import { urlFor, renderBlockText } from "../sanity.js"
   import { links } from "svelte-routing"
 
   // COMPONENTS
-  import ParticipantsList from "./ParticipantsList.svelte"
+  import ParticipantsList from "../ParticipantsList.svelte"
 
   // *** PROPS
   export let caseStudy = {}
@@ -21,7 +21,7 @@
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import "../variables.scss";
 
   .case-study-single {
     .title {

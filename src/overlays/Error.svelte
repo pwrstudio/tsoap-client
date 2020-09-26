@@ -10,7 +10,7 @@
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import "../variables.scss";
 
   .error-screen {
     position: fixed;

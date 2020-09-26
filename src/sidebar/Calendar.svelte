@@ -10,17 +10,17 @@
   import get from "lodash/get"
 
   // *** GLOBAL
-  import { formattedDate } from "./global.js"
+  import { formattedDate } from "../global.js"
 
   // COMPONENTS
-  import ParticipantsList from "./ParticipantsList.svelte"
+  import ParticipantsList from "../ParticipantsList.svelte"
 
   // *** PROPS
   export let events = []
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import "../variables.scss";
 
   $ITEM_HEIGHT: 60px;
 
@@ -39,24 +39,22 @@
       width: 100%;
       height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
-      cursor: pointer;
       color: $COLOR_DARK;
       display: block;
       text-decoration: none;
-      // display: flex;
-      // align-items: center;
+      user-select: none;
 
       .inner {
         width: 100%;
         .row {
           width: 100%;
+
           display: flex;
           justify-content: space-between;
 
           .title {
-            // font-size: $FONT_SIZE_MEDIUM;
             font-family: $sans-stack;
-            font-weight: bold;
+            font-weight: 500;
             white-space: nowrap;
           }
 
@@ -67,18 +65,22 @@
             white-space: nowrap;
             overflow: hidden;
             flex-shrink: 4;
-            display: none;
+            color: $COLOR_MID_2;
           }
 
           .date {
             white-space: nowrap;
+            color: $COLOR_MID_2;
           }
 
           .participants {
             pointer-events: none;
+            color: $COLOR_MID_2;
+            font-size: $FONT_SIZE_SMALL;
           }
         }
       }
+
       transition: background 0.5s $transition;
 
       &:hover {
@@ -87,23 +89,28 @@
 
       &.footer {
         height: 40px;
-        border-top: 2px solid $COLOR_MID_1;
+        border-top: 1px solid $COLOR_MID_1;
         position: absolute;
         bottom: 0;
         left: 0;
         &:hover {
-          background: $COLOR_LIGHT;
+          background: unset;
         }
       }
 
       &.header {
         position: absolute;
         height: 40px;
-        border-bottom: 2px solid $COLOR_MID_1;
+        border-bottom: 1px solid $COLOR_MID_1;
         top: 0;
         left: 0;
+
+        .archive-link {
+          color: $COLOR_MID_2;
+          text-decoration: underline;
+        }
         &:hover {
-          background: $COLOR_LIGHT;
+          background: unset;
         }
       }
     }
@@ -116,7 +123,7 @@
     <div class="inner">
       <div class="row">
         <div>Events</div>
-        <div>Event Archive</div>
+        <div class="archive-link">Event Archive</div>
       </div>
     </div>
   </div>
@@ -154,7 +161,7 @@
         <div class="elips">
           .........................................................
         </div>
-        <div class="date">Ongoing Exhibition</div>
+        <div class="date">Ongoing</div>
       </div>
     </div>
   </div>

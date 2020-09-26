@@ -5,26 +5,7 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
-  import { onMount } from "svelte"
-
-  import { createEventDispatcher } from "svelte"
-  const dispatch = createEventDispatcher()
-
   const SSO_SERVER = "https://sso.tsoap.dev/auth/discourse_sso"
-
-  //   // VARIABLES
-  let newUserName = ""
-  let newUserColor = ""
-  let newUserAvatar = 1
-
-  const makeTemporaryUser = () => {
-    dispatch("newTemporaryUser", {
-      newUserName: newUserName,
-      newUserColor: newUserColor,
-      newUserAvatar: newUserAvatar,
-    })
-  }
 
   const authenticateAccreditedUser = () => {
     window.location = SSO_SERVER
@@ -32,7 +13,7 @@
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import "../variables.scss";
 
   * {
     box-sizing: border-box;
@@ -106,16 +87,6 @@
     <div class="section">
       <div class="header">Login as accredited user</div>
       <button on:click={authenticateAccreditedUser}>Authenticate</button>
-    </div>
-    <div>
-      <div class="header">Create session account</div>
-      <input
-        bind:value={newUserName}
-        type="text"
-        placeholder="Name"
-        maxlength="100" />
-      <input bind:value={newUserColor} type="color" />
-      <button on:click={makeTemporaryUser}>Start</button>
     </div>
   </div>
 </div>

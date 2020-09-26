@@ -7,14 +7,14 @@
 
   // *** IMPORTS
   import get from "lodash/get"
-  import { urlFor, renderBlockText } from "./sanity.js"
+  import { urlFor, renderBlockText } from "../sanity.js"
 
   // *** PROPS
   export let caseStudies = []
 </script>
 
 <style lang="scss">
-  @import "./variables.scss";
+  @import "../variables.scss";
 
   .case-study-listing {
     display: inline-block;
