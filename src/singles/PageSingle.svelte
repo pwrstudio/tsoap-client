@@ -9,6 +9,7 @@
   import get from "lodash/get"
   import { fade } from "svelte/transition"
   import { urlFor, renderBlockText } from "../sanity.js"
+  import { links } from "svelte-routing"
 
   // *** PROPS
   export let page = {}
@@ -19,49 +20,68 @@
 <style lang="scss">
   @import "../variables.scss";
 
+  $ITEM_HEIGHT: 60px;
+
   .page-single {
-    .title {
-      font-weight: bold;
+    .main-header {
+      padding: 15px;
+
+      .title {
+        font-family: $SANS_STACK;
+        font-size: $FONT_SIZE_LARGE;
+        font-weight: 500;
+      }
+
+      .participants {
+        color: $COLOR_MID_2;
+        font-family: $MONO_STACK;
+        font-size: $FONT_SIZE_SMALL;
+        display: inline-block;
+      }
     }
 
-    .image {
-      width: 300px;
-      img,
-      video {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-      }
+    .divider {
+      border-bottom: 1px dotted $COLOR_MID_1;
+      width: 100%;
+    }
+
+    .text {
+      padding: 15px;
+      font-family: $SANS_STACK;
+      font-size: $FONT_SIZE_BASE;
+      font-weight: 400;
+      line-height: 1.4em;
+    }
+
+    .related-events {
+      padding: 15px;
     }
   }
 </style>
 
-<div class="page-profile-single" in:fade>
-  <!-- TITLE -->
-  <div class="title">{page.title}</div>
-  <!-- FILES -->
-  <!-- {#if Array.isArray(caseStudy.files)}
-    {#each caseStudy.files as f, index (f._key)}
-      <div>
-        <div class="title">{f.title}</div>
-      </div>
-    {/each}
-  {/if} -->
-  <!-- IMAGE -->
-  <!-- {#if get(caseStudy, 'mainImage.asset', false)}
-    <div class="image">
-      <img
-        src={urlFor(caseStudy.mainImage.asset)
-          .width(600)
-          .quality(90)
-          .auto('format')
-          .url()} />
-    </div>
-  {/if} -->
+<div class="page-single" in:fade use:links>
+  <!-- HEADER -->
+  <div class="main-header">
+    <!-- TITLE -->
+    <div class="title">{page.title}</div>
+  </div>
+  <div class="divider" />
+
   <!-- TEXT -->
-  <!-- {#if Array.isArray(get(caseStudy, 'content.content', false))}
-    <div class="text">
-      {@html renderBlockText(caseStudy.content.content)}
-    </div>
-  {/if} -->
+  <div class="text">
+    {#if Array.isArray(get(page, 'content.content', false))}
+      {@html renderBlockText(page.content.content)}
+    {/if}
+  </div>
+
+  <div class="divider" />
+
+  <!-- RELATED pageS -->
+  <!-- <div class="related-case-studies"> -->
+  <!-- {await relatedpages then relatedpages} -->
+  <!-- {#if Array.isArray(get(page, 'connectedpages', false))}
+      <Calendar pages={page.connectedpages} related={true} />
+    {/if} -->
+  <!-- {/await} -->
+  <!-- </div> -->
 </div>

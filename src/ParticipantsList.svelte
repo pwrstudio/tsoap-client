@@ -6,6 +6,7 @@
   // # # # # # # # # # # # # #
   // IMPORTS
   import get from "lodash/get"
+
   // *** PROPS
   export let participants = {}
 </script>
@@ -16,6 +17,10 @@
   a {
     color: inherit;
     text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 </style>
 
@@ -24,7 +29,4 @@
     href={'/profiles/' + get(participant, 'slug.current', '')}>{participant.name}{#if index < participants.length - 1}
       ,
     {/if}</a>
-  <!-- {index} {participants.length} -->
-  <!-- {#if index == participants.length - 2}
-    &nbsp;&amp;&nbsp; -->
 {/each}

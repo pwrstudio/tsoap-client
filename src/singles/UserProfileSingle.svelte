@@ -8,60 +8,87 @@
   // *** IMPORTS
   import get from "lodash/get"
   import { fade } from "svelte/transition"
-  import { urlFor, renderBlockText } from "../sanity.js"
+  import { urlFor, renderBlockText, loadData } from "../sanity.js"
+  import { links } from "svelte-routing"
+
+  import { QUERY } from "../global.js"
+
+  // COMPONENTS
+  import Calendar from "../sidebar/Calendar.svelte"
 
   // *** PROPS
   export let user = {}
 
   console.dir(user)
+
+  // const relatedEvents = loadData(QUERY.RELATED_EVENTS, {id: user._id})
 </script>
 
 <style lang="scss">
   @import "../variables.scss";
 
+  $ITEM_HEIGHT: 60px;
+
   .user-profile-single {
-    .title {
-      font-weight: bold;
+    .main-header {
+      padding: 15px;
+
+      .title {
+        font-family: $SANS_STACK;
+        font-size: $FONT_SIZE_LARGE;
+        font-weight: 500;
+      }
+
+      .participants {
+        color: $COLOR_MID_2;
+        font-family: $MONO_STACK;
+        font-size: $FONT_SIZE_SMALL;
+        display: inline-block;
+      }
     }
 
-    .image {
-      width: 300px;
-      img,
-      video {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-      }
+    .divider {
+      border-bottom: 1px dotted $COLOR_MID_1;
+      width: 100%;
+    }
+
+    .text {
+      padding: 15px;
+      font-family: $SANS_STACK;
+      font-size: $FONT_SIZE_BASE;
+      font-weight: 400;
+      line-height: 1.4em;
+    }
+
+    .related-events {
+      padding: 15px;
     }
   }
 </style>
 
-<div class="user-profile-single" in:fade>
-  <!-- TITLE -->
-  <div class="title">{user.name}</div>
-  <!-- FILES -->
-  <!-- {#if Array.isArray(caseStudy.files)}
-    {#each caseStudy.files as f, index (f._key)}
-      <div>
-        <div class="title">{f.title}</div>
-      </div>
-    {/each}
-  {/if} -->
-  <!-- IMAGE -->
-  <!-- {#if get(caseStudy, 'mainImage.asset', false)}
-    <div class="image">
-      <img
-        src={urlFor(caseStudy.mainImage.asset)
-          .width(600)
-          .quality(90)
-          .auto('format')
-          .url()} />
-    </div>
-  {/if} -->
-  <!-- TEXT -->
-  <!-- {#if Array.isArray(get(caseStudy, 'content.content', false))}
+<div class="user-profile-single" in:fade use:links>
+  <!-- HEADER -->
+
+  <div class="main-header">
+    <!-- TITLE -->
+    <div class="title">{user.name}</div>
+  </div>
+  <div class="divider" />
+
+  <!-- BIOGRAPHY -->
+  {#if Array.isArray(get(user, 'biography.content', false))}
     <div class="text">
-      {@html renderBlockText(caseStudy.content.content)}
+      {@html renderBlockText(user.content.content)}
     </div>
-  {/if} -->
+    <div class="divider" />
+  {/if}
+
+  <!-- RELATED EVENTS -->
+  <!-- <div class="related-events"> -->
+  <!-- {await relatedEvents then relatedEvents} -->
+  <!-- {#if Array.isArray(get(user, 'connectedEvents', false))}
+      <Calendar events={user.connectedEvents} related={true} />
+    {/if} -->
+  <!-- {/await} -->
+  <!-- </div> -->
 </div>

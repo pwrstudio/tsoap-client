@@ -14,6 +14,7 @@
   import get from "lodash/get"
   import sample from "lodash/sample"
   import { fade, fly, scale } from "svelte/transition"
+  import { quartOut } from "svelte/easing"
   import { urlFor, loadData } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
@@ -919,7 +920,7 @@
 
   * {
     box-sizing: border-box;
-    font-family: $mono-stack;
+    font-family: $MONO_STACK;
   }
 
   .pop {
@@ -1130,12 +1131,6 @@
       width: 100vw;
     }
 
-    // HEIGHTS:
-    // Minimap => 200px
-    // Calendar =>
-    // Chat =>
-    // Menubar => 60px
-
     .minimap {
       background: black;
       height: 200px;
@@ -1180,43 +1175,43 @@
 
   .passive-content-slot {
     position: absolute;
-    bottom: 10px;
-    right: 410px;
+    top: 10px;
+    right: calc(#{$SIDEBAR_WIDTH} + 10px);
     width: 500px;
-    height: calc(100vh - 330px);
-    padding: 10px;
+    max-width: calc(100vw - (#{$SIDEBAR_WIDTH} + 20px));
+    max-height: calc(100vh - 20px);
     background: $COLOR_LIGHT;
     z-index: 100;
     overflow-y: auto;
     font-size: $FONT_SIZE_BASE;
     color: $COLOR_DARK;
     padding-bottom: 60px;
-    border-radius: 4px;
 
     @include hide-scroll;
 
-    @include screen-size("small") {
-      position: fixed;
-      bottom: unset;
-      top: 0px;
-      right: unset;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-    }
+    // @include screen-size("small") {
+    //   position: fixed;
+    //   bottom: unset;
+    //   top: 0px;
+    //   right: unset;
+    //   left: 0;
+    //   width: 100vw;
+    //   height: 100vh;
+    // }
 
     .close {
       margin-bottom: 20px;
       position: absolute;
-      top: 0px;
+      top: -10px;
       right: 10px;
-      font-size: 48px;
+      font-size: 38px;
       color: $COLOR_MID_2;
       cursor: pointer;
       text-decoration: none;
+      transition: transform 0.3s $transition;
 
       &:hover {
-        transform: scale(1.2);
+        transform: scale(1.1);
       }
     }
   }
@@ -1342,69 +1337,47 @@
 <!-- GAME WORLD -->
 <div class="game" class:expanded={sidebarHidden} bind:this={gameContainer} />
 
-<!-- CASE STUDIES -->
-{#await caseStudies then caseStudies}
-  {#if section === 'case-studies'}
-    <div class="passive-content-slot" use:links transition:fly={{ y: 200 }}>
-      <a class="close" href="/">×</a>
-      <!-- SINGLE CASE STUDY -->
-      {#if slug}
-        <CaseStudySingle
-          caseStudy={caseStudies.find((cs) => cs.slug.current === slug)} />
-      {:else}
-        <!-- LISTING CASE STUDY -->
-        <CaseStudyListing {caseStudies} />
+{#if ['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}
+  <div class="passive-content-slot" use:links transition:fly={{ y: 200 }}>
+    <a class="close" href="/">×</a>
+    <!-- CASE STUDIES -->
+    {#await caseStudies then caseStudies}
+      {#if section === 'case-studies'}
+        {#if slug}
+          <!-- SINGLE CASE STUDY -->
+          <CaseStudySingle
+            caseStudy={caseStudies.find((cs) => cs.slug.current === slug)} />
+        {:else}
+          <!-- LISTING CASE STUDY -->
+          <CaseStudyListing {caseStudies} />
+        {/if}
       {/if}
-    </div>
-  {/if}
-{/await}
-
-<!-- EVENTS -->
-{#await events then events}
-  {#if section === 'events' && slug}
-    <div
-      class="passive-content-slot"
-      use:links
-      in:fly={{ y: 200, duration: 300 }}
-      out:fly={{ y: 200, duration: 300 }}>
-      <a class="close" href="/">×</a>
-      <!-- SINGLE EVENT -->
-      <EventSingle event={events.find((ev) => ev.slug.current === slug)} />
-    </div>
-  {/if}
-{/await}
-
-<!-- USERS -->
-{#await users then users}
-  {#if section == 'profiles' && slug}
-    <div
-      class="passive-content-slot"
-      use:links
-      in:fly={{ y: 200, duration: 300 }}
-      out:fly={{ y: 200, duration: 300 }}>
-      <a class="close" href="/">×</a>
-      <!-- SINGLE EVENT -->
-      <UserProfileSingle
-        user={users.find((u) => get(u, 'slug.current', '') === slug)} />
-    </div>
-  {/if}
-{/await}
-
-<!-- PAGES -->
-{#await pages then pages}
-  {#if section == 'pages' && slug}
-    <div
-      class="passive-content-slot"
-      use:links
-      in:fly={{ y: 200, duration: 300 }}
-      out:fly={{ y: 200, duration: 300 }}>
-      <a class="close" href="/">×</a>
-      <!-- SINGLE EVENT -->
-      <PageSingle
-        page={pages.find((p) => get(p, 'slug.current', '') === slug)} />
-    </div>
-  {/if}
-{/await}
+    {/await}
+    <!-- USERS -->
+    {#await users then users}
+      {#if section == 'profiles' && slug}
+        <!-- SINGLE PROFILE -->
+        <UserProfileSingle
+          user={users.find((u) => get(u, 'slug.current', '') === slug)} />
+      {/if}
+    {/await}
+    <!-- EVENTS -->
+    {#await events then events}
+      {#if section === 'events' && slug}
+        <!-- SINGLE EVENT -->
+        <EventSingle event={events.find((ev) => ev.slug.current === slug)} />
+      {/if}
+    {/await}
+    <!-- PAGES -->
+    {#await pages then pages}
+      {#if section == 'pages' && slug}
+        <!-- SINGLE PAGE -->
+        <PageSingle
+          page={pages.find((p) => get(p, 'slug.current', '') === slug)} />
+      {/if}
+    {/await}
+  </div>
+{/if}
 
 <!-- ACTIVE CONTENT: STREAM -->
 <!-- {#if $localUserArea === 4 && !activeContentClosed}

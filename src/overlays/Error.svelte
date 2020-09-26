@@ -26,7 +26,7 @@
     z-index: 100000;
 
     .box {
-      font-family: $mono-stack;
+      font-family: $MONO_STACK;
       padding: 20px;
       font-size: 64px;
       text-align: center;

@@ -17,6 +17,7 @@
 
   // *** PROPS
   export let events = []
+  export let related = false
 </script>
 
 <style lang="scss">
@@ -44,6 +45,11 @@
       text-decoration: none;
       user-select: none;
 
+      &.related {
+        padding-left: 0;
+        padding-right: 0;
+      }
+
       .inner {
         width: 100%;
         .row {
@@ -53,15 +59,15 @@
           justify-content: space-between;
 
           .title {
-            font-family: $sans-stack;
+            font-family: $SANS_STACK;
             font-weight: 500;
             white-space: nowrap;
           }
 
           .elips {
-            margin-left: 10px;
-            margin-right: 10px;
-            width: 50%;
+            margin-left: 5px;
+            margin-right: 5px;
+            width: 90%;
             white-space: nowrap;
             overflow: hidden;
             flex-shrink: 4;
@@ -109,6 +115,11 @@
           color: $COLOR_MID_2;
           text-decoration: underline;
         }
+
+        &.related {
+          border-bottom: 1px dotted $COLOR_MID_1;
+        }
+
         &:hover {
           background: unset;
         }
@@ -119,11 +130,11 @@
 
 <div class="calendar-container">
   <!-- HEADER -->
-  <div class="calendar-item header">
+  <div class="calendar-item header" class:related>
     <div class="inner">
       <div class="row">
-        <div>Events</div>
-        <div class="archive-link">Event Archive</div>
+        <div>{related ? 'Related Events' : 'Events'}</div>
+        <div class="archive-link">{related ? 'View All' : 'Event Archive'}</div>
       </div>
     </div>
   </div>
@@ -132,6 +143,7 @@
   {#each events as event, index (event._id)}
     <a
       class="calendar-item"
+      class:related
       in:fade={{ delay: 100 * index }}
       href={'/events/' + get(event, 'slug.current', '')}>
       <div class="inner">
@@ -154,15 +166,17 @@
   {/each}
 
   <!-- FOOTER -->
-  <div class="calendar-item footer">
-    <div class="inner">
-      <div class="row">
-        <div class="title">Mississippi exhibition</div>
-        <div class="elips">
-          .........................................................
+  {#if !related}
+    <div class="calendar-item footer">
+      <div class="inner">
+        <div class="row">
+          <div class="title">Mississippi exhibition</div>
+          <div class="elips">
+            .........................................................
+          </div>
+          <div class="date">Ongoing</div>
         </div>
-        <div class="date">Ongoing</div>
       </div>
     </div>
-  </div>
+  {/if}
 </div>

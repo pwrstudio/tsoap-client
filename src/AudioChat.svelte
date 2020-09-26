@@ -238,7 +238,7 @@
     padding: 10px;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
-    font-family: $mono-stack;
+    font-family: $MONO_STACK;
 
     padding-left: 15px;
     padding-right: 15px;

@@ -101,7 +101,7 @@
     margin-right: auto;
     font-size: $FONT_SIZE_SMALL;
     line-height: $line-height;
-    font-family: $sans-stack;
+    font-family: $SANS_STACK;
     margin-bottom: $line-height;
     margin-top: $line-height;
     color: $white;

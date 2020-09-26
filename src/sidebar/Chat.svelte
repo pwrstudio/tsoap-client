@@ -88,7 +88,7 @@
     padding-right: 10px;
 
     input {
-      font-family: $mono-stack;
+      font-family: $MONO_STACK;
       font-size: $FONT_SIZE_SMALL;
       float: left;
       width: calc(100% - 70px);
@@ -104,7 +104,7 @@
     }
 
     button {
-      font-family: $mono-stack;
+      font-family: $MONO_STACK;
       font-size: $FONT_SIZE_SMALL;
       width: 60px;
       float: right;

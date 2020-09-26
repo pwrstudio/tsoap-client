@@ -75,7 +75,7 @@
       display: block;
       color: black;
       line-height: $line-height;
-      font-family: $sans-stack;
+      font-family: $SANS_STACK;
       margin-bottom: $line-height;
       margin-top: $line-height;
       user-select: none;

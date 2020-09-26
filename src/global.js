@@ -24,6 +24,12 @@ export const TINTMAP = [
   0xdddddd,
   0xffffff,
 ]
+export const FORMATMAP = {
+  pdfBlock: "PDF",
+  videoBlock: "VIDEO",
+  audioBlock: "AUDIO",
+  imageBlock: "IMAGE",
+}
 
 export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
 
@@ -34,11 +40,13 @@ export const QUERY = {
   USERS: "*[_type == 'participant']",
   PAGES: "*[_type == 'page']",
   AUDIO_INSTALLATIONS:
-    "*[_type == 'audioInstallation']{..., authors[]->{slug,name}, 'audioURL': soundFile.asset->url,spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
+    "*[_type == 'audioInstallation']{..., participants[]->{slug,name}, 'audioURL': soundFile.asset->url,spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   CASE_STUDIES:
-    "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., authors[]->{slug,name}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
+    "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., connectedEvents[]->{...,participants[]->{slug,name}}, participants[]->{slug,name}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   LAND_MARKS:
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
+  // CONNECTED_PROJECTS:
+  //   '*[_type == "event" && participants[]._ref == $id]{...,authors[]->{...}}',
 }
 
 export const TEXT_STYLE = {

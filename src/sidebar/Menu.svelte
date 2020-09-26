@@ -21,6 +21,8 @@
     align-items: center;
     justify-content: space-between;
     user-select: none;
+    padding-left: 10px;
+    padding-right: 10px;
 
     // @include screen-size("small") {
     //   position: fixed;
