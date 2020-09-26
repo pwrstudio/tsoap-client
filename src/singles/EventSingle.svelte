@@ -13,7 +13,6 @@
 
   // COMPONENTS
   import ParticipantsList from "../ParticipantsList.svelte"
-  import Calendar from "../sidebar/Calendar.svelte"
 
   // GLOBAL
   import { formattedDate } from "../global.js"
@@ -52,69 +51,22 @@
       width: 100%;
     }
 
-    .material {
+    .date {
       padding: 15px;
+      text-align: center;
+      font-weight: 500;
+      font-family: $SANS_STACK;
+    }
 
-      .material-item {
+    .image {
+      width: 100%;
+      padding-top: 15px;
+      padding-bottom: 15px;
+
+      img {
         width: 100%;
-        // height: $ITEM_HEIGHT;
-        background: $COLOR_LIGHT;
-        color: $COLOR_DARK;
-        display: block;
-        text-decoration: none;
-        user-select: none;
-        padding-top: 5px;
-        padding-bottom: 10px;
-
-        .row {
-          width: 100%;
-
-          display: flex;
-          justify-content: space-between;
-
-          .title {
-            font-family: $SANS_STACK;
-            font-weight: 400;
-            white-space: nowrap;
-          }
-
-          .elips {
-            margin-left: 5px;
-            margin-right: 5px;
-            width: 90%;
-            white-space: nowrap;
-            overflow: hidden;
-            flex-shrink: 4;
-            color: $COLOR_MID_2;
-          }
-
-          .format {
-            white-space: nowrap;
-            color: $COLOR_MID_2;
-          }
-        }
-
-        cursor: pointer;
-
-        // transition: background 0.5s $transition;
-
-        &:hover {
-          background: $COLOR_MID_1;
-        }
-
-        &.header {
-          border-bottom: 1px dotted $COLOR_MID_1;
-          cursor: default;
-
-          .archive-link {
-            color: $COLOR_MID_2;
-            text-decoration: underline;
-          }
-
-          &:hover {
-            background: unset;
-          }
-        }
+        max-height: 300px;
+        object-fit: cover;
       }
     }
 
@@ -134,7 +86,6 @@
 
 <div class="event-single" in:fade use:links>
   <!-- HEADER -->
-
   <div class="main-header">
     <!-- TITLE -->
     <div class="title">{event.title}</div>
@@ -146,20 +97,35 @@
       </div>
     {/if}
   </div>
-
   <div class="divider" />
+
+  <!-- DATE -->
+  <div class="date">{formattedDate(event.startDate)}</div>
+  <div class="divider" />
+
+  <!-- IMAGE -->
+  {#if get(event, 'mainImage.asset', false)}
+    <div class="image">
+      <img
+        src={urlFor(event.mainImage.asset)
+          .width(600)
+          .quality(90)
+          .auto('format')
+          .url()} />
+    </div>
+    <div class="divider" />
+  {/if}
 
   <!-- TEXT -->
-  <div class="text">
-    {#if Array.isArray(get(event, 'content.content', false))}
+  {#if Array.isArray(get(event, 'content.content', false)) && event.content.content.length > 0}
+    <div class="text">
       {@html renderBlockText(event.content.content)}
-    {/if}
-  </div>
+    </div>
+    <div class="divider" />
+  {/if}
 
-  <div class="divider" />
-
-  <!-- RELATED EVENTS -->
-  <div class="related-case-studies">
+  <!-- CONNCECTED CASE STUDIES -->
+  <div class="connected-case-studies">
     <!-- {await relatedEvents then relatedEvents} -->
     <!-- {#if Array.isArray(get(event, 'connectedEvents', false))}
       <Calendar events={event.connectedEvents} related={true} />
