@@ -250,8 +250,9 @@
       bottom: 60px;
       left: unset;
       right: 10px;
-      min-width: 400px;
-      max-width: calc(100vw - 20px);
+      right: 10px;
+      min-width: unset;
+      width: calc(100% - 20px);
     }
 
     .button {

@@ -887,7 +887,7 @@
     })
 
     const getResponsiveWidth = () =>
-      window.matchMedia("(max-width: 700px)").matches || sidebarHidden
+      window.matchMedia("(max-width: 800px)").matches || sidebarHidden
         ? window.innerWidth
         : window.innerWidth - 400
 
@@ -1246,6 +1246,10 @@
       text-decoration: none;
       transition: transform 0.3s $transition;
 
+      @include screen-size("small") {
+        top: 0px;
+      }
+
       &:hover {
         transform: scale(1.1);
       }
@@ -1281,6 +1285,10 @@
       text-decoration: none;
       transition: transform 0.3s $transition;
       z-index: 100;
+
+      @include screen-size("small") {
+        top: 0px;
+      }
 
       &:hover {
         transform: scale(1.1);

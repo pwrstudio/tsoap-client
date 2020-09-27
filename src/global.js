@@ -46,7 +46,7 @@ export const QUERY = {
   LAND_MARKS:
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
   CONNECTED_CASE_STUDIES:
-    '*[_type in ["caseStudyEmergent", "caseStudyExhibition"]]',
+    '*[_type in ["caseStudyEmergent", "caseStudyExhibition"]]{..., participants[]->{slug,name}}',
 
   // CONNECTED_PROJECTS:
   //   '*[_type == "event" && participants[]._ref == $id]{...,authors[]->{...}}',

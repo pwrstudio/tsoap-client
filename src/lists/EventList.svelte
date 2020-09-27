@@ -24,7 +24,7 @@
   let containerWidth = "100%"
 
   onMount(async () => {
-    if (window.matchMedia("(max-width: 700px)").matches && !related) {
+    if (window.matchMedia("(max-width: 800px)").matches && !related) {
       containerWidth = window.innerWidth * 0.8 * events.length + "px"
     }
   })
