@@ -59,7 +59,7 @@
   </div>
 
   {#if authenticated}
-    <div class="menu-item login">Logout</div>
+    <a href="/" class="menu-item login">Logout</a>
   {:else}
     <a
       href="https://sso.tsoap.dev/auth/discourse_sso"
