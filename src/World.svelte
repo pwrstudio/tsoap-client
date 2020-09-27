@@ -1003,6 +1003,8 @@
     @include screen-size("small") {
       bottom: 60px;
       left: 10px;
+      max-width: calc(100vw - 20px);
+      z-index: 10;
     }
 
     .color-code {
