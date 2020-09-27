@@ -19,6 +19,9 @@
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
   import MediaQuery from "svelte-media-query"
+  import Tweener from "tweener"
+
+  const tweener = new Tweener(1 / 60)
 
   // COMPONENTS
   // sidebar
@@ -160,7 +163,7 @@
   let audioChatActive = false
   let sidebarHidden = false
   let loggedIn = false
-
+  let caseStudiesLoaded = false
   let intentToPickUp = false
 
   // UI DATA VARIABLES
@@ -479,6 +482,8 @@
               history.replaceState({}, "CONNECTED", "/")
             }
 
+            console.dir(gameRoom)
+
             // ******
             // PLAYER
             // ******
@@ -613,13 +618,11 @@
             }
 
             // CREATE CASE STUDY
-            const createCaseStudy = (caseStudy) => {
+            const createCaseStudy = (caseStudy, animate) => {
               // const nameText = new PIXI.Text(caseStudy.name, TEXT_STYLE)
               // nameText.anchor.set(0.5)
 
               const container = new PIXI.Container()
-              container.x = caseStudy.x
-              container.y = caseStudy.y
               container.visible = caseStudy.carriedBy === "" ? true : false
               container.uuid = caseStudy.uuid
               container.caseStudyId = caseStudy.caseStudyId
@@ -632,7 +635,16 @@
               graphics.drawRect(0, 0, 15, 20)
               graphics.endFill()
 
+              container.x = caseStudy.x
+              container.y = animate ? 0 : caseStudy.y
+
               container.addChild(graphics)
+
+              if (animate) {
+                tweener
+                  .add(container)
+                  .to({ y: caseStudy.y }, 3, Tweener.ease.bounceOut)
+              }
 
               const onDown = (e) => {
                 // console.dir(localPlayers[$localUserSessionID].carrying)
@@ -682,9 +694,13 @@
 
             // CASE STUDY: ADD
             gameRoom.state.caseStudies.onAdd = (caseStudy, sessionId) => {
-              // console.log("%_%_%_ Case study added")
-              // console.dir(caseStudy)
-              createCaseStudy(caseStudy)
+              if (caseStudiesLoaded) {
+                // console.log("====> loaded")
+                createCaseStudy(caseStudy, true)
+              } else {
+                // console.log("notloaded")
+                createCaseStudy(caseStudy, false)
+              }
             }
 
             // CASE STUDY: REMOVE
@@ -923,6 +939,10 @@
     // console.log("CHECKING URL PARAMS ====>")
     // console.log("section", section)
     // console.log("slug", slug)
+
+    setTimeout(() => {
+      caseStudiesLoaded = true
+    }, 5000)
 
     if (section === "login") {
       console.log("LOGIN")
