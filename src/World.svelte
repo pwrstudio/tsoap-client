@@ -275,7 +275,7 @@
 
             if (intentToPickUp) {
               pickUpCaseStudy(intentToPickUp)
-              intentToPickUp = false
+              // intentToPickUp = false
             }
           }
           localPlayers[key].avatar.setAnimation("rest")
@@ -523,14 +523,27 @@
               hideTarget()
             })
 
+            // gameRoom.state.players.carrying.onChange = (player, sessionId) => {
+            //   if ($localUserSessionID === sessionId) {
+            //     console.log("CARRYING CHANGED")
+            //   }
+            // }
+
             // PLAYER: STATE CHANGE
             gameRoom.state.players.onChange = (player, sessionId) => {
               // console.log("player state change")
-              // console.dir(player)
+              console.dir(player)
               if ($localUserSessionID === sessionId) {
                 // console.log("is self")
                 localPlayers[sessionId].carrying = player.carrying
-                // console.log(localPlayers[sessionId].carrying)
+                if (localPlayers[sessionId].carrying && intentToPickUp) {
+                  let g = emergentLayer.children.find(
+                    (cs) => cs.uuid === player.carrying
+                  )
+                  console.dir(g)
+                  navigate("/case-studies/" + g.slug)
+                  intentToPickUp = false
+                }
               }
               if (player.path.waypoints.length > 0) {
                 moveQ[sessionId] = player.path.waypoints
@@ -627,6 +640,7 @@
               container.uuid = caseStudy.uuid
               container.caseStudyId = caseStudy.caseStudyId
               container.name = caseStudy.name
+              container.slug = caseStudy.slug
               container.interactive = true
               container.tint = caseStudy.tint
 
