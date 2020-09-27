@@ -5,8 +5,8 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
-  import get from "lodash/get"
+  // *** PROPS
+  export let authenticated = false
 </script>
 
 <style lang="scss">
@@ -58,5 +58,11 @@
     <a href="/pages/help" class="menu-item">Help</a>
   </div>
 
-  <a href="/login" class="menu-item login">Login</a>
+  {#if authenticated}
+    <a
+      href="https://sso.tsoap.dev/auth/discourse_sso"
+      class="menu-item login">Login</a>
+  {:else}
+    <div class="menu-item login">Logout</div>
+  {/if}
 </div>

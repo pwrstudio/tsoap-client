@@ -14,12 +14,16 @@
   // COMPONENTS
   import ParticipantsList from "../lists/ParticipantsList.svelte"
   import CaseStudyList from "../lists/CaseStudyList.svelte"
+  import VideoPlayer from "./VideoPlayer.svelte"
 
   // GLOBAL
   import { formattedDate, QUERY } from "../global.js"
 
   // *** PROPS
   export let event = {}
+  export let live = false
+
+  let expanded = false
 
   console.dir(event._id)
 
@@ -94,6 +98,10 @@
 </style>
 
 <div class="event-single" in:fade use:links>
+  {#if live}
+    <VideoPlayer />
+  {/if}
+
   <!-- HEADER -->
   <div class="main-header">
     <!-- TITLE -->
@@ -108,36 +116,40 @@
   </div>
   <div class="divider" />
 
-  <!-- DATE -->
-  <div class="date">{formattedDate(event.startDate)}</div>
-  <div class="divider" />
-
-  <!-- IMAGE -->
-  {#if get(event, 'mainImage.asset', false)}
-    <div class="image">
-      <img
-        alt={event.title}
-        src={urlFor(event.mainImage.asset)
-          .width(600)
-          .quality(90)
-          .auto('format')
-          .url()} />
-    </div>
+  {#if !live || expanded}
+    <!-- DATE -->
+    <div class="date">{formattedDate(event.startDate)}</div>
     <div class="divider" />
-  {/if}
 
-  <!-- TEXT -->
-  {#if Array.isArray(get(event, 'content.content', false)) && event.content.content.length > 0}
-    <div class="text">
-      {@html renderBlockText(event.content.content)}
+    <!-- IMAGE -->
+    {#if !live}
+      {#if get(event, 'mainImage.asset', false)}
+        <div class="image">
+          <img
+            alt={event.title}
+            src={urlFor(event.mainImage.asset)
+              .width(600)
+              .quality(90)
+              .auto('format')
+              .url()} />
+        </div>
+        <div class="divider" />
+      {/if}
+    {/if}
+
+    <!-- TEXT -->
+    {#if Array.isArray(get(event, 'content.content', false)) && event.content.content.length > 0}
+      <div class="text">
+        {@html renderBlockText(event.content.content)}
+      </div>
+      <div class="divider" />
+    {/if}
+
+    <!-- CONNCECTED CASE STUDIES -->
+    <div class="connected-case-studies">
+      {#await connectedCaseStudies then connectedCaseStudies}
+        <CaseStudyList caseStudies={connectedCaseStudies} related={true} />
+      {/await}
     </div>
-    <div class="divider" />
   {/if}
-
-  <!-- CONNCECTED CASE STUDIES -->
-  <div class="connected-case-studies">
-    {#await connectedCaseStudies then connectedCaseStudies}
-      <CaseStudyList caseStudies={connectedCaseStudies} related={true} />
-    {/await}
-  </div>
 </div>

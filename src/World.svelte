@@ -1232,39 +1232,36 @@
     font-size: $FONT_SIZE_BASE;
     color: $COLOR_DARK;
     position: fixed;
-    line-height: 2em;
     top: 10px;
+    right: calc(#{$SIDEBAR_WIDTH} + 10px);
     width: 500px;
-    height: 300px;
-    right: 410px;
-    border-radius: 4px;
+    max-width: calc(100vw - (#{$SIDEBAR_WIDTH} + 20px));
+    max-height: calc(100vh - 20px);
+    overflow-y: auto;
+    font-size: $FONT_SIZE_BASE;
+    color: $COLOR_DARK;
+    padding-bottom: 60px;
 
-    @include screen-size("small") {
-      display: none;
-    }
+    @include hide-scroll;
 
-    img,
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    @include screen-size("small") {
-      display: none;
-    }
+    // @include screen-size("small") {
+    //   display: none;
+    // }
 
     .close {
       margin-bottom: 20px;
       position: absolute;
-      top: 10px;
+      top: -10px;
       right: 10px;
-      font-size: 48px;
-      color: black;
+      font-size: 38px;
+      color: $COLOR_MID_2;
       cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.3s $transition;
+      z-index: 100;
 
       &:hover {
-        transform: scale(1.2);
+        transform: scale(1.1);
       }
     }
   }
@@ -1319,7 +1316,7 @@
     </div>
     <!-- MENUBAR -->
     <div class="menu">
-      <Menu />
+      <Menu authenticated={localPlayers[$localUserSessionID].authenticated} />
     </div>
   </div>
 {/if}
@@ -1373,9 +1370,9 @@
 {/if}
 
 <!-- ACTIVE CONTENT: STREAM -->
-<!-- {#if $localUserArea === 4 && !activeContentClosed}
+<!-- {#if get(localPlayers, '[$localUserSessionID]', false) && localPlayers[$localUserSessionID].area === 4 && !activeContentClosed} -->
+<!-- {#if !activeContentClosed}
   <div class="active-content-slot" transition:fly={{ y: -200 }}>
-    <video src="/test.mp4" muted autoplay loop />
     <div
       class="close"
       on:click={(e) => {
@@ -1383,16 +1380,11 @@
       }}>
       ×
     </div>
-  </div>
-{/if} -->
-
-<!-- PROXIMITY -->
-<!-- {#if playersInProximity.length > 0}
-  <div class="proximity" transition:fly={{ y: -200, duration: 300 }}>
-    <div><strong>Players nearby</strong></div>
-    {#each playersInProximity as player}
-      <div>{player.name}</div>
-    {/each}
+    {#await events then events}
+      <EventSingle
+        live={true}
+        event={events.find((ev) => ev.slug.current === 'test-event')} />
+    {/await}
   </div>
 {/if} -->
 
