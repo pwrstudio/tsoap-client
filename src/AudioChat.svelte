@@ -245,9 +245,16 @@
 
     user-select: none;
 
+    @include screen-size("small") {
+      top: unset;
+      bottom: 60px;
+      left: unset;
+      right: 10px;
+      min-width: 400px;
+      max-width: calc(100vw - 20px);
+    }
+
     .button {
-      // padding-top: 3px;
-      // padding-bottom: 3px;
       padding-left: 15px;
       padding-right: 15px;
       border: 1px solid $COLOR_MID_2;
@@ -279,6 +286,10 @@
     .userlist {
       min-height: 200px;
       margin-top: 20px;
+
+      @include screen-size("small") {
+        min-height: unset;
+      }
 
       .user {
         margin-bottom: 10px;

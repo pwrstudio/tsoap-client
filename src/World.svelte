@@ -913,9 +913,9 @@
 
     window.dispatchEvent(new Event("resize"))
 
-    if (window.matchMedia("(max-width: 700px)").matches) {
-      viewport.setZoom(0.75)
-    }
+    // if (window.matchMedia("(max-width: 700px)").matches) {
+    //   viewport.setZoom(0.75)
+    // }
 
     // Give the local user a UUID
     localUserUUID.set(nanoid())
@@ -1001,9 +1001,8 @@
     user-select: none;
 
     @include screen-size("small") {
-      top: unset;
-      bottom: 20px;
-      display: none;
+      bottom: 60px;
+      left: 10px;
     }
 
     .color-code {
@@ -1058,8 +1057,10 @@
 
     @include screen-size("small") {
       top: unset;
-      bottom: 20px;
-      display: none;
+      bottom: 60px;
+      left: unset;
+      right: 10px;
+      max-width: calc(100vw - 20px);
     }
 
     .message {
@@ -1204,12 +1205,12 @@
     @include screen-size("small") {
       position: fixed;
       bottom: unset;
-      top: 0px;
+      top: 80px;
       right: unset;
       left: 0;
       max-width: unset;
       width: 100vw;
-      height: calc(100vh - 40px);
+      height: calc(100vh - 130px);
     }
 
     .close {
@@ -1247,10 +1248,6 @@
 
     @include hide-scroll;
 
-    // @include screen-size("small") {
-    //   display: none;
-    // }
-
     .close {
       margin-bottom: 20px;
       position: absolute;
@@ -1274,7 +1271,21 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 40px;
+    height: 50px;
+    z-index: 1000;
+  }
+
+  .mobile-calendar {
+    position: fixed;
+    background: $COLOR_LIGHT;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    z-index: 1000;
+    overflow-x: auto;
+    @include hide-scroll;
+    border-bottom: 1px solid $COLOR_MID_1;
   }
 </style>
 
@@ -1404,12 +1415,19 @@
   </div>
 {/if} -->
 
-<!-- MOBILE MENU-->
+<!-- MOBILE -->
 <MediaQuery query="(max-width: 800px)" let:matches>
   {#if matches}
     {#if localPlayers[$localUserSessionID]}
+      <!-- MOBILE MENU-->
       <div class="mobile-menu" use:links>
         <Menu authenticated={localPlayers[$localUserSessionID].authenticated} />
+      </div>
+      <!-- MOBILE CALENDAR-->
+      <div class="mobile-calendar" use:links>
+        {#await events then events}
+          <EventList {events} />
+        {/await}      
       </div>
     {/if}
   {/if}

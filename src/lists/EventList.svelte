@@ -6,6 +6,7 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
+  import { onMount, onDestroy } from "svelte"
   import { fade } from "svelte/transition"
   import get from "lodash/get"
 
@@ -14,10 +15,19 @@
 
   // COMPONENTS
   import ParticipantsList from "./ParticipantsList.svelte"
+  import { window } from "lodash/_freeGlobal"
 
   // *** PROPS
   export let events = []
   export let related = false
+
+  let containerWidth = "100%"
+
+  onMount(async () => {
+    if (window.matchMedia("(max-width: 700px)").matches && !related) {
+      containerWidth = window.innerWidth * 0.8 * events.length + "px"
+    }
+  })
 </script>
 
 <style lang="scss">
@@ -34,6 +44,10 @@
     padding-top: 40px;
     padding-bottom: 40px;
 
+    @include screen-size("small") {
+      padding-top: 0;
+    }
+
     .event {
       padding: 0px 10px;
       padding-top: 10px;
@@ -45,13 +59,29 @@
       text-decoration: none;
       user-select: none;
 
+      @include screen-size("small") {
+        width: 80vw;
+        display: inline-flex;
+        align-items: center;
+        height: 80px;
+        border-right: 1px solid $COLOR_MID_1;
+      }
+
       &.related {
         padding-left: 0;
         padding-right: 0;
+
+        @include screen-size("small") {
+          display: block;
+          width: 100%;
+          height: $ITEM_HEIGHT;
+          border-right: unset;
+        }
       }
 
       .inner {
         width: 100%;
+
         .row {
           width: 100%;
 
@@ -102,6 +132,10 @@
         &:hover {
           background: unset;
         }
+
+        @include screen-size("small") {
+          display: none;
+        }
       }
 
       &.header {
@@ -116,8 +150,16 @@
           text-decoration: underline;
         }
 
+        @include screen-size("small") {
+          display: none;
+        }
+
         &.related {
           border-bottom: 1px dotted $COLOR_MID_1;
+          @include screen-size("small") {
+            display: block;
+            position: static;
+          }
         }
 
         &:hover {
@@ -128,7 +170,7 @@
   }
 </style>
 
-<div class="eventlist-container">
+<div class="eventlist-container" style={'width:' + containerWidth + ';'}>
   <!-- HEADER -->
   <div class="event header" class:related>
     <div class="inner">
