@@ -37,6 +37,10 @@
       font-size: 48px;
       text-align: center;
       user-select: none;
+
+      @include screen-size("small") {
+        font-size: 18px;
+      }
     }
   }
 </style>

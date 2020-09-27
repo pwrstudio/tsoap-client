@@ -18,6 +18,7 @@
   import { urlFor, loadData } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
+  import MediaQuery from "svelte-media-query"
 
   // COMPONENTS
   // sidebar
@@ -1200,15 +1201,16 @@
 
     @include hide-scroll;
 
-    // @include screen-size("small") {
-    //   position: fixed;
-    //   bottom: unset;
-    //   top: 0px;
-    //   right: unset;
-    //   left: 0;
-    //   width: 100vw;
-    //   height: 100vh;
-    // }
+    @include screen-size("small") {
+      position: fixed;
+      bottom: unset;
+      top: 0px;
+      right: unset;
+      left: 0;
+      max-width: unset;
+      width: 100vw;
+      height: calc(100vh - 40px);
+    }
 
     .close {
       margin-bottom: 20px;
@@ -1266,6 +1268,14 @@
       }
     }
   }
+
+  .mobile-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+  }
 </style>
 
 {#if !sidebarHidden}
@@ -1281,46 +1291,51 @@
 {/if}
 
 <!-- SIDEBAR -->
-{#if localPlayers[$localUserSessionID]}
-  <div
-    class="sidebar"
-    use:links
-    class:hidden={sidebarHidden}
-    on:click={() => {
-      if (sidebarHidden) {
-        sidebarHidden = false
-        window.dispatchEvent(new Event('resize'))
-      }
-    }}>
-    <!-- MINIMAP -->
-    <div class="minimap">
-      <MiniMap {miniImage} player={localPlayers[$localUserSessionID]} />
-    </div>
-    <div class="middle-section">
-      <!-- CALENDAR -->
-      <div class="calendar">
-        {#await events then events}
-          <EventList {events} />
-        {/await}
+<MediaQuery query="(min-width: 800px)" let:matches>
+  {#if matches}
+    {#if localPlayers[$localUserSessionID]}
+      <div
+        class="sidebar"
+        use:links
+        class:hidden={sidebarHidden}
+        on:click={() => {
+          if (sidebarHidden) {
+            sidebarHidden = false
+            window.dispatchEvent(new Event('resize'))
+          }
+        }}>
+        <!-- MINIMAP -->
+        <div class="minimap">
+          <MiniMap {miniImage} player={localPlayers[$localUserSessionID]} />
+        </div>
+        <div class="middle-section">
+          <!-- CALENDAR -->
+          <div class="calendar">
+            {#await events then events}
+              <EventList {events} />
+            {/await}
+          </div>
+          <!-- CHAT -->
+          <div class="chat">
+            {#each Object.values(AREA) as A}
+              {#if localPlayers[$localUserSessionID].area === A}
+                <Chat
+                  chatMessages={chatMessages.filter((m) => m.area === A)}
+                  currentArea={A}
+                  on:submit={submitChat} />
+              {/if}
+            {/each}
+          </div>
+        </div>
+        <!-- MENUBAR -->
+        <div class="menu">
+          <Menu
+            authenticated={localPlayers[$localUserSessionID].authenticated} />
+        </div>
       </div>
-      <!-- CHAT -->
-      <div class="chat">
-        {#each Object.values(AREA) as A}
-          {#if localPlayers[$localUserSessionID].area === A}
-            <Chat
-              chatMessages={chatMessages.filter((m) => m.area === A)}
-              currentArea={A}
-              on:submit={submitChat} />
-          {/if}
-        {/each}
-      </div>
-    </div>
-    <!-- MENUBAR -->
-    <div class="menu">
-      <Menu authenticated={localPlayers[$localUserSessionID].authenticated} />
-    </div>
-  </div>
-{/if}
+    {/if}
+  {/if}
+</MediaQuery>
 
 <!-- GAME WORLD -->
 <div class="game" class:expanded={sidebarHidden} bind:this={gameContainer} />
@@ -1388,6 +1403,17 @@
     {/await}
   </div>
 {/if} -->
+
+<!-- MOBILE MENU-->
+<MediaQuery query="(max-width: 800px)" let:matches>
+  {#if matches}
+    {#if localPlayers[$localUserSessionID]}
+      <div class="mobile-menu" use:links>
+        <Menu authenticated={localPlayers[$localUserSessionID].authenticated} />
+      </div>
+    {/if}
+  {/if}
+</MediaQuery>
 
 <!-- INVENTORY -->
 {#if localPlayers && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].carrying}
