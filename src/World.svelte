@@ -508,6 +508,7 @@
 
             // PLAYER: BANNED
             gameRoom.onMessage("banned", (message) => {
+              console.log("RECIEVED MESSAGe banned")
               setUIState(STATE.BANNED)
             })
 
@@ -722,6 +723,7 @@
             })
           })
           .catch((e) => {
+            console.dir(e)
             if (e.code == 4215) {
               console.log("BANNED")
               setUIState(STATE.BANNED)
@@ -849,7 +851,6 @@
             landMarkLocation.y = lm.y
             landMarkLocation.pivot.x = landMarkLocation.width / 2
             landMarkLocation.pivot.y = landMarkLocation.height / 2
-
             landMarkLayer.addChild(landMarkLocation)
           })
         })
