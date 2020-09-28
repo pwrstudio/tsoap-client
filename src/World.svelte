@@ -482,7 +482,7 @@
           .joinOrCreate("game", playerObject)
           .then((gameRoom) => {
             // HACK
-            if (section == 'authenticate') {
+            if (section == "authenticate") {
               history.replaceState({}, "CONNECTED", "/")
             }
 
@@ -928,9 +928,9 @@
     playerLayer = new PIXI.Container()
     landMarkLayer = new PIXI.Container()
     viewport.addChild(mapLayer)
+    viewport.addChild(audioInstallationLayer)
     viewport.addChild(exhibitionLayer)
     viewport.addChild(emergentLayer)
-    viewport.addChild(audioInstallationLayer)
     viewport.addChild(playerLayer)
     viewport.addChild(landMarkLayer)
 
