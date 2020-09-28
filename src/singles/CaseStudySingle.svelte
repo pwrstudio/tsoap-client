@@ -11,21 +11,22 @@
   import { urlFor, renderBlockText, loadData } from "../sanity.js"
   import { links } from "svelte-routing"
 
-  import { FORMATMAP, QUERY } from "../global.js"
+  // import { FORMATMAP, QUERY } from "../global.js"
 
   // COMPONENTS
   import ParticipantsList from "../lists/ParticipantsList.svelte"
   import EventList from "../lists/EventList.svelte"
+  import MaterialItem from "./MaterialItem.svelte"
 
   // *** PROPS
   export let caseStudy = {}
   // const relatedEvents = loadData(QUERY.RELATED_EVENTS, {id: caseStudy._id})
+
+  console.dir(caseStudy)
 </script>
 
 <style lang="scss">
   @import "../variables.scss";
-
-  $ITEM_HEIGHT: 60px;
 
   .case-study-single {
     .main-header {
@@ -52,68 +53,6 @@
 
     .material {
       padding: 15px;
-
-      .material-item {
-        width: 100%;
-        // height: $ITEM_HEIGHT;
-        background: $COLOR_LIGHT;
-        color: $COLOR_DARK;
-        display: block;
-        text-decoration: none;
-        user-select: none;
-        padding-top: 5px;
-        padding-bottom: 10px;
-
-        .row {
-          width: 100%;
-
-          display: flex;
-          justify-content: space-between;
-
-          .title {
-            font-family: $SANS_STACK;
-            font-weight: 400;
-            white-space: nowrap;
-          }
-
-          .elips {
-            margin-left: 5px;
-            margin-right: 5px;
-            width: 90%;
-            white-space: nowrap;
-            overflow: hidden;
-            flex-shrink: 4;
-            color: $COLOR_MID_2;
-          }
-
-          .format {
-            white-space: nowrap;
-            color: $COLOR_MID_2;
-          }
-        }
-
-        cursor: pointer;
-
-        // transition: background 0.5s $transition;
-
-        &:hover {
-          background: $COLOR_MID_1;
-        }
-
-        &.header {
-          border-bottom: 1px dotted $COLOR_MID_1;
-          cursor: default;
-
-          .archive-link {
-            color: $COLOR_MID_2;
-            text-decoration: underline;
-          }
-
-          &:hover {
-            background: unset;
-          }
-        }
-      }
     }
 
     .text {
@@ -126,6 +65,68 @@
 
     .related-events {
       padding: 15px;
+    }
+  }
+
+  .material-item {
+    width: 100%;
+    // height: $ITEM_HEIGHT;
+    background: $COLOR_LIGHT;
+    color: $COLOR_DARK;
+    display: block;
+    text-decoration: none;
+    user-select: none;
+    padding-top: 5px;
+    padding-bottom: 10px;
+
+    .row {
+      width: 100%;
+
+      display: flex;
+      justify-content: space-between;
+
+      .title {
+        font-family: $SANS_STACK;
+        font-weight: 400;
+        white-space: nowrap;
+      }
+
+      .elips {
+        margin-left: 5px;
+        margin-right: 5px;
+        width: 90%;
+        white-space: nowrap;
+        overflow: hidden;
+        flex-shrink: 4;
+        color: $COLOR_MID_2;
+      }
+
+      .format {
+        white-space: nowrap;
+        color: $COLOR_MID_2;
+      }
+    }
+
+    cursor: pointer;
+
+    // transition: background 0.5s $transition;
+
+    &:hover {
+      background: $COLOR_MID_1;
+    }
+
+    &.header {
+      border-bottom: 1px dotted $COLOR_MID_1;
+      cursor: default;
+
+      .archive-link {
+        color: $COLOR_MID_2;
+        text-decoration: underline;
+      }
+
+      &:hover {
+        background: unset;
+      }
     }
   }
 </style>
@@ -157,17 +158,7 @@
     </div>
     {#if Array.isArray(caseStudy.material)}
       {#each caseStudy.material as item (item._key)}
-        <div class="material-item">
-          <div class="row">
-            <div class="title">{item.title}</div>
-            <div class="elips">
-              ....................................................................
-            </div>
-            <div class="format">
-              {item._type === 'fileBlock' ? item.fileType : FORMATMAP[item._type]}
-            </div>
-          </div>
-        </div>
+        <MaterialItem {item}/>
       {/each}
     {/if}
   </div>

@@ -1268,6 +1268,12 @@
         transform: scale(1.1);
       }
     }
+
+    transition: transform 0.3s ease-out;
+
+    &.pushed {
+      transform: translateY(380px);
+    }
   }
 
   .active-content-slot {
@@ -1284,7 +1290,6 @@
     overflow-y: auto;
     font-size: $FONT_SIZE_BASE;
     color: $COLOR_DARK;
-    padding-bottom: 60px;
 
     @include hide-scroll;
 
@@ -1398,6 +1403,7 @@
 {#if ['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}
   <div
     class="passive-content-slot"
+    class:pushed={!activeContentClosed}
     use:links
     transition:fly={{ y: 200, duration: 400, easing: quartOut }}>
     <a class="close" href="/">×</a>
@@ -1442,7 +1448,7 @@
 
 <!-- ACTIVE CONTENT: STREAM -->
 <!-- {#if get(localPlayers, '[$localUserSessionID]', false) && localPlayers[$localUserSessionID].area === 4 && !activeContentClosed} -->
-<!-- {#if !activeContentClosed}
+{#if !activeContentClosed}
   <div class="active-content-slot" transition:fly={{ y: -200 }}>
     <div
       class="close"
@@ -1457,7 +1463,7 @@
         event={events.find((ev) => ev.slug.current === 'test-event')} />
     {/await}
   </div>
-{/if} -->
+{/if}
 
 <!-- MOBILE -->
 <MediaQuery query="(max-width: 800px)" let:matches>
