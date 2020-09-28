@@ -13,7 +13,6 @@
 </script>
 
 <Router>
-  <Route path="/authenticate/:sso/:sig" component={World} authenticate={true} />
   <Route path="/*" let:params>
     <World {params} />
   </Route>

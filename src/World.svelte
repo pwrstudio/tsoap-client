@@ -71,13 +71,12 @@
   document.addEventListener(visibilityChange, handleVisibilityChange, false)
 
   // PROPS
-  export let authenticate = false
-  export let sso = false
-  export let sig = false
   export let params = false
 
   let section = false
   let slug = false
+  let sso = false
+  let sig = false
 
   $: {
     // // Split URL parameters
@@ -86,7 +85,12 @@
     // console.log("– params", params)
     const args = get(params, "[*]", "").split("/")
     section = args[0] && args[0].length > 0 ? args[0] : "seed"
-    slug = args[1] && args[1].length > 0 ? args[1] : false
+    if (section === "authenticate") {
+      sso = args[1] && args[1].length > 0 ? args[1] : false
+      sig = args[2] && args[2].length > 0 ? args[2] : false
+    } else {
+      slug = args[1] && args[1].length > 0 ? args[1] : false
+    }
     // console.log("– section", section)
     // console.log("– slug", slug)
     // console.log("* * * * * ")
@@ -456,7 +460,7 @@
 
         let playerObject = {}
 
-        if (authenticate && sso && sig) {
+        if (section === "authenticate" && sso && sig) {
           playerObject = {
             sso: sso,
             sig: sig,
@@ -478,7 +482,7 @@
           .joinOrCreate("game", playerObject)
           .then((gameRoom) => {
             // HACK
-            if (authenticate) {
+            if (section == 'authenticate') {
               history.replaceState({}, "CONNECTED", "/")
             }
 
