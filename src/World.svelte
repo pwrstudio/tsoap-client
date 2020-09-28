@@ -36,6 +36,8 @@
   import PageSingle from "./singles/PageSingle.svelte"
   import UserProfileSingle from "./singles/UserProfileSingle.svelte"
   import EventSingle from "./singles/EventSingle.svelte"
+  import AudioInstallationSingle from "./singles/AudioInstallationSingle.svelte"
+
   // overlays
   import Login from "./overlays/Login.svelte"
   import Banned from "./overlays/Banned.svelte"
@@ -122,6 +124,8 @@
 
   let caseStudiesExhibition = []
   let caseStudiesEmergent = []
+
+  let inAudioZone = false
 
   // DOM REFERENCES
   let gameContainer = {}
@@ -231,6 +235,7 @@
       if (dist < 400) {
         if (!a.audio.playing()) {
           a.audio.play()
+          inAudioZone = true
         }
         // OldRange = 250
         // NewRange = 1
@@ -242,6 +247,7 @@
       if (dist > 400) {
         if (a.audio.playing()) {
           a.audio.pause()
+          inAudioZone = false
         }
       }
     })
@@ -1452,7 +1458,7 @@
 
 <!-- ACTIVE CONTENT: STREAM -->
 <!-- {#if get(localPlayers, '[$localUserSessionID]', false) && localPlayers[$localUserSessionID].area === 4 && !activeContentClosed} -->
-{#if !activeContentClosed}
+{#if !activeContentClosed && !inAudioZone}
   <div class="active-content-slot" transition:fly={{ y: -200 }}>
     <div
       class="close"
@@ -1465,6 +1471,21 @@
       <EventSingle
         live={true}
         event={events.find((ev) => ev.slug.current === 'test-event')} />
+    {/await}
+  </div>
+{/if}
+
+{#if inAudioZone}
+  <div class="active-content-slot" transition:fly={{ y: -200 }}>
+    <div
+      class="close"
+      on:click={(e) => {
+        activeContentClosed = true
+      }}>
+      ×
+    </div>
+    {#await audioInstallations then audioInstallations}
+      <AudioInstallationSingle />
     {/await}
   </div>
 {/if}
