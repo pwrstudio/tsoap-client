@@ -379,8 +379,8 @@
               )
               sprite.name = ms
               sprite.visible = ms === "rest" ? true : false
-              sprite.height = 80
-              sprite.width = 80
+              sprite.height = 60
+              sprite.width = 60
               // if (playerOptions.npc) {
               //   sprite.tint = 0xfc9c42
               // }
