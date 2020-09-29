@@ -7,6 +7,7 @@
 
   // IMPORTS
   import { fade } from "svelte/transition"
+  import anchorme from "anchorme" // or this
   import get from "lodash/get"
 
   // GLOBALS
@@ -54,5 +55,15 @@
     <span class="name">{message.name}:</span>
     <span class="date">{formattedChatDate(message.timestamp)}</span>
   </div>
-  <div class="body">{message.text}</div>
+  <div class="body">
+    {@html anchorme({
+      input: message.text,
+      options: {
+        attributes: {
+          target: '_blank',
+          class: 'some-class',
+        },
+      },
+    })}
+  </div>
 </div>

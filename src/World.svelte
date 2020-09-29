@@ -37,7 +37,6 @@
   import UserProfileSingle from "./singles/UserProfileSingle.svelte"
   import EventSingle from "./singles/EventSingle.svelte"
   import AudioInstallationSingle from "./singles/AudioInstallationSingle.svelte"
-
   // overlays
   import Login from "./overlays/Login.svelte"
   import Banned from "./overlays/Banned.svelte"
