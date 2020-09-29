@@ -9,17 +9,17 @@
   import { onMount } from "svelte"
   import * as Colyseus from "colyseus.js"
   import * as PIXI from "pixi.js"
-  // import * as PIXI from "./pixi.js"
   import { Viewport } from "pixi-viewport"
   import get from "lodash/get"
   import sample from "lodash/sample"
-  import { fade, fly, scale } from "svelte/transition"
+  import { fly, scale } from "svelte/transition"
   import { quartOut } from "svelte/easing"
   import { urlFor, loadData } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
   import MediaQuery from "svelte-media-query"
   import Tweener from "tweener"
+  import Cookies from "js-cookie"
 
   const tweener = new Tweener(1 / 60)
 
@@ -38,10 +38,11 @@
   import CaseStudySingle from "./singles/CaseStudySingle.svelte"
   import PageSingle from "./singles/PageSingle.svelte"
   import UserProfileSingle from "./singles/UserProfileSingle.svelte"
-  import EventSingle from "./singles/EventSingle.svelte"
+  import EventSingle from "./singles/event/EventSingle.svelte"
+  import LiveSingle from "./singles/event/LiveSingle.svelte"
+  import ArchivedSingle from "./singles/event/ArchivedSingle.svelte"
   import AudioInstallationSingle from "./singles/AudioInstallationSingle.svelte"
   // overlays
-  import Login from "./overlays/Login.svelte"
   import Banned from "./overlays/Banned.svelte"
   import LoadingScreen from "./overlays/LoadingScreen.svelte"
   import Error from "./overlays/Error.svelte"
@@ -76,7 +77,6 @@
 
   // PROPS
   export let params = false
-
   let section = false
   let slug = false
   let sso = false
@@ -103,7 +103,6 @@
   // GLOBAL
   import {
     nanoid,
-    getRandomInt,
     MAP,
     COLORMAP,
     TINTMAP,
@@ -124,11 +123,9 @@
   const users = loadData(QUERY.USERS)
   const pages = loadData(QUERY.PAGES)
 
-  let caseStudiesExhibition = []
-  let caseStudiesEmergent = []
-
   let inAudioZone = false
 
+  // TOOLBAR STATE
   const BOTTOM_AREA_STATE = {
     CHAT: 0,
     SEMINAR: 1,
@@ -136,11 +133,6 @@
   }
 
   let bottomAreaState = BOTTOM_AREA_STATE.CHAT
-
-  // DOM REFERENCES
-  let gameContainer = {}
-
-  // VARIABLES
 
   const STATE = {
     ERROR: 0,
@@ -177,10 +169,13 @@
     console.log("STATE: ", UI.state)
   }
 
+  // DOM REFERENCES
+  let gameContainer = {}
+
+  // VARIABLES
   let activeContentClosed = false
   let audioChatActive = false
   let sidebarHidden = false
-  let loggedIn = false
   let caseStudiesLoaded = false
   let intentToPickUp = false
 
@@ -188,7 +183,6 @@
   let miniImage = false
 
   // WORLD STATE
-  let playersInProximity = []
   let localPlayers = {}
   let chatMessages = []
   let moveQ = []
@@ -215,27 +209,7 @@
   // PIXI MISC.
   let targetGraphics = {}
 
-  const checkPlayerProximity = () => {
-    playersInProximity = []
-    for (let k in localPlayers) {
-      if (
-        !localPlayers[k].isSelf &&
-        Math.abs(
-          localPlayers[k].avatar.x - localPlayers[$localUserSessionID].avatar.x
-        ) < 200 &&
-        Math.abs(
-          localPlayers[k].avatar.y - localPlayers[$localUserSessionID].avatar.y
-        ) < 200
-      ) {
-        playersInProximity.push(localPlayers[k])
-      }
-    }
-  }
-
   const checkAudioProximity = () => {
-    // debounce(() => {
-    // console.log(Date.now())
-    // console.log("checking audio...")
     audioInstallationLayer.children.forEach((a) => {
       let dist = Math.sqrt(
         Math.pow(a.x - localPlayers[$localUserSessionID].avatar.x, 2) +
@@ -261,7 +235,6 @@
         }
       }
     })
-    // }, 500)
   }
 
   // GAME LOOP
@@ -295,12 +268,10 @@
 
             if (intentToPickUp) {
               pickUpCaseStudy(intentToPickUp)
-              // intentToPickUp = false
             }
           }
           localPlayers[key].avatar.setAnimation("rest")
           delete moveQ[key]
-          // checkPlayerProximity()
         }
       } else {
         delete moveQ[key]
@@ -329,8 +300,7 @@
   let dropCaseStudy = () => {}
   let pickUpCaseStudy = () => {}
 
-  const makeNewUser = (sso, sig) => {
-    loggedIn = true
+  const initializeGameWorld = (sso, sig) => {
     gameContainer.appendChild(app.view)
 
     // Load assets
@@ -462,6 +432,11 @@
           if (player.isSelf) {
             viewport.follow(player.avatar)
             localUserSessionID.set(player.id)
+            // Set cookie if user is successfully authenticated
+            if (player.authenticated) {
+              console.log("Current user is logged in")
+              Cookies.set("tsoap-logged-in", "true", { expires: 7 })
+            }
             setUIState(STATE.READY)
           }
 
@@ -498,11 +473,9 @@
           .joinOrCreate("game", playerObject)
           .then((gameRoom) => {
             // HACK
-            if (section == "authenticate") {
-              history.replaceState({}, "CONNECTED", "/")
-            }
-
-            console.dir(gameRoom)
+            // if (section == "authenticate") {
+            //   history.replaceState({}, "CONNECTED", "/")
+            // }
 
             // ******
             // PLAYER
@@ -543,12 +516,6 @@
               hideTarget()
             })
 
-            // gameRoom.state.players.carrying.onChange = (player, sessionId) => {
-            //   if ($localUserSessionID === sessionId) {
-            //     console.log("CARRYING CHANGED")
-            //   }
-            // }
-
             // PLAYER: STATE CHANGE
             gameRoom.state.players.onChange = (player, sessionId) => {
               // console.log("player state change")
@@ -572,7 +539,7 @@
                 localPlayers[sessionId].area = player.area
                 localPlayers[sessionId].avatar.x = player.x
                 localPlayers[sessionId].avatar.y = player.y
-                checkPlayerProximity()
+                // checkPlayerProximity()
               }
             }
 
@@ -787,61 +754,56 @@
 
       // ADD EXHIBITION CASE STUDIES
       caseStudies.then((caseStudies) => {
-        caseStudiesExhibition = caseStudies.filter(
-          (cs) => cs._type === "caseStudyExhibition"
-        )
-        caseStudiesEmergent = caseStudies.filter(
-          (cs) => cs._type === "caseStudyEmergent"
-        )
+        caseStudies
+          .filter((cs) => cs._type === "caseStudyExhibition")
+          .forEach((cs, i) => {
+            const spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
+            const spriteId = "caseStudy-" + cs._id
+            const csLoader = new PIXI.Loader()
+            csLoader.add(spriteId, spriteUrl).load((loader, resources) => {
+              const frames = new PIXI.AnimatedSprite(
+                resources[spriteId].spritesheet.animations["frames"]
+              )
+              frames.animationSpeed = 0.02
+              frames.play()
 
-        caseStudiesExhibition.forEach((cs, i) => {
-          const spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
-          const spriteId = "caseStudy-" + cs._id
-          const csLoader = new PIXI.Loader()
-          csLoader.add(spriteId, spriteUrl).load((loader, resources) => {
-            const frames = new PIXI.AnimatedSprite(
-              resources[spriteId].spritesheet.animations["frames"]
-            )
-            frames.animationSpeed = 0.02
-            frames.play()
+              const nameText = new PIXI.Text(cs.title, TEXT_STYLE)
+              nameText.anchor.set(0.5)
 
-            const nameText = new PIXI.Text(cs.title, TEXT_STYLE)
-            nameText.anchor.set(0.5)
+              const caseStudyLocation = new PIXI.Container()
+              caseStudyLocation.addChild(frames)
+              caseStudyLocation.x = cs.x
+              caseStudyLocation.y = cs.y
+              caseStudyLocation.pivot.x = caseStudyLocation.width / 2
+              caseStudyLocation.pivot.y = caseStudyLocation.height / 2
+              caseStudyLocation.title = cs.title
+              caseStudyLocation.interactive = true
 
-            const caseStudyLocation = new PIXI.Container()
-            caseStudyLocation.addChild(frames)
-            caseStudyLocation.x = cs.x
-            caseStudyLocation.y = cs.y
-            caseStudyLocation.pivot.x = caseStudyLocation.width / 2
-            caseStudyLocation.pivot.y = caseStudyLocation.height / 2
-            caseStudyLocation.title = cs.title
-            caseStudyLocation.interactive = true
+              const onDown = (e) => {
+                navigate("/case-studies/" + get(cs, "slug.current", false))
+                e.stopPropagation()
+              }
 
-            const onDown = (e) => {
-              navigate("/case-studies/" + get(cs, "slug.current", false))
-              e.stopPropagation()
-            }
+              const onEnter = (e) => {
+                gameContainer.style.cursor = "pointer"
+                nameText.x = caseStudyLocation.x + 10
+                nameText.y = caseStudyLocation.y - 60
+                exhibitionLayer.addChild(nameText)
+              }
 
-            const onEnter = (e) => {
-              gameContainer.style.cursor = "pointer"
-              nameText.x = caseStudyLocation.x + 10
-              nameText.y = caseStudyLocation.y - 60
-              exhibitionLayer.addChild(nameText)
-            }
+              const onLeave = (e) => {
+                gameContainer.style.cursor = "default"
+                exhibitionLayer.removeChild(nameText)
+              }
 
-            const onLeave = (e) => {
-              gameContainer.style.cursor = "default"
-              exhibitionLayer.removeChild(nameText)
-            }
+              caseStudyLocation.on("mousedown", onDown)
+              caseStudyLocation.on("touchstart", onDown)
+              caseStudyLocation.on("mouseover", onEnter)
+              caseStudyLocation.on("mouseout", onLeave)
 
-            caseStudyLocation.on("mousedown", onDown)
-            caseStudyLocation.on("touchstart", onDown)
-            caseStudyLocation.on("mouseover", onEnter)
-            caseStudyLocation.on("mouseout", onLeave)
-
-            exhibitionLayer.addChild(caseStudyLocation)
+              exhibitionLayer.addChild(caseStudyLocation)
+            })
           })
-        })
       })
 
       // ADD AUDIO INSTALLATIONS
@@ -936,6 +898,24 @@
     app.stage.addChild(viewport)
 
     // Create and add layers
+    // (1) => Map
+    // (2) => Audio Installations
+    // (3) => Exhibitions
+    // (4) => Emergent/mobil case studies
+    // (5) => Players
+    // (6) => Landmarks
+    // let layers = [
+    //   mapLayer,
+    //   emergentLayer,
+    //   exhibitionLayer,
+    //   audioInstallationLayer,
+    //   playerLayer,
+    //   landMarkLayer,
+    // ]
+    // layers.forEach((l) => {
+    //   l = new PIXI.Container()
+    //   viewport.addChild(l)
+    // })
     mapLayer = new PIXI.Container()
     emergentLayer = new PIXI.Container()
     exhibitionLayer = new PIXI.Container()
@@ -962,27 +942,26 @@
 
     window.dispatchEvent(new Event("resize"))
 
-    // if (window.matchMedia("(max-width: 700px)").matches) {
-    //   viewport.setZoom(0.75)
-    // }
-
     // Give the local user a UUID
     localUserUUID.set(nanoid())
 
-    // console.log("CHECKING URL PARAMS ====>")
-    // console.log("section", section)
-    // console.log("slug", slug)
-
+    // HACK
     setTimeout(() => {
       caseStudiesLoaded = true
     }, 5000)
 
-    if (section === "login") {
-      console.log("LOGIN")
-      setUIState(STATE.LOGIN)
-    } else {
-      makeNewUser(sso, sig)
+    let visitorCookie = Cookies.get("tsoap-visitor")
+    console.dir(visitorCookie)
+    Cookies.set("tsoap-visitor", "true", { expires: 7 })
+
+    let authCookie = Cookies.get("tsoap-logged-in")
+    console.dir(authCookie)
+
+    if (authCookie) {
+      window.location = "https://sso.tsoap.dev/auth/discourse_sso"
     }
+
+    initializeGameWorld(sso, sig)
   })
 </script>
 
@@ -992,46 +971,6 @@
   * {
     box-sizing: border-box;
     font-family: $MONO_STACK;
-  }
-
-  .pop {
-    position: fixed;
-    width: auto;
-    background: $COLOR_MID_2;
-    height: auto;
-    line-height: 2em;
-    text-align: center;
-    top: 10px;
-    right: 410px;
-    padding: 20px;
-    border-radius: 10px;
-
-    @include screen-size("small") {
-      top: unset;
-      bottom: 20px;
-    }
-
-    &.tiny {
-      border-radius: 5px;
-      opacity: 0.7;
-      padding: 5px;
-      font-size: 10px;
-      line-height: 1.2em;
-      pointer-events: none;
-    }
-  }
-
-  .proximity {
-    font-size: $FONT_SIZE_BASE;
-    position: fixed;
-    width: auto;
-    background: $COLOR_LIGHT;
-    height: auto;
-    line-height: 2em;
-    top: 10px;
-    left: 10px;
-    padding: 20px;
-    border-radius: 10px;
   }
 
   .inventory {
@@ -1252,14 +1191,13 @@
     }
   }
 
-  .passive-content-slot {
+  .main-content-slot {
     position: absolute;
-    top: 10px;
+    top: 0;
     right: calc(#{$SIDEBAR_WIDTH} + 10px);
     width: 500px;
     max-width: calc(100vw - (#{$SIDEBAR_WIDTH} + 20px));
-    max-height: calc(100vh - 20px);
-    background: $COLOR_LIGHT;
+    max-height: 100vh;
     z-index: 100;
     overflow-y: auto;
     font-size: $FONT_SIZE_BASE;
@@ -1289,6 +1227,7 @@
       cursor: pointer;
       text-decoration: none;
       transition: transform 0.3s $transition;
+      z-index: 100;
 
       @include screen-size("small") {
         top: 0px;
@@ -1301,47 +1240,39 @@
 
     transition: transform 0.3s ease-out;
 
-    &.pushed {
-      transform: translateY(380px);
-    }
-  }
-
-  .active-content-slot {
-    background: $COLOR_LIGHT;
-    z-index: 100;
-    font-size: $FONT_SIZE_BASE;
-    color: $COLOR_DARK;
-    position: fixed;
-    top: 10px;
-    right: calc(#{$SIDEBAR_WIDTH} + 10px);
-    width: 500px;
-    max-width: calc(100vw - (#{$SIDEBAR_WIDTH} + 20px));
-    max-height: calc(100vh - 20px);
-    overflow-y: auto;
-    font-size: $FONT_SIZE_BASE;
-    color: $COLOR_DARK;
-
-    @include hide-scroll;
-
-    .close {
-      margin-bottom: 20px;
-      position: absolute;
-      top: -10px;
-      right: 10px;
-      font-size: 38px;
-      color: $COLOR_MID_2;
-      cursor: pointer;
-      text-decoration: none;
-      transition: transform 0.3s $transition;
+    .content-item {
+      width: 100%;
+      background: $COLOR_LIGHT;
       z-index: 100;
+      font-size: $FONT_SIZE_BASE;
+      color: $COLOR_DARK;
+      position: relative;
+      margin-bottom: 10px;
+      margin-top: 10px;
 
-      @include screen-size("small") {
-        top: 0px;
+      @include hide-scroll;
+
+      .close {
+        margin-bottom: 20px;
+        position: absolute;
+        top: -10px;
+        right: 10px;
+        font-size: 38px;
+        color: $COLOR_MID_2;
+        cursor: pointer;
+        text-decoration: none;
+        transition: transform 0.3s $transition;
+
+        @include screen-size("small") {
+          top: 0px;
+        }
+
+        &:hover {
+          transform: scale(1.1);
+        }
       }
 
-      &:hover {
-        transform: scale(1.1);
-      }
+      transition: transform 0.3s ease-out;
     }
   }
 
@@ -1451,15 +1382,54 @@
 <!-- GAME WORLD -->
 <div class="game" class:expanded={sidebarHidden} bind:this={gameContainer} />
 
-{#if ['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}
-  <div
-    class="passive-content-slot"
-    class:pushed={!activeContentClosed}
-    use:links
-    transition:fly={{ y: 200, duration: 400, easing: quartOut }}>
-    <a class="close" href="/">×</a>
-    <!-- CASE STUDIES -->
-    {#await caseStudies then caseStudies}
+<!-- MAIN CONTENT -->
+<div class="main-content-slot">
+  <!-- INFORMATION BOX -->
+
+  <!-- AUDIOZONE -->
+  {#if inAudioZone}
+    <div class="content-item active" transition:fly={{ y: -200 }}>
+      <div
+        class="close"
+        on:click={(e) => {
+          activeContentClosed = true
+        }}>
+        ×
+      </div>
+      {#await audioInstallations then audioInstallations}
+        <AudioInstallationSingle />
+      {/await}
+    </div>
+  {/if}
+
+  <!-- LIVE -->
+  <!-- {#if get(localPlayers, '[$localUserSessionID]', false) && localPlayers[$localUserSessionID].area === 4 && !activeContentClosed} -->
+  {#if !activeContentClosed}
+    <div class="content-item active" transition:fly={{ y: -200 }}>
+      <div
+        class="close"
+        on:click={(e) => {
+          activeContentClosed = true
+        }}>
+        ×
+      </div>
+      {#await events then events}
+        <LiveSingle
+          event={events.find((ev) => ev.slug.current === 'test-event')} />
+      {/await}
+    </div>
+  {/if}
+
+  <!-- TEXT CONTENT -->
+  {#if ['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}
+    <div
+      class="content-item passive"
+      class:pushed={!activeContentClosed}
+      use:links
+      transition:fly={{ y: 200, duration: 400, easing: quartOut }}>
+      <a class="close" href="/">×</a>
+      <!-- CASE STUDIES -->
+      {#await caseStudies then caseStudies}
       {#if section === 'case-studies'}
         {#if slug}
           <!-- SINGLE CASE STUDY -->
@@ -1471,65 +1441,32 @@
         {/if}
       {/if}
     {/await}
-    <!-- USERS -->
-    {#await users then users}
+      <!-- USERS -->
+      {#await users then users}
       {#if section == 'profiles' && slug}
         <!-- SINGLE PROFILE -->
         <UserProfileSingle
           user={users.find((u) => get(u, 'slug.current', '') === slug)} />
       {/if}
     {/await}
-    <!-- EVENTS -->
-    {#await events then events}
+      <!-- EVENTS -->
+      {#await events then events}
       {#if section === 'events' && slug}
         <!-- SINGLE EVENT -->
         <EventSingle event={events.find((ev) => ev.slug.current === slug)} />
       {/if}
     {/await}
-    <!-- PAGES -->
-    {#await pages then pages}
+      <!-- PAGES -->
+      {#await pages then pages}
       {#if section == 'pages' && slug}
         <!-- SINGLE PAGE -->
         <PageSingle
           page={pages.find((p) => get(p, 'slug.current', '') === slug)} />
       {/if}
     {/await}
-  </div>
-{/if}
-
-<!-- ACTIVE CONTENT: STREAM -->
-<!-- {#if get(localPlayers, '[$localUserSessionID]', false) && localPlayers[$localUserSessionID].area === 4 && !activeContentClosed} -->
-{#if !activeContentClosed && !inAudioZone}
-  <div class="active-content-slot" transition:fly={{ y: -200 }}>
-    <div
-      class="close"
-      on:click={(e) => {
-        activeContentClosed = true
-      }}>
-      ×
     </div>
-    {#await events then events}
-      <EventSingle
-        live={true}
-        event={events.find((ev) => ev.slug.current === 'test-event')} />
-    {/await}
-  </div>
-{/if}
-
-{#if inAudioZone}
-  <div class="active-content-slot" transition:fly={{ y: -200 }}>
-    <div
-      class="close"
-      on:click={(e) => {
-        activeContentClosed = true
-      }}>
-      ×
-    </div>
-    {#await audioInstallations then audioInstallations}
-      <AudioInstallationSingle />
-    {/await}
-  </div>
-{/if}
+  {/if}
+</div>
 
 <!-- MOBILE -->
 <MediaQuery query="(max-width: 800px)" let:matches>
@@ -1590,11 +1527,6 @@
     on:close={(e) => {
       audioChatActive = false
     }} />
-{/if}
-
-<!-- LOGIN -->
-{#if section === 'login'}
-  <Login {sso} {sig} />
 {/if}
 
 <!-- BANNED -->

@@ -4,6 +4,8 @@
   //  Menu
   //
   // # # # # # # # # # # # # #
+  // IMPORTS
+  import Cookies from "js-cookie"
 
   // *** PROPS
   export let authenticated = false
@@ -51,7 +53,13 @@
   </div>
 
   {#if authenticated}
-    <a href="/" class="menu-item login">Logout</a>
+    <a
+      href="/"
+      class="menu-item login"
+      on:click={(e) => {
+        Cookies.remove('tsoap-logged-in')
+        window.location = '/'
+      }}>Logout</a>
   {:else}
     <a
       href="https://sso.tsoap.dev/auth/discourse_sso"
