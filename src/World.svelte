@@ -956,8 +956,7 @@
 
     let authCookie = Cookies.get("tsoap-logged-in")
     console.dir(authCookie)
-
-    if (authCookie) {
+    if (authCookie && section != "authenticate") {
       window.location = "https://sso.tsoap.dev/auth/discourse_sso"
     }
 
