@@ -28,6 +28,9 @@
   import Chat from "./sidebar/Chat.svelte"
   import MiniMap from "./sidebar/MiniMap.svelte"
   import Menu from "./sidebar/Menu.svelte"
+  import ToolBar from "./sidebar/ToolBar.svelte"
+  import Seminar from "./sidebar/Seminar.svelte"
+  import Messaging from "./sidebar/Messaging.svelte"
   // lists
   import EventList from "./lists/EventList.svelte"
   import CaseStudyList from "./lists/CaseStudyList.svelte"
@@ -125,6 +128,14 @@
   let caseStudiesEmergent = []
 
   let inAudioZone = false
+
+  const BOTTOM_AREA_STATE = {
+    CHAT: 0,
+    SEMINAR: 1,
+    MESSAGING: 2,
+  }
+
+  let bottomAreaState = BOTTOM_AREA_STATE.CHAT
 
   // DOM REFERENCES
   let gameContainer = {}
@@ -556,14 +567,13 @@
               }
               if (player.path.waypoints.length > 0) {
                 moveQ[sessionId] = player.path.waypoints
+              } else {
+                // TELEPORT
+                localPlayers[sessionId].area = player.area
+                localPlayers[sessionId].avatar.x = player.x
+                localPlayers[sessionId].avatar.y = player.y
+                checkPlayerProximity()
               }
-              // else {
-              //   // TELEPORT
-              //   localPlayers[sessionId].area = player.area
-              //   localPlayers[sessionId].avatar.x = player.x
-              //   localPlayers[sessionId].avatar.y = player.y
-              //   checkPlayerProximity()
-              // }
             }
 
             // PLAYER: CLICK / TAP
@@ -1204,16 +1214,27 @@
     .middle-section {
       height: calc(100% - 240px);
 
-      .calendar {
+      .top-area {
         height: 50%;
         overflow: hidden;
         @include hide-scroll;
       }
 
-      .chat {
+      .bottom-area {
         background: $COLOR_DARK;
-        height: 50%;
+        height: calc(50% - 50px);
         @include hide-scroll;
+      }
+
+      .toolbar {
+        width: 100%;
+        // padding-top: 0px;
+        // padding-bottom: 10px;
+        height: 50px;
+        // padding-left: 7px;
+        // padding-right: 10px;
+        z-index: 1000;
+        background: $COLOR_DARK;
       }
 
       @include screen-size("small") {
@@ -1360,6 +1381,7 @@
 {/if}
 
 <!-- SIDEBAR -->
+<!-- Show on desktop only -->
 <MediaQuery query="(min-width: 800px)" let:matches>
   {#if matches}
     {#if localPlayers[$localUserSessionID]}
@@ -1378,22 +1400,42 @@
           <MiniMap {miniImage} player={localPlayers[$localUserSessionID]} />
         </div>
         <div class="middle-section">
-          <!-- CALENDAR -->
-          <div class="calendar">
+          <div class="top-area">
+            <!-- CALENDAR -->
             {#await events then events}
               <EventList {events} />
             {/await}
           </div>
-          <!-- CHAT -->
-          <div class="chat">
+          <div class="bottom-area">
+            <!-- CHAT -->
+            {#if bottomAreaState == BOTTOM_AREA_STATE.CHAT}
             {#each Object.values(AREA) as A}
               {#if localPlayers[$localUserSessionID].area === A}
                 <Chat
                   chatMessages={chatMessages.filter((m) => m.area === A)}
                   currentArea={A}
-                  on:submit={submitChat} />
+                  />
               {/if}
             {/each}
+            {/if}
+            <!-- SEMINAR -->
+            {#if bottomAreaState == BOTTOM_AREA_STATE.SEMINAR}
+            <Seminar />
+            {/if}
+            <!-- MESSAGING -->
+            {#if bottomAreaState == BOTTOM_AREA_STATE.MESSAGING}
+            <Messaging/>
+            {/if}
+            <!-- TOOLBAR-->
+            <div class="toolbar">
+          <ToolBar
+            authenticated={localPlayers[$localUserSessionID].authenticated} on:submit={submitChat} on:switchSection={e => {
+              bottomAreaState = e.detail.newSection
+            }}
+            on:teleport={e => {
+              teleportTo(3)
+            }}/>
+        </div>
           </div>
         </div>
         <!-- MENUBAR -->

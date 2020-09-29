@@ -15,28 +15,23 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
+    background: red;
+    color: black;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 100000;
 
     .box {
-      background: red;
+      font-family: $MONO_STACK;
       padding: 20px;
-      font-size: 16vw;
+      font-size: 64px;
       text-align: center;
       user-select: none;
-
-      .header {
-        font-weight: bold;
-      }
     }
   }
 </style>
 
 <div class="banned">
-  <div class="box">
-    <div class="header">BANNED</div>
-  </div>
+  <div class="box">BANNED</div>
 </div>

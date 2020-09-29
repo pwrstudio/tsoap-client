@@ -1,7 +1,7 @@
 <script>
   // # # # # # # # # # # # # #
   //
-  //  Chat
+  //  Seminar
   //
   // # # # # # # # # # # # # #
 
@@ -9,10 +9,10 @@
   import { slide } from "svelte/transition"
 
   // COMPONENTS
-  import ChatMessage from "./ChatMessage.svelte"
+  //   import ChatMessage from "./ChatMessage.svelte"
 
   // DOM REFERENCES
-  let messageContainerEl = {}
+  //   let messageContainerEl = {}
 
   // GLOBAL
   import { COLORMAP } from "../global.js"
@@ -20,24 +20,12 @@
   // PROPS
   export let chatMessages = []
   export let currentArea = 4
-
-  $: {
-    if (chatMessages) {
-      setTimeout(() => {
-        messageContainerEl.scrollTo({
-          top: messageContainerEl.scrollHeight,
-          left: 0,
-          behavior: "smooth",
-        })
-      }, 100)
-    }
-  }
 </script>
 
 <style lang="scss">
   @import "../variables.scss";
 
-  .chat-container {
+  .seminar-container {
     position: relative;
     height: 100%;
   }
@@ -64,11 +52,11 @@
   }
 </style>
 
-<div class="chat-container">
-  <div class="header">You are in: {COLORMAP[currentArea]}</div>
-  <div class="message-container" bind:this={messageContainerEl}>
-    {#each chatMessages as message (message.msgId)}
+<div class="seminar-container">
+  <div class="header">Seminar</div>
+  <div class="message-container">
+    <!-- {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />
-    {/each}
+    {/each} -->
   </div>
 </div>

@@ -24,14 +24,6 @@
     padding-left: 10px;
     padding-right: 10px;
 
-    // @include screen-size("small") {
-    //   position: fixed;
-    //   bottom: 0;
-    //   left: 0;
-    //   width: 100vw;
-    //   z-index: 1000;
-    // }
-
     .menu-item {
       padding-right: 20px;
       float: left;

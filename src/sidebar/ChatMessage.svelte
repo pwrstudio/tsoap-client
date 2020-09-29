@@ -45,7 +45,6 @@
     .body {
       border-left: 1px solid $COLOR_MID_2;
       padding-left: 10px;
-      // font-size: $FONT_SIZE_BASE;
     }
   }
 </style>
@@ -61,7 +60,6 @@
       options: {
         attributes: {
           target: '_blank',
-          class: 'some-class',
         },
       },
     })}
