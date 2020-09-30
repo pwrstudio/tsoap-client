@@ -24,6 +24,7 @@
   console.log("slug", slug)
 
   if (!slug || slug.length == 0) {
+    console.dir($authenticatedUserInformation)
     slug = "test-seminar-4"
     // slug = $authenticatedUserInformation.seminarLink.slug.current
   }

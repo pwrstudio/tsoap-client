@@ -42,6 +42,7 @@ export const QUERY = {
   PAGES: "*[_type == 'page']",
   SEMINAR: "*[_type == 'seminar' && slug.current == $slug][0]",
   SEMINAR_PARTICIPANTS: "*[_type == 'participant' && seminarLink._ref == $id]",
+  AUTH_USER_INFO: "*[_type == 'participant' && username == $username]",
   AUDIO_INSTALLATIONS:
     "*[_type == 'audioInstallation']{..., participants[]->{slug,name}, 'audioURL': soundFile.asset->url,spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   CASE_STUDIES:

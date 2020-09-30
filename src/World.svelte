@@ -391,6 +391,7 @@
             waypoints: [],
             area: playerOptions.area,
             name: playerOptions.name,
+            discourseName: playerOptions.discourseName,
             uuid: playerOptions.uuid,
             ip: playerOptions.ip,
             tint: playerOptions.tint,
@@ -435,7 +436,9 @@
               console.log("Current user is logged in")
               Cookies.set("tsoap-logged-in", "true", { expires: 7 })
               console.dir(player)
+              console.log(player.discourseName)
               localUserAuthenticated.set(true)
+              authenticatedUserInformation.set(loadData(QUERY.AUTH_USER_INFO, {username: player.discourseName}))
             }
             setUIState(STATE.READY)
           }
