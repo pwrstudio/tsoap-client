@@ -59,7 +59,6 @@
   .seminar-container {
     position: relative;
     height: 100%;
-    color: $COLOR_LIGHT;
     font-size: $FONT_SIZE_SMALL;
 
     .header {
@@ -70,7 +69,7 @@
       padding-bottom: 7px;
       width: 100%;
       background: $COLOR_DARK;
-      color: $COLOR_MID_2;
+      color: $COLOR_LIGHT;
       border-bottom: 1px solid $COLOR_LIGHT;
       text-align: left;
     }
@@ -83,6 +82,7 @@
       padding-top: 10px;
       padding-left: 10px;
       padding-right: 10px;
+      color: $COLOR_MID_2;
     }
 
     .link {

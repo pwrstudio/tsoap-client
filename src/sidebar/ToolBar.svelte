@@ -13,8 +13,12 @@
   // *** STORES
   import { localUserAuthenticated } from "../stores"
 
+  // *** PROPS
+  export let section = ""
+
   // VARIABLES
   let chatInputValue = ""
+  let showChatInput = false
 
   const submitChat = () => {
     dispatch("submit", {
@@ -101,10 +105,24 @@
 </style>
 
 <div class="toolbar" use:links>
-  {#if $localUserAuthenticated}
-    <a href="/" class="toolbar-item chat"> Chat </a>
-    <a href="/seminar" class="toolbar-item"> Seminar</a>
-    <a href="/messages" class="toolbar-item">Messages</a>
+  {#if $localUserAuthenticated && !showChatInput}
+    <div
+      class="toolbar-item chat"
+      on:click={(e) => {
+        showChatInput = true
+        navigate('/')
+      }}>
+      Chat
+    </div>
+    <a
+      href="/seminar"
+      class="toolbar-item"
+      class:active={section === 'seminar'}>
+      Seminar</a>
+    <a
+      href="/messages"
+      class="toolbar-item"
+      class:active={section === 'messages'}>Messages</a>
     <div class="toolbar-item" on:click={teleport}>Support</div>
   {:else}
     <input

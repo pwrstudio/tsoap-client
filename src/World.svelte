@@ -1334,6 +1334,7 @@
             <!-- TOOLBAR-->
             <div class="toolbar">
               <ToolBar
+                {section}
                 on:submit={submitChat}
                 on:teleport={(e) => {
                   teleportTo(3)
