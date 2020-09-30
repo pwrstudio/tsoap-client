@@ -83,6 +83,8 @@
       padding-left: 10px;
       padding-right: 10px;
       color: $COLOR_MID_2;
+
+      @include hide-scroll;
     }
 
     .link {

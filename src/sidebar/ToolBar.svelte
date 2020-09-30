@@ -101,8 +101,12 @@
         border-radius: 10px;
         padding: 7px;
         text-decoration: none;
-        padding-right: 25px;
-        padding-left: 25px;
+        padding-right: 20px;
+        padding-left: 20px;
+
+        &:hover {
+          border: 1px solid $COLOR_LIGHT;
+        }
       }
     }
   }
