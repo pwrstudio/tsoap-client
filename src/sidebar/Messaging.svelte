@@ -55,6 +55,11 @@
 <div class="messaging-container">
   <div class="header">Messaging</div>
   <div class="message-container">
+    <div>TODO: List all messages<br /> TODO: Allow writing message</div>
+    <div>
+      TODO: if slug: List all messages from specific user<br />
+      TODO: Allow writing message to specified user
+    </div>
     <!-- {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />
     {/each} -->
