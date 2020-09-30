@@ -83,7 +83,7 @@
 
     .toolbar-item {
       font-size: $FONT_SIZE_BASE;
-      margin-right: 20px;
+      margin-right: 10px;
       float: left;
       color: $COLOR_LIGHT;
       cursor: pointer;
@@ -92,13 +92,17 @@
         text-decoration: underline;
       }
 
+      &.active {
+        text-decoration: underline;
+      }
+
       &.chat {
         border: 1px solid $COLOR_MID_2;
         border-radius: 10px;
         padding: 7px;
         text-decoration: none;
-        padding-right: 15px;
-        padding-left: 15px;
+        padding-right: 25px;
+        padding-left: 25px;
       }
     }
   }
