@@ -16,7 +16,7 @@
   import { QUERY } from "../global.js"
 
   // *** STORES
-  // import { localUserAuthenticated } from "../stores"
+  import { authenticatedUserInformation } from "../stores"
 
   // PROPS
   export let slug = "test-seminar-1"
@@ -25,8 +25,12 @@
 
   if (!slug || slug.length == 0) {
     console.dir($authenticatedUserInformation)
-    slug = "test-seminar-4"
-    // slug = $authenticatedUserInformation.seminarLink.slug.current
+    console.log($authenticatedUserInformation.seminarLink.slug.current)
+    slug = get(
+      $authenticatedUserInformation,
+      "seminarLink.slug.current",
+      "test-seminar-4"
+    )
   }
 
   let seminar = loadData(QUERY.SEMINAR, { slug: slug })
