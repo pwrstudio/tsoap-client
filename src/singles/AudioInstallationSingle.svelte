@@ -21,19 +21,6 @@
 
   // *** PROPS
   export let audioInstallation = {}
-  //   export let live = false
-
-  //   let expanded = false
-
-  //   console.dir(audioInstallaton._id)
-
-  //   const connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
-  //     id: audioInstallaton._id,
-  //   })
-
-  //   connectedCaseStudies.then((connectedCaseStudies) => {
-  //     console.dir(connectedCaseStudies)
-  //   })
 </script>
 
 <style lang="scss">

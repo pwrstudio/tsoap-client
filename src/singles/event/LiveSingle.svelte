@@ -43,11 +43,32 @@
   .event-single {
     .main-header {
       padding: 15px;
+      position: relative;
+      user-select: none;
 
       .title {
         font-family: $SANS_STACK;
         font-size: $FONT_SIZE_LARGE;
         font-weight: 500;
+      }
+
+      .expand {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: $COLOR_MID_2;
+        opacity: 0.4;
+        cursor: pointer;
+        // svg {
+        //   color: $COLOR_MID_2;
+        //   path {
+        //     stroke: $COLOR_MID_2;
+        //   }
+        // }
+
+        &:hover {
+          opacity: 1;
+        }
       }
 
       .participants {
@@ -104,6 +125,16 @@
       expanded = !expanded}}>
     <!-- TITLE -->
     <div class="title">{event.title}</div>
+    <!-- ARROW DOWN -->
+    <div class='expand'>
+      {#if expanded}
+      <svg xmlns="http://www.w3.org/2000/svg" height="40" viewBox="0 0 24 24" width="40"><path d="M0 0h24v24H0z" fill="none"/><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+      {:else}
+            <svg xmlns="http://www.w3.org/2000/svg" height="40" viewBox="0 0 24 24" width="40"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+
+      {/if}
+    
+    </div>
 
     <!-- PARTICIPANTS -->
     {#if get(event, 'participants', false) && Array.isArray(event.participants)}

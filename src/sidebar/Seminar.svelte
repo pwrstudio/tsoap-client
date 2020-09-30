@@ -21,17 +21,17 @@
   // PROPS
   export let slug = "test-seminar-1"
 
-  console.log("slug", slug)
+  // console.log("slug", slug)
 
   if (!slug || slug.length == 0) {
-    console.dir($authenticatedUserInformation)
-    console.log(
-      get(
-        $authenticatedUserInformation,
-        "seminarLink.slug.current",
-        "XXXX NO SLUG"
-      )
-    )
+    // console.dir($authenticatedUserInformation)
+    // console.log(
+    //   get(
+    //     $authenticatedUserInformation,
+    //     "seminarLink.slug.current",
+    //     "XXXX NO SLUG"
+    //   )
+    // )
     slug = get(
       $authenticatedUserInformation,
       "seminarLink.slug.current",
@@ -43,11 +43,11 @@
   let loadedParticipants = []
 
   seminar.then((seminar) => {
-    console.dir(seminar._id)
+    // console.dir(seminar._id)
     loadData(QUERY.SEMINAR_PARTICIPANTS, {
       id: seminar._id,
     }).then((connectedParticipants) => {
-      console.dir(connectedParticipants)
+      // console.dir(connectedParticipants)
       loadedParticipants = connectedParticipants
     })
   })
@@ -134,6 +134,7 @@
         </div>
       <!-- PARTICIPANTS LIST -->
       <div class="participants-list">
+          <div>Participants in seminar:</div>
           <ParticipantsList participants={loadedParticipants}/>
         </div>
     </div>
