@@ -116,7 +116,7 @@
     localUserUUID,
     localUserSessionID,
     localUserAuthenticated,
-    authenticatedUserInformation
+    authenticatedUserInformation,
   } from "./stores.js"
 
   // ** SANITY
@@ -428,7 +428,7 @@
           if (player.isSelf) {
             viewport.follow(player.avatar)
             localUserSessionID.set(player.id)
-            localUserAuthenticated.set(true)
+            // localUserAuthenticated.set(true)
 
             // Set cookie if user is successfully authenticated
             if (player.authenticated) {
