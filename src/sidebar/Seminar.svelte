@@ -25,7 +25,13 @@
 
   if (!slug || slug.length == 0) {
     console.dir($authenticatedUserInformation)
-    console.log($authenticatedUserInformation.seminarLink.slug.current)
+    console.log(
+      get(
+        $authenticatedUserInformation,
+        "seminarLink.slug.current",
+        "XXXX NO SLUG"
+      )
+    )
     slug = get(
       $authenticatedUserInformation,
       "seminarLink.slug.current",

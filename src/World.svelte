@@ -438,7 +438,11 @@
               console.dir(player)
               console.log(player.discourseName)
               localUserAuthenticated.set(true)
-              authenticatedUserInformation.set(loadData(QUERY.AUTH_USER_INFO, {username: player.discourseName}))
+              loadData(QUERY.AUTH_USER_INFO, {
+                username: player.discourseName,
+              }).then((info) => {
+                authenticatedUserInformation.set(info)
+              })
             }
             setUIState(STATE.READY)
           }
