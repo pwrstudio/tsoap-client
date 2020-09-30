@@ -112,7 +112,12 @@
   } from "./global.js"
 
   // STORES
-  import { localUserUUID, localUserSessionID } from "./stores.js"
+  import {
+    localUserUUID,
+    localUserSessionID,
+    localUserAuthenticated,
+    authenticatedUserInformation
+  } from "./stores.js"
 
   // ** SANITY
   const graphicsSettings = loadData(QUERY.GRAPHICS_SETTINGS)
@@ -124,15 +129,6 @@
   const pages = loadData(QUERY.PAGES)
 
   let inAudioZone = false
-
-  // TOOLBAR STATE
-  const BOTTOM_AREA_STATE = {
-    CHAT: 0,
-    SEMINAR: 1,
-    MESSAGING: 2,
-  }
-
-  let bottomAreaState = BOTTOM_AREA_STATE.CHAT
 
   const STATE = {
     ERROR: 0,
@@ -432,10 +428,14 @@
           if (player.isSelf) {
             viewport.follow(player.avatar)
             localUserSessionID.set(player.id)
+            localUserAuthenticated.set(true)
+
             // Set cookie if user is successfully authenticated
             if (player.authenticated) {
               console.log("Current user is logged in")
               Cookies.set("tsoap-logged-in", "true", { expires: 7 })
+              console.dir(player)
+              localUserAuthenticated.set(true)
             }
             setUIState(STATE.READY)
           }
@@ -500,14 +500,11 @@
 
             // PLAYER: ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
-              // console.log("ADD PLAYER")
-              // console.dir(player)
               localPlayers[sessionId] = createPlayer(player, sessionId)
             }
 
             // PLAYER: BANNED
             gameRoom.onMessage("banned", (message) => {
-              console.log("RECIEVED MESSAGe banned")
               setUIState(STATE.BANNED)
             })
 
@@ -527,7 +524,6 @@
                   let g = emergentLayer.children.find(
                     (cs) => cs.uuid === player.carrying
                   )
-                  console.dir(g)
                   navigate("/case-studies/" + g.slug)
                   intentToPickUp = false
                 }
@@ -647,8 +643,6 @@
               }
 
               const onDown = (e) => {
-                // console.dir(localPlayers[$localUserSessionID].carrying)
-
                 // Drop if carrying
                 if (
                   localPlayers[$localUserSessionID].carrying &&
@@ -673,15 +667,11 @@
               }
 
               const onEnter = () => {
-                // nameText.x = caseStudy.x + 10
-                // nameText.y = caseStudy.y - 30
-                // viewport.addChild(nameText)
                 gameContainer.style.cursor = "grab"
               }
 
               const onLeave = () => {
                 gameContainer.style.cursor = "default"
-                // viewport.removeChild(nameText)
               }
 
               container.on("mousedown", onDown)
@@ -742,10 +732,8 @@
           .catch((e) => {
             console.dir(e)
             if (e.code == 4215) {
-              console.log("BANNED")
               setUIState(STATE.BANNED)
             } else {
-              console.log("GAME ROOM: JOIN ERROR", e)
               setUIState(STATE.ERROR, false, "FAILED TO CONNECT TO GAMESERVER")
               // Sentry.captureException(err)
             }
@@ -904,18 +892,6 @@
     // (4) => Emergent/mobil case studies
     // (5) => Players
     // (6) => Landmarks
-    // let layers = [
-    //   mapLayer,
-    //   emergentLayer,
-    //   exhibitionLayer,
-    //   audioInstallationLayer,
-    //   playerLayer,
-    //   landMarkLayer,
-    // ]
-    // layers.forEach((l) => {
-    //   l = new PIXI.Container()
-    //   viewport.addChild(l)
-    // })
     mapLayer = new PIXI.Container()
     emergentLayer = new PIXI.Container()
     exhibitionLayer = new PIXI.Container()
@@ -951,8 +927,13 @@
     }, 5000)
 
     let visitorCookie = Cookies.get("tsoap-visitor")
-    console.dir(visitorCookie)
+
+    //   if none:
+    // show GDPR authorisation
+    // 	yes => set cookie (TTL 7days)
     Cookies.set("tsoap-visitor", "true", { expires: 7 })
+
+    //   either way => show introduction text
 
     let authCookie = Cookies.get("tsoap-logged-in")
     console.dir(authCookie)
@@ -1201,7 +1182,12 @@
     overflow-y: auto;
     font-size: $FONT_SIZE_BASE;
     color: $COLOR_DARK;
-    padding-bottom: 60px;
+    // padding-bottom: 60px;
+    transition: transform 0.5s $transition;
+
+    &.pushed {
+      transform: translatex(360px);
+    }
 
     @include hide-scroll;
 
@@ -1213,28 +1199,6 @@
       left: 0;
       max-width: unset;
       width: 100vw;
-      height: calc(100vh - 130px);
-    }
-
-    .close {
-      margin-bottom: 20px;
-      position: absolute;
-      top: -10px;
-      right: 10px;
-      font-size: 38px;
-      color: $COLOR_MID_2;
-      cursor: pointer;
-      text-decoration: none;
-      transition: transform 0.3s $transition;
-      z-index: 100;
-
-      @include screen-size("small") {
-        top: 0px;
-      }
-
-      &:hover {
-        transform: scale(1.1);
-      }
     }
 
     transition: transform 0.3s ease-out;
@@ -1261,9 +1225,16 @@
         cursor: pointer;
         text-decoration: none;
         transition: transform 0.3s $transition;
+        z-index: 10000;
 
         @include screen-size("small") {
           top: 0px;
+          margin-bottom: 0;
+          margin-top: 0;
+
+          &.passive {
+            min-height: 100vh;
+          }
         }
 
         &:hover {
@@ -1298,23 +1269,22 @@
   }
 </style>
 
-{#if !sidebarHidden}
-  <div
-    class="hide-button"
-    in:scale={{ delay: 500 }}
-    on:click={() => {
-      sidebarHidden = !sidebarHidden
-      window.dispatchEvent(new Event('resize'))
-    }}>
-    »
-  </div>
-{/if}
-
 <!-- SIDEBAR -->
 <!-- Show on desktop only -->
 <MediaQuery query="(min-width: 800px)" let:matches>
   {#if matches}
     {#if localPlayers[$localUserSessionID]}
+      {#if !sidebarHidden}
+        <div
+          class="hide-button"
+          in:scale={{ delay: 500 }}
+          on:click={() => {
+            sidebarHidden = !sidebarHidden
+            window.dispatchEvent(new Event('resize'))
+          }}>
+          »
+        </div>
+      {/if}
       <div
         class="sidebar"
         use:links
@@ -1337,41 +1307,36 @@
             {/await}
           </div>
           <div class="bottom-area">
-            <!-- CHAT -->
-            {#if bottomAreaState == BOTTOM_AREA_STATE.CHAT}
-            {#each Object.values(AREA) as A}
-              {#if localPlayers[$localUserSessionID].area === A}
-                <Chat
-                  chatMessages={chatMessages.filter((m) => m.area === A)}
-                  currentArea={A}
-                  />
-              {/if}
-            {/each}
+            {#if section == 'seminar'}
+              <!-- SEMINAR -->
+              <Seminar {slug}/>
+            {:else if section == 'messages'}
+              <!-- MESSAGES -->
+              <Messaging {slug}/>
+            {:else}
+              <!-- CHAT -->
+              {#each Object.values(AREA) as A}
+                {#if localPlayers[$localUserSessionID].area === A}
+                  <Chat
+                    chatMessages={chatMessages.filter((m) => m.area === A)}
+                    currentArea={A} />
+                {/if}
+              {/each}
             {/if}
-            <!-- SEMINAR -->
-            {#if bottomAreaState == BOTTOM_AREA_STATE.SEMINAR}
-            <Seminar />
-            {/if}
-            <!-- MESSAGING -->
-            {#if bottomAreaState == BOTTOM_AREA_STATE.MESSAGING}
-            <Messaging/>
-            {/if}
+            <!-- {/if} -->
             <!-- TOOLBAR-->
             <div class="toolbar">
-          <ToolBar
-            authenticated={localPlayers[$localUserSessionID].authenticated} on:submit={submitChat} on:switchSection={e => {
-              bottomAreaState = e.detail.newSection
-            }}
-            on:teleport={e => {
-              teleportTo(3)
-            }}/>
-        </div>
+              <ToolBar
+                on:submit={submitChat}
+                on:teleport={(e) => {
+                  teleportTo(3)
+                }} />
+            </div>
           </div>
         </div>
         <!-- MENUBAR -->
         <div class="menu">
-          <Menu
-            authenticated={localPlayers[$localUserSessionID].authenticated} />
+          <Menu />
         </div>
       </div>
     {/if}
@@ -1382,7 +1347,7 @@
 <div class="game" class:expanded={sidebarHidden} bind:this={gameContainer} />
 
 <!-- MAIN CONTENT -->
-<div class="main-content-slot">
+<div class="main-content-slot" class:pushed={sidebarHidden}>
   <!-- INFORMATION BOX -->
 
   <!-- AUDIOZONE -->
@@ -1473,7 +1438,7 @@
     {#if localPlayers[$localUserSessionID]}
       <!-- MOBILE MENU-->
       <div class="mobile-menu" use:links>
-        <Menu authenticated={localPlayers[$localUserSessionID].authenticated} />
+        <Menu />
       </div>
       <!-- MOBILE CALENDAR-->
       <div class="mobile-calendar" use:links>

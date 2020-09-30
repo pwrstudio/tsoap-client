@@ -40,6 +40,8 @@ export const QUERY = {
   EVENTS: "*[_type == 'event']{..., participants[]->{slug,name}}",
   USERS: "*[_type == 'participant']",
   PAGES: "*[_type == 'page']",
+  SEMINAR: "*[_type == 'seminar' && slug.current == $slug][0]",
+  SEMINAR_PARTICIPANTS: "*[_type == 'participant' && seminarLink._ref == $id]",
   AUDIO_INSTALLATIONS:
     "*[_type == 'audioInstallation']{..., participants[]->{slug,name}, 'audioURL': soundFile.asset->url,spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   CASE_STUDIES:
@@ -48,7 +50,6 @@ export const QUERY = {
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
   CONNECTED_CASE_STUDIES:
     '*[_type in ["caseStudyEmergent", "caseStudyExhibition"]]{..., participants[]->{slug,name}}',
-
   // CONNECTED_PROJECTS:
   //   '*[_type == "event" && participants[]._ref == $id]{...,authors[]->{...}}',
 }

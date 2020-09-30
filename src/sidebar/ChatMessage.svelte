@@ -27,6 +27,7 @@
     padding-right: 10px;
     color: $COLOR_LIGHT;
     font-size: $FONT_SIZE_SMALL;
+    user-select: none;
 
     .meta {
       width: 100%;

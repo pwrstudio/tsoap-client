@@ -7,6 +7,9 @@
   // IMPORTS
   import Cookies from "js-cookie"
 
+  // *** STORES
+  import { localUserAuthenticated } from "../stores"
+
   // *** PROPS
   export let authenticated = false
 </script>
@@ -52,7 +55,7 @@
     <a href="/pages/help" class="menu-item">Help</a>
   </div>
 
-  {#if authenticated}
+  {#if $localUserAuthenticated}
     <a
       href="/"
       class="menu-item login"

@@ -7,6 +7,9 @@
   // IMPORTS
   import get from "lodash/get"
 
+  // *** STORES
+  import { localUserAuthenticated } from "../stores"
+
   // *** PROPS
   export let participants = {}
 </script>
@@ -24,9 +27,13 @@
   }
 </style>
 
-{#each participants as participant, index}
-  <a
-    href={'/profiles/' + get(participant, 'slug.current', '')}>{participant.name}{#if index < participants.length - 1}
-      ,
-    {/if}</a>
-{/each}
+{#if participants && Array.isArray(participants)}
+  {#each participants as participant, index}
+    <a
+      href={'/profiles/' + get(participant, 'slug.current', '')}>{participant.name}</a>
+    {#if $localUserAuthenticated}
+      <a
+        href={'/messages/' + get(participant, 'slug.current', '')}>(Message)</a>
+    {/if}
+  {/each}
+{/if}

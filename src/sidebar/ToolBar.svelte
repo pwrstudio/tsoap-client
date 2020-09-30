@@ -6,11 +6,12 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
+  import { links, navigate } from "svelte-routing"
   import { createEventDispatcher } from "svelte"
   const dispatch = createEventDispatcher()
 
-  // *** PROPS
-  export let authenticated = false
+  // *** STORES
+  import { localUserAuthenticated } from "../stores"
 
   // VARIABLES
   let chatInputValue = ""
@@ -22,11 +23,6 @@
     chatInputValue = ""
   }
 
-  const switchSection = (newSection) => {
-    dispatch("switchSection", {
-      newSection: newSection,
-    })
-  }
   const teleport = () => {
     dispatch("teleport")
   }
@@ -43,6 +39,7 @@
     background: $COLOR_DARK;
     display: flex;
     align-items: center;
+    user-select: none;
 
     input {
       font-family: $MONO_STACK;
@@ -82,19 +79,34 @@
 
     .toolbar-item {
       font-size: $FONT_SIZE_BASE;
-      margin-right: 10px;
+      margin-right: 20px;
       float: left;
       color: $COLOR_LIGHT;
       cursor: pointer;
+      text-decoration: none;
       &:hover {
         text-decoration: underline;
+      }
+
+      &.chat {
+        border: 1px solid $COLOR_MID_2;
+        border-radius: 10px;
+        padding: 7px;
+        text-decoration: none;
+        padding-right: 15px;
+        padding-left: 15px;
       }
     }
   }
 </style>
 
-<div class="toolbar">
-  {#if !authenticated}
+<div class="toolbar" use:links>
+  {#if $localUserAuthenticated}
+    <a href="/" class="toolbar-item chat"> Chat </a>
+    <a href="/seminar" class="toolbar-item"> Seminar</a>
+    <a href="/messages" class="toolbar-item">Messages</a>
+    <div class="toolbar-item" on:click={teleport}>Support</div>
+  {:else}
     <input
       type="[text]"
       maxlength="600"
@@ -103,29 +115,5 @@
         if (e.keyCode == 13) submitChat()
       }} />
     <button on:click={submitChat}>Send</button>
-  {/if}
-  {#if authenticated}
-    <div
-      class="toolbar-item"
-      on:click={() => {
-        switchSection(0)
-      }}>
-      Chat
-    </div>
-    <div
-      class="toolbar-item"
-      on:click={() => {
-        switchSection(1)
-      }}>
-      Seminar
-    </div>
-    <div
-      class="toolbar-item"
-      on:click={() => {
-        switchSection(2)
-      }}>
-      Messages
-    </div>
-    <div class="toolbar-item" on:click={teleport}>Support</div>
   {/if}
 </div>
