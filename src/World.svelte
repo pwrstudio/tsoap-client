@@ -825,10 +825,26 @@
 
             const audioInstallationLocation = new PIXI.Container();
             audioInstallationLocation.addChild(frames);
-            audioInstallationLocation.audio = new Howl({
-              src: [ai.audioURL],
-              loop: true
-            });
+
+            // TODO: handle audio streams
+            // https://github.com/goldfire/howler.js/issues/689
+            // TEST: http://prclive1.listenon.in:9960/?fbclid=IwAR1bAO9Hf-yvOGrjKVVdYt0XXnqo85o1G2IXWrzVtjIujOit5JqW7oQUtfI%27
+            // https://medium.com/crowdbotics/build-your-own-radio-streaming-app-with-howler-js-637f929decc0
+
+            if (ai.streamURL) {
+              console.log("audioSource", ai.streamURL);
+              audioInstallationLocation.audio = new Howl({
+                src: ai.streamURL,
+                html5: true,
+                format: ["mp3", "aac"]
+              });
+            } else {
+              audioInstallationLocation.audio = new Howl({
+                src: [ai.audioURL],
+                loop: true
+              });
+            }
+
             audioInstallationLocation.x = ai.x;
             audioInstallationLocation.y = ai.y;
             audioInstallationLocation.pivot.x =
