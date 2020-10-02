@@ -595,6 +595,21 @@
               // }, 300)
             })
 
+            // PLAYER: CLICK / TAP
+            viewport.on("drag-end", (e) => {
+              delete moveQ[$localUserSessionID]
+              hideTarget()
+              showTarget(Math.round(e.world.x), Math.round(e.world.y))
+              // setTimeout(() => {
+              gameRoom.send("go", {
+                x: Math.round(e.world.x),
+                y: Math.round(e.world.y),
+                originX: localPlayers[$localUserSessionID].avatar.x,
+                originY: localPlayers[$localUserSessionID].avatar.y,
+              })
+              // }, 300)
+            })
+
             // PLAYER: TELEPORT
             teleportTo = (area) => {
               gameRoom.send("teleport", {
@@ -1429,8 +1444,8 @@
   {/if}
 
   <!-- LIVE -->
-  <!-- {#if get(localPlayers, '[$localUserSessionID]', false) && localPlayers[$localUserSessionID].area === 4 && !activeContentClosed} -->
-  {#if !activeContentClosed}
+  {#if get(localPlayers, '[$localUserSessionID]', false) && localPlayers[$localUserSessionID].area === 4 && !activeContentClosed}
+  <!-- {#if !activeContentClosed} -->
     <div class="content-item active" transition:fly={{ y: -200 }}>
       <div
         class="close"
