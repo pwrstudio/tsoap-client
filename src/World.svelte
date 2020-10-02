@@ -410,6 +410,9 @@
           const onDown = e => {
             if (player.uuid != $localUserUUID) {
               e.stopPropagation();
+            } else if (player.authenticated) {
+              window.alert(player.name);
+              navigate("/profiles/" + slugify(player.discourseName));
             }
           };
 
