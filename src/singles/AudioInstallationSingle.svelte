@@ -6,13 +6,13 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import get from "lodash/get"
-  import { fade } from "svelte/transition"
-  import { urlFor, renderBlockText, loadData } from "../sanity.js"
-  import { links } from "svelte-routing"
+  import get from "lodash/get";
+  import { fade } from "svelte/transition";
+  import { urlFor, renderBlockText, loadData } from "../sanity.js";
+  import { links } from "svelte-routing";
 
   // COMPONENTS
-  import ParticipantsList from "../lists/ParticipantsList.svelte"
+  import ParticipantsList from "../lists/ParticipantsList.svelte";
   //   import CaseStudyList from "../lists/CaseStudyList.svelte"
   //   import VideoPlayer from "./VideoPlayer.svelte"
 
@@ -20,7 +20,7 @@
   //   import { formattedDate, QUERY } from "../global.js"
 
   // *** PROPS
-  export let audioInstallation = {}
+  export let audioInstallation = {};
 </script>
 
 <style lang="scss">
@@ -94,12 +94,21 @@
   <!-- HEADER -->
   <div class="main-header">
     <!-- TITLE -->
-    <div class="title"><svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>NOW: Audio placeholder</div>
+    <div class="title">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24">
+        <path d="M0 0h24v24H0z" fill="none" />
+        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+      </svg>
+      NOW: {audioInstallation.title}
+    </div>
 
     <!-- PARTICIPANTS -->
     {#if get(audioInstallation, 'participants', false) && Array.isArray(audioInstallation.participants)}
-      <div class="participants">
-      </div>
+      <div class="participants" />
     {/if}
   </div>
   <div class="divider" />
