@@ -1384,7 +1384,7 @@
                 {section}
                 on:submit={submitChat}
                 on:teleport={(e) => {
-                  teleportTo(3)
+                  teleportTo('blue')
                 }} />
             </div>
           </div>
