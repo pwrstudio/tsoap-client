@@ -34,12 +34,12 @@
     .box {
       font-family: $MONO_STACK;
       padding: 20px;
-      font-size: 48px;
+      font-size: 18px;
       text-align: center;
       user-select: none;
 
       @include screen-size("small") {
-        font-size: 18px;
+        font-size: 12px;
       }
     }
   }

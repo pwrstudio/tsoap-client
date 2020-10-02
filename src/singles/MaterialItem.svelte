@@ -1,15 +1,13 @@
 <script>
   // # # # # # # # # # # # # #
   //
-  //  MAterial Item
+  //  Material Item
   //
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
   import get from "lodash/get"
-  import { fade } from "svelte/transition"
-  import { urlFor, renderBlockText, loadData } from "../sanity.js"
-  import { links } from "svelte-routing"
+  import { urlFor } from "../sanity.js"
 
   import { FORMATMAP } from "../global.js"
   // *** PROPS
@@ -25,19 +23,19 @@
 
   switch (item._type) {
     case "imageBlock":
-      url = urlFor(item.image.asset).url()
+      url = urlFor(get(item, "image.asset", {})).url()
       break
     case "audioBlock":
-      url = makeUrl(item.audioFile.asset._ref)
+      url = makeUrl(get(item, "audioFile.asset._ref", ""))
       break
     case "fileBlock":
-      url = makeUrl(item.file.asset._ref)
+      url = makeUrl(get(item, "file.asset._ref", ""))
       break
-    case "pefBlock":
-      url = makeUrl(item.pdfFile.asset._ref)
+    case "pdfBlock":
+      url = makeUrl(get(item, "pdfFile.asset._ref", ""))
       break
     case "videoBlock":
-      url = makeUrl(item.videoFile.asset._ref)
+      url = makeUrl(get(item, "item.videoFile.asset._ref", ""))
       break
   }
 </script>

@@ -30,16 +30,24 @@
     )
   }
 
-  let seminar = loadData(QUERY.SEMINAR, { slug: slug })
+  let seminar = loadData(QUERY.SEMINAR, { slug: slug }).catch((err) => {
+    console.dir(err)
+  })
   let loadedParticipants = []
 
   seminar.then((seminar) => {
-    // Get participants of seminar
-    loadData(QUERY.SEMINAR_PARTICIPANTS, {
-      id: seminar._id,
-    }).then((connectedParticipants) => {
-      loadedParticipants = connectedParticipants
-    })
+    if (seminar && seminar._id) {
+      // Get participants of seminar
+      loadData(QUERY.SEMINAR_PARTICIPANTS, {
+        id: seminar._id,
+      })
+        .then((connectedParticipants) => {
+          loadedParticipants = connectedParticipants
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
   })
 </script>
 
