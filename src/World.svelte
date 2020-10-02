@@ -979,6 +979,7 @@
     viewport.addChild(emergentLayer)
     viewport.addChild(playerLayer)
     viewport.addChild(landMarkLayer)
+    viewport.drag({ pressDrag: false })
 
     // PIXI: TICKER
     ticker = PIXI.Ticker.shared

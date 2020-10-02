@@ -49,7 +49,6 @@
     }
 
     .inner-container {
-      background: red;
       height: calc(100% - 80px);
       @include hide-scroll;
       overflow-y: auto;
