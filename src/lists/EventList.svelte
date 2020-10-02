@@ -6,7 +6,7 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import { onMount, onDestroy } from "svelte"
+  import { onMount } from "svelte"
   import { fade } from "svelte/transition"
   import get from "lodash/get"
 
