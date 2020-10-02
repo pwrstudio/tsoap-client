@@ -531,19 +531,19 @@
                   {
                     x: initialX + 10
                   },
-                  0.1
+                  0.05
                 )
                 .to(
                   {
                     x: initialX - 10
                   },
-                  0.2
+                  0.1
                 )
                 .to(
                   {
                     x: initialX
                   },
-                  0.1
+                  0.05
                 );
               hideTarget();
             });
