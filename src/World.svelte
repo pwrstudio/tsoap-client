@@ -523,6 +523,28 @@
 
             // PLAYER: ILLEGAL MOVE
             gameRoom.onMessage("illegalMove", message => {
+              // window.alert("ILLEGAL MOVE");
+              const initialX = localPlayers[$localUserSessionID].avatar.x;
+              tweener
+                .add(localPlayers[$localUserSessionID].avatar)
+                .to(
+                  {
+                    x: initialX + 10
+                  },
+                  0.1
+                )
+                .to(
+                  {
+                    x: initialX - 10
+                  },
+                  0.2
+                )
+                .to(
+                  {
+                    x: initialX
+                  },
+                  0.1
+                );
               hideTarget();
             });
 
