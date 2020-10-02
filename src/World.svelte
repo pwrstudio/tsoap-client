@@ -438,7 +438,10 @@
           playerLayer.addChild(player.avatar)
 
           if (player.isSelf) {
-            viewport.follow(player.avatar)
+            viewport.follow(player.avatar, {
+              radius: 20,
+              acceleration: 400,
+            })
             localUserSessionID.set(player.id)
             // localUserAuthenticated.set(true)
 
@@ -579,14 +582,17 @@
 
             // PLAYER: CLICK / TAP
             viewport.on("clicked", (e) => {
+              delete moveQ[$localUserSessionID]
               hideTarget()
+              showTarget(Math.round(e.world.x), Math.round(e.world.y))
+              // setTimeout(() => {
               gameRoom.send("go", {
                 x: Math.round(e.world.x),
                 y: Math.round(e.world.y),
                 originX: localPlayers[$localUserSessionID].avatar.x,
                 originY: localPlayers[$localUserSessionID].avatar.y,
               })
-              showTarget(Math.round(e.world.x), Math.round(e.world.y))
+              // }, 300)
             })
 
             // PLAYER: TELEPORT
