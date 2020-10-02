@@ -494,9 +494,9 @@
           .joinOrCreate("game", playerObject)
           .then((gameRoom) => {
             // HACK
-            // if (section == "authenticate") {
-            //   history.replaceState({}, "CONNECTED", "/")
-            // }
+            if (section == "authenticate") {
+              history.replaceState({}, "CONNECTED", "/")
+            }
 
             // ******
             // PLAYER
