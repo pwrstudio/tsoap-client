@@ -6,94 +6,94 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { onMount } from "svelte";
-  import * as Colyseus from "colyseus.js";
-  import * as PIXI from "pixi.js";
-  import { Viewport } from "pixi-viewport";
-  import get from "lodash/get";
-  import sample from "lodash/sample";
-  import { fly, scale } from "svelte/transition";
-  import { quartOut } from "svelte/easing";
-  import { urlFor, loadData } from "./sanity.js";
-  import { links, navigate } from "svelte-routing";
-  import { Howl } from "howler";
-  import MediaQuery from "svelte-media-query";
-  import Tweener from "tweener";
-  import Cookies from "js-cookie";
+  import { onMount } from "svelte"
+  import * as Colyseus from "colyseus.js"
+  import * as PIXI from "pixi.js"
+  import { Viewport } from "pixi-viewport"
+  import get from "lodash/get"
+  import sample from "lodash/sample"
+  import { fly, scale } from "svelte/transition"
+  import { quartOut } from "svelte/easing"
+  import { urlFor, loadData } from "./sanity.js"
+  import { links, navigate } from "svelte-routing"
+  import { Howl } from "howler"
+  import MediaQuery from "svelte-media-query"
+  import Tweener from "tweener"
+  import Cookies from "js-cookie"
 
-  const tweener = new Tweener(1 / 60);
+  const tweener = new Tweener(1 / 60)
 
   // COMPONENTS
   // sidebar
-  import Chat from "./sidebar/Chat.svelte";
-  import MiniMap from "./sidebar/MiniMap.svelte";
-  import Menu from "./sidebar/Menu.svelte";
-  import ToolBar from "./sidebar/ToolBar.svelte";
-  import Seminar from "./sidebar/Seminar.svelte";
-  import Messaging from "./sidebar/Messaging.svelte";
+  import Chat from "./sidebar/Chat.svelte"
+  import MiniMap from "./sidebar/MiniMap.svelte"
+  import Menu from "./sidebar/Menu.svelte"
+  import ToolBar from "./sidebar/ToolBar.svelte"
+  import Seminar from "./sidebar/Seminar.svelte"
+  import Messaging from "./sidebar/Messaging.svelte"
   // lists
-  import EventList from "./lists/EventList.svelte";
-  import CaseStudyList from "./lists/CaseStudyList.svelte";
+  import EventList from "./lists/EventList.svelte"
+  import CaseStudyList from "./lists/CaseStudyList.svelte"
   // singles
-  import CaseStudySingle from "./singles/CaseStudySingle.svelte";
-  import PageSingle from "./singles/PageSingle.svelte";
-  import UserProfileSingle from "./singles/UserProfileSingle.svelte";
-  import EventSingle from "./singles/event/EventSingle.svelte";
-  import LiveSingle from "./singles/event/LiveSingle.svelte";
-  import ArchivedSingle from "./singles/event/ArchivedSingle.svelte";
-  import AudioInstallationSingle from "./singles/AudioInstallationSingle.svelte";
+  import CaseStudySingle from "./singles/CaseStudySingle.svelte"
+  import PageSingle from "./singles/PageSingle.svelte"
+  import UserProfileSingle from "./singles/UserProfileSingle.svelte"
+  import EventSingle from "./singles/event/EventSingle.svelte"
+  import LiveSingle from "./singles/event/LiveSingle.svelte"
+  import ArchivedSingle from "./singles/event/ArchivedSingle.svelte"
+  import AudioInstallationSingle from "./singles/AudioInstallationSingle.svelte"
   // overlays
-  import Banned from "./overlays/Banned.svelte";
-  import LoadingScreen from "./overlays/LoadingScreen.svelte";
-  import Error from "./overlays/Error.svelte";
+  import Banned from "./overlays/Banned.svelte"
+  import LoadingScreen from "./overlays/LoadingScreen.svelte"
+  import Error from "./overlays/Error.svelte"
   // ...
-  import AudioChat from "./AudioChat.svelte";
+  import AudioChat from "./AudioChat.svelte"
 
   // Set the name of the hidden property and the change event for visibility
-  let hidden, visibilityChange;
+  let hidden, visibilityChange
   if (typeof document.hidden !== "undefined") {
-    hidden = "hidden";
-    visibilityChange = "visibilitychange";
+    hidden = "hidden"
+    visibilityChange = "visibilitychange"
   } else if (typeof document.msHidden !== "undefined") {
-    hidden = "msHidden";
-    visibilityChange = "msvisibilitychange";
+    hidden = "msHidden"
+    visibilityChange = "msvisibilitychange"
   } else if (typeof document.webkitHidden !== "undefined") {
-    hidden = "webkitHidden";
-    visibilityChange = "webkitvisibilitychange";
+    hidden = "webkitHidden"
+    visibilityChange = "webkitvisibilitychange"
   }
 
-  let deltaJump = 0;
-  let hiddenTime = 0;
+  let deltaJump = 0
+  let hiddenTime = 0
 
   const handleVisibilityChange = () => {
     if (document[hidden]) {
-      hiddenTime = Date.now();
+      hiddenTime = Date.now()
     } else {
-      deltaJump = Math.round((Date.now() - hiddenTime) / 16.6666);
+      deltaJump = Math.round((Date.now() - hiddenTime) / 16.6666)
     }
-  };
+  }
 
-  document.addEventListener(visibilityChange, handleVisibilityChange, false);
+  document.addEventListener(visibilityChange, handleVisibilityChange, false)
 
   // PROPS
-  export let params = false;
-  let section = false;
-  let slug = false;
-  let sso = false;
-  let sig = false;
+  export let params = false
+  let section = false
+  let slug = false
+  let sso = false
+  let sig = false
 
   $: {
     // // Split URL parameters
     // console.log("* * * * * ")
     // console.log("PARAMS UPDATED")
     // console.log("– params", params)
-    const args = get(params, "[*]", "").split("/");
-    section = args[0] && args[0].length > 0 ? args[0] : "seed";
+    const args = get(params, "[*]", "").split("/")
+    section = args[0] && args[0].length > 0 ? args[0] : "seed"
     if (section === "authenticate") {
-      sso = args[1] && args[1].length > 0 ? args[1] : false;
-      sig = args[2] && args[2].length > 0 ? args[2] : false;
+      sso = args[1] && args[1].length > 0 ? args[1] : false
+      sig = args[2] && args[2].length > 0 ? args[2] : false
     } else {
-      slug = args[1] && args[1].length > 0 ? args[1] : false;
+      slug = args[1] && args[1].length > 0 ? args[1] : false
     }
     // console.log("– section", section)
     // console.log("– slug", slug)
@@ -108,116 +108,116 @@
     TINTMAP,
     QUERY,
     AREA,
-    TEXT_STYLE
-  } from "./global.js";
+    TEXT_STYLE,
+  } from "./global.js"
 
   // STORES
   import {
     localUserUUID,
     localUserSessionID,
     localUserAuthenticated,
-    authenticatedUserInformation
-  } from "./stores.js";
+    authenticatedUserInformation,
+  } from "./stores.js"
 
   // ** SANITY
-  const graphicsSettings = loadData(QUERY.GRAPHICS_SETTINGS);
-  const events = loadData(QUERY.EVENTS);
-  const caseStudies = loadData(QUERY.CASE_STUDIES);
-  const audioInstallations = loadData(QUERY.AUDIO_INSTALLATIONS);
-  const landMarks = loadData(QUERY.LAND_MARKS);
-  const users = loadData(QUERY.USERS);
-  const pages = loadData(QUERY.PAGES);
+  const graphicsSettings = loadData(QUERY.GRAPHICS_SETTINGS)
+  const events = loadData(QUERY.EVENTS)
+  const caseStudies = loadData(QUERY.CASE_STUDIES)
+  const audioInstallations = loadData(QUERY.AUDIO_INSTALLATIONS)
+  const landMarks = loadData(QUERY.LAND_MARKS)
+  const users = loadData(QUERY.USERS)
+  const pages = loadData(QUERY.PAGES)
 
-  let inAudioZone = false;
+  let inAudioZone = false
 
   const STATE = {
     ERROR: 0,
     READY: 1,
     LOADING: 2,
-    BANNED: 3
-  };
+    BANNED: 3,
+  }
 
   // UI STATE
-  const UI = { state: STATE.LOADING, slug: false, errorMessage: false };
+  const UI = { state: STATE.LOADING, slug: false, errorMessage: false }
 
   const setUIState = (newState, newSlug = false, errorMessage = false) => {
     switch (newState) {
       case STATE.READY:
-        UI.state = STATE.READY;
-        UI.slug = false;
-        break;
+        UI.state = STATE.READY
+        UI.slug = false
+        break
       case STATE.LOADING:
-        UI.state = STATE.LOADING;
-        UI.slug = false;
-        break;
+        UI.state = STATE.LOADING
+        UI.slug = false
+        break
       case STATE.BANNED:
-        UI.state = STATE.BANNED;
-        UI.slug = false;
-        break;
+        UI.state = STATE.BANNED
+        UI.slug = false
+        break
       default:
-        UI.state = STATE.ERROR;
-        UI.slug = false;
-        UI.errorMessage = errorMessage;
+        UI.state = STATE.ERROR
+        UI.slug = false
+        UI.errorMessage = errorMessage
     }
-  };
-
-  $: {
-    console.log("STATE: ", UI.state);
   }
 
+  // $: {
+  //   console.log("STATE: ", UI.state)
+  // }
+
   // DOM REFERENCES
-  let gameContainer = {};
+  let gameContainer = {}
 
   // VARIABLES
-  let activeContentClosed = false;
-  let audioChatActive = false;
-  let sidebarHidden = false;
-  let caseStudiesLoaded = false;
-  let intentToPickUp = false;
+  let activeContentClosed = false
+  let audioChatActive = false
+  let sidebarHidden = false
+  let caseStudiesLoaded = false
+  let intentToPickUp = false
 
   // UI DATA VARIABLES
-  let miniImage = false;
+  let miniImage = false
 
   // WORLD STATE
-  let localPlayers = {};
-  let chatMessages = [];
-  let moveQ = [];
+  let localPlayers = {}
+  let chatMessages = []
+  let moveQ = []
 
   // COLYSEUS
   // const client = new Colyseus.Client("ws://localhost:2567")
   // const client = new Colyseus.Client("ws://212.36.170.236:2567")
-  const client = new Colyseus.Client("wss://gameserver.tsoap.dev");
+  const client = new Colyseus.Client("wss://gameserver.tsoap.dev")
 
   // PIXI
-  let app = {};
-  let viewport = {};
-  let ticker = {};
-  let avatarSpritesheets = {};
+  let app = {}
+  let viewport = {}
+  let ticker = {}
+  let avatarSpritesheets = {}
 
   // PIXI LAYERS
-  let mapLayer = {};
-  let emergentLayer = {};
-  let exhibitionLayer = {};
-  let audioInstallationLayer = {};
-  let playerLayer = {};
-  let landMarkLayer = {};
+  let mapLayer = {}
+  let emergentLayer = {}
+  let exhibitionLayer = {}
+  let audioInstallationLayer = {}
+  let playerLayer = {}
+  let landMarkLayer = {}
 
   // PIXI MISC.
-  let targetGraphics = {};
+  let targetGraphics = {}
 
   const checkAudioProximity = () => {
-    audioInstallationLayer.children.forEach(a => {
+    audioInstallationLayer.children.forEach((a) => {
       let dist = Math.sqrt(
         Math.pow(a.x - localPlayers[$localUserSessionID].avatar.x, 2) +
           Math.pow(a.y - localPlayers[$localUserSessionID].avatar.y, 2)
-      );
+      )
 
-      console.log("audioinstallation:", a.title);
+      // console.log("audioinstallation:", a.title)
 
       if (dist < a.radius) {
         if (!a.audio.playing()) {
-          a.audio.play();
-          inAudioZone = a.slug;
+          a.audio.play()
+          inAudioZone = a.slug
         }
         // OldRange = OldMax - OldMin;
         // NewRange = NewMax - NewMin;
@@ -228,169 +228,171 @@
         // NewValue = (dist / 400;
         // a.audio.volume(1 - (dist - 50) / a.radius);
 
-        a.audio.volume(1 - dist / a.radius);
+        a.audio.volume(1 - dist / a.radius)
       }
 
       if (dist > a.radius) {
         if (a.audio.playing()) {
-          a.audio.pause();
-          inAudioZone = false;
+          a.audio.pause()
+          inAudioZone = false
         }
       }
-    });
-    console.log("------");
-  };
+    })
+    // console.log("------")
+  }
 
   // GAME LOOP
-  const updatePositions = delta => {
-    let deltaRounded = Math.round(delta) + deltaJump;
-    deltaJump = 0;
+  const updatePositions = (delta) => {
+    let deltaRounded = Math.round(delta) + deltaJump
+    deltaJump = 0
     for (let key in moveQ) {
       if (localPlayers[key]) {
         if (moveQ[key].length > 0) {
           if (moveQ[key].length - deltaRounded < 0) {
-            let step = moveQ[key][moveQ[key].length - 1];
-            localPlayers[key].avatar.setAnimation(step.direction);
-            localPlayers[key].avatar.x = step.x;
-            localPlayers[key].avatar.y = step.y;
-            localPlayers[key].area = step.area;
-            moveQ[key] = [];
+            let step = moveQ[key][moveQ[key].length - 1]
+            localPlayers[key].avatar.setAnimation(step.direction)
+            localPlayers[key].avatar.x = step.x
+            localPlayers[key].avatar.y = step.y
+            localPlayers[key].area = step.area
+            moveQ[key] = []
           } else {
-            moveQ[key].splice(0, deltaRounded - 1);
-            let step = moveQ[key].shift();
-            localPlayers[key].avatar.setAnimation(step.direction);
-            localPlayers[key].avatar.x = step.x;
-            localPlayers[key].avatar.y = step.y;
-            localPlayers[key].area = step.area;
+            moveQ[key].splice(0, deltaRounded - 1)
+            let step = moveQ[key].shift()
+            localPlayers[key].avatar.setAnimation(step.direction)
+            localPlayers[key].avatar.x = step.x
+            localPlayers[key].avatar.y = step.y
+            localPlayers[key].area = step.area
             if (key === $localUserSessionID && moveQ[key].length % 10 === 0) {
-              checkAudioProximity();
+              checkAudioProximity()
             }
           }
         } else {
           if (key === $localUserSessionID) {
-            hideTarget();
+            hideTarget()
 
             if (intentToPickUp) {
-              pickUpCaseStudy(intentToPickUp);
+              pickUpCaseStudy(intentToPickUp)
             }
           }
-          localPlayers[key].avatar.setAnimation("rest");
-          delete moveQ[key];
+          localPlayers[key].avatar.setAnimation("rest")
+          delete moveQ[key]
         }
       } else {
-        delete moveQ[key];
+        delete moveQ[key]
       }
     }
-  };
+  }
 
   const showTarget = (x, y) => {
-    const graphics = new PIXI.Graphics();
-    graphics.beginFill(0xffffff);
-    graphics.alpha = 0.5;
-    graphics.drawCircle(x, y, 10);
-    graphics.endFill();
-    mapLayer.addChild(graphics);
-    targetGraphics = graphics;
-  };
+    const graphics = new PIXI.Graphics()
+    graphics.beginFill(0xffffff)
+    graphics.alpha = 0.5
+    graphics.drawCircle(x, y, 10)
+    graphics.endFill()
+    mapLayer.addChild(graphics)
+    targetGraphics = graphics
+  }
 
   const hideTarget = () => {
-    mapLayer.removeChild(targetGraphics);
-    targetGraphics = {};
-  };
+    mapLayer.removeChild(targetGraphics)
+    targetGraphics = {}
+  }
 
   // FUNCTIONS
-  let teleportTo = () => {};
-  let submitChat = () => {};
-  let dropCaseStudy = () => {};
-  let pickUpCaseStudy = () => {};
+  let teleportTo = () => {}
+  let submitChat = () => {}
+  let dropCaseStudy = () => {}
+  let pickUpCaseStudy = () => {}
 
   const initializeGameWorld = (sso, sig) => {
-    gameContainer.appendChild(app.view);
+    gameContainer.appendChild(app.view)
 
     // Load assets
-    graphicsSettings.then(graphicsSettings => {
+    graphicsSettings.then((graphicsSettings) => {
       // Load map
-      const mapAsset = get(graphicsSettings, "mapLink.mainImage.asset", false);
+      const mapAsset = get(graphicsSettings, "mapLink.mainImage.asset", false)
       if (mapAsset) {
-        const mapLoader = new PIXI.Loader();
-        const mapUrl = urlFor(mapAsset).url();
+        const mapLoader = new PIXI.Loader()
+        const mapUrl = urlFor(mapAsset).url()
         miniImage = urlFor(graphicsSettings.mapLink.miniImage.asset)
           .width(400)
           .height(400)
           .quality(100)
           .auto("format")
-          .url();
-        mapLoader.add("map", mapUrl);
+          .url()
+        mapLoader.add("map", mapUrl)
         mapLoader.load((loader, resources) => {
-          const map = new PIXI.Sprite(resources.map.texture);
-          map.width = MAP.WIDTH;
-          map.height = MAP.HEIGHT;
-          mapLayer.addChild(map);
-        });
+          const map = new PIXI.Sprite(resources.map.texture)
+          map.width = MAP.WIDTH
+          map.height = MAP.HEIGHT
+          mapLayer.addChild(map)
+        })
       } else {
-        setUIState(STATE.ERROR, false, "Unable to load map");
-        throw "Unable to load map";
+        setUIState(STATE.ERROR, false, "Unable to load map")
+        throw "Unable to load map"
       }
 
       // Load avatars
-      const activeAvatars = get(graphicsSettings, "activeAvatars", false);
-      const avatarLoader = new PIXI.Loader();
+      const activeAvatars = get(graphicsSettings, "activeAvatars", false)
+      const avatarLoader = new PIXI.Loader()
       if (activeAvatars && activeAvatars.length > 0) {
         activeAvatars.forEach((avatar, index) => {
-          const spriteUrl = get(avatar, "spriteJsonURL", false);
+          const spriteUrl = get(avatar, "spriteJsonURL", false)
           if (spriteUrl) {
-            avatarLoader.add(avatar._id, spriteUrl);
+            avatarLoader.add(avatar._id, spriteUrl)
           }
-        });
+        })
       } else {
-        setUIState(STATE.ERROR, false, "Unable to load avatars");
-        throw "Unable to load avatars";
+        setUIState(STATE.ERROR, false, "Unable to load avatars")
+        throw "Unable to load avatars"
       }
 
       avatarLoader.load((loader, resources) => {
         for (let key of Object.keys(resources)) {
           if (resources[key].extension === "json") {
-            avatarSpritesheets[key] = resources[key].spritesheet;
+            avatarSpritesheets[key] = resources[key].spritesheet
           }
         }
 
         // CREATE PLAYER
         const createPlayer = (playerOptions, sessionId) => {
           // console.log("playerOptions", playerOptions)
-          const sprites = ["rest", "front", "back", "left", "right"].map(ms => {
-            const sprite = new PIXI.AnimatedSprite(
-              avatarSpritesheets[playerOptions.avatar].animations[ms]
-            );
-            sprite.name = ms;
-            sprite.visible = ms === "rest" ? true : false;
-            sprite.height = 60;
-            sprite.width = 60;
-            // if (playerOptions.npc) {
-            //   sprite.tint = 0xfc9c42
-            // }
-            sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1;
-            sprite.play();
-            return sprite;
-          });
+          const sprites = ["rest", "front", "back", "left", "right"].map(
+            (ms) => {
+              const sprite = new PIXI.AnimatedSprite(
+                avatarSpritesheets[playerOptions.avatar].animations[ms]
+              )
+              sprite.name = ms
+              sprite.visible = ms === "rest" ? true : false
+              sprite.height = 60
+              sprite.width = 60
+              // if (playerOptions.npc) {
+              //   sprite.tint = 0xfc9c42
+              // }
+              sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1
+              sprite.play()
+              return sprite
+            }
+          )
 
           // console.log(playerOptions.name)
-          const nameText = new PIXI.Text(playerOptions.name, TEXT_STYLE);
-          nameText.anchor.set(0.5);
+          const nameText = new PIXI.Text(playerOptions.name, TEXT_STYLE)
+          nameText.anchor.set(0.5)
 
-          const avatar = new PIXI.Container();
-          avatar.addChild(...sprites);
-          avatar.motionState = "rest";
-          avatar.setAnimation = direction => {
-            avatar.motionState = direction;
-            avatar.children.forEach(c => {
-              c.visible = c.name == direction ? true : false;
-            });
-          };
-          avatar.x = playerOptions.x;
-          avatar.y = playerOptions.y;
-          avatar.pivot.x = avatar.width / 2;
-          avatar.pivot.y = avatar.height / 2;
-          avatar.interactive = true;
+          const avatar = new PIXI.Container()
+          avatar.addChild(...sprites)
+          avatar.motionState = "rest"
+          avatar.setAnimation = (direction) => {
+            avatar.motionState = direction
+            avatar.children.forEach((c) => {
+              c.visible = c.name == direction ? true : false
+            })
+          }
+          avatar.x = playerOptions.x
+          avatar.y = playerOptions.y
+          avatar.pivot.x = avatar.width / 2
+          avatar.pivot.y = avatar.height / 2
+          avatar.interactive = true
 
           const player = {
             avatar: avatar,
@@ -404,68 +406,68 @@
             connected: playerOptions.connected,
             authenticated: playerOptions.authenticated,
             id: sessionId,
-            isSelf: playerOptions.uuid === $localUserUUID
-          };
+            isSelf: playerOptions.uuid === $localUserUUID,
+          }
 
-          const onDown = e => {
+          const onDown = (e) => {
             if (player.uuid != $localUserUUID) {
-              e.stopPropagation();
+              e.stopPropagation()
             } else if (player.authenticated) {
-              window.alert(player.name);
-              navigate("/profiles/" + slugify(player.discourseName));
+              window.alert(player.name)
+              navigate("/profiles/" + slugify(player.discourseName))
             }
-          };
+          }
 
           const onEnter = () => {
             // console.log("nameText.width", nameText.width)
             // console.log("nameText.height", nameText.height)
-            nameText.x = avatar.x + 10;
-            nameText.y = avatar.y - 40;
-            playerLayer.addChild(nameText);
-          };
+            nameText.x = avatar.x + 10
+            nameText.y = avatar.y - 40
+            playerLayer.addChild(nameText)
+          }
 
           const onLeave = () => {
-            playerLayer.removeChild(nameText);
-          };
+            playerLayer.removeChild(nameText)
+          }
 
-          player.avatar.on("mousedown", onDown);
-          player.avatar.on("touchstart", onDown);
-          player.avatar.on("mouseover", onEnter);
-          player.avatar.on("mouseout", onLeave);
+          player.avatar.on("mousedown", onDown)
+          player.avatar.on("touchstart", onDown)
+          player.avatar.on("mouseover", onEnter)
+          player.avatar.on("mouseout", onLeave)
 
-          playerLayer.addChild(player.avatar);
+          playerLayer.addChild(player.avatar)
 
           if (player.isSelf) {
-            viewport.follow(player.avatar);
-            localUserSessionID.set(player.id);
-            // localUserAuthenticated.set(true)
+            viewport.follow(player.avatar)
+            localUserSessionID.set(player.id)
+            localUserAuthenticated.set(true)
 
             // Set cookie if user is successfully authenticated
             if (player.authenticated) {
-              console.log("Current user is logged in");
-              Cookies.set("tsoap-logged-in", "true", { expires: 7 });
-              console.dir(player);
-              console.log(player.discourseName);
-              localUserAuthenticated.set(true);
+              // console.log("Current user is logged in")
+              Cookies.set("tsoap-logged-in", "true", { expires: 7 })
+              // console.dir(player)
+              // console.log(player.discourseName)
+              localUserAuthenticated.set(true)
               loadData(QUERY.AUTH_USER_INFO, {
-                username: player.discourseName
-              }).then(info => {
-                authenticatedUserInformation.set(info);
-              });
+                username: player.discourseName,
+              }).then((info) => {
+                authenticatedUserInformation.set(info)
+              })
             }
-            setUIState(STATE.READY);
+            setUIState(STATE.READY)
           }
 
-          return player;
-        };
+          return player
+        }
 
-        let randomAvatar = sample(Object.keys(avatarSpritesheets));
+        let randomAvatar = sample(Object.keys(avatarSpritesheets))
 
         let name = graphicsSettings.activeAvatars.find(
-          a => a._id === randomAvatar
-        ).title;
+          (a) => a._id === randomAvatar
+        ).title
 
-        let playerObject = {};
+        let playerObject = {}
 
         if (section === "authenticate" && sso && sig) {
           playerObject = {
@@ -473,21 +475,21 @@
             sig: sig,
             uuid: $localUserUUID,
             avatar: randomAvatar,
-            tint: "0xffff00"
-          };
+            tint: "0xffff00",
+          }
         } else {
           playerObject = {
             uuid: $localUserUUID,
             name: name,
             avatar: randomAvatar,
-            tint: "0xff0000"
-          };
+            tint: "0xff0000",
+          }
         }
 
         // => GAME ROOM
         client
           .joinOrCreate("game", playerObject)
-          .then(gameRoom => {
+          .then((gameRoom) => {
             // HACK
             // if (section == "authenticate") {
             //   history.replaceState({}, "CONNECTED", "/")
@@ -501,124 +503,122 @@
             gameRoom.state.players.onRemove = (player, sessionId) => {
               try {
                 if (localPlayers[sessionId] && localPlayers[sessionId].avatar) {
-                  playerLayer.removeChild(localPlayers[sessionId].avatar);
+                  playerLayer.removeChild(localPlayers[sessionId].avatar)
                   // HACK
                   setTimeout(() => {
-                    delete localPlayers[sessionId];
-                    localPlayers = localPlayers;
-                  }, 500);
+                    delete localPlayers[sessionId]
+                    localPlayers = localPlayers
+                  }, 500)
                 }
               } catch (err) {
-                setUIState(STATE.ERROR, false, err);
-                console.dir(err);
+                setUIState(STATE.ERROR, false, err)
+                console.dir(err)
               }
-            };
+            }
 
             // PLAYER: ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
-              localPlayers[sessionId] = createPlayer(player, sessionId);
-            };
+              localPlayers[sessionId] = createPlayer(player, sessionId)
+            }
 
             // PLAYER: BANNED
-            gameRoom.onMessage("banned", message => {
-              setUIState(STATE.BANNED);
-            });
+            gameRoom.onMessage("banned", (message) => {
+              setUIState(STATE.BANNED)
+            })
 
             // PLAYER: ILLEGAL MOVE
-            gameRoom.onMessage("illegalMove", message => {
+            gameRoom.onMessage("illegalMove", (message) => {
               // window.alert("ILLEGAL MOVE");
-              const initialX = localPlayers[$localUserSessionID].avatar.x;
+              const initialX = localPlayers[$localUserSessionID].avatar.x
               tweener
                 .add(localPlayers[$localUserSessionID].avatar)
                 .to(
                   {
-                    x: initialX + 10
+                    x: initialX + 10,
                   },
                   0.05
                 )
                 .to(
                   {
-                    x: initialX - 10
+                    x: initialX - 10,
                   },
                   0.1
                 )
                 .to(
                   {
-                    x: initialX
+                    x: initialX,
                   },
                   0.05
-                );
-              hideTarget();
-            });
+                )
+              hideTarget()
+            })
 
             // PLAYER: STATE CHANGE
             gameRoom.state.players.onChange = (player, sessionId) => {
               // console.log("player state change")
-              console.dir(player);
               if ($localUserSessionID === sessionId) {
-                // console.log("is self")
-                localPlayers[sessionId].carrying = player.carrying;
+                localPlayers[sessionId].carrying = player.carrying
                 if (localPlayers[sessionId].carrying && intentToPickUp) {
                   let g = emergentLayer.children.find(
-                    cs => cs.uuid === player.carrying
-                  );
-                  navigate("/case-studies/" + g.slug);
-                  intentToPickUp = false;
+                    (cs) => cs.uuid === player.carrying
+                  )
+                  navigate("/case-studies/" + g.slug)
+                  intentToPickUp = false
                 }
               }
               if (player.path.waypoints.length > 0) {
-                moveQ[sessionId] = player.path.waypoints;
+                moveQ[sessionId] = player.path.waypoints
               } else {
                 // TELEPORT
-                localPlayers[sessionId].area = player.area;
-                localPlayers[sessionId].avatar.x = player.x;
-                localPlayers[sessionId].avatar.y = player.y;
+                localPlayers[sessionId].area = player.area
+                localPlayers[sessionId].avatar.x = player.x
+                localPlayers[sessionId].avatar.y = player.y
                 // checkPlayerProximity()
               }
-            };
+            }
 
             // PLAYER: CLICK / TAP
-            viewport.on("clicked", e => {
-              hideTarget();
+            viewport.on("clicked", (e) => {
+              hideTarget()
               gameRoom.send("go", {
                 x: Math.round(e.world.x),
                 y: Math.round(e.world.y),
                 originX: localPlayers[$localUserSessionID].avatar.x,
-                originY: localPlayers[$localUserSessionID].avatar.y
-              });
-              showTarget(Math.round(e.world.x), Math.round(e.world.y));
-            });
+                originY: localPlayers[$localUserSessionID].avatar.y,
+              })
+              showTarget(Math.round(e.world.x), Math.round(e.world.y))
+            })
 
             // PLAYER: TELEPORT
-            teleportTo = area => {
+            teleportTo = (area) => {
               gameRoom.send("teleport", {
-                area: area
-              });
-            };
+                area: area,
+              })
+            }
 
             // *******
             // MESSAGE
             // *******
 
             // MESSAGE: ADD
-            gameRoom.state.messages.onAdd = message => {
-              chatMessages = [...chatMessages, message];
-            };
+            gameRoom.state.messages.onAdd = (message) => {
+              chatMessages = [...chatMessages, message]
+            }
 
             // MESSAGE: REMOVE
-            gameRoom.state.messages.onRemove = message => {
+            gameRoom.state.messages.onRemove = (message) => {
               try {
-                const itemIndex = chatMessages.findIndex(m => m === message);
-                chatMessages.splice(itemIndex, 1);
-                chatMessages = chatMessages;
+                const itemIndex = chatMessages.findIndex((m) => m === message)
+                chatMessages.splice(itemIndex, 1)
+                chatMessages = chatMessages
               } catch (err) {
-                setUIState(STATE.ERROR, false, err);
-                console.dir(err);
+                setUIState(STATE.ERROR, false, err)
+                console.dir(err)
               }
-            };
+            }
 
             // MESSAGE: SUBMIT
-            submitChat = event => {
+            submitChat = (event) => {
               try {
                 gameRoom.send("submitChatMessage", {
                   msgId: nanoid(),
@@ -626,13 +626,13 @@
                   name: localPlayers[$localUserSessionID].name,
                   text: event.detail.text,
                   area: localPlayers[$localUserSessionID].area,
-                  tint: localPlayers[$localUserSessionID].tint
-                });
+                  tint: localPlayers[$localUserSessionID].tint,
+                })
               } catch (err) {
-                setUIState(STATE.ERROR, false, err);
-                console.dir(err);
+                setUIState(STATE.ERROR, false, err)
+                console.dir(err)
               }
-            };
+            }
 
             // ************
             // CASE STUDIES
@@ -640,120 +640,120 @@
 
             dropCaseStudy = () => {
               gameRoom.send("dropCaseStudy", {
-                uuid: localPlayers[$localUserSessionID].carrying
-              });
-            };
+                uuid: localPlayers[$localUserSessionID].carrying,
+              })
+            }
 
-            pickUpCaseStudy = uuid => {
+            pickUpCaseStudy = (uuid) => {
               gameRoom.send("pickUpCaseStudy", {
-                uuid: uuid
-              });
-            };
+                uuid: uuid,
+              })
+            }
 
             // CREATE CASE STUDY
             const createCaseStudy = (caseStudy, animate) => {
               // const nameText = new PIXI.Text(caseStudy.name, TEXT_STYLE)
               // nameText.anchor.set(0.5)
 
-              const container = new PIXI.Container();
-              container.visible = caseStudy.carriedBy === "" ? true : false;
-              container.uuid = caseStudy.uuid;
-              container.caseStudyId = caseStudy.caseStudyId;
-              container.name = caseStudy.name;
-              container.slug = caseStudy.slug;
-              container.interactive = true;
-              container.tint = caseStudy.tint;
+              const container = new PIXI.Container()
+              container.visible = caseStudy.carriedBy === "" ? true : false
+              container.uuid = caseStudy.uuid
+              container.caseStudyId = caseStudy.caseStudyId
+              container.name = caseStudy.name
+              container.slug = caseStudy.slug
+              container.interactive = true
+              container.tint = caseStudy.tint
 
-              const graphics = new PIXI.Graphics();
-              graphics.beginFill(caseStudy.tint);
-              graphics.drawRect(0, 0, 15, 20);
-              graphics.endFill();
+              const graphics = new PIXI.Graphics()
+              graphics.beginFill(caseStudy.tint)
+              graphics.drawRect(0, 0, 15, 20)
+              graphics.endFill()
 
-              container.x = caseStudy.x;
-              container.y = animate ? 0 : caseStudy.y;
+              container.x = caseStudy.x
+              container.y = animate ? 0 : caseStudy.y
 
-              container.addChild(graphics);
+              container.addChild(graphics)
 
               if (animate) {
                 tweener
                   .add(container)
-                  .to({ y: caseStudy.y }, 3, Tweener.ease.bounceOut);
+                  .to({ y: caseStudy.y }, 3, Tweener.ease.bounceOut)
               }
 
-              const onDown = e => {
+              const onDown = (e) => {
                 // Drop if carrying
                 if (
                   localPlayers[$localUserSessionID].carrying &&
                   localPlayers[$localUserSessionID].carrying.length > 0
                 ) {
                   gameRoom.send("dropCaseStudy", {
-                    uuid: localPlayers[$localUserSessionID].carrying
-                  });
+                    uuid: localPlayers[$localUserSessionID].carrying,
+                  })
                 }
-                gameContainer.style.cursor = "default";
+                gameContainer.style.cursor = "default"
                 let g = emergentLayer.children.find(
-                  cs => cs.uuid === caseStudy.uuid
-                );
-                intentToPickUp = caseStudy.uuid;
+                  (cs) => cs.uuid === caseStudy.uuid
+                )
+                intentToPickUp = caseStudy.uuid
                 gameRoom.send("go", {
                   x: g.x,
                   y: g.y,
                   originX: localPlayers[$localUserSessionID].avatar.x,
-                  originY: localPlayers[$localUserSessionID].avatar.y
-                });
-                e.stopPropagation();
-              };
+                  originY: localPlayers[$localUserSessionID].avatar.y,
+                })
+                e.stopPropagation()
+              }
 
               const onEnter = () => {
-                gameContainer.style.cursor = "grab";
-              };
+                gameContainer.style.cursor = "grab"
+              }
 
               const onLeave = () => {
-                gameContainer.style.cursor = "default";
-              };
+                gameContainer.style.cursor = "default"
+              }
 
-              container.on("mousedown", onDown);
-              container.on("touchstart", onDown);
-              container.on("mouseover", onEnter);
-              container.on("mouseout", onLeave);
+              container.on("mousedown", onDown)
+              container.on("touchstart", onDown)
+              container.on("mouseover", onEnter)
+              container.on("mouseout", onLeave)
 
-              emergentLayer.addChild(container);
-            };
+              emergentLayer.addChild(container)
+            }
 
             // CASE STUDY: ADD
             gameRoom.state.caseStudies.onAdd = (caseStudy, sessionId) => {
               if (caseStudiesLoaded) {
                 // console.log("====> loaded")
-                createCaseStudy(caseStudy, true);
+                createCaseStudy(caseStudy, true)
               } else {
                 // console.log("notloaded")
-                createCaseStudy(caseStudy, false);
+                createCaseStudy(caseStudy, false)
               }
-            };
+            }
 
             // CASE STUDY: REMOVE
             gameRoom.state.caseStudies.onRemove = (caseStudy, sessionId) => {
               // console.log("%_%_%_ Case study removed")
-              console.dir(caseStudy);
-            };
+              // console.dir(caseStudy)
+            }
 
             // CASE STUDY: STATE CHANGE
             gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
               // console.log("%_%_%_ Case study state change", caseStudy)
               let g = emergentLayer.children.find(
-                cs => cs.uuid === caseStudy.uuid
-              );
+                (cs) => cs.uuid === caseStudy.uuid
+              )
               if (g) {
-                g.children[0].tint = TINTMAP[caseStudy.age - 1];
+                g.children[0].tint = TINTMAP[caseStudy.age - 1]
                 if (caseStudy.carriedBy === "") {
-                  g.x = caseStudy.x;
-                  g.y = caseStudy.y;
-                  g.visible = true;
+                  g.x = caseStudy.x
+                  g.y = caseStudy.y
+                  g.visible = true
                 } else {
-                  g.visible = false;
+                  g.visible = false
                 }
               }
-            };
+            }
 
             // ************
             // GENERAL
@@ -761,95 +761,94 @@
 
             // GENERAL: ERROR
             gameRoom.onError((code, message) => {
-              setUIState(STATE.ERROR, false, message);
-              console.error("!!! COLYSEUS ERROR:");
-              console.error(message);
-              console.dir(err);
-            });
+              setUIState(STATE.ERROR, false, message)
+              console.error("!!! COLYSEUS ERROR:")
+              console.error(message)
+            })
           })
-          .catch(e => {
-            console.dir(e);
+          .catch((e) => {
+            console.dir(e)
             if (e.code == 4215) {
-              setUIState(STATE.BANNED);
+              setUIState(STATE.BANNED)
             } else {
-              setUIState(STATE.ERROR, false, "FAILED TO CONNECT TO GAMESERVER");
+              setUIState(STATE.ERROR, false, "FAILED TO CONNECT TO GAMESERVER")
               // Sentry.captureException(err)
             }
-          });
-      });
+          })
+      })
 
       // ADD EXHIBITION CASE STUDIES
-      caseStudies.then(caseStudies => {
+      caseStudies.then((caseStudies) => {
         caseStudies
-          .filter(cs => cs._type === "caseStudyExhibition")
+          .filter((cs) => cs._type === "caseStudyExhibition")
           .forEach((cs, i) => {
-            const spriteUrl = get(cs, "spriteLink.spriteJsonURL", "");
-            const spriteId = "caseStudy-" + cs._id;
-            const csLoader = new PIXI.Loader();
+            const spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
+            const spriteId = "caseStudy-" + cs._id
+            const csLoader = new PIXI.Loader()
             csLoader.add(spriteId, spriteUrl).load((loader, resources) => {
               const frames = new PIXI.AnimatedSprite(
                 resources[spriteId].spritesheet.animations["frames"]
-              );
-              frames.animationSpeed = 0.02;
-              frames.play();
+              )
+              frames.animationSpeed = 0.02
+              frames.play()
 
-              const nameText = new PIXI.Text(cs.title, TEXT_STYLE);
-              nameText.anchor.set(0.5);
+              const nameText = new PIXI.Text(cs.title, TEXT_STYLE)
+              nameText.anchor.set(0.5)
 
-              const caseStudyLocation = new PIXI.Container();
-              caseStudyLocation.addChild(frames);
-              caseStudyLocation.x = cs.x;
-              caseStudyLocation.y = cs.y;
-              caseStudyLocation.pivot.x = caseStudyLocation.width / 2;
-              caseStudyLocation.pivot.y = caseStudyLocation.height / 2;
-              caseStudyLocation.title = cs.title;
-              caseStudyLocation.interactive = true;
+              const caseStudyLocation = new PIXI.Container()
+              caseStudyLocation.addChild(frames)
+              caseStudyLocation.x = cs.x
+              caseStudyLocation.y = cs.y
+              caseStudyLocation.pivot.x = caseStudyLocation.width / 2
+              caseStudyLocation.pivot.y = caseStudyLocation.height / 2
+              caseStudyLocation.title = cs.title
+              caseStudyLocation.interactive = true
 
-              const onDown = e => {
-                navigate("/case-studies/" + get(cs, "slug.current", false));
-                e.stopPropagation();
-              };
+              const onDown = (e) => {
+                navigate("/case-studies/" + get(cs, "slug.current", false))
+                e.stopPropagation()
+              }
 
-              const onEnter = e => {
-                gameContainer.style.cursor = "pointer";
-                nameText.x = caseStudyLocation.x + 10;
-                nameText.y = caseStudyLocation.y - 60;
-                exhibitionLayer.addChild(nameText);
-              };
+              const onEnter = (e) => {
+                gameContainer.style.cursor = "pointer"
+                nameText.x = caseStudyLocation.x + 10
+                nameText.y = caseStudyLocation.y - 60
+                exhibitionLayer.addChild(nameText)
+              }
 
-              const onLeave = e => {
-                gameContainer.style.cursor = "default";
-                exhibitionLayer.removeChild(nameText);
-              };
+              const onLeave = (e) => {
+                gameContainer.style.cursor = "default"
+                exhibitionLayer.removeChild(nameText)
+              }
 
-              caseStudyLocation.on("mousedown", onDown);
-              caseStudyLocation.on("touchstart", onDown);
-              caseStudyLocation.on("mouseover", onEnter);
-              caseStudyLocation.on("mouseout", onLeave);
+              caseStudyLocation.on("mousedown", onDown)
+              caseStudyLocation.on("touchstart", onDown)
+              caseStudyLocation.on("mouseover", onEnter)
+              caseStudyLocation.on("mouseout", onLeave)
 
-              exhibitionLayer.addChild(caseStudyLocation);
-            });
-          });
-      });
+              exhibitionLayer.addChild(caseStudyLocation)
+            })
+          })
+      })
 
       // ADD AUDIO INSTALLATIONS
-      audioInstallations.then(audioInstallations => {
+      audioInstallations.then((audioInstallations) => {
         audioInstallations.forEach((ai, i) => {
-          const spriteUrl = get(ai, "spriteLink.spriteJsonURL", "");
-          const spriteId = "audioInstallation-" + ai._id;
-          const aiLoader = new PIXI.Loader();
+          const spriteUrl = get(ai, "spriteLink.spriteJsonURL", "")
+          const spriteId = "audioInstallation-" + ai._id
+          const aiLoader = new PIXI.Loader()
           aiLoader.add(spriteId, spriteUrl).load((loader, resources) => {
             const frames = new PIXI.AnimatedSprite(
               resources[spriteId].spritesheet.animations["frames"]
-            );
-            frames.animationSpeed = 0.02;
-            frames.play();
+            )
+            frames.animationSpeed = 0.02
+            frames.play()
 
             // const nameText = new PIXI.Text(ai.title, TEXT_STYLE)
             // nameText.anchor.set(0.5)
 
-            const audioInstallationLocation = new PIXI.Container();
-            audioInstallationLocation.addChild(frames);
+            const audioInstallationLocation = new PIXI.Container()
+            audioInstallationLocation.addChild(frames)
 
             // TODO: handle audio streams
             // https://github.com/goldfire/howler.js/issues/689
@@ -857,78 +856,77 @@
             // https://medium.com/crowdbotics/build-your-own-radio-streaming-app-with-howler-js-637f929decc0
 
             if (ai.streamURL) {
-              console.log("audioSource", ai.streamURL);
               audioInstallationLocation.audio = new Howl({
                 src: ai.streamURL,
                 html5: true,
-                format: ["mp3", "aac"]
-              });
+                format: ["mp3", "aac"],
+              })
             } else {
               audioInstallationLocation.audio = new Howl({
                 src: [ai.audioURL],
-                loop: true
-              });
+                loop: true,
+              })
             }
 
-            audioInstallationLocation.x = ai.x;
-            audioInstallationLocation.y = ai.y;
+            audioInstallationLocation.x = ai.x
+            audioInstallationLocation.y = ai.y
             audioInstallationLocation.pivot.x =
-              audioInstallationLocation.width / 2;
+              audioInstallationLocation.width / 2
             audioInstallationLocation.pivot.y =
-              audioInstallationLocation.height / 2;
-            audioInstallationLocation.title = ai.title;
-            audioInstallationLocation.slug = get(ai, "slug.current");
-            audioInstallationLocation.radius = ai.radius || 400;
-            audioInstallationLocation.interactive = false;
+              audioInstallationLocation.height / 2
+            audioInstallationLocation.title = ai.title
+            audioInstallationLocation.slug = get(ai, "slug.current")
+            audioInstallationLocation.radius = ai.radius || 400
+            audioInstallationLocation.interactive = false
 
-            audioInstallationLayer.addChild(audioInstallationLocation);
-          });
-        });
-      });
+            audioInstallationLayer.addChild(audioInstallationLocation)
+          })
+        })
+      })
 
       // ADD LANDMARKS
-      landMarks.then(landMarks => {
+      landMarks.then((landMarks) => {
         landMarks.forEach((lm, i) => {
-          const spriteUrl = get(lm, "spriteJsonURL", "");
-          const spriteId = "landMark-" + lm._id;
-          const lmLoader = new PIXI.Loader();
+          const spriteUrl = get(lm, "spriteJsonURL", "")
+          const spriteId = "landMark-" + lm._id
+          const lmLoader = new PIXI.Loader()
 
           lmLoader.add(spriteId, spriteUrl).load((loader, resources) => {
             const frames = new PIXI.AnimatedSprite(
               resources[spriteId].spritesheet.animations["frames"]
-            );
+            )
             // frames.visible = true
-            frames.animationSpeed = 0.02;
-            frames.play();
+            frames.animationSpeed = 0.02
+            frames.play()
 
-            const landMarkLocation = new PIXI.Container();
-            landMarkLocation.addChild(frames);
-            landMarkLocation.x = lm.x;
-            landMarkLocation.y = lm.y;
-            landMarkLocation.pivot.x = landMarkLocation.width / 2;
-            landMarkLocation.pivot.y = landMarkLocation.height / 2;
-            landMarkLayer.addChild(landMarkLocation);
-          });
-        });
-      });
-    });
-  };
+            const landMarkLocation = new PIXI.Container()
+            landMarkLocation.addChild(frames)
+            landMarkLocation.x = lm.x
+            landMarkLocation.y = lm.y
+            landMarkLocation.pivot.x = landMarkLocation.width / 2
+            landMarkLocation.pivot.y = landMarkLocation.height / 2
+            landMarkLayer.addChild(landMarkLocation)
+          })
+        })
+      })
+    })
+  }
 
   onMount(async () => {
     // GLOBAL SCALE MODE SETTING
-    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 
     // PIXI: APP
     app = new PIXI.Application({
       width: MAP.WIDTH,
       height: MAP.HEIGHT,
-      resolution: 1
-    });
+      resolution: 1,
+    })
 
     const getResponsiveWidth = () =>
       window.matchMedia("(max-width: 800px)").matches || sidebarHidden
         ? window.innerWidth
-        : window.innerWidth - 400;
+        : window.innerWidth - 400
 
     // PIXI: VIEWPORT
     viewport = new Viewport({
@@ -936,10 +934,10 @@
       screenHeight: window.innerHeight,
       worldWidth: MAP.WIDTH,
       worldHeight: MAP.HEIGHT,
-      interaction: app.renderer.plugins.interaction
-    });
+      interaction: app.renderer.plugins.interaction,
+    })
 
-    app.stage.addChild(viewport);
+    app.stage.addChild(viewport)
 
     // Create and add layers
     // (1) => Map
@@ -948,57 +946,56 @@
     // (4) => Emergent/mobil case studies
     // (5) => Players
     // (6) => Landmarks
-    mapLayer = new PIXI.Container();
-    emergentLayer = new PIXI.Container();
-    exhibitionLayer = new PIXI.Container();
-    audioInstallationLayer = new PIXI.Container();
-    playerLayer = new PIXI.Container();
-    landMarkLayer = new PIXI.Container();
-    viewport.addChild(mapLayer);
-    viewport.addChild(audioInstallationLayer);
-    viewport.addChild(exhibitionLayer);
-    viewport.addChild(emergentLayer);
-    viewport.addChild(playerLayer);
-    viewport.addChild(landMarkLayer);
+    mapLayer = new PIXI.Container()
+    emergentLayer = new PIXI.Container()
+    exhibitionLayer = new PIXI.Container()
+    audioInstallationLayer = new PIXI.Container()
+    playerLayer = new PIXI.Container()
+    landMarkLayer = new PIXI.Container()
+    viewport.addChild(mapLayer)
+    viewport.addChild(audioInstallationLayer)
+    viewport.addChild(exhibitionLayer)
+    viewport.addChild(emergentLayer)
+    viewport.addChild(playerLayer)
+    viewport.addChild(landMarkLayer)
 
     // PIXI: TICKER
-    ticker = PIXI.Ticker.shared;
-    ticker.start();
-    ticker.add(updatePositions);
+    ticker = PIXI.Ticker.shared
+    ticker.start()
+    ticker.add(updatePositions)
 
     window.onresize = () => {
-      const responsiveWidth = getResponsiveWidth();
-      viewport.resize(responsiveWidth, window.innerHeight);
-      app.renderer.resize(responsiveWidth, window.innerHeight);
-    };
+      const responsiveWidth = getResponsiveWidth()
+      viewport.resize(responsiveWidth, window.innerHeight)
+      app.renderer.resize(responsiveWidth, window.innerHeight)
+    }
 
-    window.dispatchEvent(new Event("resize"));
+    window.dispatchEvent(new Event("resize"))
 
     // Give the local user a UUID
-    localUserUUID.set(nanoid());
+    localUserUUID.set(nanoid())
 
     // HACK
     setTimeout(() => {
-      caseStudiesLoaded = true;
-    }, 5000);
+      caseStudiesLoaded = true
+    }, 5000)
 
-    let visitorCookie = Cookies.get("tsoap-visitor");
+    let visitorCookie = Cookies.get("tsoap-visitor")
 
     //   if none:
     // show GDPR authorisation
     // 	yes => set cookie (TTL 7days)
-    Cookies.set("tsoap-visitor", "true", { expires: 7 });
+    Cookies.set("tsoap-visitor", "true", { expires: 7 })
 
     //   either way => show introduction text
 
-    let authCookie = Cookies.get("tsoap-logged-in");
-    console.dir(authCookie);
+    let authCookie = Cookies.get("tsoap-logged-in")
     if (authCookie && section != "authenticate") {
-      window.location = "https://sso.tsoap.dev/auth/discourse_sso";
+      window.location = "https://sso.tsoap.dev/auth/discourse_sso"
     }
 
-    initializeGameWorld(sso, sig);
-  });
+    initializeGameWorld(sso, sig)
+  })
 </script>
 
 <style lang="scss">
@@ -1190,9 +1187,10 @@
       height: calc(100% - 240px);
 
       .top-area {
+        position: relative;
         height: 50%;
+        width: 100%;
         overflow: hidden;
-        @include hide-scroll;
       }
 
       .bottom-area {
@@ -1335,8 +1333,8 @@
           class="hide-button"
           in:scale={{ delay: 500 }}
           on:click={() => {
-            sidebarHidden = !sidebarHidden;
-            window.dispatchEvent(new Event('resize'));
+            sidebarHidden = !sidebarHidden
+            window.dispatchEvent(new Event('resize'))
           }}>
           »
         </div>
@@ -1347,8 +1345,8 @@
         class:hidden={sidebarHidden}
         on:click={() => {
           if (sidebarHidden) {
-            sidebarHidden = false;
-            window.dispatchEvent(new Event('resize'));
+            sidebarHidden = false
+            window.dispatchEvent(new Event('resize'))
           }
         }}>
         <!-- MINIMAP -->
@@ -1359,7 +1357,7 @@
           <div class="top-area">
             <!-- CALENDAR -->
             {#await events then events}
-              <EventList {events} />
+                <EventList {events} />
             {/await}
           </div>
           <div class="bottom-area">
@@ -1385,8 +1383,8 @@
               <ToolBar
                 {section}
                 on:submit={submitChat}
-                on:teleport={e => {
-                  teleportTo(3);
+                on:teleport={(e) => {
+                  teleportTo(3)
                 }} />
             </div>
           </div>
@@ -1575,8 +1573,8 @@
 {/if}
 
 <svelte:window
-  on:keyup={e => {
+  on:keyup={(e) => {
     if (e.keyCode == 32 && localPlayers[$localUserSessionID].carrying && localPlayers[$localUserSessionID].carrying.length > 0) {
-      dropCaseStudy();
+      dropCaseStudy()
     }
   }} />

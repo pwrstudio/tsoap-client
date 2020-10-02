@@ -2,13 +2,13 @@ import { format, getYear, formatDistanceToNow } from "date-fns"
 
 export const SANITY_PROJECT_ID = "bu5rnal5"
 
-export const KEYBOARD = {
-  UP: 38,
-  DOWN: 40,
-  LEFT: 37,
-  RIGHT: 39,
-  ENTER: 13,
-}
+// export const KEYBOARD = {
+//   UP: 38,
+//   DOWN: 40,
+//   LEFT: 37,
+//   RIGHT: 39,
+//   ENTER: 13,
+// }
 
 export const AREA = { YELLOW: 2, RED: 3, GREEN: 4, BLUE: 5 }
 export const COLORMAP = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"]
@@ -110,16 +110,16 @@ export const formattedChatDate = (start) => {
 export const nanoid = (t = 21) => {
   let e = "",
     r = crypto.getRandomValues(new Uint8Array(t))
-  for (; t--;) {
+  for (; t--; ) {
     let n = 63 & r[t]
     e +=
       n < 36
         ? n.toString(36)
         : n < 62
-          ? (n - 26).toString(36).toUpperCase()
-          : n < 63
-            ? "_"
-            : "-"
+        ? (n - 26).toString(36).toUpperCase()
+        : n < 63
+        ? "_"
+        : "-"
   }
   return e
 }

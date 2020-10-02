@@ -49,7 +49,7 @@
       font-family: $MONO_STACK;
       font-size: $FONT_SIZE_SMALL;
       float: left;
-      width: calc(100% - 70px);
+      width: calc(100% - 60px);
       display: block;
       background: $COLOR_DARK;
       border: 1px solid $COLOR_MID_2;
@@ -58,6 +58,7 @@
       padding: 10px;
       outline: none;
       height: 30px;
+      margin-right: 10px;
     }
 
     button {
@@ -114,6 +115,7 @@
 
 <div class="toolbar" use:links>
   {#if $localUserAuthenticated && !showChatInput}
+    <!-- CHAT => open full input -->
     <div
       class="toolbar-item chat"
       on:click={(e) => {
@@ -122,17 +124,20 @@
       }}>
       Chat
     </div>
+    <!-- SEMINAR -->
     <a
       href="/seminar"
       class="toolbar-item"
       class:active={section === 'seminar'}>
       Seminar</a>
+    <!-- MESSAGES -->
     <a
       href="/messages"
       class="toolbar-item"
       class:active={section === 'messages'}>Messages</a>
     <div class="toolbar-item" on:click={teleport}>Support</div>
   {:else}
+    <!-- CHAT -->
     <input
       type="[text]"
       maxlength="600"

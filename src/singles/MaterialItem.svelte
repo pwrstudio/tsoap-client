@@ -6,39 +6,39 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import get from "lodash/get";
-  import { fade } from "svelte/transition";
-  import { urlFor, renderBlockText, loadData } from "../sanity.js";
-  import { links } from "svelte-routing";
+  import get from "lodash/get"
+  import { fade } from "svelte/transition"
+  import { urlFor, renderBlockText, loadData } from "../sanity.js"
+  import { links } from "svelte-routing"
 
-  import { FORMATMAP } from "../global.js";
+  import { FORMATMAP } from "../global.js"
   // *** PROPS
-  export let item = {};
+  export let item = {}
 
-  let url = "";
+  let url = ""
 
-  const makeUrl = ref => {
-    const stripped = ref.substring(5).replace("-", ".");
-    console.log(stripped);
-    return "https://cdn.sanity.io/files/bu5rnal5/production/" + stripped;
-  };
+  const makeUrl = (ref) => {
+    const stripped = ref.substring(5).replace("-", ".")
+    // console.log(stripped);
+    return "https://cdn.sanity.io/files/bu5rnal5/production/" + stripped
+  }
 
   switch (item._type) {
     case "imageBlock":
-      url = urlFor(item.image.asset).url();
-      break;
+      url = urlFor(item.image.asset).url()
+      break
     case "audioBlock":
-      url = makeUrl(item.audioFile.asset._ref);
-      break;
+      url = makeUrl(item.audioFile.asset._ref)
+      break
     case "fileBlock":
-      url = makeUrl(item.file.asset._ref);
-      break;
+      url = makeUrl(item.file.asset._ref)
+      break
     case "pefBlock":
-      url = makeUrl(item.pdfFile.asset._ref);
-      break;
+      url = makeUrl(item.pdfFile.asset._ref)
+      break
     case "videoBlock":
-      url = makeUrl(item.videoFile.asset._ref);
-      break;
+      url = makeUrl(item.videoFile.asset._ref)
+      break
   }
 </script>
 

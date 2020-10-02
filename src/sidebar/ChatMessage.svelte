@@ -7,8 +7,7 @@
 
   // IMPORTS
   import { fade } from "svelte/transition"
-  import anchorme from "anchorme" // or this
-  import get from "lodash/get"
+  import anchorme from "anchorme"
 
   // GLOBALS
   import { formattedChatDate } from "../global.js"

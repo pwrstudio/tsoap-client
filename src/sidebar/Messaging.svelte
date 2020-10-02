@@ -5,21 +5,19 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
-  import { slide } from "svelte/transition"
+  export let username = "rasmus"
 
-  // COMPONENTS
-  //   import ChatMessage from "./ChatMessage.svelte"
+  let privateMessages = []
 
-  // DOM REFERENCES
-  //   let messageContainerEl = {}
-
-  // GLOBAL
-  import { COLORMAP } from "../global.js"
-
-  // PROPS
-  export let chatMessages = []
-  export let currentArea = 4
+  fetch("https://sso.tsoap.dev/messages?user=" + username)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data)
+      privateMessages = data
+    })
+    .catch((err) => {
+      console.error(err)
+    })
 </script>
 
 <style lang="scss">
@@ -61,13 +59,15 @@
 <div class="messaging-container">
   <div class="header">Messaging</div>
   <div class="message-container">
-    <div>TODO: List all messages<br /> TODO: Allow writing message</div>
+    <div>___ List all messages</div>
+    {#each privateMessages as message (message.msgId)}
+      <div>{message.title} – {message.last_posted_at}</div>
+    {/each}
+    <div>TODO: Allow writing message</div>
     <div>
-      TODO: if slug: List all messages from specific user<br />
+      TODO: if slug:<br />
+      TODO: List all messages from specific user<br />
       TODO: Allow writing message to specified user
     </div>
-    <!-- {#each chatMessages as message (message.msgId)}
-      <ChatMessage {message} />
-    {/each} -->
   </div>
 </div>

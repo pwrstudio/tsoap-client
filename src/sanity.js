@@ -12,8 +12,6 @@ const tracer = (x) => {
   return x
 }
 
-console.log(SANITY_PROJECT_ID)
-
 export const client = sanityClient({
   projectId: SANITY_PROJECT_ID,
   dataset: "production",

@@ -21,8 +21,6 @@
   // *** PROPS
   export let caseStudy = {}
   // const relatedEvents = loadData(QUERY.RELATED_EVENTS, {id: caseStudy._id})
-
-  console.dir(caseStudy)
 </script>
 
 <style lang="scss">

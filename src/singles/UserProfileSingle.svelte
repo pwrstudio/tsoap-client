@@ -19,8 +19,6 @@
   // *** PROPS
   export let user = {}
 
-  console.dir(user)
-
   // const relatedEvents = loadData(QUERY.RELATED_EVENTS, {id: user._id})
 </script>
 

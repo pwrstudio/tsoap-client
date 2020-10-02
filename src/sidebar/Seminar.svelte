@@ -21,17 +21,8 @@
   // PROPS
   export let slug = "test-seminar-1"
 
-  // console.log("slug", slug)
-
+  // If there is no slug, show user's own seminar
   if (!slug || slug.length == 0) {
-    // console.dir($authenticatedUserInformation)
-    // console.log(
-    //   get(
-    //     $authenticatedUserInformation,
-    //     "seminarLink.slug.current",
-    //     "XXXX NO SLUG"
-    //   )
-    // )
     slug = get(
       $authenticatedUserInformation,
       "seminarLink.slug.current",
@@ -43,11 +34,10 @@
   let loadedParticipants = []
 
   seminar.then((seminar) => {
-    // console.dir(seminar._id)
+    // Get participants of seminar
     loadData(QUERY.SEMINAR_PARTICIPANTS, {
       id: seminar._id,
     }).then((connectedParticipants) => {
-      // console.dir(connectedParticipants)
       loadedParticipants = connectedParticipants
     })
   })

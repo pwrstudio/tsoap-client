@@ -24,15 +24,13 @@
 
   let expanded = false
 
-  console.dir(event._id)
-
   const connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
     id: event._id,
   })
 
-  connectedCaseStudies.then((connectedCaseStudies) => {
-    console.dir(connectedCaseStudies)
-  })
+  // connectedCaseStudies.then((connectedCaseStudies) => {
+  //   console.dir(connectedCaseStudies)
+  // })
 </script>
 
 <style lang="scss">

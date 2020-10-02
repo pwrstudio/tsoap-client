@@ -133,7 +133,7 @@
           <div class="elips">
             .........................................................
           </div>
-          <div class="date">Category</div>
+          <div class="date">{caseStudy.category}</div>
         </div>
         <div class="row">
           <div class="participants">

@@ -6,13 +6,13 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import get from "lodash/get";
-  import { fade } from "svelte/transition";
-  import { urlFor, renderBlockText, loadData } from "../sanity.js";
-  import { links } from "svelte-routing";
+  import get from "lodash/get"
+  import { fade } from "svelte/transition"
+  import { urlFor, renderBlockText, loadData } from "../sanity.js"
+  import { links } from "svelte-routing"
 
   // COMPONENTS
-  import ParticipantsList from "../lists/ParticipantsList.svelte";
+  import ParticipantsList from "../lists/ParticipantsList.svelte"
   //   import CaseStudyList from "../lists/CaseStudyList.svelte"
   //   import VideoPlayer from "./VideoPlayer.svelte"
 
@@ -20,7 +20,7 @@
   //   import { formattedDate, QUERY } from "../global.js"
 
   // *** PROPS
-  export let audioInstallation = {};
+  export let audioInstallation = {}
 </script>
 
 <style lang="scss">
