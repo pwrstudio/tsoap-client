@@ -29,7 +29,7 @@
     // left: 0;
     // margin: 0;
     // padding: 0;
-    // pointer-events: none;
+    pointer-events: none;
 
     .youtube-container,
     .vimeo-container {

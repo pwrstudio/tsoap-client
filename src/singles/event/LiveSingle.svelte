@@ -23,9 +23,10 @@
   export let event = {}
 
   let expanded = false
+  let connectedCaseStudies = []
 
   if (event._id) {
-    const connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
+    connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
       id: event._id,
     })
   }

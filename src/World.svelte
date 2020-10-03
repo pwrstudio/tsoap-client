@@ -14,7 +14,7 @@
   import sample from "lodash/sample"
   import { fly, scale } from "svelte/transition"
   import { quartOut } from "svelte/easing"
-  import { urlFor, loadData } from "./sanity.js"
+  import { urlFor, loadData, client } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
   import MediaQuery from "svelte-media-query"
@@ -69,18 +69,29 @@
   // *** PROPS
   export let params = false
 
+  // DOM REFERENCES
+  let gameContainer = {}
+
+  // VARIABLES
+  let activeContentClosed = false
+  let audioChatActive = false
+  let sidebarHidden = false
+  let caseStudiesLoaded = false
+  let intentToPickUp = false
+  let inAudioZone = false
+  let miniImage = false
+  let localPlayers = {}
+  let chatMessages = []
+  let moveQ = []
+
   // ___ Routing
-  // ___ Split the url parameter into variables
   let section = false
   let slug = false
   let sso = false
   let sig = false
 
   $: {
-    // // Split URL parameters
-    // console.log("* * * * * ")
-    // console.log("PARAMS UPDATED")
-    // console.log("– params", params)
+    // ___ Split the url parameter into variables
     const args = get(params, "[*]", "").split("/")
     section = args[0] && args[0].length > 0 ? args[0] : "seed"
     if (section === "authenticate") {
@@ -89,9 +100,6 @@
     } else {
       slug = args[1] && args[1].length > 0 ? args[1] : false
     }
-    // console.log("– section", section)
-    // console.log("– slug", slug)
-    // console.log("* * * * * ")
   }
 
   // ___ Listen for changes to page visibility (ie. tab being out of focus etc..)
@@ -115,6 +123,7 @@
     if (document[hidden]) {
       hiddenTime = Date.now()
     } else {
+      // Number of frames missed (1000ms / 60frames ≈ 16.6666)
       deltaJump = Math.round((Date.now() - hiddenTime) / 16.6666)
     }
   }
@@ -129,11 +138,23 @@
   const landMarks = loadData(QUERY.LAND_MARKS)
   const users = loadData(QUERY.USERS)
   const pages = loadData(QUERY.PAGES)
-  const activeStreams = loadData(QUERY.ACTIVE_STREAMS)
+
+  // __ Listen for changes to the active streams post
+  let activeStreams = loadData(QUERY.ACTIVE_STREAMS)
+  let currentStream = false
+
+  client.listen(QUERY.ACTIVE_STREAMS).subscribe((update) => {
+    currentStream = false
+    setTimeout(() => {
+      activeStreams = loadData(QUERY.ACTIVE_STREAMS).then((aS) => {
+        activeContentClosed = false
+        currentStream = aS.mainStream
+      })
+    }, 1000)
+  })
 
   activeStreams.then((activeStreams) => {
-    console.log("___ activeStreams")
-    console.dir(activeStreams)
+    currentStream = activeStreams.mainStream
   })
 
   // ___ Set overarching state of the UI
@@ -171,25 +192,8 @@
   //   console.log("STATE: ", UI.state)
   // }
 
-  // DOM REFERENCES
-  let gameContainer = {}
-
-  // VARIABLES
-  let activeContentClosed = false
-  let audioChatActive = false
-  let sidebarHidden = false
-  let caseStudiesLoaded = false
-  let intentToPickUp = false
-  let inAudioZone = false
-  let miniImage = false
-
-  // WORLD STATE
-  let localPlayers = {}
-  let chatMessages = []
-  let moveQ = []
-
   // __ Connect to Colyseus gameserver
-  const client = new Colyseus.Client("wss://gameserver.tsoap.dev")
+  const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
   // const client = new Colyseus.Client("ws://localhost:2567")
 
   // ___ For animations
@@ -310,19 +314,21 @@
   let pickUpCaseStudy = () => {}
 
   const initializeGameWorld = (sso, sig) => {
-    // Load assets
+    // __ Load assets
     graphicsSettings.then((graphicsSettings) => {
-      // Load map
+      // __ Load map
       const mapAsset = get(graphicsSettings, "mapLink.mainImage.asset", false)
       if (mapAsset) {
-        const mapLoader = new PIXI.Loader()
-        const mapUrl = urlFor(mapAsset).url()
+        // __ Get minimap URL
         miniImage = urlFor(graphicsSettings.mapLink.miniImage.asset)
           .width(400)
           .height(400)
           .quality(100)
           .auto("format")
           .url()
+        // __ Load main map
+        const mapLoader = new PIXI.Loader()
+        const mapUrl = urlFor(mapAsset).url()
         mapLoader.add("map", mapUrl)
         mapLoader.load((loader, resources) => {
           const map = new PIXI.Sprite(resources.map.texture)
@@ -335,7 +341,7 @@
         throw "Unable to load map"
       }
 
-      // Load avatars
+      // __ Load avatars
       const activeAvatars = get(graphicsSettings, "activeAvatars", false)
       const avatarLoader = new PIXI.Loader()
       if (activeAvatars && activeAvatars.length > 0) {
@@ -349,7 +355,6 @@
         setUIState(STATE.ERROR, false, "Unable to load avatars")
         throw "Unable to load avatars"
       }
-
       avatarLoader.load((loader, resources) => {
         for (let key of Object.keys(resources)) {
           if (resources[key].extension === "json") {
@@ -357,9 +362,9 @@
           }
         }
 
-        // CREATE PLAYER
+        // __ Create player
         const createPlayer = (playerOptions, sessionId) => {
-          // console.log("playerOptions", playerOptions)
+          // __ Create sprites for all motion states
           const sprites = ["rest", "front", "back", "left", "right"].map(
             (ms) => {
               const sprite = new PIXI.AnimatedSprite(
@@ -369,33 +374,32 @@
               sprite.visible = ms === "rest" ? true : false
               sprite.height = 60
               sprite.width = 60
-              // if (playerOptions.npc) {
-              //   sprite.tint = 0xfc9c42
-              // }
+
               sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1
               sprite.play()
               return sprite
             }
           )
 
-          // console.log(playerOptions.name)
+          // __ Name graphics (shown on hover)
           const nameText = new PIXI.Text(playerOptions.name, TEXT_STYLE)
           nameText.anchor.set(0.5)
 
+          // __ Add sprites and initial position to container
           const avatar = new PIXI.Container()
           avatar.addChild(...sprites)
           avatar.motionState = "rest"
+          avatar.x = playerOptions.x
+          avatar.y = playerOptions.y
+          avatar.pivot.x = avatar.width / 2
+          avatar.pivot.y = avatar.height / 2
+          avatar.interactive = true
           avatar.setAnimation = (direction) => {
             avatar.motionState = direction
             avatar.children.forEach((c) => {
               c.visible = c.name == direction ? true : false
             })
           }
-          avatar.x = playerOptions.x
-          avatar.y = playerOptions.y
-          avatar.pivot.x = avatar.width / 2
-          avatar.pivot.y = avatar.height / 2
-          avatar.interactive = true
 
           const player = {
             avatar: avatar,
@@ -422,8 +426,6 @@
           }
 
           const onEnter = () => {
-            // console.log("nameText.width", nameText.width)
-            // console.log("nameText.height", nameText.height)
             nameText.x = avatar.x + 10
             nameText.y = avatar.y - 40
             playerLayer.addChild(nameText)
@@ -441,6 +443,7 @@
           playerLayer.addChild(player.avatar)
 
           if (player.isSelf) {
+            // __ Follow own avatar in viewport
             viewport.follow(player.avatar, {
               radius: 20,
               acceleration: 400,
@@ -448,28 +451,31 @@
             localUserSessionID.set(player.id)
             // localUserAuthenticated.set(true)
 
-            // Set cookie if user is successfully authenticated
+            // __ Set cookie if user is successfully authenticated
             if (player.authenticated) {
-              // console.log("Current user is logged in")
               Cookies.set("tsoap-logged-in", "true", { expires: 7 })
-              // console.dir(player)
-              // console.log(player.discourseName)
               localUserAuthenticated.set(true)
               loadData(QUERY.AUTH_USER_INFO, {
                 username: player.discourseName,
-              }).then((info) => {
-                authenticatedUserInformation.set(info)
               })
+                .then((info) => {
+                  authenticatedUserInformation.set(info)
+                })
+                .catch((err) => {
+                  console.log(err)
+                })
             }
+            // __ Loading is done
             setUIState(STATE.READY)
           }
 
           return player
         }
 
-        let randomAvatar = sample(Object.keys(avatarSpritesheets))
+        // __ Get a random avatar
+        const randomAvatar = sample(Object.keys(avatarSpritesheets))
 
-        let name = graphicsSettings.activeAvatars.find(
+        const name = graphicsSettings.activeAvatars.find(
           (a) => a._id === randomAvatar
         ).title
 
@@ -492,11 +498,11 @@
           }
         }
 
-        // => GAME ROOM
-        client
+        // __ Join game room
+        gameClient
           .joinOrCreate("game", playerObject)
           .then((gameRoom) => {
-            // HACK
+            // !!! HACK
             if (section == "authenticate") {
               history.replaceState({}, "CONNECTED", "/")
             }
@@ -505,13 +511,15 @@
             // PLAYER
             // ******
 
-            // PLAYER: REMOVE
+            // PLAYER => REMOVE
             gameRoom.state.players.onRemove = (player, sessionId) => {
               try {
-                if (localPlayers[sessionId] && localPlayers[sessionId].avatar) {
+                if (get(localPlayers, "[sessionId].avatar", false)) {
+                  // Remove player graphics
                   playerLayer.removeChild(localPlayers[sessionId].avatar)
-                  // HACK
+                  // !!! HACK
                   setTimeout(() => {
+                    // Delete player object
                     delete localPlayers[sessionId]
                     localPlayers = localPlayers
                   }, 500)
@@ -522,20 +530,20 @@
               }
             }
 
-            // PLAYER: ADD
+            // PLAYER => ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
               localPlayers[sessionId] = createPlayer(player, sessionId)
             }
 
-            // PLAYER: BANNED
+            // PLAYER => BANNED
             gameRoom.onMessage("banned", (message) => {
               setUIState(STATE.BANNED)
             })
 
-            // PLAYER: ILLEGAL MOVE
+            // PLAYER => ILLEGAL MOVE
             gameRoom.onMessage("illegalMove", (message) => {
-              // window.alert("ILLEGAL MOVE");
               const initialX = localPlayers[$localUserSessionID].avatar.x
+              // __ Vibrate avatar
               tweener
                 .add(localPlayers[$localUserSessionID].avatar)
                 .to(
@@ -559,7 +567,7 @@
               hideTarget()
             })
 
-            // PLAYER: STATE CHANGE
+            // PLAYER => CHANGE
             gameRoom.state.players.onChange = (player, sessionId) => {
               // console.log("player state change")
               if ($localUserSessionID === sessionId) {
@@ -573,29 +581,31 @@
                 }
               }
               if (player.path.waypoints.length > 0) {
+                // __ Normal movement
                 moveQ[sessionId] = player.path.waypoints
               } else {
-                // TELEPORT
+                // __ Teleport
                 localPlayers[sessionId].area = player.area
                 localPlayers[sessionId].avatar.x = player.x
                 localPlayers[sessionId].avatar.y = player.y
-                // checkPlayerProximity()
               }
             }
 
-            // PLAYER: CLICK / TAP
+            // PLAYER => CLICK / TAP
             viewport.on("clicked", (e) => {
+              // __ Cancel current movement
               delete moveQ[$localUserSessionID]
               hideTarget()
-              showTarget(Math.round(e.world.x), Math.round(e.world.y))
-              // setTimeout(() => {
+              // __ Start new movement
+              const targetX = Math.round(e.world.x)
+              const targetY = Math.round(e.world.y)
+              showTarget(targetX, targetY)
               gameRoom.send("go", {
-                x: Math.round(e.world.x),
-                y: Math.round(e.world.y),
+                x: targetX,
+                y: targetY,
                 originX: localPlayers[$localUserSessionID].avatar.x,
                 originY: localPlayers[$localUserSessionID].avatar.y,
               })
-              // }, 300)
             })
 
             // PLAYER: CLICK / TAP
@@ -624,12 +634,12 @@
             // MESSAGE
             // *******
 
-            // MESSAGE: ADD
+            // MESSAGE => ADD
             gameRoom.state.messages.onAdd = (message) => {
               chatMessages = [...chatMessages, message]
             }
 
-            // MESSAGE: REMOVE
+            // MESSAGE => REMOVE
             gameRoom.state.messages.onRemove = (message) => {
               try {
                 const itemIndex = chatMessages.findIndex((m) => m === message)
@@ -641,7 +651,7 @@
               }
             }
 
-            // MESSAGE: SUBMIT
+            // MESSAGE => SUBMIT
             submitChat = (event) => {
               try {
                 gameRoom.send("submitChatMessage", {
@@ -674,7 +684,7 @@
               })
             }
 
-            // CREATE CASE STUDY
+            // __ Create Case Study
             const createCaseStudy = (caseStudy, animate) => {
               // const nameText = new PIXI.Text(caseStudy.name, TEXT_STYLE)
               // nameText.anchor.set(0.5)
@@ -744,7 +754,7 @@
               emergentLayer.addChild(container)
             }
 
-            // CASE STUDY: ADD
+            // CASE STUDY => ADD
             gameRoom.state.caseStudies.onAdd = (caseStudy, sessionId) => {
               if (caseStudiesLoaded) {
                 // console.log("====> loaded")
@@ -755,15 +765,14 @@
               }
             }
 
-            // CASE STUDY: REMOVE
+            // CASE STUDY => REMOVE
             gameRoom.state.caseStudies.onRemove = (caseStudy, sessionId) => {
               // console.log("%_%_%_ Case study removed")
               // console.dir(caseStudy)
             }
 
-            // CASE STUDY: STATE CHANGE
+            // CASE STUDY => CHANGE
             gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
-              // console.log("%_%_%_ Case study state change", caseStudy)
               let g = emergentLayer.children.find(
                 (cs) => cs.uuid === caseStudy.uuid
               )
@@ -780,10 +789,8 @@
             }
 
             // ************
-            // GENERAL
+            // GENERAL ERROR
             // ************
-
-            // GENERAL: ERROR
             gameRoom.onError((code, message) => {
               setUIState(STATE.ERROR, false, message)
               console.error("!!! COLYSEUS ERROR:")
@@ -801,7 +808,7 @@
           })
       })
 
-      // ADD EXHIBITION CASE STUDIES
+      // __ Add exhibition (static) case studies
       caseStudies.then((caseStudies) => {
         caseStudies
           .filter((cs) => cs._type === "caseStudyExhibition")
@@ -855,7 +862,7 @@
           })
       })
 
-      // ADD AUDIO INSTALLATIONS
+      // __ Add audio installations
       audioInstallations.then((audioInstallations) => {
         audioInstallations.forEach((ai, i) => {
           const spriteUrl = get(ai, "spriteLink.spriteJsonURL", "")
@@ -867,9 +874,6 @@
             )
             frames.animationSpeed = 0.02
             frames.play()
-
-            // const nameText = new PIXI.Text(ai.title, TEXT_STYLE)
-            // nameText.anchor.set(0.5)
 
             const audioInstallationLocation = new PIXI.Container()
             audioInstallationLocation.addChild(frames)
@@ -965,7 +969,7 @@
     // ___ Create and add layers
     // (1) => Map
     // (2) => Audio Installations
-    // (3) => Exhibitions
+    // (3) => Exhibition/static case studies
     // (4) => Emergent/mobil case studies
     // (5) => Players
     // (6) => Landmarks
@@ -1030,6 +1034,7 @@
   .inventory {
     position: fixed;
     width: auto;
+    max-width: 50vw;
     background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
@@ -1040,10 +1045,8 @@
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
     cursor: pointer;
-
     padding-left: 15px;
     padding-right: 15px;
-
     user-select: none;
 
     @include screen-size("small") {
@@ -1253,7 +1256,6 @@
     overflow-y: auto;
     font-size: $FONT_SIZE_BASE;
     color: $COLOR_DARK;
-    // padding-bottom: 60px;
     transition: transform 0.5s $transition;
 
     &.pushed {
@@ -1451,7 +1453,7 @@
   <!-- LIVE -->
   {#await activeStreams then activeStreams}
   <!-- MAIN AREA -->
-    {#if get(localPlayers, '[$localUserSessionID].area', 4) == 4 && activeStreams.mainStream && !activeContentClosed}
+    {#if get(localPlayers, '[$localUserSessionID].area', 4) == 4 && currentStream && !activeContentClosed}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
@@ -1461,11 +1463,11 @@
           ×
         </div>
           <LiveSingle
-            event={activeStreams.mainStream} />
+            event={currentStream} />
       </div>
     {/if}
     <!-- SUPPORT AREA -->
-    {#if get(localPlayers, '[$localUserSessionID].area', 4) == 5 && activeStreams.supportStrem}
+    {#if get(localPlayers, '[$localUserSessionID].area', 4) == 5 && activeStreams.supportStream}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
