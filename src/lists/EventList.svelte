@@ -72,7 +72,8 @@
       @include screen-size("small") {
         width: 80vw;
         display: inline-flex;
-        align-items: center;
+        // align-items: center;
+        padding-top: 10px;
         height: 80px;
         border-right: 1px solid $COLOR_MID_1;
       }

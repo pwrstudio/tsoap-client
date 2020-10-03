@@ -1321,6 +1321,10 @@
       @include screen-size("small") {
         margin-top: 0;
         margin-bottom: 0;
+
+        &.passive {
+          min-height: 100vh;
+        }
       }
 
       transition: transform 0.3s ease-out;
