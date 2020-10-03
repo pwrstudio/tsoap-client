@@ -21,9 +21,7 @@
   import Tweener from "tweener"
   import Cookies from "js-cookie"
 
-  const tweener = new Tweener(1 / 60)
-
-  // COMPONENTS
+  // *** COMPONENTS
   // sidebar
   import Chat from "./sidebar/Chat.svelte"
   import MiniMap from "./sidebar/MiniMap.svelte"
@@ -49,34 +47,30 @@
   // ...
   import AudioChat from "./AudioChat.svelte"
 
-  // Set the name of the hidden property and the change event for visibility
-  let hidden, visibilityChange
-  if (typeof document.hidden !== "undefined") {
-    hidden = "hidden"
-    visibilityChange = "visibilitychange"
-  } else if (typeof document.msHidden !== "undefined") {
-    hidden = "msHidden"
-    visibilityChange = "msvisibilitychange"
-  } else if (typeof document.webkitHidden !== "undefined") {
-    hidden = "webkitHidden"
-    visibilityChange = "webkitvisibilitychange"
-  }
+  // *** GLOBAL
+  import {
+    nanoid,
+    MAP,
+    COLORMAP,
+    TINTMAP,
+    QUERY,
+    AREA,
+    TEXT_STYLE,
+  } from "./global.js"
 
-  let deltaJump = 0
-  let hiddenTime = 0
+  // *** STORES
+  import {
+    localUserUUID,
+    localUserSessionID,
+    localUserAuthenticated,
+    authenticatedUserInformation,
+  } from "./stores.js"
 
-  const handleVisibilityChange = () => {
-    if (document[hidden]) {
-      hiddenTime = Date.now()
-    } else {
-      deltaJump = Math.round((Date.now() - hiddenTime) / 16.6666)
-    }
-  }
-
-  document.addEventListener(visibilityChange, handleVisibilityChange, false)
-
-  // PROPS
+  // *** PROPS
   export let params = false
+
+  // ___ Routing
+  // ___ Split the url parameter into variables
   let section = false
   let slug = false
   let sso = false
@@ -100,26 +94,34 @@
     // console.log("* * * * * ")
   }
 
-  // GLOBAL
-  import {
-    nanoid,
-    MAP,
-    COLORMAP,
-    TINTMAP,
-    QUERY,
-    AREA,
-    TEXT_STYLE,
-  } from "./global.js"
+  // ___ Listen for changes to page visibility (ie. tab being out of focus etc..)
+  // ___ Fastforward animations when window is refocused
+  let deltaJump = 0
+  let hiddenTime = 0
+  let hidden, visibilityChange
 
-  // STORES
-  import {
-    localUserUUID,
-    localUserSessionID,
-    localUserAuthenticated,
-    authenticatedUserInformation,
-  } from "./stores.js"
+  if (typeof document.hidden !== "undefined") {
+    hidden = "hidden"
+    visibilityChange = "visibilitychange"
+  } else if (typeof document.msHidden !== "undefined") {
+    hidden = "msHidden"
+    visibilityChange = "msvisibilitychange"
+  } else if (typeof document.webkitHidden !== "undefined") {
+    hidden = "webkitHidden"
+    visibilityChange = "webkitvisibilitychange"
+  }
 
-  // ** SANITY
+  const handleVisibilityChange = () => {
+    if (document[hidden]) {
+      hiddenTime = Date.now()
+    } else {
+      deltaJump = Math.round((Date.now() - hiddenTime) / 16.6666)
+    }
+  }
+
+  document.addEventListener(visibilityChange, handleVisibilityChange, false)
+
+  // ___ Get data from Sanity CMS
   const graphicsSettings = loadData(QUERY.GRAPHICS_SETTINGS)
   const events = loadData(QUERY.EVENTS)
   const caseStudies = loadData(QUERY.CASE_STUDIES)
@@ -127,9 +129,14 @@
   const landMarks = loadData(QUERY.LAND_MARKS)
   const users = loadData(QUERY.USERS)
   const pages = loadData(QUERY.PAGES)
+  const activeStreams = loadData(QUERY.ACTIVE_STREAMS)
 
-  let inAudioZone = false
+  activeStreams.then((activeStreams) => {
+    console.log("___ activeStreams")
+    console.dir(activeStreams)
+  })
 
+  // ___ Set overarching state of the UI
   const STATE = {
     ERROR: 0,
     READY: 1,
@@ -137,7 +144,6 @@
     BANNED: 3,
   }
 
-  // UI STATE
   const UI = { state: STATE.LOADING, slug: false, errorMessage: false }
 
   const setUIState = (newState, newSlug = false, errorMessage = false) => {
@@ -174,8 +180,7 @@
   let sidebarHidden = false
   let caseStudiesLoaded = false
   let intentToPickUp = false
-
-  // UI DATA VARIABLES
+  let inAudioZone = false
   let miniImage = false
 
   // WORLD STATE
@@ -183,54 +188,46 @@
   let chatMessages = []
   let moveQ = []
 
-  // COLYSEUS
-  // const client = new Colyseus.Client("ws://localhost:2567")
-  // const client = new Colyseus.Client("ws://212.36.170.236:2567")
+  // __ Connect to Colyseus gameserver
   const client = new Colyseus.Client("wss://gameserver.tsoap.dev")
+  // const client = new Colyseus.Client("ws://localhost:2567")
+
+  // ___ For animations
+  const tweener = new Tweener(1 / 60)
 
   // PIXI
   let app = {}
   let viewport = {}
   let ticker = {}
   let avatarSpritesheets = {}
-
-  // PIXI LAYERS
+  // layers
   let mapLayer = {}
   let emergentLayer = {}
   let exhibitionLayer = {}
   let audioInstallationLayer = {}
   let playerLayer = {}
   let landMarkLayer = {}
-
-  // PIXI MISC.
+  // misc
   let targetGraphics = {}
 
   const checkAudioProximity = () => {
     audioInstallationLayer.children.forEach((a) => {
-      let dist = Math.sqrt(
+      // Get distance between user and audio installation
+      const dist = Math.sqrt(
         Math.pow(a.x - localPlayers[$localUserSessionID].avatar.x, 2) +
           Math.pow(a.y - localPlayers[$localUserSessionID].avatar.y, 2)
       )
-
-      // console.log("audioinstallation:", a.title)
-
+      // Check if user is within range of audio installation
       if (dist < a.radius) {
         if (!a.audio.playing()) {
           a.audio.play()
           inAudioZone = a.slug
         }
-        // OldRange = OldMax - OldMin;
-        // NewRange = NewMax - NewMin;
+        // Set volume proportionally to distance
+        // Formula to translate ranges:
         // NewValue = ((OldValue - OldMin) * NewRange) / OldRange + NewMin;
-        // OldRange = 400 - 0;
-        // NewRange = 1 - 0;
-        // NewValue = ((dist - 0 ) * 1) / 400 + 0;
-        // NewValue = (dist / 400;
-        // a.audio.volume(1 - (dist - 50) / a.radius);
-
         a.audio.volume(1 - dist / a.radius)
       }
-
       if (dist > a.radius) {
         if (a.audio.playing()) {
           a.audio.pause()
@@ -238,17 +235,21 @@
         }
       }
     })
-    // console.log("------")
   }
 
-  // GAME LOOP
+  // __ Game loop
+  // __ Called at approximately 60fps by pixi.ticker
   const updatePositions = (delta) => {
+    // Combine delta (lag) and potential time passed since window was in focus
     let deltaRounded = Math.round(delta) + deltaJump
     deltaJump = 0
+    // Iterate over all users currently in move queue
     for (let key in moveQ) {
       if (localPlayers[key]) {
         if (moveQ[key].length > 0) {
           if (moveQ[key].length - deltaRounded < 0) {
+            // User reached destination while the window was out of focus
+            // Move to final step and clear users's move queue
             let step = moveQ[key][moveQ[key].length - 1]
             localPlayers[key].avatar.setAnimation(step.direction)
             localPlayers[key].avatar.x = step.x
@@ -256,6 +257,7 @@
             localPlayers[key].area = step.area
             moveQ[key] = []
           } else {
+            // Get next step, adjusting for delta
             moveQ[key].splice(0, deltaRounded - 1)
             let step = moveQ[key].shift()
             localPlayers[key].avatar.setAnimation(step.direction)
@@ -263,13 +265,15 @@
             localPlayers[key].avatar.y = step.y
             localPlayers[key].area = step.area
             if (key === $localUserSessionID && moveQ[key].length % 10 === 0) {
+              // Check proximity to audio installations every 10th step
               checkAudioProximity()
             }
           }
         } else {
+          // Destination reached
           if (key === $localUserSessionID) {
             hideTarget()
-
+            // User was walking towards a case study
             if (intentToPickUp) {
               pickUpCaseStudy(intentToPickUp)
             }
@@ -283,6 +287,7 @@
     }
   }
 
+  // __ Mark path destination
   const showTarget = (x, y) => {
     const graphics = new PIXI.Graphics()
     graphics.beginFill(0xffffff)
@@ -298,15 +303,13 @@
     targetGraphics = {}
   }
 
-  // FUNCTIONS
+  // *** GLOBAL FUNCTIONS
   let teleportTo = () => {}
   let submitChat = () => {}
   let dropCaseStudy = () => {}
   let pickUpCaseStudy = () => {}
 
   const initializeGameWorld = (sso, sig) => {
-    gameContainer.appendChild(app.view)
-
     // Load assets
     graphicsSettings.then((graphicsSettings) => {
       // Load map
@@ -933,23 +936,23 @@
     })
   }
 
+  const getResponsiveWidth = () =>
+    window.matchMedia("(max-width: 800px)").matches || sidebarHidden
+      ? window.innerWidth
+      : window.innerWidth - 400
+
   onMount(async () => {
-    // GLOBAL SCALE MODE SETTING
+    // ___ Set Global scale mode to hard edges
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST
 
-    // PIXI: APP
+    // ___ Create Pixi App
     app = new PIXI.Application({
       width: MAP.WIDTH,
       height: MAP.HEIGHT,
       resolution: 1,
     })
 
-    const getResponsiveWidth = () =>
-      window.matchMedia("(max-width: 800px)").matches || sidebarHidden
-        ? window.innerWidth
-        : window.innerWidth - 400
-
-    // PIXI: VIEWPORT
+    // __ Create Pixi Viewport
     viewport = new Viewport({
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
@@ -957,10 +960,9 @@
       worldHeight: MAP.HEIGHT,
       interaction: app.renderer.plugins.interaction,
     })
-
     app.stage.addChild(viewport)
 
-    // Create and add layers
+    // ___ Create and add layers
     // (1) => Map
     // (2) => Audio Installations
     // (3) => Exhibitions
@@ -979,9 +981,9 @@
     viewport.addChild(emergentLayer)
     viewport.addChild(playerLayer)
     viewport.addChild(landMarkLayer)
-    viewport.drag()
+    // viewport.drag()
 
-    // PIXI: TICKER
+    // ___ Start Pixi ticker
     ticker = PIXI.Ticker.shared
     ticker.start()
     ticker.add(updatePositions)
@@ -991,30 +993,27 @@
       viewport.resize(responsiveWidth, window.innerHeight)
       app.renderer.resize(responsiveWidth, window.innerHeight)
     }
-
     window.dispatchEvent(new Event("resize"))
 
-    // Give the local user a UUID
+    // ___ Give the local user a UUID
     localUserUUID.set(nanoid())
 
-    // HACK
+    // !!! HACK
     setTimeout(() => {
       caseStudiesLoaded = true
     }, 5000)
 
+    // ___ Cookies
     let visitorCookie = Cookies.get("tsoap-visitor")
-
-    //   if none:
-    // show GDPR authorisation
-    // 	yes => set cookie (TTL 7days)
     Cookies.set("tsoap-visitor", "true", { expires: 7 })
-
     //   either way => show introduction text
-
-    let authCookie = Cookies.get("tsoap-logged-in")
+    const authCookie = Cookies.get("tsoap-logged-in")
     if (authCookie && section != "authenticate") {
       window.location = "https://sso.tsoap.dev/auth/discourse_sso"
     }
+
+    // __ Add pixi view to DOM
+    gameContainer.appendChild(app.view)
 
     initializeGameWorld(sso, sig)
   })
@@ -1223,11 +1222,7 @@
 
       .toolbar {
         width: 100%;
-        // padding-top: 0px;
-        // padding-bottom: 10px;
         height: 50px;
-        // padding-left: 7px;
-        // padding-right: 10px;
         z-index: 1000;
         background: $COLOR_DARK;
       }
@@ -1454,22 +1449,37 @@
   {/if}
 
   <!-- LIVE -->
-  {#if get(localPlayers, '[$localUserSessionID]', false) && localPlayers[$localUserSessionID].area === 4 && !activeContentClosed}
-  <!-- {#if !activeContentClosed} -->
-    <div class="content-item active" transition:fly={{ y: -200 }}>
-      <div
-        class="close"
-        on:click={e => {
-          activeContentClosed = true;
-        }}>
-        ×
+  {#await activeStreams then activeStreams}
+  <!-- MAIN AREA -->
+    {#if get(localPlayers, '[$localUserSessionID].area', 4) == 4 && activeStreams.mainStream && !activeContentClosed}
+      <div class="content-item active" transition:fly={{ y: -200 }}>
+        <div
+          class="close"
+          on:click={e => {
+            activeContentClosed = true;
+          }}>
+          ×
+        </div>
+          <LiveSingle
+            event={activeStreams.mainStream} />
       </div>
-      {#await events then events}
-        <LiveSingle
-          event={events.find(ev => ev.slug.current === 'test-event')} />
-      {/await}
-    </div>
-  {/if}
+    {/if}
+    <!-- SUPPORT AREA -->
+    {#if get(localPlayers, '[$localUserSessionID].area', 4) == 5 && activeStreams.supportStrem}
+      <div class="content-item active" transition:fly={{ y: -200 }}>
+        <div
+          class="close"
+          on:click={e => {
+            activeContentClosed = true;
+          }}>
+          ×
+        </div>
+          <LiveSingle
+            event={{streamURL: activeStreams.supportStream}}/>
+      </div>
+    {/if}
+  {/await}
+
 
   <!-- TEXT CONTENT -->
   {#if ['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}

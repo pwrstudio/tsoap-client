@@ -52,6 +52,8 @@ export const QUERY = {
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
   CONNECTED_CASE_STUDIES:
     '*[_type in ["caseStudyEmergent", "caseStudyExhibition"]]{..., participants[]->{slug,name}}',
+  ACTIVE_STREAMS:
+    "*[_id == 'active-streams']{..., mainStream->{..., participants[]->{slug,name}}}[0]",
   // CONNECTED_PROJECTS:
   //   '*[_type == "event" && participants[]._ref == $id]{...,authors[]->{...}}',
 }

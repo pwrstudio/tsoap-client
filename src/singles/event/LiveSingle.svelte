@@ -24,9 +24,11 @@
 
   let expanded = false
 
-  const connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
-    id: event._id,
-  })
+  if (event._id) {
+    const connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
+      id: event._id,
+    })
+  }
 
   // connectedCaseStudies.then((connectedCaseStudies) => {
   //   console.dir(connectedCaseStudies)
@@ -116,20 +118,20 @@
 </style>
 
 <div class="event-single" in:fade use:links>
-  <VideoPlayer />
+  <VideoPlayer streamUrl={event.streamURL} />
 
-  <!-- HEADER -->
-  <div class="main-header" on:click={() => {
+  {#if event.title}
+    <!-- HEADER -->
+    <div class="main-header" on:click={() => {
       expanded = !expanded}}>
     <!-- TITLE -->
     <div class="title">{event.title}</div>
     <!-- ARROW DOWN -->
     <div class='expand'>
       {#if expanded}
-      <svg xmlns="http://www.w3.org/2000/svg" height="40" viewBox="0 0 24 24" width="40"><path d="M0 0h24v24H0z" fill="none"/><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" height="40" viewBox="0 0 24 24" width="40"><path d="M0 0h24v24H0z" fill="none"/><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
       {:else}
-            <svg xmlns="http://www.w3.org/2000/svg" height="40" viewBox="0 0 24 24" width="40"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-
+        <svg xmlns="http://www.w3.org/2000/svg" height="40" viewBox="0 0 24 24" width="40"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
       {/if}
     
     </div>
@@ -141,22 +143,23 @@
       </div>
     {/if}
   </div>
-  <div class="divider" />
+    <div class="divider" />
 
-  {#if expanded}
-    <!-- TEXT -->
-    {#if Array.isArray(get(event, 'content.content', false)) && event.content.content.length > 0}
+    {#if expanded}
+      <!-- TEXT -->
+      {#if Array.isArray(get(event, 'content.content', false)) && event.content.content.length > 0}
       <div class="text">
         {@html renderBlockText(event.content.content)}
       </div>
       <div class="divider" />
     {/if}
 
-    <!-- CONNECTED CASE STUDIES -->
-    <div class="connected-case-studies">
+      <!-- CONNECTED CASE STUDIES -->
+      <div class="connected-case-studies">
       {#await connectedCaseStudies then connectedCaseStudies}
         <CaseStudyList caseStudies={connectedCaseStudies} related={true} />
       {/await}
     </div>
+    {/if}
   {/if}
 </div>
