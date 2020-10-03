@@ -52,6 +52,10 @@
       height: calc(100% - 80px);
       @include hide-scroll;
       overflow-y: auto;
+
+      @include screen-size("small") {
+        height: 100%;
+      }
     }
 
     .event {

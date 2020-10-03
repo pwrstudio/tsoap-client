@@ -979,7 +979,7 @@
     viewport.addChild(emergentLayer)
     viewport.addChild(playerLayer)
     viewport.addChild(landMarkLayer)
-    viewport.drag({ pressDrag: false })
+    viewport.drag()
 
     // PIXI: TICKER
     ticker = PIXI.Ticker.shared
@@ -1316,6 +1316,11 @@
         &:hover {
           transform: scale(1.1);
         }
+      }
+
+      @include screen-size("small") {
+        margin-top: 0;
+        margin-bottom: 0;
       }
 
       transition: transform 0.3s ease-out;
