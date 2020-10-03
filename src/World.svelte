@@ -686,9 +686,6 @@
 
             // __ Create Case Study
             const createCaseStudy = (caseStudy, animate) => {
-              // const nameText = new PIXI.Text(caseStudy.name, TEXT_STYLE)
-              // nameText.anchor.set(0.5)
-
               const container = new PIXI.Container()
               container.visible = caseStudy.carriedBy === "" ? true : false
               container.uuid = caseStudy.uuid
@@ -708,6 +705,7 @@
 
               container.addChild(graphics)
 
+              // __ Animate in with bounce
               if (animate) {
                 tweener
                   .add(container)
@@ -715,7 +713,7 @@
               }
 
               const onDown = (e) => {
-                // Drop if carrying
+                // __ Make user drop case study, if carrying, to pick up new one
                 if (
                   localPlayers[$localUserSessionID].carrying &&
                   localPlayers[$localUserSessionID].carrying.length > 0
@@ -1452,8 +1450,8 @@
 
   <!-- LIVE -->
   {#await activeStreams then activeStreams}
-  <!-- MAIN AREA -->
-    {#if get(localPlayers, '[$localUserSessionID].area', 4) == 4 && currentStream && !activeContentClosed}
+    <!-- MAIN AREA -->
+    {#if localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area == 4 && currentStream && !activeContentClosed}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
@@ -1467,7 +1465,7 @@
       </div>
     {/if}
     <!-- SUPPORT AREA -->
-    {#if get(localPlayers, '[$localUserSessionID].area', 4) == 5 && activeStreams.supportStream}
+    {#if localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area == 5 && activeStreams.supportStream}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
