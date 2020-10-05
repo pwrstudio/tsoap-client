@@ -8,13 +8,10 @@
   // *** IMPORTS
   import get from "lodash/get"
   import { fade } from "svelte/transition"
-  import { urlFor, renderBlockText, loadData } from "../sanity.js"
+  import { renderBlockText, loadData } from "../sanity.js"
   import { links } from "svelte-routing"
 
   import { QUERY } from "../global.js"
-
-  // COMPONENTS
-  // import Calendar from "../sidebar/Calendar.svelte"
 
   // *** PROPS
   export let user = {}

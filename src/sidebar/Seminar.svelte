@@ -76,10 +76,7 @@
       width: 100%;
       height: calc(100% - 30px);
       overflow-y: auto;
-      padding-bottom: 10px;
-      padding-top: 10px;
-      padding-left: 10px;
-      padding-right: 10px;
+      padding: 10px;
       color: $COLOR_MID_2;
 
       @include hide-scroll;

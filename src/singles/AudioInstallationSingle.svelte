@@ -14,7 +14,6 @@
   // COMPONENTS
   import ParticipantsList from "../lists/ParticipantsList.svelte"
   //   import CaseStudyList from "../lists/CaseStudyList.svelte"
-  //   import VideoPlayer from "./VideoPlayer.svelte"
 
   // GLOBAL
   //   import { formattedDate, QUERY } from "../global.js"

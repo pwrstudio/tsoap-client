@@ -38,10 +38,8 @@
   import UserProfileSingle from "./singles/UserProfileSingle.svelte"
   import EventSingle from "./singles/event/EventSingle.svelte"
   import LiveSingle from "./singles/event/LiveSingle.svelte"
-  import ArchivedSingle from "./singles/event/ArchivedSingle.svelte"
   import AudioInstallationSingle from "./singles/AudioInstallationSingle.svelte"
   // overlays
-  import Banned from "./overlays/Banned.svelte"
   import LoadingScreen from "./overlays/LoadingScreen.svelte"
   import Error from "./overlays/Error.svelte"
   // ...
@@ -80,6 +78,7 @@
   let intentToPickUp = false
   let inAudioZone = false
   let miniImage = false
+  let showWelcomeCard = false
   let localPlayers = {}
   let chatMessages = []
   let moveQ = []
@@ -162,7 +161,6 @@
     ERROR: 0,
     READY: 1,
     LOADING: 2,
-    BANNED: 3,
   }
 
   const UI = { state: STATE.LOADING, errorMessage: false }
@@ -174,9 +172,6 @@
         break
       case STATE.LOADING:
         UI.state = STATE.LOADING
-        break
-      case STATE.BANNED:
-        UI.state = STATE.BANNED
         break
       default:
         UI.state = STATE.ERROR
@@ -529,7 +524,7 @@
 
             // PLAYER => BANNED
             gameRoom.onMessage("banned", (message) => {
-              setUIState(STATE.BANNED)
+              setUIState(STATE.ERROR, "You have been banned")
             })
 
             // PLAYER => ILLEGAL MOVE
@@ -600,22 +595,7 @@
               })
             })
 
-            // PLAYER: CLICK / TAP
-            // viewport.on("drag-end", (e) => {
-            //   delete moveQ[$localUserSessionID]
-            //   hideTarget()
-            //   showTarget(Math.round(e.world.x), Math.round(e.world.y))
-            //   // setTimeout(() => {
-            //   gameRoom.send("go", {
-            //     x: Math.round(e.world.x),
-            //     y: Math.round(e.world.y),
-            //     originX: localPlayers[$localUserSessionID].avatar.x,
-            //     originY: localPlayers[$localUserSessionID].avatar.y,
-            //   })
-            //   // }, 300)
-            // })
-
-            // PLAYER: TELEPORT
+            // PLAYER => TELEPORT
             teleportTo = (area) => {
               gameRoom.send("teleport", {
                 area: area,
@@ -679,6 +659,7 @@
             // __ Create Case Study
             const createCaseStudy = (caseStudy, animate) => {
               const container = new PIXI.Container()
+              // __ Hide if currently in a user's inventory
               container.visible = caseStudy.carriedBy === "" ? true : false
               container.uuid = caseStudy.uuid
               container.caseStudyId = caseStudy.caseStudyId
@@ -705,7 +686,7 @@
               }
 
               const onDown = (e) => {
-                // __ Make user drop case study, if carrying, to pick up new one
+                // __ Make user drop case study if carrying, to allow picking up new one
                 if (
                   localPlayers[$localUserSessionID].carrying &&
                   localPlayers[$localUserSessionID].carrying.length > 0
@@ -714,17 +695,21 @@
                     uuid: localPlayers[$localUserSessionID].carrying,
                   })
                 }
-                gameContainer.style.cursor = "default"
-                let g = emergentLayer.children.find(
+
+                // __ Move towards clicked case study
+                // __ and indicate that it should be picked up once reached
+                const g = emergentLayer.children.find(
                   (cs) => cs.uuid === caseStudy.uuid
                 )
-                intentToPickUp = caseStudy.uuid
-                gameRoom.send("go", {
-                  x: g.x,
-                  y: g.y,
-                  originX: localPlayers[$localUserSessionID].avatar.x,
-                  originY: localPlayers[$localUserSessionID].avatar.y,
-                })
+                if (g) {
+                  intentToPickUp = caseStudy.uuid
+                  gameRoom.send("go", {
+                    x: g.x,
+                    y: g.y,
+                    originX: localPlayers[$localUserSessionID].avatar.x,
+                    originY: localPlayers[$localUserSessionID].avatar.y,
+                  })
+                }
                 e.stopPropagation()
               }
 
@@ -747,27 +732,28 @@
             // CASE STUDY => ADD
             gameRoom.state.caseStudies.onAdd = (caseStudy, sessionId) => {
               if (caseStudiesLoaded) {
-                // console.log("====> loaded")
                 createCaseStudy(caseStudy, true)
               } else {
-                // console.log("notloaded")
                 createCaseStudy(caseStudy, false)
               }
             }
 
             // CASE STUDY => REMOVE
             gameRoom.state.caseStudies.onRemove = (caseStudy, sessionId) => {
+              // !! TODO: PROPERLY REMOVE CASE STUDY
               // console.log("%_%_%_ Case study removed")
               // console.dir(caseStudy)
             }
 
             // CASE STUDY => CHANGE
             gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
-              let g = emergentLayer.children.find(
+              const g = emergentLayer.children.find(
                 (cs) => cs.uuid === caseStudy.uuid
               )
               if (g) {
+                // __ Darken color one step
                 g.children[0].tint = TINTMAP[caseStudy.age - 1]
+                // __ Update position of not currently in a user's inventory
                 if (caseStudy.carriedBy === "") {
                   g.x = caseStudy.x
                   g.y = caseStudy.y
@@ -783,14 +769,13 @@
             // ************
             gameRoom.onError((code, message) => {
               setUIState(STATE.ERROR, message)
-              console.error("!!! COLYSEUS ERROR:")
-              console.error(message)
+              console.error("Gameserver error:", message)
             })
           })
           .catch((e) => {
             console.dir(e)
             if (e.code == 4215) {
-              setUIState(STATE.BANNED)
+              setUIState(STATE.ERROR, "You have been banned")
             } else {
               setUIState(STATE.ERROR, "FAILED TO CONNECT TO GAMESERVER")
               // Sentry.captureException(err)
@@ -868,11 +853,7 @@
             const audioInstallationLocation = new PIXI.Container()
             audioInstallationLocation.addChild(frames)
 
-            // TODO: handle audio streams
-            // https://github.com/goldfire/howler.js/issues/689
-            // TEST: http://prclive1.listenon.in:9960/?fbclid=IwAR1bAO9Hf-yvOGrjKVVdYt0XXnqo85o1G2IXWrzVtjIujOit5JqW7oQUtfI%27
-            // https://medium.com/crowdbotics/build-your-own-radio-streaming-app-with-howler-js-637f929decc0
-
+            // __ Either load stream URL or audio file
             if (ai.streamURL) {
               audioInstallationLocation.audio = new Howl({
                 src: ai.streamURL,
@@ -902,7 +883,7 @@
         })
       })
 
-      // ADD LANDMARKS
+      // __ Add landmarks
       landMarks.then((landMarks) => {
         landMarks.forEach((lm, i) => {
           const spriteUrl = get(lm, "spriteJsonURL", "")
@@ -997,10 +978,11 @@
       caseStudiesLoaded = true
     }, 5000)
 
-    // ___ Cookies
-    let visitorCookie = Cookies.get("tsoap-visitor")
+    // ___ Show welcome card if user has not visited in last 7 days
+    showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
     Cookies.set("tsoap-visitor", "true", { expires: 7 })
-    //   either way => show introduction text
+
+    // __ Redirect to authentication if user is marked as logged in
     const authCookie = Cookies.get("tsoap-logged-in")
     if (authCookie && section != "authenticate") {
       window.location = "https://sso.tsoap.dev/auth/discourse_sso"
@@ -1009,6 +991,7 @@
     // __ Add pixi view to DOM
     gameContainer.appendChild(app.view)
 
+    // __ Start the game...
     initializeGameWorld(sso, sig)
   })
 </script>
@@ -1588,11 +1571,6 @@
     on:close={e => {
       audioChatActive = false;
     }} />
-{/if}
-
-<!-- BANNED -->
-{#if UI.state == STATE.BANNED}
-  <Banned />
 {/if}
 
 <!-- LOADING -->

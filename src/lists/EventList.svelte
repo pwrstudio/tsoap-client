@@ -24,6 +24,7 @@
   let containerWidth = "100%"
 
   onMount(async () => {
+    // __ Enabled horizontal scroll layout on mobile
     if (window.matchMedia("(max-width: 800px)").matches && !related) {
       containerWidth = window.innerWidth * 0.8 * events.length + "px"
     }
@@ -50,8 +51,8 @@
 
     .inner-container {
       height: calc(100% - 80px);
-      @include hide-scroll;
       overflow-y: auto;
+      @include hide-scroll;
 
       @include screen-size("small") {
         height: 100%;
@@ -72,7 +73,6 @@
       @include screen-size("small") {
         width: 80vw;
         display: inline-flex;
-        // align-items: center;
         padding-top: 10px;
         height: 80px;
         border-right: 1px solid $COLOR_MID_1;
@@ -95,7 +95,6 @@
 
         .row {
           width: 100%;
-
           display: flex;
           justify-content: space-between;
 
@@ -140,9 +139,6 @@
       &.footer {
         height: 40px;
         border-top: 1px solid $COLOR_MID_1;
-        // position: absolute;
-        // bottom: 0;
-        // left: 0;
         &:hover {
           background: unset;
         }
@@ -153,11 +149,8 @@
       }
 
       &.header {
-        // position: absolute;
         height: 40px;
         border-bottom: 1px solid $COLOR_MID_1;
-        // top: 0;
-        // left: 0;
 
         .archive-link {
           color: $COLOR_MID_2;

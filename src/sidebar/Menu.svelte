@@ -9,9 +9,6 @@
 
   // *** STORES
   import { localUserAuthenticated } from "../stores"
-
-  // *** PROPS
-  export let authenticated = false
 </script>
 
 <style lang="scss">

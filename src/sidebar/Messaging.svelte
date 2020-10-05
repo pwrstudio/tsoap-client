@@ -25,11 +25,11 @@
     get($authenticatedUserInformation, "username", false)
   ) {
     let username = $authenticatedUserInformation.username
-    console.log(username)
+    // console.log(username)
     fetch("https://sso.tsoap.dev/messages?user=" + username)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data)
+        // console.log(data)
         privateMessages = data.messages
       })
       .catch((err) => {

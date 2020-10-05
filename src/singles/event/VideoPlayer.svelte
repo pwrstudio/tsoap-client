@@ -1,7 +1,7 @@
 <script>
   // # # # # # # # # # # # # #
   //
-  //  EMBED BLOCK
+  //  Video Player
   //
   // # # # # # # # # # # # # #
 
@@ -18,18 +18,9 @@
   .embed {
     width: 100%;
     background: black;
-    // margin-left: auto;
-    // margin-right: auto;
-    // background: black;
     display: flex;
     justify-content: center;
     align-items: center;
-    // position: fixed;
-    // top: 0;
-    // left: 0;
-    // margin: 0;
-    // padding: 0;
-    pointer-events: none;
 
     .youtube-container,
     .vimeo-container {
@@ -53,20 +44,6 @@
 </style>
 
 <div class="embed">
-  <!-- // YOUTUBE -->
-  {#if streamUrl.includes('youtube')}
-    <div class="youtube-container">
-      <iframe
-        width="720"
-        height="480"
-        src={'https://www.youtube.com/embed/' + getVideoId(streamUrl).id}
-        frameborder="no"
-        allow="autoplay; fullscreen"
-        allowfullscreen />
-    </div>
-  {/if}
-
-  <!-- // VIMEO -->
   {#if streamUrl.includes('vimeo')}
     <div class="vimeo-container">
       <iframe

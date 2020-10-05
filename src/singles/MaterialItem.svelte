@@ -15,11 +15,9 @@
 
   let url = ""
 
-  const makeUrl = (ref) => {
-    const stripped = ref.substring(5).replace("-", ".")
-    // console.log(stripped);
-    return "https://cdn.sanity.io/files/bu5rnal5/production/" + stripped
-  }
+  const makeUrl = (ref) =>
+    "https://cdn.sanity.io/files/bu5rnal5/production/" +
+    ref.substring(5).replace("-", ".")
 
   switch (item._type) {
     case "imageBlock":
@@ -47,7 +45,6 @@
 
   .material-item {
     width: 100%;
-    // height: $ITEM_HEIGHT;
     background: $COLOR_LIGHT;
     color: $COLOR_DARK;
     display: block;

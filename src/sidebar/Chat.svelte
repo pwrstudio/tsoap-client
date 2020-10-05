@@ -5,9 +5,6 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
-  import { slide } from "svelte/transition"
-
   // COMPONENTS
   import ChatMessage from "./ChatMessage.svelte"
 
