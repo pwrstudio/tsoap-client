@@ -1534,19 +1534,13 @@
       Carrying
       <span class="color-icon" />
       <strong>
-        {emergentLayer.children.find(cs => cs.uuid === localPlayers[$localUserSessionID].carrying).name}
-      </strong>
-      . Press
-      <span class="button">SPACE</span>
-      to
-      <span>drop</span>
-      .
+        {emergentLayer.children.find(cs => cs.uuid === localPlayers[$localUserSessionID].carrying).name}</strong>. Press <span class="button">SPACE</span> to <span>drop</span>.
     </div>
   </div>
 {/if}
 
 <!-- AUDIOCHAT BOX  -->
-{#if !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
+{#if $localUserAuthenticated && !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
   <div class="audiochat-box">
     <div class="message">
       Nearby audioroom
