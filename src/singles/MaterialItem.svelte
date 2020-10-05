@@ -35,6 +35,9 @@
     case "videoBlock":
       url = makeUrl(get(item, "item.videoFile.asset._ref", ""))
       break
+    case "linkBlock":
+      url = get(item, "item.url", "")
+      break
   }
 </script>
 
