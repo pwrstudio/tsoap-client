@@ -165,32 +165,24 @@
     BANNED: 3,
   }
 
-  const UI = { state: STATE.LOADING, slug: false, errorMessage: false }
+  const UI = { state: STATE.LOADING, errorMessage: false }
 
-  const setUIState = (newState, newSlug = false, errorMessage = false) => {
+  const setUIState = (newState, errorMessage = false) => {
     switch (newState) {
       case STATE.READY:
         UI.state = STATE.READY
-        UI.slug = false
         break
       case STATE.LOADING:
         UI.state = STATE.LOADING
-        UI.slug = false
         break
       case STATE.BANNED:
         UI.state = STATE.BANNED
-        UI.slug = false
         break
       default:
         UI.state = STATE.ERROR
-        UI.slug = false
         UI.errorMessage = errorMessage
     }
   }
-
-  // $: {
-  //   console.log("STATE: ", UI.state)
-  // }
 
   // __ Connect to Colyseus gameserver
   const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
@@ -337,7 +329,7 @@
           mapLayer.addChild(map)
         })
       } else {
-        setUIState(STATE.ERROR, false, "Unable to load map")
+        setUIState(STATE.ERROR, "Unable to load map")
         throw "Unable to load map"
       }
 
@@ -352,7 +344,7 @@
           }
         })
       } else {
-        setUIState(STATE.ERROR, false, "Unable to load avatars")
+        setUIState(STATE.ERROR, "Unable to load avatars")
         throw "Unable to load avatars"
       }
       avatarLoader.load((loader, resources) => {
@@ -525,7 +517,7 @@
                   }, 500)
                 }
               } catch (err) {
-                setUIState(STATE.ERROR, false, err)
+                setUIState(STATE.ERROR, err)
                 console.dir(err)
               }
             }
@@ -569,9 +561,9 @@
 
             // PLAYER => CHANGE
             gameRoom.state.players.onChange = (player, sessionId) => {
-              // console.log("player state change")
               if ($localUserSessionID === sessionId) {
                 localPlayers[sessionId].carrying = player.carrying
+                // __ Carrying ?
                 if (localPlayers[sessionId].carrying && intentToPickUp) {
                   let g = emergentLayer.children.find(
                     (cs) => cs.uuid === player.carrying
@@ -609,19 +601,19 @@
             })
 
             // PLAYER: CLICK / TAP
-            viewport.on("drag-end", (e) => {
-              delete moveQ[$localUserSessionID]
-              hideTarget()
-              showTarget(Math.round(e.world.x), Math.round(e.world.y))
-              // setTimeout(() => {
-              gameRoom.send("go", {
-                x: Math.round(e.world.x),
-                y: Math.round(e.world.y),
-                originX: localPlayers[$localUserSessionID].avatar.x,
-                originY: localPlayers[$localUserSessionID].avatar.y,
-              })
-              // }, 300)
-            })
+            // viewport.on("drag-end", (e) => {
+            //   delete moveQ[$localUserSessionID]
+            //   hideTarget()
+            //   showTarget(Math.round(e.world.x), Math.round(e.world.y))
+            //   // setTimeout(() => {
+            //   gameRoom.send("go", {
+            //     x: Math.round(e.world.x),
+            //     y: Math.round(e.world.y),
+            //     originX: localPlayers[$localUserSessionID].avatar.x,
+            //     originY: localPlayers[$localUserSessionID].avatar.y,
+            //   })
+            //   // }, 300)
+            // })
 
             // PLAYER: TELEPORT
             teleportTo = (area) => {
@@ -646,7 +638,7 @@
                 chatMessages.splice(itemIndex, 1)
                 chatMessages = chatMessages
               } catch (err) {
-                setUIState(STATE.ERROR, false, err)
+                setUIState(STATE.ERROR, err)
                 console.dir(err)
               }
             }
@@ -663,7 +655,7 @@
                   tint: localPlayers[$localUserSessionID].tint,
                 })
               } catch (err) {
-                setUIState(STATE.ERROR, false, err)
+                setUIState(STATE.ERROR, err)
                 console.dir(err)
               }
             }
@@ -790,7 +782,7 @@
             // GENERAL ERROR
             // ************
             gameRoom.onError((code, message) => {
-              setUIState(STATE.ERROR, false, message)
+              setUIState(STATE.ERROR, message)
               console.error("!!! COLYSEUS ERROR:")
               console.error(message)
             })
@@ -800,7 +792,7 @@
             if (e.code == 4215) {
               setUIState(STATE.BANNED)
             } else {
-              setUIState(STATE.ERROR, false, "FAILED TO CONNECT TO GAMESERVER")
+              setUIState(STATE.ERROR, "FAILED TO CONNECT TO GAMESERVER")
               // Sentry.captureException(err)
             }
           })
