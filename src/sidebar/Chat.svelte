@@ -56,8 +56,10 @@
     width: 100%;
     height: calc(100% - 30px);
     overflow-y: auto;
+    overflow-x: hidden;
     padding-bottom: 10px;
     padding-top: 10px;
+    @include hide-scroll;
   }
 </style>
 
