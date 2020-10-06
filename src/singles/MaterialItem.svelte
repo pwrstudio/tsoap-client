@@ -115,7 +115,7 @@
       ....................................................................
     </div>
     <div class="format">
-      {item._type === 'fileBlock' ? item.fileType : FORMATMAP[item._type]}
+      {item._type === 'fileBlock' || item._type === 'linkBlock' ? item.fileType : FORMATMAP[item._type]}
     </div>
   </div>
 </a>
