@@ -14,7 +14,7 @@
   import sample from "lodash/sample"
   import { fly, scale } from "svelte/transition"
   import { quartOut } from "svelte/easing"
-  import { urlFor, loadData, client } from "./sanity.js"
+  import { urlFor, loadData, client, renderBlockText } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
   import MediaQuery from "svelte-media-query"
@@ -137,6 +137,11 @@
   const landMarks = loadData(QUERY.LAND_MARKS)
   const users = loadData(QUERY.USERS)
   const pages = loadData(QUERY.PAGES)
+  const welcomeCard = loadData(QUERY.WELCOME_CARD)
+
+  welcomeCard.then((welcomeCard) => {
+    console.dir(welcomeCard)
+  })
 
   // __ Listen for changes to the active streams post
   let activeStreams = loadData(QUERY.ACTIVE_STREAMS)
@@ -980,6 +985,7 @@
 
     // ___ Show welcome card if user has not visited in last 7 days
     showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
+    showWelcomeCard = true
     Cookies.set("tsoap-visitor", "true", { expires: 7 })
 
     // __ Redirect to authentication if user is marked as logged in
@@ -1010,7 +1016,7 @@
     max-width: 50vw;
     background: $COLOR_LIGHT;
     height: auto;
-    line-height: 2em;
+    line-height: 1.4em;
     text-align: center;
     bottom: 10px;
     left: 10px;
@@ -1322,6 +1328,11 @@
     @include hide-scroll;
     border-bottom: 1px solid $COLOR_MID_1;
   }
+
+  .welcome-card {
+    padding: 10px;
+    padding-top: 20px;
+  }
 </style>
 
 <!-- SIDEBAR -->
@@ -1405,6 +1416,22 @@
 <!-- MAIN CONTENT -->
 <div class="main-content-slot" class:pushed={sidebarHidden}>
   <!-- INFORMATION BOX -->
+  {#await welcomeCard then welcomeCard}
+  {#if showWelcomeCard}
+    <div class="content-item active" transition:fly={{ y: -200 }}>
+      <div
+        class="close"
+        on:click={e => {
+          showWelcomeCard = false;
+        }}>
+        ×
+      </div>
+      <div class='welcome-card'>
+        {@html renderBlockText(get(welcomeCard, 'content.content',[]))}
+      </div>
+    </div>
+  {/if}
+  {/await}
 
   <!-- AUDIOZONE -->
   {#if inAudioZone}
