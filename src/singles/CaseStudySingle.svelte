@@ -145,37 +145,35 @@
   <div class="divider" />
 
   <!-- MATERIAL -->
-  <div class="material">
-    <div class="material-item header">
-      <div class="row">
-        <div class="title">Material</div>
-        <div class="format">File format</div>
+  {#if Array.isArray(caseStudy.material)}
+    <div class="material">
+      <div class="material-item header">
+        <div class="row">
+          <div class="title">Material</div>
+          <div class="format">File format</div>
+        </div>
       </div>
+        {#each caseStudy.material as item (item._key)}
+          <MaterialItem {item}/>
+        {/each}
     </div>
-    {#if Array.isArray(caseStudy.material)}
-      {#each caseStudy.material as item (item._key)}
-        <MaterialItem {item}/>
-      {/each}
-    {/if}
-  </div>
-
-  <div class="divider" />
+    <div class="divider" />
+  {/if}
 
   <!-- TEXT -->
-  <div class="text">
-    {#if Array.isArray(get(caseStudy, 'content.content', false))}
-      {@html renderBlockText(caseStudy.content.content)}
-    {/if}
-  </div>
-
-  <div class="divider" />
+  {#if Array.isArray(get(caseStudy, 'content.content', false))}
+    <div class="text">
+        {@html renderBlockText(caseStudy.content.content)}
+    </div>
+    <div class="divider" />
+  {/if}
 
   <!-- RELATED EVENTS -->
-  <div class="related-events">
-    <!-- {await relatedEvents then relatedEvents} -->
-    {#if Array.isArray(get(caseStudy, 'connectedEvents', false))}
-      <EventList events={caseStudy.connectedEvents} related={true} />
-    {/if}
-    <!-- {/await} -->
-  </div>
+  {#if Array.isArray(get(caseStudy, 'connectedEvents', false))}
+    <div class="related-events">
+      <!-- {await relatedEvents then relatedEvents} -->
+        <EventList events={caseStudy.connectedEvents} related={true} />
+      <!-- {/await} -->
+    </div>
+  {/if}
 </div>

@@ -42,11 +42,6 @@
       text-decoration: none;
       user-select: none;
 
-      &.related {
-        padding-left: 0;
-        padding-right: 0;
-      }
-
       .inner {
         width: 100%;
         .row {
@@ -106,6 +101,16 @@
           background: unset;
         }
       }
+
+      &.related {
+        padding-left: 0;
+        padding-right: 0;
+
+        &.header {
+          height: 30px;
+          padding-top: 0;
+        }
+      }
     }
   }
 </style>
@@ -125,7 +130,7 @@
     <a
       class="case-study-item"
       class:related
-      in:fade={{ delay: 100 * index }}
+      in:fade={{ delay: index < 10 ? 100 * index : 1000 }}
       href={'/case-studies/' + get(caseStudy, 'slug.current', '')}>
       <div class="inner">
         <div class="row">

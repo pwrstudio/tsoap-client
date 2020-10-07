@@ -12,6 +12,8 @@
   // *** GLOBAL
   import { formattedDate } from "../global.js"
 
+  // COMPONENTS
+  import NewPrivateMessage from "./NewPrivateMessage.svelte"
   import { authenticatedUserInformation } from "../stores"
 
   let expanded = false
@@ -30,12 +32,17 @@
     color: $COLOR_LIGHT;
     font-size: $FONT_SIZE_SMALL;
     user-select: none;
+    border-bottom: 1px solid $COLOR_MID_2;
 
     .header {
       cursor: pointer;
-      border-bottom: 1px solid $COLOR_MID_2;
+      border-bottom: 1px solid transparent;
       padding-top: 10px;
       padding-bottom: 15px;
+
+      &.expanded {
+        border-bottom: 1px solid $COLOR_MID_2;
+      }
 
       .meta {
         width: 100%;
@@ -92,6 +99,7 @@
 <div class="message-container">
   <div
     class="header"
+    class:expanded
     on:click={e => {
       expanded = !expanded
     }}>
@@ -119,6 +127,6 @@
         </div>
       {/each}
     </div>
-    <div>TODO: Allow writing message</div>
+    <NewPrivateMessage />
   {/if}
 </div>

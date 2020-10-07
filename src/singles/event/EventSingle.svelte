@@ -8,7 +8,7 @@
   // *** IMPORTS
   import get from "lodash/get"
   import { fade } from "svelte/transition"
-  import { urlFor, renderBlockText, loadData } from "../../sanity.js"
+  import { urlFor, renderBlockText } from "../../sanity.js"
   import { links } from "svelte-routing"
 
   // COMPONENTS
@@ -16,18 +16,13 @@
   import CaseStudyList from "../../lists/CaseStudyList.svelte"
 
   // GLOBAL
-  import { formattedDate, QUERY } from "../../global.js"
+  import { formattedDate } from "../../global.js"
 
   // *** PROPS
   export let event = {}
 
-  const connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
-    id: event._id,
-  })
-
-  // connectedCaseStudies.then((connectedCaseStudies) => {
-  //   console.dir(connectedCaseStudies)
-  // })
+  // console.log("____EVENT")
+  // console.dir(event)
 </script>
 
 <style lang="scss">
@@ -134,8 +129,8 @@
 
   <!-- CONNECTED CASE STUDIES -->
   <div class="connected-case-studies">
-    {#await connectedCaseStudies then connectedCaseStudies}
-      <CaseStudyList caseStudies={connectedCaseStudies} related={true} />
-    {/await}
+      {#if Array.isArray(get(event, 'connectedCaseStudies')) && event.connectedCaseStudies.length > 0}
+        <CaseStudyList caseStudies={event.connectedCaseStudies} related={true} />
+      {/if}
   </div>
 </div>

@@ -443,8 +443,10 @@
 
             // __ Set cookie if user is successfully authenticated
             if (player.authenticated) {
-              Cookies.set("tsoap-logged-in", "true", { expires: 7 })
+              Cookies.remove("tsoap-logged-in")
+              // Cookies.set("tsoap-logged-in", "false", { expires: 7 })
               localUserAuthenticated.set(true)
+              player.discourseName = "rasmus"
               loadData(QUERY.AUTH_USER_INFO, {
                 username: player.discourseName,
               })
@@ -983,7 +985,7 @@
 
     // ___ Show welcome card if user has not visited in last 7 days
     showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
-    showWelcomeCard = true
+    // showWelcomeCard = true
     Cookies.set("tsoap-visitor", "true", { expires: 7 })
 
     // __ Redirect to authentication if user is marked as logged in

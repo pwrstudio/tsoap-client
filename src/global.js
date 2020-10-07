@@ -37,7 +37,8 @@ export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
 export const QUERY = {
   GRAPHICS_SETTINGS:
     "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'miniImage': miniImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
-  EVENTS: "*[_type == 'event']{..., participants[]->{slug,name}}",
+  EVENTS:
+    "*[_type == 'event']{..., participants[]->{slug,name}, connectedCaseStudies[]->{...,participants[]->{slug,name}},}",
   USERS: "*[_type == 'participant']",
   PAGES: "*[_type == 'page']",
   SEMINAR: "*[_type == 'seminar' && slug.current == $slug][0]",
@@ -50,8 +51,6 @@ export const QUERY = {
     "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., connectedEvents[]->{...,participants[]->{slug,name}}, participants[]->{slug,name}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   LAND_MARKS:
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
-  CONNECTED_CASE_STUDIES:
-    '*[_type in ["caseStudyEmergent", "caseStudyExhibition"]]{..., participants[]->{slug,name}}',
   ACTIVE_STREAMS:
     "*[_id == 'active-streams']{..., mainStream->{..., participants[]->{slug,name}}}[0]",
   WELCOME_CARD: "*[_id == 'welcome-card'][0]",
@@ -101,7 +100,7 @@ export const formattedDate = (start, end) => {
   }
 }
 
-export const formattedChatDate = (start) => {
+export const formattedChatDate = start => {
   try {
     const startDate = start ? start : Date.now()
     return format(startDate, "HH:mm EEE")

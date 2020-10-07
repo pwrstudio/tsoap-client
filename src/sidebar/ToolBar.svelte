@@ -159,10 +159,12 @@
         if (e.keyCode == 13) submitChat()
       }} />
     <button on:click={submitChat}>Send</button>
-    <button
-      class="close-chat"
-      on:click={e => {
-        showChatInput = false
-      }}>×</button>
+    {#if $localUserAuthenticated}
+      <button
+        class="close-chat"
+        on:click={e => {
+          showChatInput = false
+        }}>×</button>
+    {/if}
   {/if}
 </div>
