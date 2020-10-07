@@ -130,32 +130,17 @@
 <div class="case-study-single" in:fade use:links>
   <!-- HEADER -->
 
-  <div class="main-header">
-    <!-- TITLE -->
-    <div class="title">{caseStudy.title}</div>
+  {#if caseStudy.title}
+    <div class="main-header">
+      <!-- TITLE -->
+      <div class="title">{caseStudy.title}</div>
 
-    <!-- PARTICIPANTS -->
-    {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
-      <div class="participants">
-        <ParticipantsList participants={caseStudy.participants} />
-      </div>
-    {/if}
-  </div>
-
-  <div class="divider" />
-
-  <!-- MATERIAL -->
-  {#if Array.isArray(caseStudy.material)}
-    <div class="material">
-      <div class="material-item header">
-        <div class="row">
-          <div class="title">Material</div>
-          <div class="format">File format</div>
+      <!-- PARTICIPANTS -->
+      {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
+        <div class="participants">
+          <ParticipantsList participants={caseStudy.participants} />
         </div>
-      </div>
-        {#each caseStudy.material as item (item._key)}
-          <MaterialItem {item}/>
-        {/each}
+      {/if}
     </div>
     <div class="divider" />
   {/if}
@@ -168,12 +153,26 @@
     <div class="divider" />
   {/if}
 
+  <!-- MATERIAL -->
+  {#if Array.isArray(caseStudy.material)}
+    <div class="material">
+      <div class="material-item header">
+        <div class="row">
+          <div class="title">Material</div>
+          <div class="format">Type</div>
+        </div>
+      </div>
+        {#each caseStudy.material as item (item._key)}
+          <MaterialItem {item}/>
+        {/each}
+    </div>
+    <div class="divider" />
+  {/if}
+
   <!-- RELATED EVENTS -->
   {#if Array.isArray(get(caseStudy, 'connectedEvents', false))}
     <div class="related-events">
-      <!-- {await relatedEvents then relatedEvents} -->
-        <EventList events={caseStudy.connectedEvents} related={true} />
-      <!-- {/await} -->
+      <EventList events={caseStudy.connectedEvents} related={true} />
     </div>
   {/if}
 </div>

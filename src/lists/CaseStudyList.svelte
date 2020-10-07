@@ -8,16 +8,70 @@
   // *** IMPORTS
   import { fade } from "svelte/transition"
   import get from "lodash/get"
-
-  // *** GLOBAL
-  import { formattedDate } from "../global.js"
+  import Fuse from "fuse.js"
 
   // COMPONENTS
   import ParticipantsList from "./ParticipantsList.svelte"
+  import { areIntervalsOverlappingWithOptions } from "date-fns/fp"
 
   // *** PROPS
   export let caseStudies = []
   export let related = false
+
+  // *** VARIABLES
+  let filterTerm = ""
+  let filteredCaseStudies = caseStudies
+
+  // DOM REFERENCES
+  let selectElement = {}
+
+  const fuseOptions = {
+    threshold: 0.2,
+    keys: ["title", "category", "participants.name"],
+  }
+
+  const fuse = new Fuse(caseStudies, fuseOptions)
+
+  const titleSort = (a, b) => {
+    const textA = a.title ? a.title.toUpperCase() : "Undefined"
+    const textB = b.title ? b.title.toUpperCase() : "Undefined"
+    return textA < textB ? -1 : textA > textB ? 1 : 0
+  }
+
+  const seminarSort = (a, b) => {
+    const textA = a.category ? a.category.toUpperCase() : "Undefined"
+    const textB = b.category ? b.category.toUpperCase() : "Undefined"
+    return textA < textB ? -1 : textA > textB ? 1 : 0
+  }
+
+  const sortCaseStudies = sortOrder => {
+    filterTerm = ""
+    filteredCaseStudies =
+      sortOrder === "seminar"
+        ? caseStudies.sort(seminarSort)
+        : caseStudies.sort(titleSort)
+  }
+
+  // FILTER
+  $: {
+    console.log("filterTerm", filterTerm)
+    if (filterTerm) {
+      filteredCaseStudies = []
+      filteredCaseStudies = fuse.search(filterTerm).map(hit => hit.item)
+      console.log("fuse.js")
+      console.dir(filteredCaseStudies)
+    } else {
+      filteredCaseStudies = caseStudies
+    }
+  }
+
+  // FILTER
+  // $: {
+  //   filteredCaseStudies =
+  //     sortOrder === "seminar"
+  //       ? caseStudies.sort(seminarSort)
+  //       : caseStudies.sort(titleSort)
+  // }
 </script>
 
 <style lang="scss">
@@ -28,14 +82,16 @@
   .case-study-container {
     height: 100%;
     color: $COLOR_DARK;
+    font-family: $MONO_STACK;
     font-size: $FONT_SIZE_BASE;
     background: $COLOR_LIGHT;
 
     .case-study-item {
       padding: 0px 10px;
       padding-top: 10px;
+      padding-bottom: 10px;
       width: 100%;
-      height: $ITEM_HEIGHT;
+      min-height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
       color: $COLOR_DARK;
       display: block;
@@ -53,7 +109,8 @@
           .title {
             font-family: $SANS_STACK;
             font-weight: 500;
-            white-space: nowrap;
+            // white-space: nowrap;
+            min-width: 50%;
           }
 
           .elips {
@@ -62,7 +119,7 @@
             width: 90%;
             white-space: nowrap;
             overflow: hidden;
-            flex-shrink: 4;
+            flex-shrink: 2;
             color: $COLOR_MID_2;
           }
 
@@ -112,6 +169,58 @@
         }
       }
     }
+
+    .toolbar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 40px;
+      padding: 10px;
+      font-size: $FONT_SIZE_SMALL;
+
+      .sort {
+        height: 100%;
+        display: flex;
+        align-items: center;
+
+        select {
+          margin-left: 5px;
+          font-size: $FONT_SIZE_SMALL;
+          color: $COLOR_DARK;
+          font-family: $MONO_STACK;
+          border: none;
+          background: $COLOR_LIGHT;
+        }
+      }
+
+      .filter {
+        height: 100%;
+        display: flex;
+        align-items: center;
+
+        svg {
+          margin-right: 5px;
+          path {
+            color: $COLOR_MID_1;
+          }
+        }
+        input {
+          width: 8ch;
+          border: none;
+          outline: none;
+          font-size: $FONT_SIZE_SMALL;
+          color: $COLOR_DARK;
+          font-family: $MONO_STACK;
+          background: $COLOR_LIGHT;
+
+          &:focus {
+            border-bottom: 1px solid $COLOR_DARK;
+            width: 16ch;
+          }
+        }
+      }
+    }
   }
 </style>
 
@@ -125,12 +234,35 @@
     </div>
   </div>
 
+  <!-- TOOLBAR -->
+  {#if !related}
+    <div class="toolbar">
+      <div class="sort">
+        <div>Sort by:</div>
+        <select name="sortOrder" bind:this={selectElement}>
+          <option value="title" selected>Title</option>
+          <option value="seminar">Seminar</option>
+        </select>
+      </div>
+      <div class="filter">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"><path d="M0 0h24v24H0z" fill="none" />
+          <path
+            d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" /></svg><input
+          type="[text]"
+          placeholder="Search"
+          bind:value={filterTerm} />
+      </div>
+    </div>
+  {/if}
   <!-- CASE STUDIES -->
-  {#each caseStudies as caseStudy, index (caseStudy._id)}
+  {#each filteredCaseStudies as caseStudy, index (caseStudy._id)}
     <a
       class="case-study-item"
       class:related
-      in:fade={{ delay: index < 10 ? 100 * index : 1000 }}
       href={'/case-studies/' + get(caseStudy, 'slug.current', '')}>
       <div class="inner">
         <div class="row">
@@ -151,3 +283,9 @@
     </a>
   {/each}
 </div>
+
+<!-- in:fade={{ delay: index < 10 ? 100 * index : 1000 }} -->
+
+<!-- on:change={e => {
+  sortCaseStudies(selectElement.value)
+  }} -->
