@@ -44,6 +44,7 @@
   import Error from "./overlays/Error.svelte"
   // ...
   import AudioChat from "./AudioChat.svelte"
+  import InventoryMessage from "./InventoryMessage.svelte"
 
   // *** GLOBAL
   import {
@@ -669,13 +670,14 @@
               container.uuid = caseStudy.uuid
               container.caseStudyId = caseStudy.caseStudyId
               container.name = caseStudy.name
+              container.category = caseStudy.category || "none"
               container.slug = caseStudy.slug
               container.interactive = true
               container.tint = caseStudy.tint
 
               const graphics = new PIXI.Graphics()
               graphics.beginFill(caseStudy.tint)
-              graphics.drawRect(0, 0, 15, 20)
+              graphics.drawRect(0, 0, 15, 15)
               graphics.endFill()
 
               container.x = caseStudy.x
@@ -1033,36 +1035,6 @@
       left: 10px;
       max-width: calc(100vw - 20px);
       z-index: 10;
-    }
-
-    .color-code {
-      height: 0.5em;
-      width: 0.5em;
-      border-radius: 0.5em;
-      margin-right: 1em;
-      float: left;
-      background: $COLOR_LIGHT;
-      position: relative;
-      top: 4px;
-    }
-
-    .message {
-      margin-right: 10px;
-    }
-
-    .button {
-      padding-left: 15px;
-      padding-right: 15px;
-      border: 1px solid $COLOR_MID_2;
-      color: $COLOR_MID_2;
-      border-radius: 10px;
-      text-align: center;
-
-      &:hover {
-        border: 1px solid $COLOR_DARK;
-        color: $COLOR_DARK;
-        cursor: pointer;
-      }
     }
   }
 
@@ -1558,10 +1530,7 @@
       dropCaseStudy(localPlayers[$localUserSessionID].carrying);
     }}>
     <div>
-      Carrying
-      <span class="color-icon" />
-      <strong>
-        {emergentLayer.children.find(cs => cs.uuid === localPlayers[$localUserSessionID].carrying).name}</strong>. Press <span class="button">SPACE</span> to <span>drop</span>.
+      <InventoryMessage caseStudy={emergentLayer.children.find(cs => cs.uuid === localPlayers[$localUserSessionID].carrying)}/>
     </div>
   </div>
 {/if}

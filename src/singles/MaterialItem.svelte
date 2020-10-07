@@ -15,8 +15,8 @@
 
   let url = ""
 
-  const makeUrl = (ref) =>
-    "https://cdn.sanity.io/files/bu5rnal5/production/" +
+  const makeUrl = ref =>
+    "https://shape.anthropocene-curriculum.org/material/files/bu5rnal5/production/" +
     ref.substring(5).replace("-", ".")
 
   switch (item._type) {

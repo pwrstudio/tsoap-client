@@ -91,48 +91,58 @@
       padding-top: 10px;
       padding-bottom: 10px;
       width: 100%;
-      min-height: $ITEM_HEIGHT;
+      // min-height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
       color: $COLOR_DARK;
-      display: block;
+      display: inline-block;
       text-decoration: none;
       user-select: none;
 
       .inner {
         width: 100%;
-        .row {
-          width: 100%;
 
-          display: flex;
-          justify-content: space-between;
+        .color-icon {
+          height: 10px;
+          width: 10px;
+          margin-right: 15px;
+          float: left;
+          margin-top: 4px;
+
+          &.communication {
+            background: $COLOR_COMMUNICATION;
+          }
+          &.consensus-building {
+            background: $COLOR_CONSENSUS_BUILDING;
+          }
+          &.sensing {
+            background: $COLOR_SENSING;
+          }
+          &.archiving {
+            background: $COLOR_ARCHIVING;
+          }
+        }
+
+        .mid-section {
+          width: 60%;
+          float: left;
 
           .title {
             font-family: $SANS_STACK;
             font-weight: 500;
-            // white-space: nowrap;
-            min-width: 50%;
-          }
-
-          .elips {
-            margin-left: 5px;
-            margin-right: 5px;
-            width: 90%;
-            white-space: nowrap;
-            overflow: hidden;
-            flex-shrink: 2;
-            color: $COLOR_MID_2;
-          }
-
-          .date {
-            white-space: nowrap;
-            color: $COLOR_MID_2;
           }
 
           .participants {
+            font-family: $MONO_STACK;
             pointer-events: none;
             color: $COLOR_MID_2;
             font-size: $FONT_SIZE_SMALL;
           }
+        }
+
+        .date {
+          white-space: nowrap;
+          color: $COLOR_MID_2;
+          float: right;
         }
       }
 
@@ -143,11 +153,7 @@
       }
 
       &.header {
-        // position: absolute;
-        // height: 40px;
         border-bottom: 1px dotted $COLOR_MID_1;
-        // top: 0;
-        // left: 0;
 
         .archive-link {
           color: $COLOR_MID_2;
@@ -178,6 +184,8 @@
       height: 40px;
       padding: 10px;
       font-size: $FONT_SIZE_SMALL;
+      border-bottom: 1px dotted $COLOR_MID_1;
+      margin-bottom: 10px;
 
       .sort {
         height: 100%;
@@ -265,20 +273,16 @@
       class:related
       href={'/case-studies/' + get(caseStudy, 'slug.current', '')}>
       <div class="inner">
-        <div class="row">
-          <div class="title">{caseStudy.title}</div>
-          <div class="elips">
-            .........................................................
+          <div class="color-icon {caseStudy.category}" />
+          <div class='mid-section'>
+            <div class="title">{caseStudy.title}</div>
+            <div class="participants">
+              {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
+                <ParticipantsList participants={caseStudy.participants} />
+              {/if}
+            </div>
           </div>
           <div class="date">{caseStudy.category}</div>
-        </div>
-        <div class="row">
-          <div class="participants">
-            {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
-              <ParticipantsList participants={caseStudy.participants} />
-            {/if}
-          </div>
-        </div>
       </div>
     </a>
   {/each}

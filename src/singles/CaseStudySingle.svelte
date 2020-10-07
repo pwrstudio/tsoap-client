@@ -28,6 +28,26 @@
     .main-header {
       padding: 15px;
 
+      .color-icon {
+        height: 20px;
+        width: 20px;
+        margin-right: 20px;
+        float: left;
+
+        &.communication {
+          background: $COLOR_COMMUNICATION;
+        }
+        &.consensus-building {
+          background: $COLOR_CONSENSUS_BUILDING;
+        }
+        &.sensing {
+          background: $COLOR_SENSING;
+        }
+        &.archiving {
+          background: $COLOR_ARCHIVING;
+        }
+      }
+
       .title {
         font-family: $SANS_STACK;
         font-size: $FONT_SIZE_LARGE;
@@ -132,6 +152,9 @@
 
   {#if caseStudy.title}
     <div class="main-header">
+      <!-- COLOR CODE  -->
+      <div class="color-icon {caseStudy.category}" />
+
       <!-- TITLE -->
       <div class="title">{caseStudy.title}</div>
 
@@ -158,6 +181,7 @@
     <div class="material">
       <div class="material-item header">
         <div class="row">
+          
           <div class="title">Material</div>
           <div class="format">Type</div>
         </div>

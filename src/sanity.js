@@ -7,7 +7,7 @@ import has from "lodash/has"
 // GLOBAL
 import { SANITY_PROJECT_ID } from "./global.js"
 
-const tracer = (x) => {
+const tracer = x => {
   console.dir(x)
   return x
 }
@@ -16,12 +16,12 @@ export const client = sanityClient({
   projectId: SANITY_PROJECT_ID,
   dataset: "production",
   token: "", // or leave blank to be anonymous user
-  useCdn: false, // `false` if you want to ensure fresh data
+  useCdn: true, // `false` if you want to ensure fresh data
 })
 
 const h = blocksToHtml.h
 
-const prepareTextElements = (props) => {
+const prepareTextElements = props => {
   let textElements = []
   if (has(props, "node.caption.content"))
     textElements.push(
@@ -38,7 +38,7 @@ const prepareTextElements = (props) => {
   return textElements
 }
 
-export const renderBlockText = (text) =>
+export const renderBlockText = text =>
   blocksToHtml({
     blocks: text,
     serializers: serializers,
@@ -48,29 +48,29 @@ export const renderBlockText = (text) =>
 
 export const toPlainText = (blocks = []) => {
   return blocks
-    .map((block) => {
+    .map(block => {
       if (block._type !== "block" || !block.children) {
         return ""
       }
-      return block.children.map((child) => child.text).join("")
+      return block.children.map(child => child.text).join("")
     })
     .join("\n\n")
 }
 
 const builder = imageUrlBuilder(client)
 
-export const urlFor = (source) => builder.image(source)
+export const urlFor = source => builder.image(source)
 
 const serializers = {
   marks: {
-    link: (props) =>
+    link: props =>
       h(
         "a",
         { target: "_blank", rel: "noreferrer", href: props.mark.href },
         props.children
       ),
-    highlight: (props) => h("mark", { className: "highlight" }, props.children),
-    footnote: (props) => {
+    highlight: props => h("mark", { className: "highlight" }, props.children),
+    footnote: props => {
       return h(
         "a",
         {
@@ -83,7 +83,7 @@ const serializers = {
     },
   },
   types: {
-    block: (props) => {
+    block: props => {
       const style = props.node.style || "normal"
 
       if (style === "blockquote") return h("blockquote", {}, props.children)
@@ -96,7 +96,7 @@ const serializers = {
 
       return h("p", { className: style }, props.children)
     },
-    image: (props) => {
+    image: props => {
       // console.log('IMAGE')
       // if (has(props, 'node.asset._ref')) {
       //     let assetPost = loadData('*[_id == $ref][0]', { ref: props.node.asset._ref })
@@ -131,7 +131,7 @@ const serializers = {
         ...prepareTextElements(props),
       ])
     },
-    embedBlock: (props) => {
+    embedBlock: props => {
       // YOUTUBE
       if (props.node.url.includes("youtube")) {
         return h("figure", { className: "youtube" }, [
@@ -197,9 +197,9 @@ const serializers = {
         ])
       }
     },
-    videoBlock: (props) => {
+    videoBlock: props => {
       const videoUrl =
-        "https://cdn.sanity.io/files/" +
+        "https://shape.anthropocene-curriculum.org/material/files/" +
         SANITY_PROJECT_ID +
         "/production/" +
         props.node.videoFile.asset._ref
@@ -215,9 +215,9 @@ const serializers = {
         ...prepareTextElements(props),
       ])
     },
-    audioBlock: (props) => {
+    audioBlock: props => {
       const audioUrl =
-        "https://cdn.sanity.io/files/" +
+        "https://shape.anthropocene-curriculum.org/material/files/" +
         SANITY_PROJECT_ID +
         "/production/" +
         props.node.audioFile.asset._ref
