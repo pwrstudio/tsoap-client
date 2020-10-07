@@ -6,13 +6,11 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import { fade } from "svelte/transition"
   import get from "lodash/get"
   import Fuse from "fuse.js"
 
   // COMPONENTS
   import ParticipantsList from "./ParticipantsList.svelte"
-  import { areIntervalsOverlappingWithOptions } from "date-fns/fp"
 
   // *** PROPS
   export let caseStudies = []
@@ -20,17 +18,15 @@
 
   // *** VARIABLES
   let filterTerm = ""
-  let filteredCaseStudies = caseStudies
-
-  // DOM REFERENCES
-  let selectElement = {}
+  let filteredCaseStudies = []
+  let orderedCaseStudies = {}
+  let fuseList = {}
+  let sortOrder = "title"
 
   const fuseOptions = {
     threshold: 0.2,
     keys: ["title", "category", "participants.name"],
   }
-
-  const fuse = new Fuse(caseStudies, fuseOptions)
 
   const titleSort = (a, b) => {
     const textA = a.title ? a.title.toUpperCase() : "Undefined"
@@ -44,34 +40,24 @@
     return textA < textB ? -1 : textA > textB ? 1 : 0
   }
 
-  const sortCaseStudies = sortOrder => {
-    filterTerm = ""
-    filteredCaseStudies =
-      sortOrder === "seminar"
-        ? caseStudies.sort(seminarSort)
-        : caseStudies.sort(titleSort)
-  }
+  orderedCaseStudies["title"] = [...caseStudies].sort(titleSort)
+  orderedCaseStudies["seminar"] = [...caseStudies].sort(seminarSort)
+
+  fuseList["title"] = new Fuse(orderedCaseStudies["title"], fuseOptions)
+  fuseList["seminar"] = new Fuse(orderedCaseStudies["seminar"], fuseOptions)
 
   // FILTER
   $: {
     console.log("filterTerm", filterTerm)
+    console.log("sortOrder", sortOrder)
     if (filterTerm) {
-      filteredCaseStudies = []
-      filteredCaseStudies = fuse.search(filterTerm).map(hit => hit.item)
-      console.log("fuse.js")
-      console.dir(filteredCaseStudies)
+      filteredCaseStudies = fuseList[sortOrder]
+        .search(filterTerm)
+        .map(hit => hit.item)
     } else {
-      filteredCaseStudies = caseStudies
+      filteredCaseStudies = orderedCaseStudies[sortOrder]
     }
   }
-
-  // FILTER
-  // $: {
-  //   filteredCaseStudies =
-  //     sortOrder === "seminar"
-  //       ? caseStudies.sort(seminarSort)
-  //       : caseStudies.sort(titleSort)
-  // }
 </script>
 
 <style lang="scss">
@@ -248,7 +234,7 @@
     <div class="toolbar">
       <div class="sort">
         <div>Sort by:</div>
-        <select name="sortOrder" bind:this={selectElement}>
+        <select name="sortOrder" bind:value={sortOrder}>
           <option value="title" selected>Title</option>
           <option value="seminar">Seminar</option>
         </select>
