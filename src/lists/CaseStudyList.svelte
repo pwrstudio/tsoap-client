@@ -107,6 +107,7 @@
           margin-right: 15px;
           float: left;
           margin-top: 4px;
+          background: $COLOR_EXHIBITION;
 
           &.communication {
             background: $COLOR_COMMUNICATION;
@@ -282,7 +283,7 @@
               {/if}
             </div>
           </div>
-          <div class="date">{caseStudy.category}</div>
+          <div class="date">{#if caseStudy.category}{caseStudy.category}{/if}</div>
       </div>
     </a>
   {/each}

@@ -33,6 +33,7 @@
         width: 20px;
         margin-right: 20px;
         float: left;
+        background: $COLOR_EXHIBITION;
 
         &.communication {
           background: $COLOR_COMMUNICATION;
