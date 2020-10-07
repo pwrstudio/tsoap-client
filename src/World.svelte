@@ -1421,13 +1421,6 @@
   <!-- AUDIOZONE -->
   {#if inAudioZone}
     <div class="content-item active" transition:fly={{ y: -200 }}>
-      <div
-        class="close"
-        on:click={e => {
-          activeContentClosed = true;
-        }}>
-        ×
-      </div>
       {#await audioInstallations then audioInstallations}
         <AudioInstallationSingle
           audioInstallation={audioInstallations.find(aI => aI.slug.current === inAudioZone)} />
@@ -1585,10 +1578,3 @@
 {#if UI.state == STATE.ERROR}
   <Error message={UI.errorMessage} />
 {/if}
-
-<svelte:window
-  on:keyup={e => {
-    if (e.keyCode == 32 && localPlayers[$localUserSessionID].carrying && localPlayers[$localUserSessionID].carrying.length > 0) {
-      dropCaseStudy()
-    }
-  }} />
