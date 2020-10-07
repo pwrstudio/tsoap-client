@@ -42,6 +42,17 @@
   $ITEM_HEIGHT: 60px;
 
   .user-profile-single {
+    .go-back {
+      padding-top: 5px;
+      padding-left: 10px;
+      cursor: pointer;
+      svg {
+        path {
+          fill: $COLOR_MID_2;
+        }
+      }
+    }
+
     .main-header {
       padding: 15px;
 
@@ -84,8 +95,12 @@
 </style>
 
 <div class="user-profile-single" in:fade use:links>
+  <!-- BACK LINK -->
+  <div class='go-back' on:click={e => {
+      window.history.back()}}>
+      <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M21 11H6.83l3.58-3.59L9 6l-6 6 6 6 1.41-1.41L6.83 13H21z"/></svg>
+    </div>
   <!-- HEADER -->
-
   <div class="main-header">
     <!-- TITLE -->
     <div class="title">{user.name}</div>
