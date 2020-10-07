@@ -21,6 +21,7 @@
   export let events = []
   export let related = false
 
+  // *** VARIABLES
   let containerWidth = "100%"
 
   onMount(async () => {

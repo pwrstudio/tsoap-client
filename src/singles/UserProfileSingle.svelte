@@ -11,12 +11,29 @@
   import { renderBlockText, loadData } from "../sanity.js"
   import { links } from "svelte-routing"
 
+  // *** GLOBALS
   import { QUERY } from "../global.js"
+
+  // COMPONENTS
+  import EventList from "../lists/EventList.svelte"
+  import CaseStudyList from "../lists/CaseStudyList.svelte"
 
   // *** PROPS
   export let user = {}
 
-  // const relatedEvents = loadData(QUERY.RELATED_EVENTS, {id: user._id})
+  let relatedCaseStudies = false
+  let relatedEvents = false
+
+  const relatedContent = loadData(QUERY.CONNECTED_TO_USER, { id: user._id })
+
+  relatedContent.then(relatedContent => {
+    if (relatedContent && Array.isArray(relatedContent)) {
+      relatedEvents = relatedContent.filter(c => c._type == "event")
+      relatedCaseStudies = relatedContent.filter(
+        c => c._type == "caseStudyExhibition" || c._type == "caseStudyEmergent"
+      )
+    }
+  })
 </script>
 
 <style lang="scss">
@@ -58,6 +75,11 @@
     .related-events {
       padding: 15px;
     }
+
+    .connected-case-studies {
+      padding: 15px;
+      padding-top: 0;
+    }
   }
 </style>
 
@@ -79,11 +101,16 @@
   {/if}
 
   <!-- RELATED EVENTS -->
-  <!-- <div class="related-events"> -->
-  <!-- {await relatedEvents then relatedEvents} -->
-  <!-- {#if Array.isArray(get(user, 'connectedEvents', false))}
-      <Calendar events={user.connectedEvents} related={true} />
-    {/if} -->
-  <!-- {/await} -->
-  <!-- </div> -->
+  <div class="related-events">
+    {#if relatedEvents && Array.isArray(relatedEvents) && relatedEvents.length > 0}
+      <EventList events={relatedEvents} related={true} />
+    {/if}
+  </div>
+
+  <!-- CONNECTED CASE STUDIES -->
+  <div class="connected-case-studies">
+    {#if relatedCaseStudies && Array.isArray(relatedCaseStudies) && relatedCaseStudies.length > 0}
+      <CaseStudyList caseStudies={relatedCaseStudies} related={true} />
+    {/if}
+  </div>
 </div>

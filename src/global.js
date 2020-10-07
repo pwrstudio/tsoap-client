@@ -54,8 +54,7 @@ export const QUERY = {
   ACTIVE_STREAMS:
     "*[_id == 'active-streams']{..., mainStream->{..., participants[]->{slug,name}}}[0]",
   WELCOME_CARD: "*[_id == 'welcome-card'][0]",
-  // CONNECTED_PROJECTS:
-  //   '*[_type == "event" && participants[]._ref == $id]{...,authors[]->{...}}',
+  CONNECTED_TO_USER: "*[participants[]._ref == $id]{...,participants[]->{...}}",
 }
 
 export const TEXT_STYLE = {
