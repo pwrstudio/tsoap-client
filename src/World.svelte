@@ -139,7 +139,7 @@
   const pages = loadData(QUERY.PAGES)
   const welcomeCard = loadData(QUERY.WELCOME_CARD)
 
-  welcomeCard.then((welcomeCard) => {
+  welcomeCard.then(welcomeCard => {
     console.dir(welcomeCard)
   })
 
@@ -147,17 +147,17 @@
   let activeStreams = loadData(QUERY.ACTIVE_STREAMS)
   let currentStream = false
 
-  client.listen(QUERY.ACTIVE_STREAMS).subscribe((update) => {
+  client.listen(QUERY.ACTIVE_STREAMS).subscribe(update => {
     currentStream = false
     setTimeout(() => {
-      activeStreams = loadData(QUERY.ACTIVE_STREAMS).then((aS) => {
+      activeStreams = loadData(QUERY.ACTIVE_STREAMS).then(aS => {
         activeContentClosed = false
         currentStream = aS.mainStream
       })
     }, 1000)
   })
 
-  activeStreams.then((activeStreams) => {
+  activeStreams.then(activeStreams => {
     currentStream = activeStreams.mainStream
   })
 
@@ -207,7 +207,7 @@
   let targetGraphics = {}
 
   const checkAudioProximity = () => {
-    audioInstallationLayer.children.forEach((a) => {
+    audioInstallationLayer.children.forEach(a => {
       // Get distance between user and audio installation
       const dist = Math.sqrt(
         Math.pow(a.x - localPlayers[$localUserSessionID].avatar.x, 2) +
@@ -235,7 +235,7 @@
 
   // __ Game loop
   // __ Called at approximately 60fps by pixi.ticker
-  const updatePositions = (delta) => {
+  const updatePositions = delta => {
     // Combine delta (lag) and potential time passed since window was in focus
     let deltaRounded = Math.round(delta) + deltaJump
     deltaJump = 0
@@ -307,7 +307,7 @@
 
   const initializeGameWorld = (sso, sig) => {
     // __ Load assets
-    graphicsSettings.then((graphicsSettings) => {
+    graphicsSettings.then(graphicsSettings => {
       // __ Load map
       const mapAsset = get(graphicsSettings, "mapLink.mainImage.asset", false)
       if (mapAsset) {
@@ -357,21 +357,19 @@
         // __ Create player
         const createPlayer = (playerOptions, sessionId) => {
           // __ Create sprites for all motion states
-          const sprites = ["rest", "front", "back", "left", "right"].map(
-            (ms) => {
-              const sprite = new PIXI.AnimatedSprite(
-                avatarSpritesheets[playerOptions.avatar].animations[ms]
-              )
-              sprite.name = ms
-              sprite.visible = ms === "rest" ? true : false
-              sprite.height = 60
-              sprite.width = 60
+          const sprites = ["rest", "front", "back", "left", "right"].map(ms => {
+            const sprite = new PIXI.AnimatedSprite(
+              avatarSpritesheets[playerOptions.avatar].animations[ms]
+            )
+            sprite.name = ms
+            sprite.visible = ms === "rest" ? true : false
+            sprite.height = 60
+            sprite.width = 60
 
-              sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1
-              sprite.play()
-              return sprite
-            }
-          )
+            sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1
+            sprite.play()
+            return sprite
+          })
 
           // __ Name graphics (shown on hover)
           const nameText = new PIXI.Text(playerOptions.name, TEXT_STYLE)
@@ -386,9 +384,9 @@
           avatar.pivot.x = avatar.width / 2
           avatar.pivot.y = avatar.height / 2
           avatar.interactive = true
-          avatar.setAnimation = (direction) => {
+          avatar.setAnimation = direction => {
             avatar.motionState = direction
-            avatar.children.forEach((c) => {
+            avatar.children.forEach(c => {
               c.visible = c.name == direction ? true : false
             })
           }
@@ -408,7 +406,7 @@
             isSelf: playerOptions.uuid === $localUserUUID,
           }
 
-          const onDown = (e) => {
+          const onDown = e => {
             if (player.uuid != $localUserUUID) {
               e.stopPropagation()
             } else if (player.authenticated) {
@@ -450,10 +448,10 @@
               loadData(QUERY.AUTH_USER_INFO, {
                 username: player.discourseName,
               })
-                .then((info) => {
+                .then(info => {
                   authenticatedUserInformation.set(info)
                 })
-                .catch((err) => {
+                .catch(err => {
                   console.log(err)
                 })
             }
@@ -468,7 +466,7 @@
         const randomAvatar = sample(Object.keys(avatarSpritesheets))
 
         const name = graphicsSettings.activeAvatars.find(
-          (a) => a._id === randomAvatar
+          a => a._id === randomAvatar
         ).title
 
         let playerObject = {}
@@ -493,7 +491,7 @@
         // __ Join game room
         gameClient
           .joinOrCreate("game", playerObject)
-          .then((gameRoom) => {
+          .then(gameRoom => {
             // !!! HACK
             if (section == "authenticate") {
               history.replaceState({}, "CONNECTED", "/")
@@ -528,12 +526,12 @@
             }
 
             // PLAYER => BANNED
-            gameRoom.onMessage("banned", (message) => {
+            gameRoom.onMessage("banned", message => {
               setUIState(STATE.ERROR, "You have been banned")
             })
 
             // PLAYER => ILLEGAL MOVE
-            gameRoom.onMessage("illegalMove", (message) => {
+            gameRoom.onMessage("illegalMove", message => {
               const initialX = localPlayers[$localUserSessionID].avatar.x
               // __ Vibrate avatar
               tweener
@@ -566,7 +564,7 @@
                 // __ Carrying ?
                 if (localPlayers[sessionId].carrying && intentToPickUp) {
                   let g = emergentLayer.children.find(
-                    (cs) => cs.uuid === player.carrying
+                    cs => cs.uuid === player.carrying
                   )
                   navigate("/case-studies/" + g.slug)
                   intentToPickUp = false
@@ -584,7 +582,7 @@
             }
 
             // PLAYER => CLICK / TAP
-            viewport.on("clicked", (e) => {
+            viewport.on("clicked", e => {
               // __ Cancel current movement
               delete moveQ[$localUserSessionID]
               hideTarget()
@@ -601,7 +599,7 @@
             })
 
             // PLAYER => TELEPORT
-            teleportTo = (area) => {
+            teleportTo = area => {
               gameRoom.send("teleport", {
                 area: area,
               })
@@ -612,14 +610,14 @@
             // *******
 
             // MESSAGE => ADD
-            gameRoom.state.messages.onAdd = (message) => {
+            gameRoom.state.messages.onAdd = message => {
               chatMessages = [...chatMessages, message]
             }
 
             // MESSAGE => REMOVE
-            gameRoom.state.messages.onRemove = (message) => {
+            gameRoom.state.messages.onRemove = message => {
               try {
-                const itemIndex = chatMessages.findIndex((m) => m === message)
+                const itemIndex = chatMessages.findIndex(m => m === message)
                 chatMessages.splice(itemIndex, 1)
                 chatMessages = chatMessages
               } catch (err) {
@@ -629,7 +627,7 @@
             }
 
             // MESSAGE => SUBMIT
-            submitChat = (event) => {
+            submitChat = event => {
               try {
                 gameRoom.send("submitChatMessage", {
                   msgId: nanoid(),
@@ -655,7 +653,7 @@
               })
             }
 
-            pickUpCaseStudy = (uuid) => {
+            pickUpCaseStudy = uuid => {
               gameRoom.send("pickUpCaseStudy", {
                 uuid: uuid,
               })
@@ -690,7 +688,7 @@
                   .to({ y: caseStudy.y }, 3, Tweener.ease.bounceOut)
               }
 
-              const onDown = (e) => {
+              const onDown = e => {
                 // __ Make user drop case study if carrying, to allow picking up new one
                 if (
                   localPlayers[$localUserSessionID].carrying &&
@@ -704,7 +702,7 @@
                 // __ Move towards clicked case study
                 // __ and indicate that it should be picked up once reached
                 const g = emergentLayer.children.find(
-                  (cs) => cs.uuid === caseStudy.uuid
+                  cs => cs.uuid === caseStudy.uuid
                 )
                 if (g) {
                   intentToPickUp = caseStudy.uuid
@@ -753,7 +751,7 @@
             // CASE STUDY => CHANGE
             gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
               const g = emergentLayer.children.find(
-                (cs) => cs.uuid === caseStudy.uuid
+                cs => cs.uuid === caseStudy.uuid
               )
               if (g) {
                 // __ Darken color one step
@@ -777,7 +775,7 @@
               console.error("Gameserver error:", message)
             })
           })
-          .catch((e) => {
+          .catch(e => {
             console.dir(e)
             if (e.code == 4215) {
               setUIState(STATE.ERROR, "You have been banned")
@@ -789,9 +787,9 @@
       })
 
       // __ Add exhibition (static) case studies
-      caseStudies.then((caseStudies) => {
+      caseStudies.then(caseStudies => {
         caseStudies
-          .filter((cs) => cs._type === "caseStudyExhibition")
+          .filter(cs => cs._type === "caseStudyExhibition")
           .forEach((cs, i) => {
             const spriteUrl = get(cs, "spriteLink.spriteJsonURL", "")
             const spriteId = "caseStudy-" + cs._id
@@ -815,19 +813,19 @@
               caseStudyLocation.title = cs.title
               caseStudyLocation.interactive = true
 
-              const onDown = (e) => {
+              const onDown = e => {
                 navigate("/case-studies/" + get(cs, "slug.current", false))
                 e.stopPropagation()
               }
 
-              const onEnter = (e) => {
+              const onEnter = e => {
                 gameContainer.style.cursor = "pointer"
                 nameText.x = caseStudyLocation.x + 10
                 nameText.y = caseStudyLocation.y - 60
                 exhibitionLayer.addChild(nameText)
               }
 
-              const onLeave = (e) => {
+              const onLeave = e => {
                 gameContainer.style.cursor = "default"
                 exhibitionLayer.removeChild(nameText)
               }
@@ -843,7 +841,7 @@
       })
 
       // __ Add audio installations
-      audioInstallations.then((audioInstallations) => {
+      audioInstallations.then(audioInstallations => {
         audioInstallations.forEach((ai, i) => {
           const spriteUrl = get(ai, "spriteLink.spriteJsonURL", "")
           const spriteId = "audioInstallation-" + ai._id
@@ -889,7 +887,7 @@
       })
 
       // __ Add landmarks
-      landMarks.then((landMarks) => {
+      landMarks.then(landMarks => {
         landMarks.forEach((lm, i) => {
           const spriteUrl = get(lm, "spriteJsonURL", "")
           const spriteId = "landMark-" + lm._id
@@ -1395,7 +1393,7 @@
               <ToolBar
                 {section}
                 on:submit={submitChat}
-                on:teleport={(e) => {
+                on:teleport={e => {
                   teleportTo('blue')
                 }} />
             </div>
@@ -1605,7 +1603,7 @@
 {/if}
 
 <svelte:window
-  on:keyup={(e) => {
+  on:keyup={e => {
     if (e.keyCode == 32 && localPlayers[$localUserSessionID].carrying && localPlayers[$localUserSessionID].carrying.length > 0) {
       dropCaseStudy()
     }

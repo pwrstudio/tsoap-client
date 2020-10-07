@@ -5,10 +5,10 @@
   //
   // # # # # # # # # # # # # #
   // IMPORTS
-  import Cookies from "js-cookie"
+  import Cookies from "js-cookie";
 
   // *** STORES
-  import { localUserAuthenticated } from "../stores"
+  import { localUserAuthenticated } from "../stores";
 </script>
 
 <style lang="scss">
@@ -57,8 +57,8 @@
       href="/"
       class="menu-item login"
       on:click={(e) => {
-        Cookies.remove('tsoap-logged-in')
-        window.location = '/'
+        Cookies.remove('tsoap-logged-in');
+        window.location = '/';
       }}>Logout</a>
   {:else}
     <a

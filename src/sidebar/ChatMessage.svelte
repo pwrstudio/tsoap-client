@@ -6,14 +6,14 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { fade } from "svelte/transition"
-  import anchorme from "anchorme"
+  import { fade } from "svelte/transition";
+  import anchorme from "anchorme";
 
   // GLOBALS
-  import { formattedChatDate } from "../global.js"
+  import { formattedChatDate } from "../global.js";
 
   // PROPS
-  export let message = {}
+  export let message = {};
 </script>
 
 <style lang="scss">

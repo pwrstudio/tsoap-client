@@ -6,35 +6,35 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import get from "lodash/get"
+  import get from "lodash/get";
 
   // COMPONENTS
-  import PrivateMessageThread from "./PrivateMessageThread.svelte"
+  import PrivateMessageThread from "./PrivateMessageThread.svelte";
 
   // *** STORES
   import {
     localUserAuthenticated,
     authenticatedUserInformation,
-  } from "../stores"
+  } from "../stores";
 
   // *** VARIABLES
-  let privateMessages = []
+  let privateMessages = [];
 
   if (
     $localUserAuthenticated &&
     get($authenticatedUserInformation, "username", false)
   ) {
-    let username = $authenticatedUserInformation.username
+    let username = $authenticatedUserInformation.username;
     // console.log(username)
     fetch("https://sso.tsoap.dev/messages?user=" + username)
       .then((response) => response.json())
       .then((data) => {
         // console.log(data)
-        privateMessages = data.messages
+        privateMessages = data.messages;
       })
       .catch((err) => {
-        console.error(err)
-      })
+        console.error(err);
+      });
   }
 </script>
 
@@ -80,8 +80,8 @@
     {#each privateMessages as message (message.id)}
       <PrivateMessageThread {message} />
     {/each}
-    <!-- <div>TODO: Allow writing message</div>
-    <div>
+    <div>TODO: Allow writing message</div>
+    <!-- <div>
       TODO: if slug:<br />
       TODO: List all messages from specific user<br />
       TODO: Allow writing message to specified user

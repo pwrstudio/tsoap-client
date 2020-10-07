@@ -92,7 +92,7 @@
 <div class="message-container">
   <div
     class="header"
-    on:click={(e) => {
+    on:click={e => {
       expanded = !expanded
     }}>
     <div class="meta">
@@ -100,7 +100,7 @@
       <div class="date">{formattedDate(message.last_posted_at)}</div>
     </div>
     <div class="participants">
-      {#each get(message, 'details.allowed_users', []).filter((p) => p.username != get($authenticatedUserInformation, 'username', '')) as participant (participant.id)}
+      {#each get(message, 'details.allowed_users', []).filter(p => p.username != get($authenticatedUserInformation, 'username', '')) as participant (participant.id)}
         <span>{participant.name}, </span>
       {/each}
     </div>
@@ -119,5 +119,6 @@
         </div>
       {/each}
     </div>
+    <div>TODO: Allow writing message</div>
   {/if}
 </div>

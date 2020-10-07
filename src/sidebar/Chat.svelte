@@ -6,17 +6,17 @@
   // # # # # # # # # # # # # #
 
   // COMPONENTS
-  import ChatMessage from "./ChatMessage.svelte"
+  import ChatMessage from "./ChatMessage.svelte";
 
   // DOM REFERENCES
-  let messageContainerEl = {}
+  let messageContainerEl = {};
 
   // GLOBAL
-  import { COLORMAP } from "../global.js"
+  import { COLORMAP } from "../global.js";
 
   // PROPS
-  export let chatMessages = []
-  export let currentArea = 4
+  export let chatMessages = [];
+  export let currentArea = 4;
 
   $: {
     if (chatMessages) {
@@ -25,8 +25,8 @@
           top: messageContainerEl.scrollHeight,
           left: 0,
           behavior: "smooth",
-        })
-      }, 100)
+        });
+      }, 100);
     }
   }
 </script>

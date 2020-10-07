@@ -47,7 +47,7 @@
 
     input {
       font-family: $MONO_STACK;
-      font-size: $FONT_SIZE_SMALL;
+      font-size: $FONT_SIZE_BASE;
       float: left;
       width: calc(100% - 60px);
       display: block;
@@ -59,11 +59,19 @@
       outline: none;
       height: 30px;
       margin-right: 10px;
+
+      &.smaller {
+        width: calc(100% - 110px);
+      }
+
+      &:focus {
+        border: 1px solid $COLOR_LIGHT;
+      }
     }
 
     button {
       font-family: $MONO_STACK;
-      font-size: $FONT_SIZE_SMALL;
+      font-size: $FONT_SIZE_BASE;
       width: 60px;
       float: right;
       display: block;
@@ -77,8 +85,12 @@
       line-height: 20px;
 
       &:hover {
-        background: $COLOR_LIGHT;
-        color: $COLOR_DARK;
+        border: 1px solid $COLOR_LIGHT;
+      }
+
+      &.close-chat {
+        width: 40px;
+        margin-left: 10px;
       }
     }
 
@@ -142,9 +154,15 @@
       type="[text]"
       maxlength="600"
       bind:value={chatInputValue}
+      class:smaller={$localUserAuthenticated}
       on:keydown={(e) => {
         if (e.keyCode == 13) submitChat()
       }} />
     <button on:click={submitChat}>Send</button>
+    <button
+      class="close-chat"
+      on:click={e => {
+        showChatInput = false
+      }}>×</button>
   {/if}
 </div>
