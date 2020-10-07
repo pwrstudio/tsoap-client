@@ -33,7 +33,7 @@
       url = makeUrl(get(item, "pdfFile.asset._ref", ""))
       break
     case "videoBlock":
-      url = makeUrl(get(item, "item.videoFile.asset._ref", ""))
+      url = makeUrl(get(item, "videoFile.asset._ref", ""))
       break
     case "linkBlock":
       url = get(item, "url", "")
