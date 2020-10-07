@@ -31,7 +31,7 @@
       .color-icon {
         height: 20px;
         width: 20px;
-        margin-right: 20px;
+        margin-right: 15px;
         float: left;
         background: $COLOR_EXHIBITION;
 

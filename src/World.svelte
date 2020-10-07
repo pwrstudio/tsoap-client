@@ -20,6 +20,7 @@
   import MediaQuery from "svelte-media-query"
   import Tweener from "tweener"
   import Cookies from "js-cookie"
+  import slugify from "slugify"
 
   // *** COMPONENTS
   // sidebar
@@ -408,21 +409,33 @@
           }
 
           const onDown = e => {
+            // __ Open profile if accredited user
+            if (player.authenticated) {
+              navigate(
+                "/profiles/" +
+                  slugify(player.discourseName, {
+                    lower: true,
+                    strict: true,
+                  })
+              )
+            }
             if (player.uuid != $localUserUUID) {
               e.stopPropagation()
-            } else if (player.authenticated) {
-              window.alert(player.name)
-              navigate("/profiles/" + slugify(player.discourseName))
             }
           }
 
           const onEnter = () => {
+            if (player.authenticated) {
+              gameContainer.style.cursor = "pointer"
+            }
             nameText.x = avatar.x + 10
             nameText.y = avatar.y - 40
             playerLayer.addChild(nameText)
           }
 
           const onLeave = () => {
+            gameContainer.style.cursor = "default"
+
             playerLayer.removeChild(nameText)
           }
 

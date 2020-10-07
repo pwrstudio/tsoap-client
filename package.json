@@ -33,6 +33,7 @@
     "lodash": "^4.17.20",
     "pixi-viewport": "^4.13.2",
     "pixi.js": "^5.3.3",
+    "slugify": "^1.4.5",
     "svelte-media-query": "^0.0.4",
     "svelte-routing": "^1.4.2",
     "tweener": "^0.1.3"
