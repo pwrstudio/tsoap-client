@@ -5,14 +5,14 @@
   //
   // # # # # # # # # # # # # #
 
-  let counter = 0
+  // let counter = 0
 
-  const inc = () => {
-    counter++
-    requestAnimationFrame(inc)
-  }
+  // const inc = () => {
+  //   counter++
+  //   requestAnimationFrame(inc)
+  // }
 
-  requestAnimationFrame(inc)
+  // requestAnimationFrame(inc)
 </script>
 
 <style lang="scss">
@@ -46,7 +46,5 @@
 </style>
 
 <div class="loading-screen">
-  <div class="box">
-    <div class="header">LOADING: {counter}</div>
-  </div>
+  <div class="box"><img src="/1.gif" /></div>
 </div>

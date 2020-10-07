@@ -457,8 +457,8 @@
 
             // __ Set cookie if user is successfully authenticated
             if (player.authenticated) {
-              Cookies.remove("tsoap-logged-in")
-              // Cookies.set("tsoap-logged-in", "false", { expires: 7 })
+              // Cookies.remove("tsoap-logged-in")
+              Cookies.set("tsoap-logged-in", "true", { expires: 7 })
               localUserAuthenticated.set(true)
               player.discourseName = "rasmus"
               loadData(QUERY.AUTH_USER_INFO, {
