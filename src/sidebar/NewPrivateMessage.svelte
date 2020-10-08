@@ -11,7 +11,7 @@
 
   import { authenticatedUserInformation } from "../stores"
 
-  //   *** PROPS
+  // *** PROPS
   export let threadId = 0
 
   // *** VARIABLES

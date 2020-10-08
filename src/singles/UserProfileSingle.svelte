@@ -27,6 +27,7 @@
   const relatedContent = loadData(QUERY.CONNECTED_TO_USER, { id: user._id })
 
   relatedContent.then(relatedContent => {
+    // __ Filter related content by type
     if (relatedContent && Array.isArray(relatedContent)) {
       relatedEvents = relatedContent.filter(c => c._type == "event")
       relatedCaseStudies = relatedContent.filter(

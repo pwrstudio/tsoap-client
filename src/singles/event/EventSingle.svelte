@@ -20,9 +20,6 @@
 
   // *** PROPS
   export let event = {}
-
-  // console.log("____EVENT")
-  // console.dir(event)
 </script>
 
 <style lang="scss">

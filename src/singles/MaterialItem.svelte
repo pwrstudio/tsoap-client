@@ -9,10 +9,13 @@
   import get from "lodash/get"
   import { urlFor } from "../sanity.js"
 
+  // *** GLOBAL
   import { FORMATMAP } from "../global.js"
+
   // *** PROPS
   export let item = {}
 
+  // *** VARIABLES
   let url = ""
 
   const makeUrl = ref =>

@@ -7,9 +7,6 @@
 
   // PROPS
   export let caseStudy = ""
-
-  console.log("___ inventory message")
-  console.dir(caseStudy)
 </script>
 
 <style lang="scss">

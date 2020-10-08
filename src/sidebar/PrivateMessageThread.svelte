@@ -16,11 +16,12 @@
   import NewPrivateMessage from "./NewPrivateMessage.svelte"
   import { authenticatedUserInformation } from "../stores"
 
-  let expanded = false
-
   // PROPS
   export let message = {}
   export let own = {}
+
+  // *** VARIABLES
+  let expanded = false
 </script>
 
 <style lang="scss">
@@ -65,7 +66,6 @@
 
     .post {
       padding-top: 10px;
-      //   padding-bottom: 5px;
       margin-bottom: 5px;
 
       .meta {

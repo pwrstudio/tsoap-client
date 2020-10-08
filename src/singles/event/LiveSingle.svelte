@@ -17,7 +17,7 @@
   import VideoPlayer from "./VideoPlayer.svelte"
 
   // GLOBAL
-  import { formattedDate, QUERY } from "../../global.js"
+  import { QUERY } from "../../global.js"
 
   // *** PROPS
   export let event = {}

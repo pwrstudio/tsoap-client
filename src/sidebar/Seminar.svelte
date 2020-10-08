@@ -21,7 +21,7 @@
   // PROPS
   export let slug = "test-seminar-1"
 
-  // If there is no slug, show user's own seminar
+  // __ If there is no slug, show user's own seminar
   if (!slug || slug.length == 0) {
     slug = get(
       $authenticatedUserInformation,
@@ -30,21 +30,21 @@
     )
   }
 
-  let seminar = loadData(QUERY.SEMINAR, { slug: slug }).catch((err) => {
+  let seminar = loadData(QUERY.SEMINAR, { slug: slug }).catch(err => {
     console.dir(err)
   })
   let loadedParticipants = []
 
-  seminar.then((seminar) => {
+  seminar.then(seminar => {
     if (seminar && seminar._id) {
       // Get participants of seminar
       loadData(QUERY.SEMINAR_PARTICIPANTS, {
         id: seminar._id,
       })
-        .then((connectedParticipants) => {
+        .then(connectedParticipants => {
           loadedParticipants = connectedParticipants
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(err)
         })
     }
