@@ -26,14 +26,13 @@
   let connectedCaseStudies = []
 
   if (event._id) {
+    console.log("event._id", event._id)
     connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
       id: event._id,
+    }).catch(err => {
+      console.dir(err)
     })
   }
-
-  // connectedCaseStudies.then((connectedCaseStudies) => {
-  //   console.dir(connectedCaseStudies)
-  // })
 </script>
 
 <style lang="scss">

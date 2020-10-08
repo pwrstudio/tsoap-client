@@ -3,6 +3,7 @@ import blocksToHtml from "@sanity/block-content-to-html"
 import imageUrlBuilder from "@sanity/image-url"
 import getVideoId from "get-video-id"
 import has from "lodash/has"
+import get from "lodash/get"
 
 // GLOBAL
 import { SANITY_PROJECT_ID } from "./global.js"
@@ -97,32 +98,9 @@ const serializers = {
       return h("p", { className: style }, props.children)
     },
     image: props => {
-      // console.log('IMAGE')
-      // if (has(props, 'node.asset._ref')) {
-      //     let assetPost = loadData('*[_id == $ref][0]', { ref: props.node.asset._ref })
-      //     assetPost.then(image => {
-      //         // console.dir(image)
-      //         // console.log(urlFor(props.node.asset)
-      //         //     .width(800)
-      //         //     .quality(90)
-      //         //     .auto('format')
-      //         //     .url())
-      //         // console.dir(props)
-      //         return h('figure', { className: 'image' }, [
-      //             h('img', {
-      //                 src: urlFor(props.node.asset)
-      //                     .width(800)
-      //                     .quality(90)
-      //                     .auto('format')
-      //                     .url()
-      //             }),
-      //             ...prepareTextElements(props)
-      //         ])
-      //     })
-      // }
       return h("figure", { className: "image" }, [
         h("img", {
-          src: urlFor(props.node.asset)
+          src: urlFor(get(props, "node.asset", ""))
             .width(800)
             .quality(90)
             .auto("format")
@@ -133,7 +111,7 @@ const serializers = {
     },
     embedBlock: props => {
       // YOUTUBE
-      if (props.node.url.includes("youtube")) {
+      if (get(props, "node.url", "").includes("youtube")) {
         return h("figure", { className: "youtube" }, [
           h(
             "div",
@@ -154,7 +132,7 @@ const serializers = {
         ])
       }
       // VIMEO
-      if (props.node.url.includes("vimeo")) {
+      if (get(props, "node.url", "").includes("vimeo")) {
         return h("figure", { className: "vimeo" }, [
           h(
             "div",
@@ -176,7 +154,7 @@ const serializers = {
         ])
       }
       // SOUNDCLOUD
-      if (props.node.url.includes("soundcloud")) {
+      if (get(props, "node.url", "").includes("soundcloud")) {
         return h("figure", { className: "soundcloud" }, [
           h(
             "div",
@@ -186,7 +164,7 @@ const serializers = {
               height: "300",
               src:
                 "https://w.soundcloud.com/player/?url=" +
-                props.node.url +
+                get(props, "node.url", "") +
                 "&color=%23fffff",
               frameborder: "no",
               scrolling: "no",
@@ -202,7 +180,7 @@ const serializers = {
         "https://shape.anthropocene-curriculum.org/material/files/" +
         SANITY_PROJECT_ID +
         "/production/" +
-        props.node.videoFile.asset._ref
+        get(props, "node.videoFile.asset._ref", "")
           .replace("file-", "")
           .replace("-mp4", ".mp4")
       return h("figure", { className: "video" }, [
@@ -210,7 +188,7 @@ const serializers = {
           src: videoUrl,
           controls: true,
           loop: true,
-          autoplay: props.node.autoPlay,
+          autoplay: get(props, "node.autoPlay", ""),
         }),
         ...prepareTextElements(props),
       ])
@@ -220,7 +198,7 @@ const serializers = {
         "https://shape.anthropocene-curriculum.org/material/files/" +
         SANITY_PROJECT_ID +
         "/production/" +
-        props.node.audioFile.asset._ref
+        get(props, "node.audioFile.asset._ref", "")
           .replace("file-", "")
           .replace("-mp3", ".mp3")
       return h("figure", { className: "audio" }, [
