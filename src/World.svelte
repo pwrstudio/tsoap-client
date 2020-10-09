@@ -1004,7 +1004,9 @@
     // __ Redirect to authentication if user is marked as logged in
     const authCookie = Cookies.get("tsoap-logged-in")
     if (authCookie && section != "authenticate") {
-      window.location = "https://sso.tsoap.dev/auth/discourse_sso"
+      console.log("___ REDIRECTING to auth with params:", params)
+      window.location =
+        "https://sso.tsoap.dev/auth/discourse_sso?params=" + params
     }
 
     // __ Add pixi view to DOM
