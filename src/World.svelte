@@ -470,13 +470,9 @@
                 .catch(err => {
                   console.log(err)
                 })
-            }
-
-            // __ Navigate based on URL paramters passed
-            // __ before going through authenticateion
-            if (returnParams) {
+              // __ Navigate based on URL paramters passed
+              // __ before going through authenticateion
               console.log("returnParams", returnParams)
-              window.alert(returnParams)
               navigate("/" + returnParams)
             }
             // __ Loading is done
