@@ -38,7 +38,7 @@ export const QUERY = {
   GRAPHICS_SETTINGS:
     "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'miniImage': miniImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
   EVENTS:
-    "*[_type == 'event']{..., participants[]->{slug,name}, connectedCaseStudies[]->{...,participants[]->{slug,name}},}",
+    "*[_type == 'event']{..., participants[]->{slug,name}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}},}",
   USERS: "*[_type == 'participant']",
   PAGES: "*[_type == 'page']",
   SEMINAR: "*[_type == 'seminar' && slug.current == $slug][0]",
@@ -46,13 +46,13 @@ export const QUERY = {
   AUTH_USER_INFO:
     "*[_type == 'participant' && username == $username]{..., seminarLink->{...}}[0]",
   AUDIO_INSTALLATIONS:
-    "*[_type == 'audioInstallation']{..., participants[]->{slug,name}, 'audioURL': soundFile.asset->url,spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
+    "*[_type == 'audioInstallation']{..., participants[]->{slug,name,username}, 'audioURL': soundFile.asset->url,spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   CASE_STUDIES:
-    "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., connectedEvents[]->{...,participants[]->{slug,name}}, participants[]->{slug,name}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
+    "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., connectedEvents[]->{...,participants[]->{slug,name,username}}, participants[]->{slug,name,username}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   LAND_MARKS:
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
   ACTIVE_STREAMS:
-    "*[_id == 'active-streams']{..., mainStream->{..., participants[]->{slug,name}}}[0]",
+    "*[_id == 'active-streams']{..., mainStream->{..., participants[]->{slug,name,username}}}[0]",
   WELCOME_CARD: "*[_id == 'welcome-card'][0]",
   CONNECTED_TO_USER: "*[participants[]._ref == $id]{...,participants[]->{...}}",
 }
