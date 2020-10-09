@@ -46,16 +46,11 @@
       border-radius: 5px;
       width: auto;
       display: inline-block;
-
-      a {
-        color: $COLOR_MID_2;
-      }
+      color: $COLOR_MID_2;
 
       &:hover {
         border: 1px solid $COLOR_LIGHT;
-        a {
-          color: $COLOR_LIGHT;
-        }
+        color: $COLOR_LIGHT;
       }
     }
 
