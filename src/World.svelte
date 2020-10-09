@@ -55,7 +55,8 @@
     TINTMAP,
     QUERY,
     AREA,
-    TEXT_STYLE,
+    TEXT_STYLE_AVATAR,
+    TEXT_STYLE_CASE_STUDY,
   } from "./global.js"
 
   // *** STORES
@@ -378,8 +379,18 @@
           })
 
           // __ Name graphics (shown on hover)
-          const nameText = new PIXI.Text(playerOptions.name, TEXT_STYLE)
-          nameText.anchor.set(0.5)
+          const textSprite = new PIXI.Text(
+            playerOptions.name,
+            TEXT_STYLE_AVATAR
+          )
+          const txtBG = new PIXI.Sprite(PIXI.Texture.WHITE)
+          txtBG.width = textSprite.width + 10
+          txtBG.height = textSprite.height + 10
+          textSprite.x = 5
+          textSprite.y = 5
+          const textContainer = new PIXI.Container()
+          textContainer.addChild(txtBG, textSprite)
+          textContainer.name = "text"
 
           // __ Add sprites and initial position to container
           const avatar = new PIXI.Container()
@@ -393,7 +404,7 @@
           avatar.setAnimation = direction => {
             avatar.motionState = direction
             avatar.children.forEach(c => {
-              c.visible = c.name == direction ? true : false
+              c.visible = c.name == direction || c.name == "text" ? true : false
             })
           }
 
@@ -432,15 +443,18 @@
             if (player.authenticated) {
               gameContainer.style.cursor = "pointer"
             }
-            nameText.x = avatar.x + 10
-            nameText.y = avatar.y - 40
-            playerLayer.addChild(nameText)
+            // console.log("___ textContainer.width", textContainer.width)
+            // console.log("___ textContainer.height", textContainer.height)
+            // console.log("___ avatar.width", avatar.width)
+            // console.log("___ avatar.height", avatar.height)
+            textContainer.y = 30 - textContainer.height / 2
+            textContainer.x = -(textContainer.width / 2) + 30
+            avatar.addChild(textContainer)
           }
 
           const onLeave = () => {
             gameContainer.style.cursor = "default"
-
-            playerLayer.removeChild(nameText)
+            avatar.removeChild(textContainer)
           }
 
           player.avatar.on("mousedown", onDown)
@@ -474,12 +488,12 @@
                 })
               // __ Navigate based on URL paramters passed
               // __ before going through authenticateion
-              console.log("returnSection", returnSection)
-              console.log("returnSlug", returnSlug)
+              // console.log("returnSection", returnSection)
+              // console.log("returnSlug", returnSlug)
               let returnPath = "/"
               returnPath += returnSection ? returnSection : ""
               returnPath += returnSlug ? "/" + returnSlug : ""
-              console.log("returnPath", returnPath)
+              // console.log("returnPath", returnPath)
               navigate(returnPath)
             }
             // __ Loading is done
@@ -519,11 +533,6 @@
         gameClient
           .joinOrCreate("game", playerObject)
           .then(gameRoom => {
-            // !!! HACK
-            // if (section == "authenticate") {
-            //   history.replaceState({}, "CONNECTED", "/")
-            // }
-
             // ******
             // PLAYER
             // ******
@@ -704,6 +713,21 @@
               graphics.drawRect(0, 0, 15, 15)
               graphics.endFill()
 
+              // __ Name graphics (shown on hover)
+              const textSprite = new PIXI.Text(
+                caseStudy.name,
+                TEXT_STYLE_CASE_STUDY
+              )
+              const txtBG = new PIXI.Sprite(PIXI.Texture.WHITE)
+              txtBG.tint = 0x000000
+              txtBG.width = textSprite.width + 10
+              txtBG.height = textSprite.height + 10
+              textSprite.x = 5
+              textSprite.y = 5
+              const textContainer = new PIXI.Container()
+              textContainer.addChild(txtBG, textSprite)
+              textContainer.name = "text"
+
               container.x = caseStudy.x
               container.y = animate ? 0 : caseStudy.y
 
@@ -746,10 +770,16 @@
 
               const onEnter = () => {
                 gameContainer.style.cursor = "grab"
+                textContainer.y =
+                  container.y + container.height / 2 - textContainer.height / 2
+                textContainer.x =
+                  container.x - textContainer.width / 2 + container.width / 2
+                playerLayer.addChild(textContainer)
               }
 
-              const onLeave = () => {
+              const onLeave = e => {
                 gameContainer.style.cursor = "default"
+                playerLayer.removeChild(textContainer)
               }
 
               container.on("mousedown", onDown)
@@ -829,8 +859,17 @@
               frames.animationSpeed = 0.02
               frames.play()
 
-              const nameText = new PIXI.Text(cs.title, TEXT_STYLE)
-              nameText.anchor.set(0.5)
+              // __ Name graphics (shown on hover)
+              const textSprite = new PIXI.Text(cs.title, TEXT_STYLE_CASE_STUDY)
+              const txtBG = new PIXI.Sprite(PIXI.Texture.WHITE)
+              txtBG.tint = 0x000000
+              txtBG.width = textSprite.width + 10
+              txtBG.height = textSprite.height + 10
+              textSprite.x = 5
+              textSprite.y = 5
+              const textContainer = new PIXI.Container()
+              textContainer.addChild(txtBG, textSprite)
+              textContainer.name = "text"
 
               const caseStudyLocation = new PIXI.Container()
               caseStudyLocation.addChild(frames)
@@ -848,14 +887,16 @@
 
               const onEnter = e => {
                 gameContainer.style.cursor = "pointer"
-                nameText.x = caseStudyLocation.x + 10
-                nameText.y = caseStudyLocation.y - 60
-                exhibitionLayer.addChild(nameText)
+                textContainer.y =
+                  caseStudyLocation.height / 2 - textContainer.height / 2
+                textContainer.x =
+                  -(textContainer.width / 2) + caseStudyLocation.width / 2
+                caseStudyLocation.addChild(textContainer)
               }
 
               const onLeave = e => {
                 gameContainer.style.cursor = "default"
-                exhibitionLayer.removeChild(nameText)
+                caseStudyLocation.removeChild(textContainer)
               }
 
               caseStudyLocation.on("mousedown", onDown)

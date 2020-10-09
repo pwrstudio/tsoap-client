@@ -57,11 +57,22 @@ export const QUERY = {
   CONNECTED_TO_USER: "*[participants[]._ref == $id]{...,participants[]->{...}}",
 }
 
-export const TEXT_STYLE = {
+export const TEXT_STYLE_AVATAR = {
   fontFamily: "IBM Plex Mono",
-  fontSize: 16,
+  fontSize: 13,
+  align: "center",
+  fill: "black",
+  wordWrap: true,
+  wordWrapWidth: 300,
+}
+
+export const TEXT_STYLE_CASE_STUDY = {
+  fontFamily: "IBM Plex Mono",
+  fontSize: 13,
   align: "center",
   fill: "white",
+  wordWrap: true,
+  wordWrapWidth: 300,
 }
 
 // const mainFormat = "MMM dd yyyy – HH:mm"
