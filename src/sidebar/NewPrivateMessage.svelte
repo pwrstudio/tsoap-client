@@ -13,6 +13,8 @@
 
   // *** PROPS
   export let threadId = 0
+  export let url = "https://work.anthropocene-curriculum.org/new-message"
+  export let text = "+ New message"
 
   // *** VARIABLES
   let expanded = false
@@ -134,14 +136,15 @@
 </style>
 
 <div class="new-message">
-  <div
-    class="header"
-    on:click={e => {
-      expanded = !expanded
-    }}>
-    + New message
-  </div>
-  {#if expanded}
+  <a href={url} target="_blank" class="header">{text}</a>
+  <!-- <div
+  class="header"
+  on:click={e => {
+    expanded = !expanded
+  }}>
+  + New message
+</div> -->
+  <!-- {#if expanded}
     <div class="inner" transition:slide|local>
       <div class="row">
         <input
@@ -156,5 +159,5 @@
         <button on:click={submitPrivateMessage}>Send</button>
       </div>
     </div>
-  {/if}
+  {/if} -->
 </div>

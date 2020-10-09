@@ -146,7 +146,7 @@
     <a
       href="/messages"
       class="toolbar-item"
-      class:active={section === 'messages'}>Messages</a>
+      class:active={section === 'messages'}>Messages (2)</a>
     <div class="toolbar-item" on:click={teleport}>Support</div>
   {:else}
     <!-- CHAT -->

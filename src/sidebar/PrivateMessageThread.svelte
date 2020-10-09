@@ -22,6 +22,8 @@
 
   // *** VARIABLES
   let expanded = false
+
+  console.dir(message)
 </script>
 
 <style lang="scss">
@@ -127,6 +129,8 @@
         </div>
       {/each}
     </div>
-    <NewPrivateMessage />
+    <NewPrivateMessage
+      url="https://work.anthropocene-curriculum.org/"
+      text="> Go to thread" />
   {/if}
 </div>
