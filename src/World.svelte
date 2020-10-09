@@ -93,7 +93,6 @@
   let returnSection = false
   let returnSlug = false
 
-
   $: {
     // ___ Split the url parameter into variables
     const args = get(params, "[*]", "").split("/")
@@ -477,10 +476,10 @@
               // __ before going through authenticateion
               console.log("returnSection", returnSection)
               console.log("returnSlug", returnSlug)
-              let returnPath = '/'
-              returnPath += returnSection ? returnSection : '' 
-              returnPath += returnSlug ? '/' + returnSlug : ''
-              console.log('returnPath', returnPath)
+              let returnPath = "/"
+              returnPath += returnSection ? returnSection : ""
+              returnPath += returnSlug ? "/" + returnSlug : ""
+              console.log("returnPath", returnPath)
               navigate(returnPath)
             }
             // __ Loading is done
@@ -1022,7 +1021,6 @@
         "___ REDIRECTING to auth with params:",
         JSON.stringify(params)
       )
-      window.alert(params["*"])
       window.location =
         "https://sso.tsoap.dev/auth/discourse_sso?params=" + params["*"]
     }
