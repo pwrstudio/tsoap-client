@@ -472,9 +472,10 @@
                 })
             }
 
-            // __ Navigate based on URL paramters passed 
-            // __ before going through authenticateion 
-            if(returnParams) {
+            // __ Navigate based on URL paramters passed
+            // __ before going through authenticateion
+            if (returnParams) {
+              console.log("returnParams", returnParams)
               window.alert(returnParams)
             }
             // __ Loading is done
@@ -515,9 +516,9 @@
           .joinOrCreate("game", playerObject)
           .then(gameRoom => {
             // !!! HACK
-            if (section == "authenticate") {
-              history.replaceState({}, "CONNECTED", "/")
-            }
+            // if (section == "authenticate") {
+            //   history.replaceState({}, "CONNECTED", "/")
+            // }
 
             // ******
             // PLAYER
