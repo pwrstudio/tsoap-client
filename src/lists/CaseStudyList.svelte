@@ -265,7 +265,7 @@
             <div class="title">{caseStudy.title}</div>
             <div class="participants">
               {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
-                <ParticipantsList participants={caseStudy.participants} messaging={true}/>
+                <ParticipantsList participants={caseStudy.participants}/>
               {/if}
             </div>
           </div>

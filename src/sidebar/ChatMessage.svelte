@@ -6,14 +6,14 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import { fade } from "svelte/transition";
-  import anchorme from "anchorme";
+  import { fade } from "svelte/transition"
+  import anchorme from "anchorme"
 
   // GLOBALS
-  import { formattedChatDate } from "../global.js";
+  import { formattedChatDate } from "../global.js"
 
   // PROPS
-  export let message = {};
+  export let message = {}
 </script>
 
 <style lang="scss">
@@ -51,7 +51,11 @@
 
 <div class="chat-message" transition:fade|local>
   <div class="meta">
-    <span class="name">{message.name}:</span>
+    {#if message.slug}
+      <span class="name">
+        <a href={'/profile/' + message.slug}>{message.name}</a>:
+      </span>
+    {:else}<span class="name">{message.name}:</span>{/if}
     <span class="date">{formattedChatDate(message.timestamp)}</span>
   </div>
   <div class="body">

@@ -23,10 +23,11 @@
     text-decoration: none;
 
     &:hover {
-      text-decoration: underline;
+      color: $COLOR_DARK;
     }
 
     svg {
+      margin-right: -4px;
       path {
         fill: $COLOR_MID_2;
       }
