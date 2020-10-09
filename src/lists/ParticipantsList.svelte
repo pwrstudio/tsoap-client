@@ -27,7 +27,7 @@
     }
 
     svg {
-      margin-right: -4px;
+      margin-left: -4px;
       path {
         fill: $COLOR_MID_2;
       }
