@@ -130,7 +130,7 @@
       {/each}
     </div>
     <NewPrivateMessage
-      url={'https://work.anthropocene-curriculum.org/t' + message.slug + '/' + message.id}
+      url={'https://work.anthropocene-curriculum.org/t/' + message.slug + '/' + message.id}
       text="> Go to thread" />
   {/if}
 </div>

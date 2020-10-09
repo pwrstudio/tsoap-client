@@ -45,6 +45,7 @@
     .body {
       border-left: 1px solid $COLOR_MID_2;
       padding-left: 10px;
+      padding-right: 5px;
     }
   }
 </style>
