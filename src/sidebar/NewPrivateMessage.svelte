@@ -46,12 +46,11 @@
       border-radius: 5px;
       width: auto;
       display: inline-block;
-      color: $COLOR_MID_2;
+      color: $COLOR_LIGHT;
       text-decoration: none;
 
       &:hover {
         border: 1px solid $COLOR_LIGHT;
-        color: $COLOR_LIGHT;
       }
     }
 
