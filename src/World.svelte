@@ -477,6 +477,7 @@
             if (returnParams) {
               console.log("returnParams", returnParams)
               window.alert(returnParams)
+              navigate("/" + returnParams)
             }
             // __ Loading is done
             setUIState(STATE.READY)
