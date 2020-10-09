@@ -1008,10 +1008,9 @@
         "___ REDIRECTING to auth with params:",
         JSON.stringify(params)
       )
-      window.alert(JSON.stringify(params))
+      window.alert(params["*"])
       window.location =
-        "https://sso.tsoap.dev/auth/discourse_sso?params=" +
-        JSON.stringify(params)
+        "https://sso.tsoap.dev/auth/discourse_sso?params=" + params["*"]
     }
 
     // __ Add pixi view to DOM
