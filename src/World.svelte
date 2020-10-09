@@ -90,6 +90,7 @@
   let slug = false
   let sso = false
   let sig = false
+  let returnParams = false
 
   $: {
     // ___ Split the url parameter into variables
@@ -98,6 +99,7 @@
     if (section === "authenticate") {
       sso = args[1] && args[1].length > 0 ? args[1] : false
       sig = args[2] && args[2].length > 0 ? args[2] : false
+      returnParams = args[3] && args[3].length > 0 ? args[3] : false
     } else {
       slug = args[1] && args[1].length > 0 ? args[1] : false
     }
@@ -468,6 +470,12 @@
                 .catch(err => {
                   console.log(err)
                 })
+            }
+
+            // __ Navigate based on URL paramters passed 
+            // __ before going through authenticateion 
+            if(returnParams) {
+              window.alert(returnParams)
             }
             // __ Loading is done
             setUIState(STATE.READY)
