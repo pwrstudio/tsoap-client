@@ -178,7 +178,7 @@
       <!-- PARTICIPANTS -->
       {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
         <div class="participants">
-          <ParticipantsList participants={caseStudy.participants} />
+          <ParticipantsList participants={caseStudy.participants} messaging={true}/>
         </div>
       {/if}
     </div>

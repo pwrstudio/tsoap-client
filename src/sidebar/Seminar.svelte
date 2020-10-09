@@ -132,7 +132,7 @@
       <!-- PARTICIPANTS LIST -->
       <div class="participants-list">
           <div>Participants in seminar:</div>
-          <ParticipantsList participants={loadedParticipants}/>
+          <ParticipantsList participants={loadedParticipants} messaging={true}/>
         </div>
     </div>
   {/await}

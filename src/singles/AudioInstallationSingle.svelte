@@ -160,7 +160,7 @@
       <!-- PARTICIPANTS -->
       {#if get(audioInstallation, 'participants', false) && Array.isArray(audioInstallation.participants)}
         <div class="participants">
-          <ParticipantsList participants={audioInstallation.participants} />
+          <ParticipantsList participants={audioInstallation.participants} messaging={true}/>
         </div>
       {/if}
     </div>

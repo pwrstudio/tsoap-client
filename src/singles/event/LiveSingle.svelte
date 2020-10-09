@@ -139,7 +139,7 @@
     <!-- PARTICIPANTS -->
     {#if get(event, 'participants', false) && Array.isArray(event.participants)}
       <div class="participants">
-        <ParticipantsList participants={event.participants} />
+        <ParticipantsList participants={event.participants} messaging={true}/>
       </div>
     {/if}
   </div>
