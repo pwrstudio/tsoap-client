@@ -86,7 +86,7 @@
         &.expanded {
           padding-bottom: 10px;
           padding-top: 10px;
-          height: calc(100% - 20px);
+          height: calc(100% - 30px);
         }
       }
     }
