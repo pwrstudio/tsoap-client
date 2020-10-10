@@ -620,12 +620,44 @@
 
             // PLAYER => CLICK / TAP
             viewport.on("clicked", e => {
+              console.log("____ VIEWPORT")
+              console.dir(viewport)
+              console.log("--- clicked")
+              console.dir(e)
               // __ Cancel current movement
               delete moveQ[$localUserSessionID]
+
+              console.log("__ CLICK X", Math.round(e.world.x))
+              console.log("__ CLICK Y", Math.round(e.world.y))
+
               hideTarget()
               // __ Start new movement
               const targetX = Math.round(e.world.x)
               const targetY = Math.round(e.world.y)
+              showTarget(targetX, targetY)
+              gameRoom.send("go", {
+                x: targetX,
+                y: targetY,
+                originX: localPlayers[$localUserSessionID].avatar.x,
+                originY: localPlayers[$localUserSessionID].avatar.y,
+              })
+            })
+
+            // PLAYER => TOUCH END
+            viewport.on("touchend", e => {
+              console.log("--- touchend")
+              console.dir(e)
+              console.log("__ GLOBAL X", Math.round(e.data.global.x))
+              console.log("__ GLOBAL Y", Math.round(e.data.global.y))
+
+              const world = viewport.toWorld(e.data.global.x, e.data.global.y)
+
+              // __ Cancel current movement
+              delete moveQ[$localUserSessionID]
+              hideTarget()
+              // // __ Start new movement
+              const targetX = Math.round(world.x)
+              const targetY = Math.round(world.y)
               showTarget(targetX, targetY)
               gameRoom.send("go", {
                 x: targetX,
@@ -1009,6 +1041,11 @@
       interaction: app.renderer.plugins.interaction,
     })
     app.stage.addChild(viewport)
+
+    app.stage.on("touchend", e => {
+      console.log("___ tocuh enddd")
+      console.dir(e)
+    })
 
     // ___ Create and add layers
     // (1) => Map
