@@ -1322,7 +1322,6 @@
         z-index: 10000;
 
         @include screen-size("small") {
-          top: 0px;
           margin-bottom: 0;
           margin-top: 0;
 
@@ -1341,6 +1340,7 @@
         margin-bottom: 0;
 
         &.passive {
+          padding-bottom: 140px;
           min-height: 100vh;
         }
       }
