@@ -1614,55 +1614,57 @@
         {/await}
       </div>
       <!-- MOBILE TOOLKIT -->
-      <div class="mobile-toolkit" 
-        use:links 
-        class:expanded={mobileExpanded} 
-        on:click={e => {
-          if(!mobileExpanded) {
-            mobileExpanded = true
-          }
-        }}>
-        {#if mobileExpanded }
-          <div
-            class="close"
-            on:click={e => {
-              mobileExpanded = false;
-              e.stopPropagation()
-              navigate('/')
-            }}>
-            ×
+      {#if !audioChatActive}
+        <div class="mobile-toolkit" 
+          use:links 
+          class:expanded={mobileExpanded} 
+          on:click={e => {
+            if(!mobileExpanded) {
+              mobileExpanded = true
+            }
+          }}>
+          {#if mobileExpanded }
+            <div
+              class="close"
+              on:click={e => {
+                mobileExpanded = false;
+                e.stopPropagation()
+                navigate('/')
+              }}>
+              ×
+            </div>
+          {/if}
+          {#if section == 'seminar'}
+            <!-- SEMINAR -->
+            <Seminar {slug} mobile={true} {mobileExpanded}/>
+          {:else if section == 'messages'}
+            <!-- MESSAGES -->
+            <Messaging {slug} mobile={true} {mobileExpanded}/>
+          {:else}
+            <!-- CHAT -->
+            {#each Object.values(AREA) as A}
+              {#if localPlayers[$localUserSessionID].area === A}
+                <Chat
+                  chatMessages={chatMessages.filter(m => m.area === A)}
+                  currentArea={A}
+                  mobile={true}
+                  {mobileExpanded}/>
+              {/if}
+            {/each}
+          {/if}
+          <!-- TOOLBAR-->
+          <div class="toolbar">
+            <ToolBar
+              {section}
+              mobile={true}
+              {mobileExpanded}
+              on:submit={submitChat}
+              on:teleport={e => {
+                teleportTo('blue')
+              }} />
           </div>
-        {/if}
-        {#if section == 'seminar'}
-          <!-- SEMINAR -->
-          <Seminar {slug} mobile={true} {mobileExpanded}/>
-        {:else if section == 'messages'}
-          <!-- MESSAGES -->
-          <Messaging {slug} mobile={true} {mobileExpanded}/>
-        {:else}
-          <!-- CHAT -->
-          {#each Object.values(AREA) as A}
-            {#if localPlayers[$localUserSessionID].area === A}
-              <Chat
-                chatMessages={chatMessages.filter(m => m.area === A)}
-                currentArea={A}
-                mobile={true}
-                {mobileExpanded}/>
-            {/if}
-          {/each}
-        {/if}
-        <!-- TOOLBAR-->
-        <div class="toolbar">
-          <ToolBar
-            {section}
-            mobile={true}
-            {mobileExpanded}
-            on:submit={submitChat}
-            on:teleport={e => {
-              teleportTo('blue')
-            }} />
         </div>
-      </div>
+      {/if}
       <!-- MOBILE MENU-->
       <div class="mobile-menu" use:links>
         <Menu />
