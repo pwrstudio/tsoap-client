@@ -138,30 +138,48 @@
   document.addEventListener(visibilityChange, handleVisibilityChange, false)
 
   // ___ Get data from Sanity CMS
-  const graphicsSettings = loadData(QUERY.GRAPHICS_SETTINGS)
-  const events = loadData(QUERY.EVENTS)
-  const caseStudies = loadData(QUERY.CASE_STUDIES)
-  const audioInstallations = loadData(QUERY.AUDIO_INSTALLATIONS)
-  const landMarks = loadData(QUERY.LAND_MARKS)
-  const users = loadData(QUERY.USERS)
-  const pages = loadData(QUERY.PAGES)
-  const welcomeCard = loadData(QUERY.WELCOME_CARD)
-
-  welcomeCard.then(welcomeCard => {
-    console.dir(welcomeCard)
+  const graphicsSettings = loadData(QUERY.GRAPHICS_SETTINGS).catch(err => {
+    console.log(err)
+  })
+  const events = loadData(QUERY.EVENTS).catch(err => {
+    console.log(err)
+  })
+  const caseStudies = loadData(QUERY.CASE_STUDIES).catch(err => {
+    console.log(err)
+  })
+  const audioInstallations = loadData(QUERY.AUDIO_INSTALLATIONS).catch(err => {
+    console.log(err)
+  })
+  const landMarks = loadData(QUERY.LAND_MARKS).catch(err => {
+    console.log(err)
+  })
+  const users = loadData(QUERY.USERS).catch(err => {
+    console.log(err)
+  })
+  const pages = loadData(QUERY.PAGES).catch(err => {
+    console.log(err)
+  })
+  const welcomeCard = loadData(QUERY.WELCOME_CARD).catch(err => {
+    console.log(err)
   })
 
   // __ Listen for changes to the active streams post
-  let activeStreams = loadData(QUERY.ACTIVE_STREAMS)
+  let activeStreams = loadData(QUERY.ACTIVE_STREAMS).catch(err => {
+    console.log(err)
+  })
   let currentStream = false
 
   client.listen(QUERY.ACTIVE_STREAMS).subscribe(update => {
     currentStream = false
     setTimeout(() => {
-      activeStreams = loadData(QUERY.ACTIVE_STREAMS).then(aS => {
-        activeContentClosed = false
-        currentStream = aS.mainStream
-      })
+      activeStreams = loadData(QUERY.ACTIVE_STREAMS)
+        .then(aS => {
+          activeContentClosed = false
+          currentStream = aS.mainStream
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }, 1000)
   })
 
@@ -620,15 +638,15 @@
 
             // PLAYER => CLICK / TAP
             viewport.on("clicked", e => {
-              console.log("____ VIEWPORT")
-              console.dir(viewport)
-              console.log("--- clicked")
-              console.dir(e)
+              // console.log("____ VIEWPORT")
+              // console.dir(viewport)
+              // console.log("--- clicked")
+              // console.dir(e)
               // __ Cancel current movement
               delete moveQ[$localUserSessionID]
 
-              console.log("__ CLICK X", Math.round(e.world.x))
-              console.log("__ CLICK Y", Math.round(e.world.y))
+              // console.log("__ CLICK X", Math.round(e.world.x))
+              // console.log("__ CLICK Y", Math.round(e.world.y))
 
               hideTarget()
               // __ Start new movement
@@ -645,10 +663,10 @@
 
             // PLAYER => TOUCH END
             viewport.on("touchend", e => {
-              console.log("--- touchend")
-              console.dir(e)
-              console.log("__ GLOBAL X", Math.round(e.data.global.x))
-              console.log("__ GLOBAL Y", Math.round(e.data.global.y))
+              // console.log("--- touchend")
+              // console.dir(e)
+              // console.log("__ GLOBAL X", Math.round(e.data.global.x))
+              // console.log("__ GLOBAL Y", Math.round(e.data.global.y))
 
               const world = viewport.toWorld(e.data.global.x, e.data.global.y)
 
@@ -1042,11 +1060,6 @@
     })
     app.stage.addChild(viewport)
 
-    app.stage.on("touchend", e => {
-      console.log("___ tocuh enddd")
-      console.dir(e)
-    })
-
     // ___ Create and add layers
     // (1) => Map
     // (2) => Audio Installations
@@ -1096,10 +1109,10 @@
     // __ Redirect to authentication if user is marked as logged in
     const authCookie = Cookies.get("tsoap-logged-in")
     if (authCookie && section != "authenticate") {
-      console.log(
-        "___ REDIRECTING to auth with params:",
-        JSON.stringify(params)
-      )
+      // console.log(
+      //   "___ REDIRECTING to auth with params:",
+      //   JSON.stringify(params)
+      // )
       window.location =
         "https://sso.tsoap.dev/auth/discourse_sso?params=" + params["*"]
     }
@@ -1725,7 +1738,7 @@
 {/if}
 
 <!-- AUDIOCHAT BOX  -->
-{#if $localUserAuthenticated && !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
+{#if !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
   <div class="audiochat-box">
     <div class="message">
       Nearby audioroom
@@ -1744,6 +1757,7 @@
 <!-- AUDIO CHAT -->
 {#if audioChatActive}
   <AudioChat
+    user={localPlayers[$localUserSessionID]}
     userName={localPlayers[$localUserSessionID].name}
     roomName={COLORMAP[localPlayers[$localUserSessionID].area]}
     roomId={localPlayers[$localUserSessionID].area}

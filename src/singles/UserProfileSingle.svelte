@@ -27,7 +27,11 @@
   let relatedCaseStudies = false
   let relatedEvents = false
 
-  const relatedContent = loadData(QUERY.CONNECTED_TO_USER, { id: user._id })
+  const relatedContent = loadData(QUERY.CONNECTED_TO_USER, {
+    id: user._id,
+  }).catch(err => {
+    console.log(err)
+  })
 
   relatedContent.then(relatedContent => {
     // __ Filter related content by type

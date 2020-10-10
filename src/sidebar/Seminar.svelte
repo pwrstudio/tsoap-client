@@ -32,9 +32,13 @@
     )
   }
 
-  let seminar = loadData(QUERY.SEMINAR, { slug: slug }).catch(err => {
-    console.dir(err)
-  })
+  let seminar = loadData(QUERY.SEMINAR, { slug: slug })
+    .catch(err => {
+      console.dir(err)
+    })
+    .catch(err => {
+      console.log(err)
+    })
   let loadedParticipants = []
 
   seminar.then(seminar => {

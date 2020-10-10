@@ -31,6 +31,8 @@
   if (audioInstallation._id) {
     connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
       id: audioInstallation._id,
+    }).catch(err => {
+      console.log(err)
     })
   }
 

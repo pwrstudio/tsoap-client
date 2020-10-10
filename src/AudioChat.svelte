@@ -12,9 +12,11 @@
   import { onMount, onDestroy } from "svelte"
 
   // PROPS
+  export let user = {}
   export let userName = ""
   export let roomName = ""
   export let roomId = 4
+  console.dir(user)
 
   const dispatch = createEventDispatcher()
 
@@ -52,7 +54,7 @@
             janus.attach({
               plugin: "janus.plugin.audiobridge",
               opaqueId: opaqueId,
-              success: (pluginHandle) => {
+              success: pluginHandle => {
                 console.dir(pluginHandle)
                 mixertest = pluginHandle
                 Janus.log(
@@ -64,13 +66,13 @@
                 )
                 registerUsername()
               },
-              error: (error) => {
+              error: error => {
                 console.error("-- Error attaching plugin...", error)
               },
-              consentDialog: (on) => {
+              consentDialog: on => {
                 // console.log('consent dialog')
               },
-              iceState: (state) => {
+              iceState: state => {
                 // console.log("ICE state changed to " + state);
               },
               mediaState: (medium, on) => {
@@ -81,7 +83,7 @@
                     medium
                 )
               },
-              webrtcState: (on) => {
+              webrtcState: on => {
                 console.log(
                   "Janus says our WebRTC PeerConnection is " +
                     (on ? "up" : "down") +
@@ -114,7 +116,7 @@
                         // Publish our stream
                         mixertest.createOffer({
                           media: { video: false },
-                          success: (jsep) => {
+                          success: jsep => {
                             // console.log("Got SDP!", jsep);
                             var publish = {
                               request: "configure",
@@ -122,7 +124,7 @@
                             }
                             mixertest.send({ message: publish, jsep: jsep })
                           },
-                          error: (error) => {
+                          error: error => {
                             // console.error("WebRTC error:", error);
                           },
                         })
@@ -135,13 +137,13 @@
                   } else if (event === "talking") {
                     console.log("TALKING")
                     console.log(msg["id"])
-                    let index = userList.findIndex((u) => u.id === msg["id"])
+                    let index = userList.findIndex(u => u.id === msg["id"])
                     console.log(index)
                     userList[index].talking = true
                   } else if (event === "stopped-talking") {
                     console.log("STOPPED TALKING")
                     console.log(msg["id"])
-                    let index = userList.findIndex((u) => u.id === msg["id"])
+                    let index = userList.findIndex(u => u.id === msg["id"])
                     console.log(index)
                     userList[index].talking = false
                   } else if (event === "roomchanged") {
@@ -160,7 +162,7 @@
                     if (msg["leaving"]) {
                       Janus.log("Participant left: " + msg["leaving"] + ")")
                       let index = userList.findIndex(
-                        (u) => u.id === msg["leaving"]
+                        u => u.id === msg["leaving"]
                       )
                       console.log(index)
                       userList.splice(index, 1)
@@ -176,7 +178,7 @@
               // onlocalstream: stream => {
               // 	Janus.debug(" ::: Got a local stream :::", stream);
               // },
-              onremotestream: (stream) => {
+              onremotestream: stream => {
                 // console.log('remote stream recieved')
                 // console.dir(stream)
 
