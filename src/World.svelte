@@ -391,7 +391,6 @@
             sprite.visible = ms === "rest" ? true : false
             sprite.height = 60
             sprite.width = 60
-
             sprite.animationSpeed = ms === "rest" ? 0.02 : 0.1
             sprite.play()
             return sprite
@@ -1710,7 +1709,11 @@
               {mobileExpanded}
               on:submit={submitChat}
               on:teleport={e => {
-                teleportTo('blue')
+                if(localPlayers[$localUserSessionID].area === 5) {
+                  teleportTo('green')
+                } else {
+                  teleportTo('blue')
+                }
               }} />
           </div>
         </div>
@@ -1738,7 +1741,7 @@
 {/if}
 
 <!-- AUDIOCHAT BOX  -->
-{#if !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
+{#if $localUserAuthenticated && !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
   <div class="audiochat-box">
     <div class="message">
       Nearby audioroom
