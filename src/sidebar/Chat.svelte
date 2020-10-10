@@ -17,6 +17,8 @@
   // PROPS
   export let chatMessages = []
   export let currentArea = 4
+  export let mobile = false
+  export let mobileExpanded = false
 
   $: {
     // __ Scroll chat window to bottom on update
@@ -38,6 +40,9 @@
   .chat-container {
     position: relative;
     height: 100%;
+    @include screen-size("small") {
+      height: calc(100% - 50px);
+    }
   }
 
   .header {
@@ -47,7 +52,6 @@
     padding-top: 7px;
     padding-bottom: 7px;
     width: 100%;
-    background: $COLOR_DARK;
     color: $COLOR_LIGHT;
     border-bottom: 1px solid $COLOR_LIGHT;
     text-align: left;
@@ -61,12 +65,28 @@
     padding-bottom: 10px;
     padding-top: 10px;
     @include hide-scroll;
+
+    @include screen-size("small") {
+      height: 100%;
+      padding-bottom: 0;
+      padding-top: 0;
+      &.expanded {
+        padding-bottom: 10px;
+        padding-top: 10px;
+        height: calc(100% - 20px);
+      }
+    }
   }
 </style>
 
 <div class="chat-container">
-  <div class="header">You are in: {COLORMAP[currentArea]}</div>
-  <div class="message-container" bind:this={messageContainerEl}>
+  {#if mobile && mobileExpanded}
+    <div class="header">You are in: {COLORMAP[currentArea]}</div>
+  {/if}
+  <div
+    class="message-container"
+    class:expanded={mobileExpanded}
+    bind:this={messageContainerEl}>
     {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />
     {/each}

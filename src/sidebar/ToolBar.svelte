@@ -40,7 +40,7 @@
     height: 100%;
     padding-left: 7px;
     padding-right: 10px;
-    background: $COLOR_DARK;
+    // background: $COLOR_DARK;
     display: flex;
     align-items: center;
     user-select: none;
@@ -51,7 +51,7 @@
       float: left;
       width: calc(100% - 60px);
       display: block;
-      background: $COLOR_DARK;
+      background: transparent;
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_LIGHT;
       border-radius: 10px;
@@ -75,7 +75,7 @@
       width: 60px;
       float: right;
       display: block;
-      background: $COLOR_DARK;
+      background: transparent;
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_LIGHT;
       border-radius: 5px;
@@ -146,7 +146,7 @@
     <a
       href="/messages"
       class="toolbar-item"
-      class:active={section === 'messages'}>Messages(2)</a>
+      class:active={section === 'messages'}>Messages</a>
     <div class="toolbar-item" on:click={teleport}>Support</div>
   {:else}
     <!-- CHAT -->

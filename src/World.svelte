@@ -80,6 +80,7 @@
   let caseStudiesLoaded = false
   let intentToPickUp = false
   let inAudioZone = false
+  let mobileExpanded = false
   let miniImage = false
   let showWelcomeCard = false
   let localPlayers = {}
@@ -1358,6 +1359,40 @@
     z-index: 1000;
   }
 
+  .mobile-toolkit {
+    position: fixed;
+    bottom: 50px;
+    left: 0;
+    width: 100%;
+    height: 30vh;
+    z-index: 10;
+
+    &.expanded {
+      background: $COLOR_DARK;
+      height: calc(100vh - 130px);
+    }
+
+    .toolbar {
+      height: 50px;
+    }
+
+    .close {
+      position: fixed;
+      top: 67px;
+      right: 10px;
+      font-size: 38px;
+      color: $COLOR_MID_2;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.3s $transition;
+      z-index: 10000;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+
   .mobile-calendar {
     position: fixed;
     background: $COLOR_LIGHT;
@@ -1431,7 +1466,6 @@
                 {/if}
               {/each}
             {/if}
-            <!-- {/if} -->
             <!-- TOOLBAR-->
             <div class="toolbar">
               <ToolBar
@@ -1570,15 +1604,64 @@
 <MediaQuery query="(max-width: 800px)" let:matches>
   {#if matches}
     {#if localPlayers[$localUserSessionID]}
-      <!-- MOBILE MENU-->
-      <div class="mobile-menu" use:links>
-        <Menu />
-      </div>
       <!-- MOBILE CALENDAR-->
       <div class="mobile-calendar" use:links>
         {#await events then events}
           <EventList {events} />
         {/await}
+      </div>
+      <!-- MOBILE TOOLKIT -->
+      <div class="mobile-toolkit" 
+        use:links 
+        class:expanded={mobileExpanded} 
+        on:click={e => {
+          if(!mobileExpanded) {
+            mobileExpanded = true
+          }
+        }}>
+        {#if mobileExpanded }
+          <div
+            class="close"
+            on:click={e => {
+              mobileExpanded = false;
+              e.stopPropagation()
+            }}>
+            ×
+          </div>
+        {/if}
+        {#if section == 'seminar'}
+          <!-- SEMINAR -->
+          <Seminar {slug} mobile={true} {mobileExpanded}/>
+        {:else if section == 'messages'}
+          <!-- MESSAGES -->
+          <Messaging {slug} mobile={true} {mobileExpanded}/>
+        {:else}
+          <!-- CHAT -->
+          {#each Object.values(AREA) as A}
+            {#if localPlayers[$localUserSessionID].area === A}
+              <Chat
+                chatMessages={chatMessages.filter(m => m.area === A)}
+                currentArea={A}
+                mobile={true}
+                {mobileExpanded}/>
+            {/if}
+          {/each}
+        {/if}
+        <!-- TOOLBAR-->
+        <div class="toolbar">
+          <ToolBar
+            {section}
+            mobile={true}
+            {mobileExpanded}
+            on:submit={submitChat}
+            on:teleport={e => {
+              teleportTo('blue')
+            }} />
+        </div>
+      </div>
+      <!-- MOBILE MENU-->
+      <div class="mobile-menu" use:links>
+        <Menu />
       </div>
     {/if}
   {/if}
