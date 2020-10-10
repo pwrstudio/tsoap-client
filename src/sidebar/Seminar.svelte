@@ -20,6 +20,8 @@
 
   // PROPS
   export let slug = "test-seminar-1"
+  export let mobile = false
+  export let mobileExpanded = false
 
   // __ If there is no slug, show user's own seminar
   if (!slug || slug.length == 0) {
@@ -59,6 +61,10 @@
     height: 100%;
     font-size: $FONT_SIZE_SMALL;
 
+    @include screen-size("small") {
+      height: calc(100% - 40px);
+    }
+
     .header {
       font-size: $FONT_SIZE_SMALL;
       padding-left: 10px;
@@ -66,7 +72,7 @@
       padding-top: 7px;
       padding-bottom: 7px;
       width: 100%;
-      background: $COLOR_DARK;
+      background: transparent;
       color: $COLOR_LIGHT;
       border-bottom: 1px solid $COLOR_LIGHT;
       text-align: left;
@@ -78,8 +84,18 @@
       overflow-y: auto;
       padding: 10px;
       color: $COLOR_MID_2;
-
       @include hide-scroll;
+
+      @include screen-size("small") {
+        height: 100%;
+        padding-bottom: 0;
+        padding-top: 0;
+        &.expanded {
+          padding-bottom: 10px;
+          padding-top: 10px;
+          height: calc(100% - 20px);
+        }
+      }
     }
 
     .link {
@@ -108,7 +124,7 @@
 <div class="seminar-container">
   {#await seminar then seminar}
     <div class="header">{seminar.title}</div>
-    <div class="body-container">
+    <div class="body-container" class:expanded={mobileExpanded}>
       <!-- TEXT BLOCK #1 -->
       {#if Array.isArray(get(seminar, 'firstTextBlock.content', false)) && seminar.firstTextBlock.content.length > 0}
         <div class="text-block">

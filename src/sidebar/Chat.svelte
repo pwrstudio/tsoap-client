@@ -41,7 +41,7 @@
     position: relative;
     height: 100%;
     @include screen-size("small") {
-      height: calc(100% - 50px);
+      height: calc(100% - 40px);
     }
   }
 
@@ -59,10 +59,10 @@
 
   .message-container {
     width: 100%;
-    height: calc(100% - 30px);
+    height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-bottom: 10px;
+    // padding-bottom: 10px;
     padding-top: 10px;
     @include hide-scroll;
 

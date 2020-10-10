@@ -1130,7 +1130,7 @@
 
     @include screen-size("small") {
       top: unset;
-      bottom: 60px;
+      bottom: calc(25vh + 60px);
       left: unset;
       right: 10px;
       max-width: calc(100vw - 20px);
@@ -1364,16 +1364,19 @@
     bottom: 50px;
     left: 0;
     width: 100%;
-    height: 30vh;
+    height: 25vh;
     z-index: 10;
+
+    .toolbar {
+      height: 40px;
+    }
 
     &.expanded {
       background: $COLOR_DARK;
       height: calc(100vh - 130px);
-    }
-
-    .toolbar {
-      height: 50px;
+      .toolbar {
+        background: $COLOR_DARK;
+      }
     }
 
     .close {
@@ -1625,6 +1628,7 @@
             on:click={e => {
               mobileExpanded = false;
               e.stopPropagation()
+              navigate('/')
             }}>
             ×
           </div>
