@@ -8,6 +8,7 @@
   // *** IMPORTS
   import get from "lodash/get"
   import Fuse from "fuse.js"
+  import { renderBlockText } from "../sanity.js"
 
   // COMPONENTS
   import ParticipantsList from "./ParticipantsList.svelte"
@@ -15,6 +16,9 @@
   // *** PROPS
   export let caseStudies = []
   export let related = false
+
+  // *** STORES
+  import { globalSettings } from "../stores.js"
 
   // *** VARIABLES
   let filterTerm = ""
@@ -163,6 +167,10 @@
       }
     }
 
+    .description {
+      padding: 10px;
+    }
+
     .toolbar {
       width: 100%;
       display: flex;
@@ -229,8 +237,14 @@
     </div>
   </div>
 
-  <!-- TOOLBAR -->
   {#if !related}
+    <!-- TEXT -->
+    {#if Array.isArray(get($globalSettings, 'caseStudyOverview.content', false))}
+      <div class='description'>
+        {@html renderBlockText($globalSettings.caseStudyOverview.content)}
+      </div>
+    {/if}
+    <!-- TOOLBAR -->
     <div class="toolbar">
       <div class="sort">
         <div>Sort by:</div>

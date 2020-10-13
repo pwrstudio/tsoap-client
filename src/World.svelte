@@ -993,8 +993,6 @@
             const audioInstallationLocation = new PIXI.Container()
             audioInstallationLocation.addChild(frames)
 
-            console.log("ai", ai)
-
             // __ Either load stream URL or audio file
             if (ai.streamURL) {
               audioInstallationLocation.audio = new Howl({

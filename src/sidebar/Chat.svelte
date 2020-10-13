@@ -20,18 +20,18 @@
   export let mobile = false
   export let mobileExpanded = false
 
-  $: {
-    // __ Scroll chat window to bottom on update
-    if (chatMessages) {
-      setTimeout(() => {
-        messageContainerEl.scrollTo({
-          top: messageContainerEl.scrollHeight,
-          left: 0,
-          behavior: "smooth",
-        })
-      }, 100)
-    }
-  }
+  // $: {
+  //   // __ Scroll chat window to bottom on update
+  //   if (chatMessages) {
+  //     setTimeout(() => {
+  //       messageContainerEl.scrollTo({
+  //         top: messageContainerEl.scrollHeight,
+  //         left: 0,
+  //         behavior: "smooth",
+  //       })
+  //     }, 100)
+  //   }
+  // }
 </script>
 
 <style lang="scss">
