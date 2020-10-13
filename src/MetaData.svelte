@@ -44,15 +44,27 @@
   }
 
   $: {
-    description =
+    if (
+      has(post, "biography.content") &&
+      isArray(post.biography.content) &&
+      !isEmpty(post.biography.content)
+    ) {
+      description = truncate(toPlainText(post.biography.content), {
+        length: 260,
+        separator: /.? +/,
+      })
+    } else if (
       has(post, "content.content") &&
       isArray(post.content.content) &&
       !isEmpty(post.content.content)
-        ? truncate(toPlainText(post.content.content), {
-            length: 260,
-            separator: /.? +/,
-          })
-        : $globalSettings.siteDescription
+    ) {
+      description = truncate(toPlainText(post.content.content), {
+        length: 260,
+        separator: /.? +/,
+      })
+    } else {
+      description = $globalSettings.siteDescription
+    }
   }
 
   $: {
