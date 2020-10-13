@@ -56,6 +56,7 @@
     QUERY,
     AREA,
     TEXT_STYLE_AVATAR,
+    TEXT_STYLE_AVATAR_AUTHENTICATED,
     TEXT_STYLE_CASE_STUDY,
   } from "./global.js"
 
@@ -399,7 +400,7 @@
           // __ Name graphics (shown on hover)
           const textSprite = new PIXI.Text(
             playerOptions.name,
-            TEXT_STYLE_AVATAR
+            playerOptions.authenticated ? TEXT_STYLE_AVATAR_AUTHENTICATED : TEXT_STYLE_AVATAR
           )
           const txtBG = new PIXI.Sprite(PIXI.Texture.WHITE)
           txtBG.width = textSprite.width + 10
@@ -819,7 +820,7 @@
               }
 
               const onEnter = () => {
-                gameContainer.style.cursor = "grab"
+                gameContainer.style.cursor = "pointer"
                 textContainer.y =
                   container.y + container.height / 2 - textContainer.height / 2
                 textContainer.x =

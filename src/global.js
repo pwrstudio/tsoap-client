@@ -61,6 +61,15 @@ export const TEXT_STYLE_AVATAR = {
   fontFamily: "IBM Plex Mono",
   fontSize: 13,
   align: "center",
+  fill: "#999999",
+  wordWrap: true,
+  wordWrapWidth: 300,
+}
+
+export const TEXT_STYLE_AVATAR_AUTHENTICATED = {
+  fontFamily: "IBM Plex Mono",
+  fontSize: 13,
+  align: "center",
   fill: "black",
   wordWrap: true,
   wordWrapWidth: 300,
