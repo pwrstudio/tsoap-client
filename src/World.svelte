@@ -257,7 +257,7 @@
       )
       // Check if user is within range of audio installation
       if (dist < a.radius) {
-        if (!a.audio.playing()) {
+        if (!a.audio.playing() && !a.noAutoplay) {
           a.audio.play()
           inAudioZone = a.slug
         }
@@ -993,6 +993,8 @@
             const audioInstallationLocation = new PIXI.Container()
             audioInstallationLocation.addChild(frames)
 
+            console.log("ai", ai)
+
             // __ Either load stream URL or audio file
             if (ai.streamURL) {
               audioInstallationLocation.audio = new Howl({
@@ -1014,6 +1016,7 @@
             audioInstallationLocation.pivot.y =
               audioInstallationLocation.height / 2
             audioInstallationLocation.title = ai.title
+            audioInstallationLocation.noAutoplay = ai.noAutoplay
             audioInstallationLocation.slug = get(ai, "slug.current")
             audioInstallationLocation.radius = ai.radius || 400
             audioInstallationLocation.interactive = false
