@@ -55,6 +55,8 @@ export const QUERY = {
     "*[_id == 'active-streams']{..., mainStream->{..., participants[]->{slug,name,username}}}[0]",
   WELCOME_CARD: "*[_id == 'welcome-card'][0]",
   CONNECTED_TO_USER: "*[participants[]._ref == $id]{...,participants[]->{...}}",
+  GLOBAL_SETTINGS: "*[_id == 'global-settings'][0]",
+
 }
 
 export const TEXT_STYLE_AVATAR = {

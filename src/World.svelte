@@ -46,6 +46,7 @@
   // ...
   import AudioChat from "./AudioChat.svelte"
   import InventoryMessage from "./InventoryMessage.svelte"
+  import MetaData from "./MetaData.svelte"
 
   // *** GLOBAL
   import {
@@ -66,6 +67,7 @@
     localUserSessionID,
     localUserAuthenticated,
     authenticatedUserInformation,
+    globalSettings,
   } from "./stores.js"
 
   // *** PROPS
@@ -164,6 +166,15 @@
     console.log(err)
   })
 
+  loadData(QUERY.GLOBAL_SETTINGS)
+    .then(gS => {
+      // console.log("globalSettings", gS)
+      globalSettings.set(gS)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+
   // __ Listen for changes to the active streams post
   let activeStreams = loadData(QUERY.ACTIVE_STREAMS).catch(err => {
     console.log(err)
@@ -175,8 +186,12 @@
     setTimeout(() => {
       activeStreams = loadData(QUERY.ACTIVE_STREAMS)
         .then(aS => {
-          activeContentClosed = false
-          currentStream = aS.mainStream
+          if (aS.mainStream) {
+            currentStream = aS.mainStream
+            activeContentClosed = false
+          } else {
+            currentStream = false
+          }
         })
         .catch(err => {
           console.log(err)
@@ -400,7 +415,9 @@
           // __ Name graphics (shown on hover)
           const textSprite = new PIXI.Text(
             playerOptions.name,
-            playerOptions.authenticated ? TEXT_STYLE_AVATAR_AUTHENTICATED : TEXT_STYLE_AVATAR
+            playerOptions.authenticated
+              ? TEXT_STYLE_AVATAR_AUTHENTICATED
+              : TEXT_STYLE_AVATAR
           )
           const txtBG = new PIXI.Sprite(PIXI.Texture.WHITE)
           txtBG.width = textSprite.width + 10
@@ -1464,6 +1481,12 @@
     padding-top: 20px;
   }
 </style>
+
+<!-- <MetaData /> -->
+<!-- Show default if not in special section -->
+{#if !['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}
+  <MetaData />
+{/if}
 
 <!-- SIDEBAR -->
 <!-- Show on desktop only -->

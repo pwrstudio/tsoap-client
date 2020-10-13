@@ -11,10 +11,11 @@
   import { renderBlockText } from "../sanity.js"
   import { links } from "svelte-routing"
 
-  // COMPONENTS
+  // *** COMPONENTS
   import ParticipantsList from "../lists/ParticipantsList.svelte"
   import EventList from "../lists/EventList.svelte"
   import MaterialItem from "./MaterialItem.svelte"
+  import MetaData from "../MetaData.svelte"
 
   // *** PROPS
   export let caseStudy = {}
@@ -158,6 +159,9 @@
     }
   }
 </style>
+
+<!-- METADATA -->
+<MetaData post={caseStudy}/>
 
 <div class="case-study-single" in:fade use:links>
   <!-- HEADER -->

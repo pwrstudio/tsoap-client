@@ -5,3 +5,5 @@ export const localUserUUID = writable("")
 export const localUserSessionID = writable("")
 export const localUserAuthenticated = writable(false)
 export const authenticatedUserInformation = writable({})
+export const globalSettings = writable({})
+

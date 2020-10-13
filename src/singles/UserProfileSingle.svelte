@@ -17,6 +17,7 @@
   // COMPONENTS
   import EventList from "../lists/EventList.svelte"
   import CaseStudyList from "../lists/CaseStudyList.svelte"
+  import MetaData from "../MetaData.svelte"
 
   // *** STORES
   import { localUserAuthenticated } from "../stores"
@@ -101,6 +102,9 @@
     }
   }
 </style>
+
+<!-- METADATA -->
+<MetaData post={user}/>
 
 <div class="user-profile-single" in:fade use:links>
   <!-- BACK LINK -->

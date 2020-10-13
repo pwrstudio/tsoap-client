@@ -14,6 +14,7 @@
   // COMPONENTS
   import ParticipantsList from "../../lists/ParticipantsList.svelte"
   import CaseStudyList from "../../lists/CaseStudyList.svelte"
+  import MetaData from "../../MetaData.svelte"
 
   // GLOBAL
   import { formattedDate } from "../../global.js"
@@ -93,6 +94,9 @@
     }
   }
 </style>
+
+<!-- METADATA -->
+<MetaData post={event}/>
 
 <div class="event-single" in:fade use:links>
   <!-- BACK LINK -->

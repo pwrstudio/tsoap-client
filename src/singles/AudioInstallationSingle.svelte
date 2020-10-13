@@ -16,6 +16,7 @@
   // COMPONENTS
   import ParticipantsList from "../lists/ParticipantsList.svelte"
   import CaseStudyList from "../lists/CaseStudyList.svelte"
+  import MetaData from "../MetaData.svelte"
 
   // GLOBAL
   import { QUERY } from "../global.js"
@@ -132,6 +133,9 @@
     }
   }
 </style>
+
+<!-- METADATA -->
+<MetaData post={audioInstallation}/>
 
 <div class="audio-single" in:fade use:links>
   {#if audioInstallation.title}

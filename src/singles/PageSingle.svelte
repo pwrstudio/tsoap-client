@@ -11,6 +11,9 @@
   import { renderBlockText } from "../sanity.js"
   import { links } from "svelte-routing"
 
+  // *** COMPONENTS
+  import MetaData from "../MetaData.svelte"
+
   // *** PROPS
   export let page = {}
 </script>
@@ -56,6 +59,9 @@
     }
   }
 </style>
+
+<!-- METADATA -->
+<MetaData post={page}/>
 
 <div class="page-single" in:fade use:links>
   <!-- HEADER -->
