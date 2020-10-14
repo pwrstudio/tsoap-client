@@ -116,6 +116,8 @@
         border-radius: 10px;
         padding: 10px;
         text-decoration: none;
+        float: left;
+        margin-right: 10px;
 
         &:hover {
           border: 1px solid $COLOR_LIGHT;
@@ -127,33 +129,27 @@
 
 <div class="seminar-container">
   {#await seminar then seminar}
-    <div class="header">{seminar.title}</div>
-    <div class="body-container" class:expanded={mobileExpanded}>
-      <!-- TEXT BLOCK #1 -->
-      {#if Array.isArray(get(seminar, 'firstTextBlock.content', false)) && seminar.firstTextBlock.content.length > 0}
+    {#if seminar}
+      <div class="header">{seminar.title}</div>
+      <div class="body-container" class:expanded={mobileExpanded}>
+        <!-- TEXT BLOCK #1 -->
+        {#if Array.isArray(get(seminar, 'firstTextBlock.content', false)) && seminar.firstTextBlock.content.length > 0}
         <div class="text-block">
           {@html renderBlockText(seminar.firstTextBlock.content)}
         </div>
       {/if}
-      <!-- LINK: MORE INFORMATION -->
-      <div class="link">
-        <a href={seminar.moreInformationLink} target="_blank">More information</a>
+        <div class="link">
+          <!-- LINK: MORE INFORMATION -->
+          <a href={seminar.moreInformationLink} target="_blank">More information</a>
+          <!-- LINK: BIG BLUE BUTTON -->
+          <a href={seminar.bbbLink} target="_blank">Join on BigBlueButton</a>
         </div>
-      <!-- TEXT BLOCK #2 -->
-      {#if Array.isArray(get(seminar, 'secondTextBlock.content', false)) && seminar.secondTextBlock.content.length > 0}
-        <div class="text-block">
-          {@html renderBlockText(seminar.secondTextBlock.content)}
-        </div>
-      {/if}
-      <!-- LINK: BIG BLUE BUTTON -->
-      <div class="link">
-        <a href={seminar.bbbLink} target="_blank">Join on BigBlueButton</a>
-        </div>
-      <!-- PARTICIPANTS LIST -->
-      <div class="participants-list">
+        <!-- PARTICIPANTS LIST -->
+        <div class="participants-list">
           <div>Participants in seminar:</div>
           <ParticipantsList participants={loadedParticipants} messaging={true}/>
         </div>
-    </div>
+      </div>
+    {/if}
   {/await}
 </div>

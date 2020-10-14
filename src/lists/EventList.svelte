@@ -184,7 +184,7 @@
     <div class="inner">
       <div class="row">
         <div>{related ? 'Related Events' : 'Events'}</div>
-        <div class="archive-link">{related ? 'View All' : 'Event Archive'}</div>
+        <a href='/events' class="archive-link">{related ? 'View All' : 'Event Archive'}</a>
       </div>
     </div>
   </div>

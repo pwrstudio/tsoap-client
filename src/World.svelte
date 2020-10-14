@@ -56,6 +56,9 @@
     TINTMAP,
     QUERY,
     AREA,
+    TEXT_ROOMS,
+    VIDEO_ROOMS,
+    AUDIO_ROOMS,
     TEXT_STYLE_AVATAR,
     TEXT_STYLE_AVATAR_AUTHENTICATED,
     TEXT_STYLE_CASE_STUDY,
@@ -68,6 +71,11 @@
     localUserAuthenticated,
     authenticatedUserInformation,
     globalSettings,
+    areaList,
+    currentArea,
+    currentTextRoom,
+    currentAudioRoom,
+    currentVideoRoom,
   } from "./stores.js"
 
   // *** PROPS
@@ -170,6 +178,15 @@
     .then(gS => {
       // console.log("globalSettings", gS)
       globalSettings.set(gS)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+
+  loadData(QUERY.AREAS)
+    .then(areas => {
+      console.log("areas", areas)
+      areaList.set(areas)
     })
     .catch(err => {
       console.log(err)
@@ -303,6 +320,8 @@
             localPlayers[key].avatar.y = step.y
             localPlayers[key].area = step.area
             if (key === $localUserSessionID && moveQ[key].length % 10 === 0) {
+              // Set current area for users
+              currentArea.set(localPlayers[$localUserSessionID].area)
               // Check proximity to audio installations every 10th step
               checkAudioProximity()
             }
@@ -507,6 +526,7 @@
               acceleration: 400,
             })
             localUserSessionID.set(player.id)
+            // __ Uncomment this line to show the accredited user toolkit while developing...
             // localUserAuthenticated.set(true)
 
             // __ Set cookie if user is successfully authenticated
@@ -524,12 +544,9 @@
                 })
               // __ Navigate based on URL paramters passed
               // __ before going through authenticateion
-              // console.log("returnSection", returnSection)
-              // console.log("returnSlug", returnSlug)
               let returnPath = "/"
               returnPath += returnSection ? returnSection : ""
               returnPath += returnSlug ? "/" + returnSlug : ""
-              // console.log("returnPath", returnPath)
               navigate(returnPath)
             }
             // __ Loading is done
@@ -650,21 +667,16 @@
                 localPlayers[sessionId].area = player.area
                 localPlayers[sessionId].avatar.x = player.x
                 localPlayers[sessionId].avatar.y = player.y
+                if ($localUserSessionID === sessionId) {
+                  currentArea.set(localPlayers[sessionId].area)
+                }
               }
             }
 
             // PLAYER => CLICK / TAP
             viewport.on("clicked", e => {
-              // console.log("____ VIEWPORT")
-              // console.dir(viewport)
-              // console.log("--- clicked")
-              // console.dir(e)
               // __ Cancel current movement
               delete moveQ[$localUserSessionID]
-
-              // console.log("__ CLICK X", Math.round(e.world.x))
-              // console.log("__ CLICK Y", Math.round(e.world.y))
-
               hideTarget()
               // __ Start new movement
               const targetX = Math.round(e.world.x)
@@ -680,13 +692,8 @@
 
             // PLAYER => TOUCH END
             viewport.on("touchend", e => {
-              // console.log("--- touchend")
-              // console.dir(e)
-              // console.log("__ GLOBAL X", Math.round(e.data.global.x))
-              // console.log("__ GLOBAL Y", Math.round(e.data.global.y))
-
+              // __ Convert screen coordinates to world coordinates
               const world = viewport.toWorld(e.data.global.x, e.data.global.y)
-
               // __ Cancel current movement
               delete moveQ[$localUserSessionID]
               hideTarget()
@@ -704,6 +711,9 @@
 
             // PLAYER => TELEPORT
             teleportTo = area => {
+              // __ Cancel current movement
+              delete moveQ[$localUserSessionID]
+              hideTarget()
               gameRoom.send("teleport", {
                 area: area,
               })
@@ -737,8 +747,11 @@
                   msgId: nanoid(),
                   uuid: $localUserUUID,
                   name: localPlayers[$localUserSessionID].name,
+                  username: localPlayers[$localUserSessionID].discourseName,
+                  authenticated:
+                    localPlayers[$localUserSessionID].authenticated,
                   text: event.detail.text,
-                  area: localPlayers[$localUserSessionID].area,
+                  room: $currentTextRoom,
                   tint: localPlayers[$localUserSessionID].tint,
                 })
               } catch (err) {
@@ -882,7 +895,7 @@
               if (g) {
                 // __ Darken color one step
                 g.children[0].tint = TINTMAP[caseStudy.age - 1]
-                // __ Update position of not currently in a user's inventory
+                // __ Update position if not currently in a user's inventory
                 if (caseStudy.carriedBy === "") {
                   g.x = caseStudy.x
                   g.y = caseStudy.y
@@ -893,9 +906,9 @@
               }
             }
 
-            // ************
-            // GENERAL ERROR
-            // ************
+            // ************************
+            // GENERAL ERROR HANDELING
+            // ************************
             gameRoom.onError((code, message) => {
               setUIState(STATE.ERROR, message)
               console.error("Gameserver error:", message)
@@ -1535,11 +1548,11 @@
               <Messaging {slug} />
             {:else}
               <!-- CHAT -->
-              {#each Object.values(AREA) as A}
-                {#if localPlayers[$localUserSessionID].area === A}
+              {#each TEXT_ROOMS as TR}
+                {#if $currentTextRoom === TR}
                   <Chat
-                    chatMessages={chatMessages.filter(m => m.area === A)}
-                    currentArea={A} />
+                    chatMessages={chatMessages.filter(m => m.room === TR)}
+                    currentRoom={TR} />
                 {/if}
               {/each}
             {/if}
@@ -1549,7 +1562,10 @@
                 {section}
                 on:submit={submitChat}
                 on:teleport={e => {
-                  teleportTo('blue')
+                  // __ Cancel current movement
+                  delete moveQ[$localUserSessionID]
+                  hideTarget()
+                  teleportTo($currentArea === 5 ? 'green' : 'blue')
                 }} />
             </div>
           </div>
@@ -1599,7 +1615,7 @@
   <!-- LIVE -->
   {#await activeStreams then activeStreams}
     <!-- MAIN AREA -->
-    {#if localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area == 4 && currentStream && !activeContentClosed}
+    {#if $currentVideoRoom == 'main' && currentStream && !activeContentClosed}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
@@ -1613,7 +1629,7 @@
       </div>
     {/if}
     <!-- SUPPORT AREA -->
-    {#if localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area == 5 && activeStreams.supportStream}
+    {#if $currentVideoRoom == 'support' && activeStreams.supportStream}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
@@ -1627,7 +1643,6 @@
       </div>
     {/if}
   {/await}
-
 
   <!-- TEXT CONTENT -->
   {#if ['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}
@@ -1660,9 +1675,12 @@
       {/await}
       <!-- EVENTS -->
       {#await events then events}
-        {#if section === 'events' && slug}
-          <!-- SINGLE EVENT -->
-          <EventSingle event={events.find(ev => ev.slug.current === slug)} />
+        {#if slug}
+         <!-- SINGLE EVENT -->
+         <EventSingle event={events.find(ev => ev.slug.current === slug)} />
+        {:else}
+          <!-- LIST EVENTS -->
+          <EventList {events} />
         {/if}
       {/await}
       <!-- PAGES -->
@@ -1770,7 +1788,7 @@
   <div class="audiochat-box">
     <div class="message">
       Nearby audioroom
-      <strong>{COLORMAP[localPlayers[$localUserSessionID].area]}</strong>
+      <strong>{$currentAudioRoom}</strong>
     </div>
     <div
       class="button"
@@ -1787,8 +1805,8 @@
   <AudioChat
     user={localPlayers[$localUserSessionID]}
     userName={localPlayers[$localUserSessionID].name}
-    roomName={COLORMAP[localPlayers[$localUserSessionID].area]}
-    roomId={localPlayers[$localUserSessionID].area}
+    roomName={$currentAudioRoom}
+    roomId={$currentAudioRoom}
     on:close={e => {
       audioChatActive = false;
     }} />

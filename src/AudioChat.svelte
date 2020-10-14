@@ -6,7 +6,6 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
-  import get from "lodash/get"
   import { fade } from "svelte/transition"
   import { createEventDispatcher } from "svelte"
   import { onMount, onDestroy } from "svelte"
