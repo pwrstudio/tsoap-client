@@ -185,7 +185,7 @@
 
   loadData(QUERY.AREAS)
     .then(areas => {
-      console.log("areas", areas)
+      // console.log("areas", areas)
       areaList.set(areas)
     })
     .catch(err => {
@@ -498,10 +498,6 @@
             if (player.authenticated) {
               gameContainer.style.cursor = "pointer"
             }
-            // console.log("___ textContainer.width", textContainer.width)
-            // console.log("___ textContainer.height", textContainer.height)
-            // console.log("___ avatar.width", avatar.width)
-            // console.log("___ avatar.height", avatar.height)
             textContainer.y = 30 - textContainer.height / 2
             textContainer.x = -(textContainer.width / 2) + 30
             avatar.addChild(textContainer)
@@ -726,7 +722,6 @@
             // MESSAGE => ADD
             gameRoom.state.messages.onAdd = message => {
               chatMessages = [...chatMessages, message]
-              console.dir(message)
               if ($localUserUUID == message.uuid) {
                 const messageContainerEl = document.querySelector(
                   "#message-container"
@@ -1687,12 +1682,14 @@
       {/await}
       <!-- EVENTS -->
       {#await events then events}
-        {#if slug}
-         <!-- SINGLE EVENT -->
-         <EventSingle event={events.find(ev => ev.slug.current === slug)} />
-        {:else}
-          <!-- LIST EVENTS -->
-          <EventList {events} />
+        {#if section === 'events'}
+          {#if slug}
+          <!-- SINGLE EVENT -->
+          <EventSingle event={events.find(ev => ev.slug.current === slug)} />
+          {:else}
+            <!-- LIST EVENTS -->
+            <EventList {events} />
+          {/if}
         {/if}
       {/await}
       <!-- PAGES -->

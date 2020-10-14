@@ -17,9 +17,6 @@
 
   // *** STORES
   import { localUserAuthenticated } from "../stores"
-
-  console.log("____ message")
-  console.dir(message)
 </script>
 
 <style lang="scss">

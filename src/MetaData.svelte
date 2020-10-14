@@ -20,9 +20,6 @@
   // *** PROPS
   export let post = {}
 
-  console.log("_____ METADATA")
-  console.dir(post)
-
   const stripHtml = html => {
     let tmp = document.createElement("DIV")
     tmp.innerHTML = html
