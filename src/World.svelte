@@ -77,6 +77,7 @@
     currentTextRoom,
     currentAudioRoom,
     currentVideoRoom,
+    currentAreaObject,
   } from "./stores.js"
 
   // *** PROPS
@@ -1502,6 +1503,14 @@
     padding: 10px;
     padding-top: 20px;
   }
+
+  .debug {
+    position: fixed;
+    bottom: 10px;
+    right: 420px;
+    padding: 10px;
+    font-size: 7px;
+  }
 </style>
 
 <!-- <MetaData /> -->
@@ -1830,4 +1839,16 @@
 <!-- ERROR -->
 {#if UI.state == STATE.ERROR}
   <Error message={UI.errorMessage} />
+{/if}
+
+{#if $currentAreaObject}
+  <div class="debug" style={'background-color:' + $currentAreaObject.color}>
+    <strong>{$currentAreaObject.title}</strong>
+    / video:
+    {$currentAreaObject.videoRoom}
+    / audio:
+    {$currentAreaObject.audioRoom}
+    / text:
+    {$currentAreaObject.textRoom}
+  </div>
 {/if}
