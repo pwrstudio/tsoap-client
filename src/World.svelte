@@ -554,12 +554,12 @@
           return player
         }
 
+        console.log("___YYY RANDOM")
+        console.dir(activeAvatars)
         // __ Get a random avatar
-        const randomAvatar = sample(Object.keys(avatarSpritesheets))
+        const randomAvatar = sample(activeAvatars.filter(a => !a.notRandom))
 
-        const name = graphicsSettings.activeAvatars.find(
-          a => a._id === randomAvatar
-        ).title
+        console.log(randomAvatar)
 
         let playerObject = {}
 
@@ -568,14 +568,13 @@
             sso: sso,
             sig: sig,
             uuid: $localUserUUID,
-            avatar: randomAvatar,
             tint: "0xffff00",
           }
         } else {
           playerObject = {
             uuid: $localUserUUID,
-            name: name,
-            avatar: randomAvatar,
+            name: randomAvatar.title,
+            avatar: randomAvatar._id,
             tint: "0xff0000",
           }
         }
@@ -1509,7 +1508,7 @@
     bottom: 10px;
     right: 420px;
     padding: 10px;
-    font-size: 7px;
+    font-size: 8px;
   }
 </style>
 
