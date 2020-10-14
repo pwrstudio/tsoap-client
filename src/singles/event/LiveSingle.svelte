@@ -59,6 +59,7 @@
         color: $COLOR_MID_2;
         opacity: 0.4;
         cursor: pointer;
+        transition: opacity 0.3s $transition;
         // svg {
         //   color: $COLOR_MID_2;
         //   path {
@@ -67,7 +68,7 @@
         // }
 
         &:hover {
-          opacity: 1;
+          opacity: 0.7;
         }
       }
 

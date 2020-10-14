@@ -1381,13 +1381,13 @@
       .close {
         margin-bottom: 20px;
         position: absolute;
-        top: -10px;
+        top: -6px;
         right: 10px;
         font-size: 38px;
         color: $COLOR_MID_2;
         cursor: pointer;
         text-decoration: none;
-        transition: transform 0.3s $transition;
+        transition: color 0.3s $transition;
         z-index: 10000;
 
         @include screen-size("small") {
@@ -1400,7 +1400,8 @@
         }
 
         &:hover {
-          transform: scale(1.1);
+          // transform: scale(1.1);
+          color:$COLOR_MID_3;
         }
       }
 
