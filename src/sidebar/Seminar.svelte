@@ -103,17 +103,14 @@
     }
 
     .link {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 10px;
-      margin-bottom: 10px;
+      margin-top: 20px;
+      margin-bottom: 20px;
       user-select: none;
 
       a {
         color: $COLOR_LIGHT;
         border: 1px solid $COLOR_MID_2;
-        border-radius: 10px;
+        border-radius: 20px;
         padding: 10px;
         text-decoration: none;
         float: left;
