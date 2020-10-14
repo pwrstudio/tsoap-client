@@ -32,6 +32,7 @@
   import Messaging from "./sidebar/Messaging.svelte"
   // lists
   import EventList from "./lists/EventList.svelte"
+  import EventListFull from "./lists/EventListFull.svelte"
   import CaseStudyList from "./lists/CaseStudyList.svelte"
   // singles
   import CaseStudySingle from "./singles/CaseStudySingle.svelte"
@@ -1684,11 +1685,11 @@
       {#await events then events}
         {#if section === 'events'}
           {#if slug}
-          <!-- SINGLE EVENT -->
-          <EventSingle event={events.find(ev => ev.slug.current === slug)} />
+            <!-- SINGLE EVENT -->
+            <EventSingle event={events.find(ev => ev.slug.current === slug)} />
           {:else}
             <!-- LIST EVENTS -->
-            <EventList {events} />
+            <EventListFull {events} />
           {/if}
         {/if}
       {/await}

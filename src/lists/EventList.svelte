@@ -1,7 +1,7 @@
 <script>
   // # # # # # # # # # # # # #
   //
-  //  Event List
+  //  EVENT LIST
   //
   // # # # # # # # # # # # # #
 
