@@ -726,6 +726,21 @@
             // MESSAGE => ADD
             gameRoom.state.messages.onAdd = message => {
               chatMessages = [...chatMessages, message]
+              console.dir(message)
+              if ($localUserUUID == message.uuid) {
+                const messageContainerEl = document.querySelector(
+                  "#message-container"
+                )
+                if (messageContainerEl) {
+                  setTimeout(() => {
+                    messageContainerEl.scrollTo({
+                      top: messageContainerEl.scrollHeight,
+                      left: 0,
+                      behavious: "smooth",
+                    })
+                  }, 200)
+                }
+              }
             }
 
             // MESSAGE => REMOVE
@@ -1410,7 +1425,7 @@
 
         &:hover {
           // transform: scale(1.1);
-          color:$COLOR_MID_3;
+          color: $COLOR_MID_3;
         }
       }
 

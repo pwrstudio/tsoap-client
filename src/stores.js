@@ -16,8 +16,6 @@ export const globalSettings = writable({})
 export const areaList = writable({})
 export const currentArea = writable(4)
 
-// export const AREA = { YELLOW: 2, RED: 3, GREEN: 4, BLUE: 5, MAGENTA: 6, CYAN: 7, PURPLE: 8, TEAL: 9 }
-
 export const currentAreaObject = derived(
     [currentArea, areaList ],
     ([$currentArea, $areaList]) => {
@@ -37,7 +35,7 @@ export const currentAreaObject = derived(
   export const currentAudioRoom = derived(
     [currentAreaObject],
     ([$currentAreaObject]) => {
-        if($currentAreaObject.audioRoom) {
+        if($currentAreaObject) {
             console.log('___ $currentAudioRoom', parseInt(get($currentAreaObject, 'audioRoom', "1")))
             return parseInt(get($currentAreaObject, 'audioRoom', "1"))
         } else {
@@ -49,7 +47,7 @@ export const currentAreaObject = derived(
   export const currentTextRoom = derived(
     [currentAreaObject],
     ([$currentAreaObject]) => {
-        if($currentAreaObject.textRoom) {
+        if($currentAreaObject) {
             console.log('___ $currentTextRoom', parseInt(get($currentAreaObject, 'textRoom', "2")))
             return parseInt(get($currentAreaObject, 'textRoom', "2"))
         } else {
@@ -61,7 +59,7 @@ export const currentAreaObject = derived(
   export const currentVideoRoom = derived(
     [currentAreaObject],
     ([$currentAreaObject]) => {
-        if($currentAreaObject.videoRoom) {
+        if($currentAreaObject) {
             console.log('___ $currentVideoRoom', get($currentAreaObject, 'videoRoom', "none"))
             return get($currentAreaObject, 'videoRoom', "none")
         } else {

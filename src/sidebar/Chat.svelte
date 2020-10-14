@@ -81,6 +81,7 @@
     <div class="header">You are in: {currentRoom}</div>
   {/if}
   <div
+    id="message-container"
     class="message-container"
     class:expanded={mobileExpanded}
     bind:this={messageContainerEl}>
