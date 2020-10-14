@@ -489,7 +489,7 @@
           }
 
           const onLeave = () => {
-            gameContainer.style.cursor = "default"
+            gameContainer.style.cursor = "crosshair"
             avatar.removeChild(textContainer)
           }
 
@@ -846,7 +846,7 @@
               }
 
               const onLeave = e => {
-                gameContainer.style.cursor = "default"
+                gameContainer.style.cursor = "crosshair"
                 playerLayer.removeChild(textContainer)
               }
 
@@ -963,7 +963,7 @@
               }
 
               const onLeave = e => {
-                gameContainer.style.cursor = "default"
+                gameContainer.style.cursor = "crosshair"
                 caseStudyLocation.removeChild(textContainer)
               }
 
