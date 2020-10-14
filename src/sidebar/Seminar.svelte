@@ -106,6 +106,7 @@
       margin-top: 20px;
       margin-bottom: 20px;
       user-select: none;
+      display: inline-block;
 
       a {
         color: $COLOR_LIGHT;
