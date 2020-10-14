@@ -32,6 +32,14 @@
       svg {
         path {
           fill: $COLOR_MID_2;
+          transition: fill 0.3s $transition;
+        }
+      }
+      &:hover {
+        svg {
+          path {
+            fill: $COLOR_MID_3;
+          }
         }
       }
     }
