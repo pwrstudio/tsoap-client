@@ -52,8 +52,8 @@
 
   .user-profile-single {
     .go-back {
-      padding-top: 5px;
-      padding-left: 10px;
+      padding-top: $SPACE_S;
+      padding-left: $SPACE_S;
       cursor: pointer;
       svg {
         path {
@@ -71,7 +71,7 @@
     }
 
     .main-header {
-      padding: 15px;
+      padding: $SPACE_M;
 
       .title {
         font-family: $SANS_STACK;
@@ -95,11 +95,11 @@
     @include text;
 
     .related-events {
-      padding: 15px;
+      padding: $SPACE_M;
     }
 
     .connected-case-studies {
-      padding: 15px;
+      padding: $SPACE_M;
       padding-top: 0;
     }
   }

@@ -30,8 +30,8 @@
 
   .event-single {
     .go-back {
-      padding-top: 5px;
-      padding-left: 10px;
+      padding-top: $SPACE_XS;
+      padding-left: $SPACE_S;
       cursor: pointer;
       svg {
         path {
@@ -49,7 +49,7 @@
     }
 
     .main-header {
-      padding: 15px;
+      padding: $SPACE_M;
 
       .title {
         font-family: $SANS_STACK;
@@ -71,7 +71,7 @@
     }
 
     .date {
-      padding: 15px;
+      padding: $SPACE_M;
       text-align: center;
       font-weight: 500;
       font-family: $SANS_STACK;
@@ -79,8 +79,8 @@
 
     .image {
       width: 100%;
-      padding-top: 15px;
-      padding-bottom: 15px;
+      padding-top: $SPACE_M;
+      padding-bottom: $SPACE_M;
 
       img {
         width: 100%;
@@ -92,7 +92,7 @@
     @include text;
 
     .connected-case-studies {
-      padding: 15px;
+      padding: $SPACE_M;
     }
   }
 </style>

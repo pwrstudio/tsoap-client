@@ -31,8 +31,8 @@
   @import "../variables.scss";
 
   .new-message {
-    margin-bottom: 5px;
-    padding-bottom: 5px;
+    margin-bottom: $SPACE_XS;
+    padding-bottom: $SPACE_XS;
     color: $COLOR_LIGHT;
     font-size: $FONT_SIZE_SMALL;
     user-select: none;
@@ -40,9 +40,9 @@
     .header {
       cursor: pointer;
       border: 1px solid $COLOR_MID_2;
-      padding: 5px;
-      padding-right: 10px;
-      padding-left: 10px;
+      padding: $SPACE_XS;
+      padding-right: $SPACE_S;
+      padding-left: $SPACE_S;
       border-radius: 5px;
       width: auto;
       display: inline-block;
@@ -55,14 +55,14 @@
     }
 
     .inner {
-      padding-bottom: 10px;
-      margin-top: 10px;
+      padding-bottom: $SPACE_S;
+      margin-top: $SPACE_S;
       border-bottom: 1px solid $COLOR_MID_2;
 
       .row {
         display: inline-block;
         width: 100%;
-        margin-bottom: 5px;
+        margin-bottom: $SPACE_XS;
       }
 
       .label {
@@ -80,10 +80,10 @@
         border: 1px solid $COLOR_MID_2;
         color: $COLOR_LIGHT;
         border-radius: 10px;
-        padding: 10px;
+        padding: $SPACE_S;
         outline: none;
         height: 30px;
-        margin-right: 10px;
+        margin-right: $SPACE_S;
 
         &:focus {
           border: 1px solid $COLOR_LIGHT;
@@ -100,7 +100,7 @@
         border: 1px solid $COLOR_MID_2;
         color: $COLOR_LIGHT;
         border-radius: 10px;
-        padding: 10px;
+        padding: $SPACE_S;
         outline: none;
         resize: none;
         height: 6em;
@@ -130,7 +130,7 @@
 
         &.close-chat {
           width: 40px;
-          margin-left: 10px;
+          margin-left: $SPACE_S;
         }
       }
     }

@@ -53,13 +53,13 @@
 
   .audio-single {
     .main-header {
-      padding: 15px;
+      padding: $SPACE_M;
       position: relative;
       user-select: none;
       display: flex;
 
       .controls {
-        margin-right: 10px;
+        margin-right: $SPACE_S;
         cursor: pointer;
       }
 
@@ -71,8 +71,8 @@
 
       .expand {
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: $SPACE_S;
+        right: $SPACE_S;
         color: $COLOR_MID_2;
         opacity: 0.4;
         cursor: pointer;
@@ -104,7 +104,7 @@
     }
 
     .date {
-      padding: 15px;
+      padding: $SPACE_M;
       text-align: center;
       font-weight: 500;
       font-family: $SANS_STACK;
@@ -112,8 +112,8 @@
 
     .image {
       width: 100%;
-      padding-top: 15px;
-      padding-bottom: 15px;
+      padding-top: $SPACE_M;
+      padding-bottom: $SPACE_M;
 
       img {
         width: 100%;
@@ -125,7 +125,7 @@
     @include text;
 
     .connected-case-studies {
-      padding: 15px;
+      padding: $SPACE_M;
     }
   }
 </style>

@@ -19,7 +19,7 @@
     .color-icon {
       height: 10px;
       width: 10px;
-      margin-right: 10px;
+      margin-right: $SPACE_S;
 
       &.communication {
         background: $COLOR_COMMUNICATION;
@@ -36,8 +36,8 @@
     }
 
     .button {
-      padding-left: 15px;
-      padding-right: 15px;
+      padding-left: $SPACE_M;
+      padding-right: $SPACE_M;
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_MID_2;
       border-radius: 10px;

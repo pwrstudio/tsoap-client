@@ -72,12 +72,12 @@
     }
 
     .description {
-      padding: 10px;
+      padding: $SPACE_S;
     }
 
     .event {
-      padding: 0px 10px;
-      padding-top: 10px;
+      padding: 0px $SPACE_S;
+      padding-top: $SPACE_S;
       width: 100%;
       height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
@@ -89,7 +89,7 @@
       @include screen-size("small") {
         width: 80vw;
         display: inline-flex;
-        padding-top: 10px;
+        padding-top: $SPACE_S;
         height: 80px;
         border-right: 1px solid $COLOR_MID_1;
       }
@@ -124,8 +124,8 @@
           }
 
           .elips {
-            margin-left: 5px;
-            margin-right: 5px;
+            margin-left: $SPACE_XS;
+            margin-right: $SPACE_XS;
             width: 60%;
             white-space: nowrap;
             overflow: hidden;

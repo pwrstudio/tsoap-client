@@ -39,7 +39,7 @@
     width: 100%;
     height: 100%;
     padding-left: 7px;
-    padding-right: 10px;
+    padding-right: $SPACE_S;
     // background: $COLOR_DARK;
     display: flex;
     align-items: center;
@@ -55,10 +55,10 @@
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_LIGHT;
       border-radius: 10px;
-      padding: 10px;
+      padding: $SPACE_S;
       outline: none;
       height: 30px;
-      margin-right: 10px;
+      margin-right: $SPACE_S;
 
       &.smaller {
         width: calc(100% - 110px);
@@ -90,13 +90,13 @@
 
       &.close-chat {
         width: 40px;
-        margin-left: 10px;
+        margin-left: $SPACE_S;
       }
     }
 
     .toolbar-item {
       font-size: $FONT_SIZE_BASE;
-      margin-right: 10px;
+      margin-right: $SPACE_S;
       float: left;
       color: $COLOR_LIGHT;
       cursor: pointer;
@@ -114,8 +114,8 @@
         border-radius: 10px;
         padding: 7px;
         text-decoration: none;
-        padding-right: 20px;
-        padding-left: 20px;
+        padding-right: $SPACE_L;
+        padding-left: $SPACE_L;
 
         &:hover {
           border: 1px solid $COLOR_LIGHT;

@@ -26,8 +26,8 @@
 
   .case-study-single {
     .go-back {
-      padding-top: 5px;
-      padding-left: 10px;
+      padding-top: $SPACE_XS;
+      padding-left: $SPACE_S;
       cursor: pointer;
       svg {
         path {
@@ -45,13 +45,13 @@
     }
 
     .main-header {
-      padding: 15px;
-      padding-top: 5px;
+      padding: $SPACE_M;
+      padding-top: $SPACE_XS;
 
       .color-icon {
         height: 20px;
         width: 20px;
-        margin-right: 15px;
+        margin-right: $SPACE_M;
         float: left;
         background: $COLOR_EXHIBITION;
 
@@ -89,13 +89,13 @@
     }
 
     .material {
-      padding: 15px;
+      padding: $SPACE_M;
     }
 
     @include text;
 
     .related-events {
-      padding: 15px;
+      padding: $SPACE_M;
     }
   }
 
@@ -109,8 +109,8 @@
     display: block;
     text-decoration: none;
     user-select: none;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: $SPACE_XS;
+    padding-bottom: $SPACE_XS;
 
     .row {
       width: 100%;
@@ -124,8 +124,8 @@
       }
 
       .elips {
-        margin-left: 5px;
-        margin-right: 5px;
+        margin-left: $SPACE_XS;
+        margin-right: $SPACE_XS;
         width: 90%;
         white-space: nowrap;
         overflow: hidden;

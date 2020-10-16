@@ -21,6 +21,14 @@ $COLOR_SENSING: #fff538;
 $COLOR_ARCHIVING: #f8c2e8;
 $COLOR_EXHIBITION: #ed3656;
 
+// SPACING
+$SPACE_BASE: 12px;
+
+$SPACE_XS: $SPACE_BASE / 2;
+$SPACE_S: $SPACE_BASE;
+$SPACE_M: $SPACE_BASE * 1.5;
+$SPACE_L: $SPACE_BASE * 2;
+
 // TRANSITIONS
 $transition: cubic-bezier(0.23, 1, 0.32, 1);
 
@@ -69,7 +77,7 @@ $breakpoints: (
 
 @mixin text {
   .text{
-  padding: 15px 15px 0 15px;
+  padding: $SPACE_M $SPACE_M 0 $SPACE_M;
   font-family: $SANS_STACK;
   font-size: $FONT_SIZE_BASE;
   font-weight: 400;
