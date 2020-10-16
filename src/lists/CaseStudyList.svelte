@@ -144,8 +144,12 @@
       }
 
       &.header {
-        border-bottom: 1px dotted $COLOR_MID_1;
-
+        border-bottom: 1px solid $COLOR_MID_1;
+        background-color: white;
+        word-spacing: -0.3em;
+        &:hover{
+          background: white !important;
+        }
         .archive-link {
           color: $COLOR_MID_2;
           text-decoration: underline;

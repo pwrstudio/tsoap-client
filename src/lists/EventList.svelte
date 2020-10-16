@@ -160,8 +160,14 @@
         border-bottom: 1px solid $COLOR_MID_1;
         padding-bottom: $SPACE_S;
         .archive-link {
+          font-size:90%;
+          word-spacing:-0.3em;
           color: $COLOR_MID_2;
           text-decoration: underline;
+          transition: color 250ms $transition;
+          &:hover{
+            color: $COLOR_DARK;
+          }
         }
 
         @include screen-size("small") {
