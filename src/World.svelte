@@ -602,7 +602,7 @@
             // PLAYER => REMOVE
             gameRoom.state.players.onRemove = (player, sessionId) => {
               try {
-                if (get(localPlayers, "[sessionId].avatar", false)) {
+                if (get(localPlayers[sessionId], "avatar", false)) {
                   // Remove player graphics
                   playerLayer.removeChild(localPlayers[sessionId].avatar)
                   // !!! HACK
@@ -1216,7 +1216,7 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    top:  $SPACE_S;
+    top: $SPACE_S;
     left: $SPACE_S;
     padding: $SPACE_S;
     border-radius: 4px;
@@ -1461,27 +1461,30 @@
   }
 
   .mobile-toolkit {
-
-    background: linear-gradient(0deg, rgba(0,0,0,0.6054796918767507) 0%, rgba(0,0,0,0) 100%);
+    background: linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.6054796918767507) 0%,
+      rgba(0, 0, 0, 0) 100%
+    );
     position: fixed;
     bottom: 50px;
     left: 0;
     width: 100%;
     height: 25vh;
     z-index: 10;
-    pointer-events:none;
+    pointer-events: none;
 
     transition: height 250ms $transition;
 
     .toolbar {
       height: 40px;
-      padding-bottom:$SPACE_XS;
-      pointer-events:all;
-    }    
+      padding-bottom: $SPACE_XS;
+      pointer-events: all;
+    }
 
     &.expanded {
       transition: height 250ms $transition;
-      pointer-events:all;
+      pointer-events: all;
       background: $COLOR_DARK_OPACITY;
       height: calc(100% - 250px);
       box-shadow: 0 0 15px 15px $COLOR_DARK_OPACITY;
@@ -1750,8 +1753,8 @@
           use:links
           class:expanded={mobileExpanded}
           on:click={e => {
-            console.log(e.target.nodeName);
-            if(!mobileExpanded && e.target.nodeName == 'INPUT') {
+            console.log(e.target.nodeName)
+            if (!mobileExpanded && e.target.nodeName == 'INPUT') {
               mobileExpanded = true
             }
           }}>
@@ -1815,7 +1818,7 @@
     class="inventory"
     transition:fly={{ y: 100, duration: 300 }}
     on:click={e => {
-      if(e.target.nodeName == 'SPAN'){
+      if (e.target.nodeName == 'SPAN') {
         dropCaseStudy(localPlayers[$localUserSessionID].carrying)
       }
     }}>
