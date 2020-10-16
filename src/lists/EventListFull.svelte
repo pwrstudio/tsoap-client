@@ -174,6 +174,11 @@
         height: 40px; 
         border-bottom: 1px solid $COLOR_MID_1;
         padding-bottom: $SPACE_S;
+        background-color: white;
+        word-spacing: -0.3em;
+        &:hover{
+          background: white !important;
+        }
         .archive-link {
           color: $COLOR_MID_2;
           text-decoration: underline;
