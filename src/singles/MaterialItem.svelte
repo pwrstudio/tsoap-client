@@ -57,13 +57,19 @@
     text-decoration: none;
     user-select: none;
     padding-top: 5px;
-    padding-bottom: 10px;
+    padding-bottom: 5px;
+    font-size:$FONT_SIZE_SMALL;
+    
+    &:first-of-type{
+      margin-top: 5px;
+    }
 
     .row {
       width: 100%;
-
       display: flex;
       justify-content: space-between;
+
+      
 
       .title {
         font-family: $SANS_STACK;

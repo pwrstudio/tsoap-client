@@ -105,6 +105,8 @@
     }
   }
 
+
+
   .material-item {
     width: 100%;
     // height: $ITEM_HEIGHT;
@@ -114,17 +116,16 @@
     text-decoration: none;
     user-select: none;
     padding-top: 5px;
-    padding-bottom: 10px;
+    padding-bottom: 5px;
 
     .row {
       width: 100%;
-
       display: flex;
       justify-content: space-between;
 
       .title {
         font-family: $SANS_STACK;
-        font-weight: 400;
+        font-weight: 500;
         white-space: nowrap;
       }
 
