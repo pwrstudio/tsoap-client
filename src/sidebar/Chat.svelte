@@ -37,6 +37,7 @@
   .chat-container {
     position: relative;
     height: 100%;
+
     @include screen-size("small") {
       height: calc(100% - 40px);
     }
@@ -71,6 +72,7 @@
         padding-bottom: $SPACE_S;
         padding-top: $SPACE_S;
         height: calc(100% - 28px);
+        
       }
     }
   }

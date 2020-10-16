@@ -1471,35 +1471,28 @@
     z-index: 10;
     pointer-events:none;
 
+    transition: height 250ms $transition;
+
     .toolbar {
       height: 40px;
       padding-bottom:$SPACE_XS;
       pointer-events:all;
-    }
-
-    .mobile-open-chat {
-      background-color:rgba(255,0,0,0.2);
-      width:100%;
-      height:calc(25vh - 40px);
-      display:block;
-      top:0;
-      position:absolute;
-    }
-
-    
+    }    
 
     &.expanded {
+      transition: height 250ms $transition;
       pointer-events:all;
-      background: $COLOR_DARK;
-      height: calc(100vh - 130px);
+      background: $COLOR_DARK_OPACITY;
+      height: calc(100vh - 250px);
+      box-shadow: 0 0 15px 15px $COLOR_DARK_OPACITY;
       .toolbar {
-        background: $COLOR_DARK;
+        background: transparent;
       }
     }
 
     .close {
       position: fixed;
-      top: 67px;
+      top: 185px;
       right: $SPACE_S;
       font-size: 38px;
       color: $COLOR_MID_2;
