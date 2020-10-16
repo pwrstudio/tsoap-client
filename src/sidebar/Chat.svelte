@@ -6,6 +6,7 @@
   // # # # # # # # # # # # # #
 
   // COMPONENTS
+  import { onMount } from "svelte"
   import ChatMessage from "./ChatMessage.svelte"
 
   // DOM REFERENCES
@@ -16,22 +17,18 @@
 
   // PROPS
   export let chatMessages = []
-  export let currentArea = 4
+  export let currentRoom = 2
   export let mobile = false
   export let mobileExpanded = false
 
-  // $: {
-  //   // __ Scroll chat window to bottom on update
-  //   if (chatMessages) {
-  //     setTimeout(() => {
-  //       messageContainerEl.scrollTo({
-  //         top: messageContainerEl.scrollHeight,
-  //         left: 0,
-  //         behavior: "smooth",
-  //       })
-  //     }, 100)
-  //   }
-  // }
+  onMount(async () => {
+    if (messageContainerEl) {
+      messageContainerEl.scrollTo({
+        top: messageContainerEl.scrollHeight,
+        left: 0,
+      })
+    }
+  })
 </script>
 
 <style lang="scss">
@@ -81,9 +78,10 @@
 
 <div class="chat-container">
   {#if mobile && mobileExpanded}
-    <div class="header">You are in: {COLORMAP[currentArea]}</div>
+    <div class="header">You are in: {currentRoom}</div>
   {/if}
   <div
+    id="message-container"
     class="message-container"
     class:expanded={mobileExpanded}
     bind:this={messageContainerEl}>

@@ -14,6 +14,9 @@
 
   // PROPS
   export let message = {}
+
+  // *** STORES
+  import { localUserAuthenticated } from "../stores"
 </script>
 
 <style lang="scss">
@@ -35,6 +38,16 @@
 
       .name {
         float: left;
+        svg {
+          path {
+            fill: $COLOR_MID_2;
+          }
+          &:hover {
+            path {
+              fill: $COLOR_LIGHT;
+            }
+          }
+        }
       }
 
       .date {
@@ -52,11 +65,23 @@
 
 <div class="chat-message" transition:fade|local>
   <div class="meta">
-    {#if message.slug}
+    {#if $localUserAuthenticated && message.authenticated}
       <span class="name">
-        <a href={'/profile/' + message.slug}>{message.name}</a>:
+        {message.name}
+        <a
+          href={'https://work.anthropocene-curriculum.org/new-message?username=' + message.username}
+          target="_blanks">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="13"
+            viewBox="0 0 24 24"
+            width="13">
+            <path
+              d="M4 4h16v12H5.17L4 17.17V4m0-2c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H4zm2 10h12v2H6v-2zm0-3h12v2H6V9zm0-3h12v2H6V6z" />
+          </svg>
+        </a>
       </span>
-    {:else}<span class="name">{message.name}:</span>{/if}
+    {:else}<span class="name">{message.name}</span>{/if}
     <span class="date">{formattedChatDate(message.timestamp)}</span>
   </div>
   <div class="body">

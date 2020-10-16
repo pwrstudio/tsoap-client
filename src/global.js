@@ -1,30 +1,26 @@
-import { format, getYear, formatDistanceToNow } from "date-fns"
+import { format, getYear } from "date-fns"
 
 export const SANITY_PROJECT_ID = "bu5rnal5"
 
-// export const KEYBOARD = {
-//   UP: 38,
-//   DOWN: 40,
-//   LEFT: 37,
-//   RIGHT: 39,
-//   ENTER: 13,
-// }
-
-export const AREA = { YELLOW: 2, RED: 3, GREEN: 4, BLUE: 5 }
-export const COLORMAP = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE"]
-// export const TINTMAP = [
-//   0x111111,
-//   0x333333,
-//   0x666666,
-//   0x777777,
-//   0x888888,
-//   0x999999,
-//   0xaaaaaa,
-//   0xcccccc,
-//   0xdddddd,
-//   0xffffff,
-// ]
-export const TINTMAP = [0x111111, 0x666666, 0x888888, 0xaaaaaa, 0xffffff]
+export const VIDEO_ROOMS = {MAIN: "main", SUPPORT: "support"}
+export const AUDIO_ROOMS= [1,2,3,4,5,6,7]
+export const TEXT_ROOMS = [1,2,3,4]
+export const AREA = { YELLOW: 2, RED: 3, GREEN: 4, BLUE: 5, MAGENTA: 6, CYAN: 7, PURPLE: 8, TEAL: 9 }
+export const HEX_MAP = { YELLOW: '#FFFF00', RED: '#FF0000', GREEN: '#00FF00', BLUE: '#0000FF', MAGENTA: '#FF00FF', CYAN: '#00FFFF', PURPLE: '#880088', TEAL: '#008888' }
+export const COLORMAP = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE", "MAGENTA", "CYAN", "PURPLE", "TEAL"]
+export const TINTMAP = [
+  0x111111,
+  0x333333,
+  0x666666,
+  0x777777,
+  0x888888,
+  0x999999,
+  0xaaaaaa,
+  0xcccccc,
+  0xdddddd,
+  0xffffff,
+]
+// export const TINTMAP = [0x111111, 0x666666, 0x888888, 0xaaaaaa, 0xffffff]
 export const FORMATMAP = {
   pdfBlock: "PDF",
   videoBlock: "VIDEO",
@@ -56,7 +52,7 @@ export const QUERY = {
   WELCOME_CARD: "*[_id == 'welcome-card'][0]",
   CONNECTED_TO_USER: "*[participants[]._ref == $id]{...,participants[]->{...}}",
   GLOBAL_SETTINGS: "*[_id == 'global-settings'][0]",
-
+  AREAS: "*[_type == 'area']",
 }
 
 export const TEXT_STYLE_AVATAR = {
