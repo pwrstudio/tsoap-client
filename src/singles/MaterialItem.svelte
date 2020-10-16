@@ -84,7 +84,7 @@
         width: 90%;
         white-space: nowrap;
         overflow: hidden;
-        flex-shrink: 9999;
+        flex-shrink: 99999;
         color: $COLOR_MID_2;
       }
 
