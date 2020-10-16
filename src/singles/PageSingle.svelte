@@ -25,7 +25,7 @@
 
   .page-single {
     .main-header {
-      padding: 15px;
+      padding: $SPACE_M;
 
       .title {
         font-family: $SANS_STACK;
@@ -49,7 +49,7 @@
     @include text;
 
     .related-events {
-      padding: 15px;
+      padding: $SPACE_M;
     }
   }
 </style>

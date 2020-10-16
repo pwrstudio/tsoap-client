@@ -1460,7 +1460,7 @@
 
     .toolbar {
       height: 40px;
-      padding-bottom:5px;
+      padding-bottom:$SPACE_XS;
     }
 
     &.expanded {

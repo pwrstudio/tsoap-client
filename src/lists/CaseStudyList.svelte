@@ -188,7 +188,7 @@
         align-items: center;
 
         select {
-          margin-left: 5px;
+          margin-left: $SPACE_XS;
           font-size: $FONT_SIZE_SMALL;
           color: $COLOR_DARK;
           font-family: $MONO_STACK;
@@ -203,7 +203,7 @@
         align-items: center;
 
         svg {
-          margin-right: 5px;
+          margin-right: $SPACE_XS;
           path {
             color: $COLOR_MID_1;
           }

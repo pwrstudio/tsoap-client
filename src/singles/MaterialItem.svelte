@@ -56,12 +56,12 @@
     display: block;
     text-decoration: none;
     user-select: none;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: $SPACE_XS;
+    padding-bottom: $SPACE_XS;
     font-size:$FONT_SIZE_SMALL;
     
     &:first-of-type{
-      margin-top: 5px;
+      margin-top: $SPACE_XS;
     }
 
     .row {
@@ -79,8 +79,8 @@
       }
 
       .elips {
-        margin-left: 5px;
-        margin-right: 5px;
+        margin-left: $SPACE_XS;
+        margin-right: $SPACE_XS;
         width: 90%;
         white-space: nowrap;
         overflow: hidden;
