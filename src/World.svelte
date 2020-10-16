@@ -1204,7 +1204,7 @@
     @include screen-size("small") {
       bottom: 60px;
       left: $SPACE_S;
-      max-width: calc(100vw - 20px);
+      max-width: calc(100vw - #{$SPACE_L});
       z-index: 10;
     }
   }
@@ -1822,7 +1822,9 @@
     class="inventory"
     transition:fly={{ y: 100, duration: 300 }}
     on:click={e => {
-      dropCaseStudy(localPlayers[$localUserSessionID].carrying)
+      if(e.target.nodeName == 'SPAN'){
+        dropCaseStudy(localPlayers[$localUserSessionID].carrying)
+      }
     }}>
     <div>
       <InventoryMessage
