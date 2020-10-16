@@ -150,6 +150,12 @@
         &:hover{
           background: white !important;
         }
+        &.related{
+          background-color: unset;
+          &:hover{
+            background: unset !important;
+          }
+        }
         .archive-link {
           color: $COLOR_MID_2;
           text-decoration: underline;
