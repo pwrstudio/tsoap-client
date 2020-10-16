@@ -159,6 +159,7 @@
   {:else}
     <!-- CHAT -->
     <input
+      placeholder="Write a message..."
       type="[text]"
       maxlength="600"
       bind:value={chatInputValue}
