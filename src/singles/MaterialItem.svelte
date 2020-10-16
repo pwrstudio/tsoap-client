@@ -47,7 +47,7 @@
 <style lang="scss">
   @import "../variables.scss";
 
-  $ITEM_HEIGHT: 60px;
+  
 
   .material-item {
     width: 100%;

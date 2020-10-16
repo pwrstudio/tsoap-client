@@ -67,7 +67,7 @@
 <style lang="scss">
   @import "../variables.scss";
 
-  $ITEM_HEIGHT: 60px;
+  
 
   .case-study-container {
     height: 100%;

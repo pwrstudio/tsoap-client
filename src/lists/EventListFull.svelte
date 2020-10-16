@@ -46,7 +46,7 @@
 <style lang="scss">
   @import "../variables.scss";
 
-  $ITEM_HEIGHT: 60px;
+  
 
   .eventlist-container {
     height: 100%;

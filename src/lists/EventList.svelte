@@ -35,7 +35,7 @@
 <style lang="scss">
   @import "../variables.scss";
 
-  $ITEM_HEIGHT: 60px;
+  
 
   .eventlist-container {
     height: 100%;
@@ -70,6 +70,7 @@
       display: block;
       text-decoration: none;
       user-select: none;
+      overflow: hidden;
 
       @include screen-size("small") {
         width: 80vw;

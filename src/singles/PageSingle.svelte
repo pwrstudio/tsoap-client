@@ -21,7 +21,7 @@
 <style lang="scss">
   @import "../variables.scss";
 
-  $ITEM_HEIGHT: 60px;
+  
 
   .page-single {
     .main-header {

@@ -48,7 +48,7 @@
 <style lang="scss">
   @import "../variables.scss";
 
-  $ITEM_HEIGHT: 60px;
+  
 
   .user-profile-single {
     .go-back {
