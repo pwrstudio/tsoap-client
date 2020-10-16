@@ -84,7 +84,7 @@ $breakpoints: (
   line-height: 1.4em;
   
   @include screen-size("small") {
-    padding-bottom: $SPACE_M * 2;
+    padding-bottom: $SPACE_M ;
   }
   }
 
