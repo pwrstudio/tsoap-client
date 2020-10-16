@@ -69,12 +69,13 @@
       display: flex;
       justify-content: space-between;
 
-      
-
       .title {
         font-family: $SANS_STACK;
         font-weight: 400;
         white-space: nowrap;
+        max-width: 80%;
+        overflow:hidden;
+        text-overflow: ellipsis;
       }
 
       .elips {
@@ -83,7 +84,7 @@
         width: 90%;
         white-space: nowrap;
         overflow: hidden;
-        flex-shrink: 4;
+        flex-shrink: 9999;
         color: $COLOR_MID_2;
       }
 
