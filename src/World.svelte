@@ -1483,7 +1483,7 @@
       transition: height 250ms $transition;
       pointer-events:all;
       background: $COLOR_DARK_OPACITY;
-      height: calc(100vh - 250px);
+      height: calc(100% - 250px);
       box-shadow: 0 0 15px 15px $COLOR_DARK_OPACITY;
       .toolbar {
         background: transparent;
