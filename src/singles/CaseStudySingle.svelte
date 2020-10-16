@@ -148,6 +148,7 @@
     }
 
     &.header {
+      padding-top: 0px;
       border-bottom: 1px dotted $COLOR_MID_1;
       cursor: default;
 
