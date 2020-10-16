@@ -217,6 +217,14 @@
           font-family: $MONO_STACK;
           background: $COLOR_LIGHT;
 
+          input[type="text"] {
+            -webkit-appearance: none;
+          }
+
+          select {
+            -webkit-appearance: none;
+          }
+
           &:focus {
             border-bottom: 1px solid $COLOR_DARK;
             width: 16ch;

@@ -67,6 +67,14 @@
       &:focus {
         border: 1px solid $COLOR_LIGHT;
       }
+
+      input[type="text"] {
+        -webkit-appearance: none;
+      }
+
+      select {
+        -webkit-appearance: none;
+      }
     }
 
     button {

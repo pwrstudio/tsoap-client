@@ -1449,6 +1449,8 @@
   }
 
   .mobile-toolkit {
+
+    background: linear-gradient(0deg, rgba(0,0,0,0.6054796918767507) 0%, rgba(0,0,0,0) 100%);
     position: fixed;
     bottom: 50px;
     left: 0;
@@ -1458,6 +1460,7 @@
 
     .toolbar {
       height: 40px;
+      padding-bottom:5px;
     }
 
     &.expanded {
