@@ -67,6 +67,7 @@
         font-family: $SANS_STACK;
         font-size: $FONT_SIZE_LARGE;
         font-weight: 500;
+        max-width: calc(100% - 40px);
       }
 
       .expand {
