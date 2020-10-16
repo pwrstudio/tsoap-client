@@ -98,6 +98,7 @@
           width: 100%;
           display: flex;
           justify-content: space-between;
+          align-items: baseline;
 
           .title {
             font-family: $SANS_STACK;
@@ -106,6 +107,7 @@
             max-width: 70%;
             text-overflow: ellipsis;
             overflow: hidden;
+            margin-bottom: $SPACE_XS / 2;
           }
 
           .elips {
@@ -119,8 +121,10 @@
           }
 
           .date {
+            font-size:90%;
             white-space: nowrap;
             color: $COLOR_MID_2;
+            word-spacing: -0.3em;
           }
 
           .participants {

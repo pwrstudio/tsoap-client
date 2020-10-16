@@ -76,10 +76,10 @@
     }
 
     .event {
-      padding: 0px $SPACE_S;
-      padding-top: $SPACE_S;
+      padding: $SPACE_S;
+      // padding-top: $SPACE_S;
       width: 100%;
-      height: $ITEM_HEIGHT;
+      // height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
       color: $COLOR_DARK;
       display: block;
@@ -119,7 +119,8 @@
           .title {
             font-family: $SANS_STACK;
             font-weight: 500;
-            white-space: nowrap;
+            margin-bottom: $SPACE_XS;
+            // white-space: nowrap;
             max-width: 70%;
             text-overflow: ellipsis;
             overflow: hidden;
@@ -136,8 +137,10 @@
           }
 
           .date {
+            font-size:90%;
             white-space: nowrap;
             color: $COLOR_MID_2;
+            word-spacing: -0.3em;
           }
 
           .participants {
