@@ -71,8 +71,8 @@
 
     .header {
       font-size: $FONT_SIZE_SMALL;
-      padding-left: 10px;
-      padding-right: 10px;
+      padding-left: $SPACE_S;
+      padding-right: $SPACE_S;
       padding-top: 7px;
       padding-bottom: 7px;
       width: 100%;
@@ -86,7 +86,7 @@
       width: 100%;
       height: calc(100% - 30px);
       overflow-y: auto;
-      padding: 10px;
+      padding: $SPACE_S;
       color: $COLOR_MID_2;
       @include hide-scroll;
 
@@ -95,8 +95,8 @@
         padding-bottom: 0;
         padding-top: 0;
         &.expanded {
-          padding-bottom: 10px;
-          padding-top: 10px;
+          padding-bottom: $SPACE_S;
+          padding-top: $SPACE_S;
           height: calc(100% - 20px);
         }
       }
@@ -112,10 +112,10 @@
         color: $COLOR_LIGHT;
         border: 1px solid $COLOR_MID_2;
         border-radius: 20px;
-        padding: 10px;
+        padding: $SPACE_S;
         text-decoration: none;
         float: left;
-        margin-right: 10px;
+        margin-right: $SPACE_S;
 
         &:hover {
           border: 1px solid $COLOR_LIGHT;

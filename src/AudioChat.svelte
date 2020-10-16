@@ -234,15 +234,15 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    top: 15px;
-    left: 15px;
-    padding: 10px;
+    top: $SPACE_M;
+    left: $SPACE_M;
+    padding: $SPACE_S;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
     font-family: $MONO_STACK;
 
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: $SPACE_M;
+    padding-right: $SPACE_M;
 
     user-select: none;
 
@@ -250,20 +250,20 @@
       top: unset;
       bottom: 60px;
       left: unset;
-      right: 10px;
-      right: 10px;
+      right: $SPACE_S;
+      right: $SPACE_S;
       min-width: unset;
       width: calc(100% - 20px);
     }
 
     .button {
-      padding-left: 15px;
-      padding-right: 15px;
+      padding-left: $SPACE_M;
+      padding-right: $SPACE_M;
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_MID_2;
       font-size: $FONT_SIZE_BASE;
 
-      border-radius: 10px;
+      border-radius: $SPACE_S;
       text-align: center;
 
       &:hover {
@@ -287,14 +287,14 @@
 
     .userlist {
       min-height: 200px;
-      margin-top: 20px;
+      margin-top: $SPACE_L;
 
       @include screen-size("small") {
         min-height: unset;
       }
 
       .user {
-        margin-bottom: 10px;
+        margin-bottom: $SPACE_S;
         width: 100%;
         line-height: 3em;
         height: 3em;
@@ -316,7 +316,7 @@
           display: flex;
           align-items: center;
           height: 3em;
-          padding-right: 15px;
+          padding-right: $SPACE_M;
 
           svg {
             opacity: 0.5;

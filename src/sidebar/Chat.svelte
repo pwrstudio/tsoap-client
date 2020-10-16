@@ -44,8 +44,8 @@
 
   .header {
     font-size: $FONT_SIZE_SMALL;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: $SPACE_S;
+    padding-right: $SPACE_S;
     padding-top: 7px;
     padding-bottom: 7px;
     width: 100%;
@@ -59,8 +59,8 @@
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    // padding-bottom: 10px;
-    padding-top: 10px;
+    // padding-bottom: $SPACE_S;
+    padding-top: $SPACE_S;
     @include hide-scroll;
 
     @include screen-size("small") {
@@ -68,9 +68,9 @@
       padding-bottom: 0;
       padding-top: 0;
       &.expanded {
-        padding-bottom: 10px;
-        padding-top: 10px;
-        height: calc(100% - 20px);
+        padding-bottom: $SPACE_S;
+        padding-top: $SPACE_S;
+        height: calc(100% - #{$SPACE_L});
       }
     }
   }

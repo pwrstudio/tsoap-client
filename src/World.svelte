@@ -518,7 +518,7 @@
           }
 
           const onLeave = () => {
-            gameContainer.style.cursor = "default"
+            gameContainer.style.cursor = "crosshair"
             avatar.removeChild(textContainer)
           }
 
@@ -882,7 +882,7 @@
               }
 
               const onLeave = e => {
-                gameContainer.style.cursor = "default"
+                gameContainer.style.cursor = "crosshair"
                 playerLayer.removeChild(textContainer)
               }
 
@@ -999,7 +999,7 @@
               }
 
               const onLeave = e => {
-                gameContainer.style.cursor = "default"
+                gameContainer.style.cursor = "crosshair"
                 caseStudyLocation.removeChild(textContainer)
               }
 
@@ -1191,19 +1191,19 @@
     height: auto;
     line-height: 1.4em;
     text-align: center;
-    bottom: 10px;
-    left: 10px;
-    padding: 10px;
+    bottom: $SPACE_S;
+    left: $SPACE_S;
+    padding: $SPACE_S;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
     cursor: pointer;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: $SPACE_M;
+    padding-right: $SPACE_M;
     user-select: none;
 
     @include screen-size("small") {
       bottom: 60px;
-      left: 10px;
+      left: $SPACE_S;
       max-width: calc(100vw - 20px);
       z-index: 10;
     }
@@ -1216,15 +1216,15 @@
     height: auto;
     line-height: 2em;
     text-align: center;
-    top: 10px;
-    left: 10px;
-    padding: 10px;
+    top:  $SPACE_S;
+    left: $SPACE_S;
+    padding: $SPACE_S;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
     display: flex;
 
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: $SPACE_M;
+    padding-right: $SPACE_M;
 
     user-select: none;
 
@@ -1232,17 +1232,17 @@
       top: unset;
       bottom: calc(25vh + 60px);
       left: unset;
-      right: 10px;
+      right: $SPACE_S;
       max-width: calc(100vw - 20px);
     }
 
     .message {
-      margin-right: 10px;
+      margin-right: $SPACE_S;
     }
 
     .button {
-      padding-left: 15px;
-      padding-right: 15px;
+      padding-left: $SPACE_M;
+      padding-right: $SPACE_M;
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_MID_2;
       border-radius: 10px;
@@ -1278,7 +1278,7 @@
 
   .hide-button {
     position: fixed;
-    top: 10px;
+    top: $SPACE_S;
     right: 350px;
     width: 40px;
     height: 40px;
@@ -1370,9 +1370,9 @@
   .main-content-slot {
     position: absolute;
     top: 0;
-    right: calc(#{$SIDEBAR_WIDTH} + 10px);
+    right: calc(#{$SIDEBAR_WIDTH} + #{$SPACE_S});
     width: 500px;
-    max-width: calc(100vw - (#{$SIDEBAR_WIDTH} + 20px));
+    max-width: calc(100vw - (#{$SIDEBAR_WIDTH} + #{$SPACE_L}));
     max-height: 100vh;
     z-index: 100;
     overflow-y: auto;
@@ -1405,8 +1405,8 @@
       font-size: $FONT_SIZE_BASE;
       color: $COLOR_DARK;
       position: relative;
-      margin-bottom: 10px;
-      margin-top: 10px;
+      margin-bottom: $SPACE_S;
+      margin-top: $SPACE_S;
 
       @include hide-scroll;
 
@@ -1414,7 +1414,7 @@
         margin-bottom: 20px;
         position: absolute;
         top: -6px;
-        right: 10px;
+        right: $SPACE_S;
         font-size: 38px;
         color: $COLOR_MID_2;
         cursor: pointer;
@@ -1461,6 +1461,8 @@
   }
 
   .mobile-toolkit {
+
+    background: linear-gradient(0deg, rgba(0,0,0,0.6054796918767507) 0%, rgba(0,0,0,0) 100%);
     position: fixed;
     bottom: 50px;
     left: 0;
@@ -1470,6 +1472,7 @@
 
     .toolbar {
       height: 40px;
+      padding-bottom:5px;
     }
 
     &.expanded {
@@ -1483,7 +1486,7 @@
     .close {
       position: fixed;
       top: 67px;
-      right: 10px;
+      right: $SPACE_S;
       font-size: 38px;
       color: $COLOR_MID_2;
       cursor: pointer;
@@ -1511,15 +1514,15 @@
   }
 
   .welcome-card {
-    padding: 10px;
-    padding-top: 20px;
+    padding: $SPACE_S;
+    padding-top: $SPACE_L;
   }
 
   .debug {
     position: fixed;
-    bottom: 10px;
+    bottom: $SPACE_S;
     right: 420px;
-    padding: 10px;
+    padding: $SPACE_S;
     font-size: 8px;
   }
 </style>

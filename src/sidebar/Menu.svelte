@@ -17,17 +17,17 @@
   .menu-container {
     height: 100%;
     color: $COLOR_DARK;
-    font-size: $FONT_SIZE_BASE;
+    font-size: $FONT_SIZE_SMALL;
     background: $COLOR_LIGHT;
     display: flex;
     align-items: center;
     justify-content: space-between;
     user-select: none;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: $SPACE_S;
+    padding-right: $SPACE_S;
 
     .menu-item {
-      padding-right: 20px;
+      padding-right: $SPACE_L;
       float: left;
       cursor: pointer;
       color: $COLOR_DARK;

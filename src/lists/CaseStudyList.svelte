@@ -77,9 +77,9 @@
     background: $COLOR_LIGHT;
 
     .case-study-item {
-      padding: 0px 10px;
-      padding-top: 10px;
-      padding-bottom: 10px;
+      padding: 0px $SPACE_S;
+      padding-top: $SPACE_S;
+      padding-bottom: $SPACE_S;
       width: 100%;
       // min-height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
@@ -94,7 +94,7 @@
         .color-icon {
           height: 10px;
           width: 10px;
-          margin-right: 15px;
+          margin-right: $SPACE_M;
           float: left;
           margin-top: 4px;
           background: $COLOR_EXHIBITION;
@@ -168,7 +168,7 @@
     }
 
     .description {
-      padding: 10px;
+      padding: $SPACE_S;
     }
 
     .toolbar {
@@ -177,10 +177,10 @@
       justify-content: space-between;
       align-items: center;
       height: 40px;
-      padding: 10px;
+      padding: $SPACE_S;
       font-size: $FONT_SIZE_SMALL;
       border-bottom: 1px dotted $COLOR_MID_1;
-      margin-bottom: 10px;
+      margin-bottom: $SPACE_S;
 
       .sort {
         height: 100%;
@@ -216,6 +216,14 @@
           color: $COLOR_DARK;
           font-family: $MONO_STACK;
           background: $COLOR_LIGHT;
+
+          input[type="text"] {
+            -webkit-appearance: none;
+          }
+
+          select {
+            -webkit-appearance: none;
+          }
 
           &:focus {
             border-bottom: 1px solid $COLOR_DARK;

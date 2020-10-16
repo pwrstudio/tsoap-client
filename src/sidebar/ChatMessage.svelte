@@ -23,10 +23,10 @@
   @import "../variables.scss";
 
   .chat-message {
-    margin-bottom: 5px;
-    padding-bottom: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
+    margin-bottom: $SPACE_XS;
+    padding-bottom: $SPACE_XS;
+    padding-left: $SPACE_S;
+    padding-right: $SPACE_S;
     color: $COLOR_LIGHT;
     font-size: $FONT_SIZE_SMALL;
     user-select: none;
@@ -57,8 +57,8 @@
 
     .body {
       border-left: 1px solid $COLOR_MID_2;
-      padding-left: 10px;
-      padding-right: 5px;
+      padding-left: $SPACE_S;
+      padding-right: $SPACE_XS;
     }
   }
 </style>

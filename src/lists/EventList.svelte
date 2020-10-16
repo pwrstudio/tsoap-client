@@ -61,8 +61,8 @@
     }
 
     .event {
-      padding: 0px 10px;
-      padding-top: 10px;
+      padding: 0px $SPACE_S;
+      padding-top: $SPACE_S;
       width: 100%;
       height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
@@ -74,7 +74,7 @@
       @include screen-size("small") {
         width: 80vw;
         display: inline-flex;
-        padding-top: 10px;
+        padding-top: $SPACE_S;
         height: 80px;
         border-right: 1px solid $COLOR_MID_1;
       }
@@ -98,6 +98,7 @@
           width: 100%;
           display: flex;
           justify-content: space-between;
+          align-items: baseline;
 
           .title {
             font-family: $SANS_STACK;
@@ -106,11 +107,12 @@
             max-width: 70%;
             text-overflow: ellipsis;
             overflow: hidden;
+            margin-bottom: $SPACE_XS / 2;
           }
 
           .elips {
-            margin-left: 5px;
-            margin-right: 5px;
+            margin-left: $SPACE_XS;
+            margin-right: $SPACE_XS;
             width: 60%;
             white-space: nowrap;
             overflow: hidden;
@@ -119,8 +121,10 @@
           }
 
           .date {
+            font-size:90%;
             white-space: nowrap;
             color: $COLOR_MID_2;
+            word-spacing: -0.3em;
           }
 
           .participants {
@@ -138,8 +142,9 @@
       }
 
       &.footer {
-        height: 40px;
+        height: $SPACE_S * 4;
         border-top: 1px solid $COLOR_MID_1;
+        padding-bottom: $SPACE_S;
         &:hover {
           background: unset;
         }
@@ -150,9 +155,9 @@
       }
 
       &.header {
-        height: 40px;
+        height: 40px; 
         border-bottom: 1px solid $COLOR_MID_1;
-
+        padding-bottom: $SPACE_S;
         .archive-link {
           color: $COLOR_MID_2;
           text-decoration: underline;

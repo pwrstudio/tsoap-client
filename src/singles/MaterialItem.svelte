@@ -57,11 +57,15 @@
     text-decoration: none;
     user-select: none;
     padding-top: 5px;
-    padding-bottom: 10px;
+    padding-bottom: 5px;
+    font-size:$FONT_SIZE_SMALL;
+    
+    &:first-of-type{
+      margin-top: 5px;
+    }
 
     .row {
       width: 100%;
-
       display: flex;
       justify-content: space-between;
 
@@ -69,6 +73,9 @@
         font-family: $SANS_STACK;
         font-weight: 400;
         white-space: nowrap;
+        max-width: 80%;
+        overflow:hidden;
+        text-overflow: ellipsis;
       }
 
       .elips {
@@ -77,7 +84,7 @@
         width: 90%;
         white-space: nowrap;
         overflow: hidden;
-        flex-shrink: 4;
+        flex-shrink: 99999;
         color: $COLOR_MID_2;
       }
 

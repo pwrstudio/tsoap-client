@@ -30,8 +30,8 @@
   @import "../variables.scss";
 
   .message-container {
-    margin-bottom: 5px;
-    padding-bottom: 5px;
+    margin-bottom: $SPACE_XS;
+    padding-bottom: $SPACE_XS;
     color: $COLOR_LIGHT;
     font-size: $FONT_SIZE_SMALL;
     user-select: none;
@@ -40,8 +40,8 @@
     .header {
       cursor: pointer;
       border-bottom: 1px solid transparent;
-      padding-top: 10px;
-      padding-bottom: 15px;
+      padding-top: $SPACE_S;
+      padding-bottom: $SPACE_M;
 
       &.expanded {
         border-bottom: 1px solid $COLOR_MID_2;
@@ -67,14 +67,14 @@
     }
 
     .post {
-      padding-top: 10px;
-      margin-bottom: 5px;
+      padding-top: $SPACE_S;
+      margin-bottom: $SPACE_XS;
 
       .meta {
         width: 100%;
         display: inline-block;
         color: $COLOR_MID_2;
-        padding-left: 10px;
+        padding-left: $SPACE_S;
         border-left: 1px solid $COLOR_MID_2;
 
         .sender {
@@ -89,7 +89,7 @@
 
       .content {
         border-left: 1px solid $COLOR_MID_2;
-        padding-left: 10px;
+        padding-left: $SPACE_S;
       }
     }
 

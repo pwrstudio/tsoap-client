@@ -26,8 +26,8 @@
 
   .case-study-single {
     .go-back {
-      padding-top: 5px;
-      padding-left: 10px;
+      padding-top: $SPACE_XS;
+      padding-left: $SPACE_S;
       cursor: pointer;
       svg {
         path {
@@ -45,13 +45,13 @@
     }
 
     .main-header {
-      padding: 15px;
-      padding-top: 5px;
+      padding: $SPACE_M;
+      padding-top: $SPACE_XS;
 
       .color-icon {
         height: 20px;
         width: 20px;
-        margin-right: 15px;
+        margin-right: $SPACE_M;
         float: left;
         background: $COLOR_EXHIBITION;
 
@@ -89,21 +89,17 @@
     }
 
     .material {
-      padding: 15px;
+      padding: $SPACE_M;
     }
 
-    .text {
-      padding: 15px;
-      font-family: $SANS_STACK;
-      font-size: $FONT_SIZE_BASE;
-      font-weight: 400;
-      line-height: 1.4em;
-    }
+    @include text;
 
     .related-events {
-      padding: 15px;
+      padding: $SPACE_M;
     }
   }
+
+
 
   .material-item {
     width: 100%;
@@ -113,24 +109,23 @@
     display: block;
     text-decoration: none;
     user-select: none;
-    padding-top: 5px;
-    padding-bottom: 10px;
+    padding-top: $SPACE_XS;
+    padding-bottom: $SPACE_XS;
 
     .row {
       width: 100%;
-
       display: flex;
       justify-content: space-between;
 
       .title {
         font-family: $SANS_STACK;
-        font-weight: 400;
+        font-weight: 500;
         white-space: nowrap;
       }
 
       .elips {
-        margin-left: 5px;
-        margin-right: 5px;
+        margin-left: $SPACE_XS;
+        margin-right: $SPACE_XS;
         width: 90%;
         white-space: nowrap;
         overflow: hidden;
@@ -153,6 +148,7 @@
     }
 
     &.header {
+      padding-top: 0px;
       border-bottom: 1px dotted $COLOR_MID_1;
       cursor: default;
 

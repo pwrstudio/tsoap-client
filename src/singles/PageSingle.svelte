@@ -46,13 +46,7 @@
       width: 100%;
     }
 
-    .text {
-      padding: 15px;
-      font-family: $SANS_STACK;
-      font-size: $FONT_SIZE_BASE;
-      font-weight: 400;
-      line-height: 1.4em;
-    }
+    @include text;
 
     .related-events {
       padding: 15px;
