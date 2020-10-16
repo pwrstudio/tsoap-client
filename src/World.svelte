@@ -1388,12 +1388,13 @@
 
     @include screen-size("small") {
       position: fixed;
-      bottom: 50px;
+      bottom: unset;
       top: 80px;
       right: unset;
       left: 0;
       max-width: unset;
       width: 100vw;
+      max-height: calc(100% - 130px);
     }
 
     transition: transform 0.3s ease-out;
