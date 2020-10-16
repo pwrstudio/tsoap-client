@@ -138,8 +138,9 @@
       }
 
       &.footer {
-        height: 40px;
+        height: $SPACE_S * 4;
         border-top: 1px solid $COLOR_MID_1;
+        padding-bottom: $SPACE_S;
         &:hover {
           background: unset;
         }
@@ -150,9 +151,9 @@
       }
 
       &.header {
-        height: 40px;
+        height: 40px; 
         border-bottom: 1px solid $COLOR_MID_1;
-
+        padding-bottom: $SPACE_S;
         .archive-link {
           color: $COLOR_MID_2;
           text-decoration: underline;

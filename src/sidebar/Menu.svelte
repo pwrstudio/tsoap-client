@@ -17,7 +17,7 @@
   .menu-container {
     height: 100%;
     color: $COLOR_DARK;
-    font-size: $FONT_SIZE_BASE;
+    font-size: $FONT_SIZE_SMALL;
     background: $COLOR_LIGHT;
     display: flex;
     align-items: center;
