@@ -99,6 +99,7 @@
   let localPlayers = {}
   let chatMessages = []
   let moveQ = []
+  let currentStream = false
 
   // ___ Routing
   let section = false
@@ -194,12 +195,21 @@
       console.log(err)
     })
 
-  // __ Listen for changes to the active streams post
-  let activeStreams = loadData(QUERY.ACTIVE_STREAMS).catch(err => {
-    console.log(err)
-  })
-  let currentStream = false
+  let activeStreams = loadData(QUERY.ACTIVE_STREAMS)
+    .catch(err => {
+      console.log(err)
+    })
+    .then(activeStreams => {
+      currentStream = activeStreams.mainStream
+      // client
+      //   .listen(QUERY.TARGET_STREAM, { id: activeStreams.mainStream._id })
+      //   .subscribe(u => {
+      //     console.log("11 = = = = = = =")
+      //     currentStream = u
+      //   })
+    })
 
+  // __ Listen for changes to the active streams post
   client.listen(QUERY.ACTIVE_STREAMS).subscribe(update => {
     currentStream = false
     setTimeout(() => {
@@ -208,6 +218,12 @@
           if (aS.mainStream) {
             currentStream = aS.mainStream
             activeContentClosed = false
+            // client
+            //   .listen(QUERY.TARGET_STREAM, { id: aS.mainStream._id })
+            //   .subscribe(u => {
+            //     console.log("22 = = = = = = =")
+            //     currentStream = u
+            //   })
           } else {
             currentStream = false
           }
@@ -216,10 +232,6 @@
           console.log(err)
         })
     }, 1000)
-  })
-
-  activeStreams.then(activeStreams => {
-    currentStream = activeStreams.mainStream
   })
 
   // ___ Set overarching state of the UI
@@ -1457,13 +1469,27 @@
     width: 100%;
     height: 25vh;
     z-index: 10;
+    pointer-events:none;
 
     .toolbar {
       height: 40px;
       padding-bottom:$SPACE_XS;
+      pointer-events:all;
     }
 
+    .mobile-open-chat {
+      background-color:rgba(255,0,0,0.2);
+      width:100%;
+      height:calc(25vh - 40px);
+      display:block;
+      top:0;
+      position:absolute;
+    }
+
+    
+
     &.expanded {
+      pointer-events:all;
       background: $COLOR_DARK;
       height: calc(100vh - 130px);
       .toolbar {
@@ -1555,7 +1581,7 @@
           <div class="top-area">
             <!-- CALENDAR -->
             {#await events then events}
-                <EventList {events} />
+              <EventList {events} />
             {/await}
           </div>
           <div class="bottom-area">
@@ -1605,20 +1631,20 @@
 <div class="main-content-slot" class:pushed={sidebarHidden}>
   <!-- INFORMATION BOX -->
   {#await welcomeCard then welcomeCard}
-  {#if showWelcomeCard}
-    <div class="content-item active" transition:fly={{ y: -200 }}>
-      <div
-        class="close"
-        on:click={e => {
-          showWelcomeCard = false;
-        }}>
-        ×
+    {#if showWelcomeCard}
+      <div class="content-item active" transition:fly={{ y: -200 }}>
+        <div
+          class="close"
+          on:click={e => {
+            showWelcomeCard = false
+          }}>
+          ×
+        </div>
+        <div class="welcome-card">
+          {@html renderBlockText(get(welcomeCard, 'content.content', []))}
+        </div>
       </div>
-      <div class='welcome-card'>
-        {@html renderBlockText(get(welcomeCard, 'content.content',[]))}
-      </div>
-    </div>
-  {/if}
+    {/if}
   {/await}
 
   <!-- AUDIOZONE -->
@@ -1639,12 +1665,11 @@
         <div
           class="close"
           on:click={e => {
-            activeContentClosed = true;
+            activeContentClosed = true
           }}>
           ×
         </div>
-          <LiveSingle
-            event={currentStream} />
+        <LiveSingle event={currentStream} />
       </div>
     {/if}
     <!-- SUPPORT AREA -->
@@ -1653,12 +1678,11 @@
         <div
           class="close"
           on:click={e => {
-            activeContentClosed = true;
+            activeContentClosed = true
           }}>
           ×
         </div>
-          <LiveSingle
-            event={{streamURL: activeStreams.supportStream}}/>
+        <LiveSingle event={{ streamURL: activeStreams.supportStream }} />
       </div>
     {/if}
   {/await}
@@ -1728,19 +1752,21 @@
       </div>
       <!-- MOBILE TOOLKIT -->
       {#if !audioChatActive}
-        <div class="mobile-toolkit" 
-          use:links 
-          class:expanded={mobileExpanded} 
+        <div
+          class="mobile-toolkit"
+          use:links
+          class:expanded={mobileExpanded}
           on:click={e => {
-            if(!mobileExpanded) {
+            console.log(e.target.nodeName);
+            if(!mobileExpanded && e.target.nodeName == 'INPUT') {
               mobileExpanded = true
             }
           }}>
-          {#if mobileExpanded }
+          {#if mobileExpanded}
             <div
               class="close"
               on:click={e => {
-                mobileExpanded = false;
+                mobileExpanded = false
                 e.stopPropagation()
                 navigate('/')
               }}>
@@ -1749,19 +1775,19 @@
           {/if}
           {#if section == 'seminar'}
             <!-- SEMINAR -->
-            <Seminar {slug} mobile={true} {mobileExpanded}/>
+            <Seminar {slug} mobile={true} {mobileExpanded} />
           {:else if section == 'messages'}
             <!-- MESSAGES -->
-            <Messaging {slug} mobile={true} {mobileExpanded}/>
+            <Messaging {slug} mobile={true} {mobileExpanded} />
           {:else}
             <!-- CHAT -->
-            {#each Object.values(AREA) as A}
-              {#if localPlayers[$localUserSessionID].area === A}
+            {#each TEXT_ROOMS as TR}
+              {#if $currentTextRoom === TR}
                 <Chat
-                  chatMessages={chatMessages.filter(m => m.area === A)}
-                  currentArea={A}
+                  chatMessages={chatMessages.filter(m => m.room === TR)}
+                  currentRoom={TR}
                   mobile={true}
-                  {mobileExpanded}/>
+                  {mobileExpanded} />
               {/if}
             {/each}
           {/if}
@@ -1773,7 +1799,7 @@
               {mobileExpanded}
               on:submit={submitChat}
               on:teleport={e => {
-                if(localPlayers[$localUserSessionID].area === 5) {
+                if (localPlayers[$localUserSessionID].area === 5) {
                   teleportTo('green')
                 } else {
                   teleportTo('blue')
@@ -1796,10 +1822,11 @@
     class="inventory"
     transition:fly={{ y: 100, duration: 300 }}
     on:click={e => {
-      dropCaseStudy(localPlayers[$localUserSessionID].carrying);
+      dropCaseStudy(localPlayers[$localUserSessionID].carrying)
     }}>
     <div>
-      <InventoryMessage caseStudy={emergentLayer.children.find(cs => cs.uuid === localPlayers[$localUserSessionID].carrying)}/>
+      <InventoryMessage
+        caseStudy={emergentLayer.children.find(cs => cs.uuid === localPlayers[$localUserSessionID].carrying)} />
     </div>
   </div>
 {/if}
@@ -1814,7 +1841,7 @@
     <div
       class="button"
       on:click={e => {
-        audioChatActive = true;
+        audioChatActive = true
       }}>
       Join
     </div>
@@ -1829,7 +1856,7 @@
     roomName={$currentAudioRoom}
     roomId={$currentAudioRoom}
     on:close={e => {
-      audioChatActive = false;
+      audioChatActive = false
     }} />
 {/if}
 

@@ -70,7 +70,7 @@
       &.expanded {
         padding-bottom: $SPACE_S;
         padding-top: $SPACE_S;
-        height: calc(100% - #{$SPACE_L});
+        height: calc(100% - 28px);
       }
     }
   }
