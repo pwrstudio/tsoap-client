@@ -1388,7 +1388,7 @@
 
     @include screen-size("small") {
       position: fixed;
-      bottom: unset;
+      bottom: 50px;
       top: 80px;
       right: unset;
       left: 0;
@@ -1442,7 +1442,6 @@
         margin-bottom: 0;
 
         &.passive {
-          padding-bottom: 140px;
           min-height: 100vh;
         }
       }
