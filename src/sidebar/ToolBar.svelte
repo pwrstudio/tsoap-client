@@ -36,7 +36,7 @@
 
   let notifications = []
 
-  const getPrivateMessages = () => {
+  const getNotifications = () => {
     if (
       $localUserAuthenticated &&
       get($authenticatedUserInformation, "username", false)
@@ -56,7 +56,7 @@
 
   getNotifications()
 
-  setInterval(getPrivateMessages, 10000)
+  setInterval(getNotifications, 10000)
 </script>
 
 <style lang="scss">
