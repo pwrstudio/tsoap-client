@@ -11,7 +11,10 @@
   const dispatch = createEventDispatcher()
 
   // *** STORES
-  import { localUserAuthenticated } from "../stores"
+  import {
+    localUserAuthenticated,
+    authenticatedUserInformation,
+  } from "../stores"
 
   // *** PROPS
   export let section = ""
@@ -30,6 +33,30 @@
   const teleport = () => {
     dispatch("teleport")
   }
+
+  let notifications = []
+
+  const getPrivateMessages = () => {
+    if (
+      $localUserAuthenticated &&
+      get($authenticatedUserInformation, "username", false)
+    ) {
+      let username = $authenticatedUserInformation.username
+      fetch("https://sso.tsoap.dev/notifications?user=" + username)
+        .then(response => response.json())
+        .then(data => {
+          console.log("polling notifications in toolbar", data)
+          // notifications = data.messages
+        })
+        .catch(err => {
+          console.error(err)
+        })
+    }
+  }
+
+  getNotifications()
+
+  setInterval(getPrivateMessages, 10000)
 </script>
 
 <style lang="scss">
@@ -40,7 +67,6 @@
     height: 100%;
     padding-left: 7px;
     padding-right: $SPACE_S;
-    // background: $COLOR_DARK;
     display: flex;
     align-items: center;
     user-select: none;
@@ -138,7 +164,7 @@
     <!-- CHAT => open full input -->
     <div
       class="toolbar-item chat"
-      on:click={(e) => {
+      on:click={e => {
         showChatInput = true
         navigate('/')
       }}>
@@ -164,7 +190,7 @@
       maxlength="600"
       bind:value={chatInputValue}
       class:smaller={$localUserAuthenticated}
-      on:keydown={(e) => {
+      on:keydown={e => {
         if (e.keyCode == 13) submitChat()
       }} />
     <button on:click={submitChat}>Send</button>
