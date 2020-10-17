@@ -8,6 +8,7 @@
   // IMPORTS
   import { links, navigate } from "svelte-routing"
   import { createEventDispatcher } from "svelte"
+  import get from "lodash/get"
   const dispatch = createEventDispatcher()
 
   // *** STORES
