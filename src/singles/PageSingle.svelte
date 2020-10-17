@@ -21,8 +21,6 @@
 <style lang="scss">
   @import "../variables.scss";
 
-  
-
   .page-single {
     .main-header {
       padding: $SPACE_M;
@@ -55,7 +53,7 @@
 </style>
 
 <!-- METADATA -->
-<MetaData post={page}/>
+<MetaData post={page} />
 
 <div class="page-single" in:fade use:links>
   <!-- HEADER -->

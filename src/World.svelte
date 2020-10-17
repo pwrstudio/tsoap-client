@@ -14,7 +14,7 @@
   import sample from "lodash/sample"
   import { fly, scale } from "svelte/transition"
   import { quartOut } from "svelte/easing"
-  import { urlFor, loadData, client, renderBlockText } from "./sanity.js"
+  import { urlFor, loadData, client } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
   import MediaQuery from "svelte-media-query"
@@ -48,6 +48,7 @@
   import AudioChat from "./AudioChat.svelte"
   import InventoryMessage from "./InventoryMessage.svelte"
   import MetaData from "./MetaData.svelte"
+  import Card from "./Card.svelte"
 
   // *** GLOBAL
   import {
@@ -172,17 +173,6 @@
   })
   const pages = loadData(QUERY.PAGES).catch(err => {
     console.log(err)
-  })
-  const welcomeCard = loadData(QUERY.WELCOME_CARD).catch(err => {
-    console.log(err)
-  })
-  const cards = loadData(QUERY.CARDS).catch(err => {
-    console.log(err)
-  })
-
-  cards.then(cards => {
-    console.log("CARDS ====>")
-    console.dir(cards)
   })
 
   loadData(QUERY.GLOBAL_SETTINGS)
@@ -1160,8 +1150,8 @@
     }, 5000)
 
     // ___ Show welcome card if user has not visited in last 7 days
-    showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
-    // showWelcomeCard = true
+    // showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
+    showWelcomeCard = true
     Cookies.set("tsoap-visitor", "true", { expires: 7 })
 
     // __ Redirect to authentication if user is marked as logged in
@@ -1527,11 +1517,6 @@
     border-bottom: 1px solid $COLOR_MID_1;
   }
 
-  .welcome-card {
-    padding: $SPACE_S;
-    padding-top: $SPACE_L;
-  }
-
   .debug {
     position: fixed;
     bottom: $SPACE_S;
@@ -1630,22 +1615,18 @@
 <!-- MAIN CONTENT -->
 <div class="main-content-slot" class:pushed={sidebarHidden}>
   <!-- INFORMATION BOX -->
-  {#await welcomeCard then welcomeCard}
-    {#if showWelcomeCard}
-      <div class="content-item active" transition:fly={{ y: -200 }}>
-        <div
-          class="close"
-          on:click={e => {
-            showWelcomeCard = false
-          }}>
-          ×
-        </div>
-        <div class="welcome-card">
-          {@html renderBlockText(get(welcomeCard, 'content.content', []))}
-        </div>
+  {#if showWelcomeCard && $globalSettings && $globalSettings.welcomeCard}
+    <div class="content-item active" transition:fly={{ y: -200 }}>
+      <div
+        class="close"
+        on:click={e => {
+          showWelcomeCard = false
+        }}>
+        ×
       </div>
-    {/if}
-  {/await}
+      <Card card={$globalSettings.welcomeCard} />
+    </div>
+  {/if}
 
   <!-- AUDIOZONE -->
   {#if inAudioZone}

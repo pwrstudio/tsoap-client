@@ -49,11 +49,9 @@ export const QUERY = {
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
   ACTIVE_STREAMS:
     "*[_id == 'active-streams']{..., mainStream->{..., participants[]->{slug,name,username}}}[0]",
-  WELCOME_CARD: "*[_id == 'welcome-card'][0]",
   CONNECTED_TO_USER: "*[participants[]._ref == $id]{...,participants[]->{...}}",
-  GLOBAL_SETTINGS: "*[_id == 'global-settings'][0]",
+  GLOBAL_SETTINGS: "*[_id == 'global-settings']{..., welcomeCard->{...}}[0]",
   AREAS: "*[_type == 'area']",
-  CARDS: "*[_type == 'cards']",
   TARGET_STREAM: 
   "*[_id == $id]{..., participants[]->{slug,name,username}}[0]",
   PINNED_MESSAGE: "*[_id == 'pinned-message'][0]",
