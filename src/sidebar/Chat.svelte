@@ -7,6 +7,7 @@
 
   // COMPONENTS
   import { onMount } from "svelte"
+  import { fade } from "svelte/transition"
   import ChatMessage from "./ChatMessage.svelte"
   import { client, renderBlockText, loadData } from "../sanity"
   import get from "lodash/get"
@@ -24,6 +25,7 @@
   export let mobileExpanded = false
 
   let pinnedText = false
+  let pinnedMessageClosed = false
 
   loadData(QUERY.PINNED_MESSAGE)
     .then(pM => {
@@ -32,6 +34,7 @@
         Array.isArray(get(pM, "content.content", false))
       ) {
         pinnedText = pM.content.content
+        pinnedMessageClosed = false
       } else {
         pinnedText = false
       }
@@ -51,6 +54,7 @@
             Array.isArray(get(pM, "content.content", false))
           ) {
             pinnedText = pM.content.content
+            pinnedMessageClosed = false
           } else {
             pinnedText = false
           }
@@ -132,6 +136,14 @@
       }
     }
   }
+
+  .close-pinned-message {
+    position: absolute;
+    top: 0px;
+    right: 10px;
+    font-size: 22px;
+    cursor: pointer;
+  }
 </style>
 
 <div class="chat-container">
@@ -143,9 +155,16 @@
     class="message-container"
     class:expanded={mobileExpanded}
     bind:this={messageContainerEl}>
-    {#if pinnedText}
-      <div class="pinned-message">
+    {#if pinnedText && !pinnedMessageClosed}
+      <div class="pinned-message" transition:fade|local>
         {@html renderBlockText(pinnedText)}
+        <div
+          class="close-pinned-message"
+          on:click={e => {
+            pinnedMessageClosed = true
+          }}>
+          ×
+        </div>
       </div>
     {/if}
     {#each chatMessages as message (message.msgId)}
