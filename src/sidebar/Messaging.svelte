@@ -108,9 +108,5 @@
     {#each privateMessages as message (message.id)}
       <PrivateMessageThread {message} />
     {/each}
-    <!-- <div>
-      TODO: if slug:<br />
-      TODO: Allow writing message to specified user
-    </div> -->
   </div>
 </div>

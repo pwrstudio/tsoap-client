@@ -52,8 +52,8 @@
 
   // FILTER
   $: {
-    console.log("filterTerm", filterTerm)
-    console.log("sortOrder", sortOrder)
+    // console.log("filterTerm", filterTerm)
+    // console.log("sortOrder", sortOrder)
     if (filterTerm) {
       filteredCaseStudies = fuseList[sortOrder]
         .search(filterTerm)
@@ -66,8 +66,6 @@
 
 <style lang="scss">
   @import "../variables.scss";
-
-  
 
   .case-study-container {
     height: 100%;
@@ -147,12 +145,12 @@
         border-bottom: 1px solid $COLOR_MID_1;
         background-color: white;
         word-spacing: -0.3em;
-        &:hover{
+        &:hover {
           background: white !important;
         }
-        &.related{
+        &.related {
           background-color: unset;
-          &:hover{
+          &:hover {
             background: unset !important;
           }
         }
@@ -258,7 +256,7 @@
   {#if !related}
     <!-- TEXT -->
     {#if Array.isArray(get($globalSettings, 'caseStudyOverview.content', false))}
-      <div class='description'>
+      <div class="description">
         {@html renderBlockText($globalSettings.caseStudyOverview.content)}
       </div>
     {/if}
@@ -292,23 +290,21 @@
       class:related
       href={'/case-studies/' + get(caseStudy, 'slug.current', '')}>
       <div class="inner">
-          <div class="color-icon {caseStudy.category}" />
-          <div class='mid-section'>
-            <div class="title">{caseStudy.title}</div>
-            <div class="participants">
-              {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
-                <ParticipantsList participants={caseStudy.participants}/>
-              {/if}
-            </div>
+        <div class="color-icon {caseStudy.category}" />
+        <div class="mid-section">
+          <div class="title">{caseStudy.title}</div>
+          <div class="participants">
+            {#if get(caseStudy, 'participants', false) && Array.isArray(caseStudy.participants)}
+              <ParticipantsList participants={caseStudy.participants} />
+            {/if}
           </div>
-          <div class="date">{#if caseStudy.category}{caseStudy.category}{/if}</div>
+        </div>
+        <div class="date">
+          {#if caseStudy.category}
+            {caseStudy.category === 'communication' ? 'communicating' : caseStudy.category}
+          {/if}
+        </div>
       </div>
     </a>
   {/each}
 </div>
-
-<!-- in:fade={{ delay: index < 10 ? 100 * index : 1000 }} -->
-
-<!-- on:change={e => {
-  sortCaseStudies(selectElement.value)
-  }} -->

@@ -5,26 +5,10 @@
   //
   // # # # # # # # # # # # # #
 
-  // *** IMPORTS
-  import get from "lodash/get"
-  import { slide } from "svelte/transition"
-
-  import { authenticatedUserInformation } from "../stores"
-
   // *** PROPS
   export let threadId = 0
   export let url = "https://work.anthropocene-curriculum.org/new-message"
   export let text = "+ New message"
-
-  // *** VARIABLES
-  let expanded = false
-  let recipientUserName = ""
-  let message = ""
-
-  const submitPrivateMessage = () => {
-    console.log("recipientUserName", recipientUserName)
-    console.log("message", message)
-  }
 </script>
 
 <style lang="scss">
@@ -147,27 +131,4 @@
 
 <div class="new-message">
   <a href={url} target="_blank" class="header">{text}</a>
-  <!-- <div
-  class="header"
-  on:click={e => {
-    expanded = !expanded
-  }}>
-  + New message
-</div> -->
-  <!-- {#if expanded}
-    <div class="inner" transition:slide|local>
-      <div class="row">
-        <input
-          type="[text]"
-          maxlength="200"
-          placeholder="Recipient"
-          class="recipient"
-          bind:value={recipientUserName} />
-      </div>
-      <div class="row"><textarea class="message" bind:value={message} /></div>
-      <div class="row">
-        <button on:click={submitPrivateMessage}>Send</button>
-      </div>
-    </div>
-  {/if} -->
 </div>

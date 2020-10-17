@@ -4,8 +4,6 @@
   //  METADATA
   //
   // # # # # # # # # # # # # #
-  // _lodash
-  import get from "lodash/get"
   import has from "lodash/has"
   import isArray from "lodash/isArray"
   import isEmpty from "lodash/isEmpty"

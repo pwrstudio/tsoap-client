@@ -176,6 +176,14 @@
   const welcomeCard = loadData(QUERY.WELCOME_CARD).catch(err => {
     console.log(err)
   })
+  const cards = loadData(QUERY.CARDS).catch(err => {
+    console.log(err)
+  })
+
+  cards.then(cards => {
+    console.log("CARDS ====>")
+    console.dir(cards)
+  })
 
   loadData(QUERY.GLOBAL_SETTINGS)
     .then(gS => {
@@ -566,12 +574,8 @@
           return player
         }
 
-        console.log("___YYY RANDOM")
-        console.dir(activeAvatars)
         // __ Get a random avatar
         const randomAvatar = sample(activeAvatars.filter(a => !a.notRandom))
-
-        console.log(randomAvatar)
 
         let playerObject = {}
 
