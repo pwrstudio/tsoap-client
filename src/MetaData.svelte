@@ -41,7 +41,12 @@
   }
 
   $: {
-    if (
+    if (has(post, "description") && post.description.length > 0) {
+      description = truncate(post.description, {
+        length: 260,
+        separator: /.? +/,
+      })
+    } else if (
       has(post, "biography.content") &&
       isArray(post.biography.content) &&
       !isEmpty(post.biography.content)
