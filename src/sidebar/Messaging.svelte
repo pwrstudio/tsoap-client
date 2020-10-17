@@ -25,22 +25,28 @@
   export let mobile = false
   export let mobileExpanded = false
 
-  if (
-    $localUserAuthenticated &&
-    get($authenticatedUserInformation, "username", false)
-  ) {
-    let username = $authenticatedUserInformation.username
-    // console.log(username)
-    fetch("https://sso.tsoap.dev/messages?user=" + username)
-      .then(response => response.json())
-      .then(data => {
-        // console.log(data)
-        privateMessages = data.messages
-      })
-      .catch(err => {
-        console.error(err)
-      })
+  const getPrivateMessages = () => {
+    if (
+      $localUserAuthenticated &&
+      get($authenticatedUserInformation, "username", false)
+    ) {
+      let username = $authenticatedUserInformation.username
+      // console.log(username)
+      fetch("https://sso.tsoap.dev/messages?user=" + username)
+        .then(response => response.json())
+        .then(data => {
+          console.log("private messages", data)
+          privateMessages = data.messages
+        })
+        .catch(err => {
+          console.error(err)
+        })
+    }
   }
+
+  getPrivateMessages()
+
+  setInterval(getPrivateMessages, 10000)
 </script>
 
 <style lang="scss">
