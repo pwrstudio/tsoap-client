@@ -47,10 +47,11 @@
         .then(response => response.json())
         .then(data => {
           console.log("polling notifications in toolbar", data)
-          notificationCount =
-            get(data, "notifications.notifications", []).filter(
-              n => n.notification_type === 6 && !n.read
-            ).length + 1
+          notificationCount = get(
+            data,
+            "notifications.notifications",
+            []
+          ).filter(n => n.notification_type === 6 && !n.read).length
           console.log("notificationCount", notificationCount)
         })
         .catch(err => {
