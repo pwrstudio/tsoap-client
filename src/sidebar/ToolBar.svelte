@@ -185,8 +185,9 @@
     <a
       href="/messages"
       class="toolbar-item"
-      class:active={section === 'messages'}>Messages
-      {#if notificationCount > 0}({notificationCount}){/if}</a>
+      class:active={section === 'messages'}>Messages{#if notificationCount > 0}
+        ({notificationCount})
+      {/if}</a>
     <div class="toolbar-item" on:click={teleport}>Support</div>
   {:else}
     <!-- CHAT -->
