@@ -8,18 +8,58 @@
   // COMPONENTS
   import { onMount } from "svelte"
   import ChatMessage from "./ChatMessage.svelte"
+  import { client, renderBlockText, loadData } from "../sanity"
+  import get from "lodash/get"
 
   // DOM REFERENCES
   let messageContainerEl = {}
 
   // GLOBAL
-  import { COLORMAP } from "../global.js"
+  import { QUERY } from "../global.js"
 
   // PROPS
   export let chatMessages = []
   export let currentRoom = 2
   export let mobile = false
   export let mobileExpanded = false
+
+  let pinnedText = false
+
+  loadData(QUERY.PINNED_MESSAGE)
+    .then(pM => {
+      if (
+        pM.showPinnedMessage &&
+        Array.isArray(get(pM, "content.content", false))
+      ) {
+        pinnedText = pM.content.content
+      } else {
+        pinnedText = false
+      }
+    })
+    .catch(err => {
+      console.log(err)
+    })
+
+  // __ Listen for changes to the pinned message
+  client.listen(QUERY.PINNED_MESSAGE).subscribe(update => {
+    pinnedText = false
+    setTimeout(() => {
+      loadData(QUERY.PINNED_MESSAGE)
+        .then(pM => {
+          if (
+            pM.showPinnedMessage &&
+            Array.isArray(get(pM, "content.content", false))
+          ) {
+            pinnedText = pM.content.content
+          } else {
+            pinnedText = false
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }, 500)
+  })
 
   onMount(async () => {
     if (messageContainerEl) {
@@ -64,6 +104,23 @@
     padding-top: $SPACE_S;
     @include hide-scroll;
 
+    .pinned-message {
+      background: $COLOR_DARK;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding-top: $SPACE_XS;
+      margin-bottom: $SPACE_XS;
+      padding-bottom: $SPACE_XS;
+      padding-left: $SPACE_S;
+      padding-right: $SPACE_S;
+      color: $COLOR_LIGHT;
+      font-size: $FONT_SIZE_SMALL;
+      user-select: none;
+      border-bottom: 1px solid $COLOR_MID_2;
+    }
+
     @include screen-size("small") {
       height: 100%;
       padding-bottom: 0;
@@ -72,7 +129,6 @@
         padding-bottom: $SPACE_S;
         padding-top: $SPACE_S;
         height: calc(100% - 28px);
-        
       }
     }
   }
@@ -87,6 +143,11 @@
     class="message-container"
     class:expanded={mobileExpanded}
     bind:this={messageContainerEl}>
+    {#if pinnedText}
+      <div class="pinned-message">
+        {@html renderBlockText(pinnedText)}
+      </div>
+    {/if}
     {#each chatMessages as message (message.msgId)}
       <ChatMessage {message} />
     {/each}

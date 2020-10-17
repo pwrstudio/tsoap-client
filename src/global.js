@@ -55,6 +55,7 @@ export const QUERY = {
   AREAS: "*[_type == 'area']",
   TARGET_STREAM: 
   "*[_id == $id]{..., participants[]->{slug,name,username}}[0]",
+  PINNED_MESSAGE: "*[_id == 'pinned-message'][0]",
 }
 
 export const TEXT_STYLE_AVATAR = {
