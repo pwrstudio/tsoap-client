@@ -35,7 +35,7 @@
     dispatch("teleport")
   }
 
-  let notifications = []
+  let notificationCount = 0
 
   const getNotifications = () => {
     if (
@@ -47,7 +47,12 @@
         .then(response => response.json())
         .then(data => {
           console.log("polling notifications in toolbar", data)
-          // notifications = data.messages
+          notificationCount = get(
+            data,
+            "notifications.notifications",
+            []
+          ).filter(n => n.notification_type === 6 && !n.read).length
+          console.log("notificationCount", notificationCount)
         })
         .catch(err => {
           console.error(err)
@@ -181,7 +186,8 @@
     <a
       href="/messages"
       class="toolbar-item"
-      class:active={section === 'messages'}>Messages</a>
+      class:active={section === 'messages'}>Messages
+      {#if notificationCount > 0}({notificationCount}){/if}</a>
     <div class="toolbar-item" on:click={teleport}>Support</div>
   {:else}
     <!-- CHAT -->
