@@ -64,12 +64,15 @@ export const urlFor = source => builder.image(source)
 
 const serializers = {
   marks: {
-    link: props =>
-      h(
+    link: props => {
+      const external = get(props, 'mark.href', '').includes('http')
+      let linkOptions = external ? { target: "_blank", rel: "noreferrer", href: props.mark.href } : { href: props.mark.href }
+      return h(
         "a",
-        { target: "_blank", rel: "noreferrer", href: props.mark.href },
+        linkOptions,
         props.children
-      ),
+      )
+    },
     highlight: props => h("mark", { className: "highlight" }, props.children),
     footnote: props => {
       return h(

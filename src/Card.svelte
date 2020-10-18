@@ -9,6 +9,7 @@
   import { renderBlockText } from "./sanity.js"
   import get from "lodash/get"
   import { fade } from "svelte/transition"
+  import { links } from "svelte-routing"
 
   // PROPS
   export let card = {}
@@ -53,7 +54,7 @@
   }
 </style>
 
-<div class="card">
+<div class="card" use:links>
   {#each card.slides as slide, index (slide._key)}
     {#if Array.isArray(get(slide, 'content', false)) && currentIndex === index}
       <div class="slide" in:fade|local>
