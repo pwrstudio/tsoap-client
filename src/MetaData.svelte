@@ -33,8 +33,10 @@
       title = stripHtml(post.name) + " | " + $globalSettings.title
     } else if (has(post, "title") && !isEmpty(post.title)) {
       title = stripHtml(post.title) + " | " + $globalSettings.title
-    } else {
+    } else if ($globalSettings.title) {
       title = $globalSettings.title
+    } else {
+      title = "The Shape of a Practice"
     }
   }
 
