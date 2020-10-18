@@ -79,6 +79,7 @@
     currentAudioRoom,
     currentVideoRoom,
     currentAreaObject,
+    globalUserList,
   } from "./stores.js"
 
   // *** PROPS
@@ -173,6 +174,12 @@
   })
   const pages = loadData(QUERY.PAGES).catch(err => {
     console.log(err)
+  })
+
+  users.then(users => {
+    console.dir(users)
+    globalUserList.set(users)
+    return users
   })
 
   loadData(QUERY.GLOBAL_SETTINGS)
@@ -493,13 +500,15 @@
           const onDown = e => {
             // __ Open profile if accredited user
             if (player.authenticated) {
-              navigate(
-                "/profiles/" +
-                  slugify(player.discourseName, {
-                    lower: true,
-                    strict: true,
-                  })
-              )
+              console.log("______ user")
+              console.dir(player)
+              // navigate(
+              //   "/profiles/" +
+              //     slugify(player.discourseName, {
+              //       lower: true,
+              //       strict: true,
+              //     })
+              // )
             }
             if (player.uuid != $localUserUUID) {
               e.stopPropagation()

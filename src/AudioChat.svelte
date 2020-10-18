@@ -5,12 +5,15 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
+  // *** IMPORTS
   import { fade } from "svelte/transition"
   import { createEventDispatcher } from "svelte"
   import { onMount, onDestroy } from "svelte"
 
-  // PROPS
+  // *** COMPONENTS
+  import AudioChatUser from "./AudioChatUser.svelte"
+
+  // *** PROPS
   export let user = {}
   export let userName = ""
   export let roomName = ""
@@ -60,27 +63,6 @@
               error: error => {
                 console.error("-- Error attaching plugin...", error)
               },
-              consentDialog: on => {
-                // console.log('consent dialog')
-              },
-              iceState: state => {
-                // console.log("ICE state changed to " + state);
-              },
-              mediaState: (medium, on) => {
-                // console.log(
-                //   "Janus " +
-                //     (on ? "started" : "stopped") +
-                //     " receiving our " +
-                //     medium
-                // )
-              },
-              webrtcState: on => {
-                // console.log(
-                //   "Janus says our WebRTC PeerConnection is " +
-                //     (on ? "up" : "down") +
-                //     " now"
-                // )
-              },
               onmessage: (msg, jsep) => {
                 // console.log(" ::: Got a message :::", msg)
                 const event = msg["audiobridge"]
@@ -88,7 +70,7 @@
                 if (event) {
                   if (event === "joined") {
                     if (msg["id"]) {
-                      // console.dir(msg)
+                      console.dir(msg)
                       myId = msg["id"]
                       userList = [
                         ...userList,
@@ -123,36 +105,24 @@
                     }
                     if (msg["participants"]) {
                       userList = [...userList, ...msg["participants"]]
-                      // console.dir(userList)
                     }
                   } else if (event === "talking") {
                     console.log("TALKING")
-                    console.log(msg["id"])
                     let index = userList.findIndex(u => u.id === msg["id"])
                     console.log(index)
                     userList[index].talking = true
                   } else if (event === "stopped-talking") {
                     console.log("STOPPED TALKING")
-                    console.log(msg["id"])
                     let index = userList.findIndex(u => u.id === msg["id"])
                     console.log(index)
                     userList[index].talking = false
-                  } else if (event === "roomchanged") {
-                    // console.log("Moved to room " + msg["room"] + ", new ID: " + myId);
-                  } else if (event === "destroyed") {
-                    // console.log("The room has been destroyed!")
                   } else if (event === "event") {
-                    if (msg["participants"]) {
-                      // console.log("participant change")
-                      // console.dir(...userList)
-                      // console.dir(...msg["participants"])
-                      // userList = [...userList, ...msg["participants"]];
-                    } else if (msg["error"]) {
+                    if (msg["error"]) {
                       console.error(msg["error"])
                     }
                     if (msg["leaving"]) {
-                      Janus.log("Participant left: " + msg["leaving"] + ")")
-                      let index = userList.findIndex(
+                      // Janus.log("Participant left: " + msg["leaving"] + ")")
+                      const index = userList.findIndex(
                         u => u.id === msg["leaving"]
                       )
                       // console.log(index)
@@ -162,17 +132,11 @@
                   }
                 }
                 if (jsep) {
-                  Janus.debug("Handling SDP as well...", jsep)
+                  // Janus.debug("Handling SDP as well...", jsep)
                   mixertest.handleRemoteJsep({ jsep: jsep })
                 }
               },
-              // onlocalstream: stream => {
-              // 	Janus.debug(" ::: Got a local stream :::", stream);
-              // },
               onremotestream: stream => {
-                // console.log('remote stream recieved')
-                // console.dir(stream)
-
                 Janus.attachMediaStream(
                   document.querySelector("#roomaudio"),
                   stream
@@ -189,7 +153,6 @@
               },
               oncleanup: () => {
                 webrtcUp = false
-                // console.log(" ::: Got a cleanup notification :::");
               },
             })
           },
@@ -289,45 +252,6 @@
       @include screen-size("small") {
         min-height: unset;
       }
-
-      .user {
-        margin-bottom: $SPACE_S;
-        width: 100%;
-        line-height: 3em;
-        height: 3em;
-
-        .icon {
-          float: left;
-          height: 3em;
-          width: 3em;
-          border-radius: 3em;
-          margin-right: 2em;
-          background: $COLOR_DARK;
-          border: 2px solid transparent;
-          transition: border 0.3s ease-out;
-        }
-
-        &.talking {
-          .icon {
-            border: 2px solid rgb(113, 238, 113);
-          }
-        }
-
-        .name {
-          float: left;
-        }
-        .speaking {
-          float: right;
-          display: flex;
-          align-items: center;
-          height: 3em;
-          padding-right: $SPACE_M;
-
-          svg {
-            opacity: 0.5;
-          }
-        }
-      }
     }
   }
 </style>
@@ -386,10 +310,7 @@
   <!-- USERLIST -->
   <div class="userlist">
     {#each userList as user (user.id)}
-      <div class="user {user.id}" class:talking={user.talking} transition:fade>
-        <div class="icon" />
-        <div class="name">{user.display}</div>
-      </div>
+      <AudioChatUser {user} />
     {/each}
   </div>
 </div>
