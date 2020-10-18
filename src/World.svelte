@@ -1827,9 +1827,8 @@
 {/if}
 
 <!-- AUDIOCHAT BOX  -->
-<!-- $localUserAuthenticated && -->
 {#await audioRoomNames then audioRoomNames}
-  {#if !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
+  {#if $localUserAuthenticated && !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
     <div class="audiochat-box">
       <div class="message">
         Nearby audioroom
@@ -1868,7 +1867,7 @@
   <Error message={UI.errorMessage} />
 {/if}
 
-{#if $currentAreaObject}
+<!-- {#if $currentAreaObject}
   <div class="debug" style={'background-color:' + $currentAreaObject.color}>
     <strong>{$currentAreaObject.title}</strong>
     / video:
@@ -1878,4 +1877,4 @@
     / text:
     {$currentAreaObject.textRoom}
   </div>
-{/if}
+{/if} -->
