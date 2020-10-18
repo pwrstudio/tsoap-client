@@ -757,16 +757,17 @@
             }
 
             // MESSAGE => REMOVE
-            gameRoom.state.messages.onRemove = message => {
-              try {
-                const itemIndex = chatMessages.findIndex(m => m === message)
-                chatMessages.splice(itemIndex, 1)
-                chatMessages = chatMessages
-              } catch (err) {
-                setUIState(STATE.ERROR, err)
-                console.dir(err)
-              }
-            }
+            gameRoom.onMessage("nukeMessage", msgIdToRemove => {
+              console.log("!!!! MESGS")
+              console.dir(msgIdToRemove)
+              const itemIndex = chatMessages.findIndex(
+                m => m.msgId === msgIdToRemove
+              )
+              console.log(itemIndex)
+              console.dir(chatMessages[itemIndex])
+              chatMessages.splice(itemIndex, 1)
+              chatMessages = chatMessages
+            })
 
             // MESSAGE => SUBMIT
             submitChat = event => {
@@ -1856,7 +1857,6 @@
       }} />
   {/if}
 {/await}
-
 
 <!-- LOADING -->
 {#if UI.state == STATE.LOADING}

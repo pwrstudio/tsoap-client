@@ -264,7 +264,7 @@
   <div class="header">
     <div class="text">
       {userList.length}
-      users in room
+      users in
       <strong>{roomName}</strong>
     </div>
     <div class="microphone" on:click={toggleaudio}>
