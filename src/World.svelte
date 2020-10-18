@@ -175,12 +175,14 @@
   const pages = loadData(QUERY.PAGES).catch(err => {
     console.log(err)
   })
-
-  users.then(users => {
-    console.dir(users)
-    globalUserList.set(users)
-    return users
+  const audioRoomNames = loadData(QUERY.AUDIOROOM_NAMES).catch(err => {
+    console.log(err)
   })
+
+  // audioRoomNames.then(audioRoomNames => {
+  //   console.dir(audioRoomNames)
+  //   return audioRoomNames
+  // })
 
   loadData(QUERY.GLOBAL_SETTINGS)
     .then(gS => {
@@ -1824,33 +1826,37 @@
 {/if}
 
 <!-- AUDIOCHAT BOX  -->
-{#if $localUserAuthenticated && !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
-  <div class="audiochat-box">
-    <div class="message">
-      Nearby audioroom
-      <strong>{$currentAudioRoom}</strong>
+<!-- $localUserAuthenticated && -->
+{#await audioRoomNames then audioRoomNames}
+  {#if !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
+    <div class="audiochat-box">
+      <div class="message">
+        Nearby audioroom
+        <strong>{get(audioRoomNames, 'audioRoom_' + $currentAudioRoom, 'ERROR')}</strong>
+      </div>
+      <div
+        class="button"
+        on:click={e => {
+          audioChatActive = true
+        }}>
+        Join
+      </div>
     </div>
-    <div
-      class="button"
-      on:click={e => {
-        audioChatActive = true
-      }}>
-      Join
-    </div>
-  </div>
-{/if}
+  {/if}
 
-<!-- AUDIO CHAT -->
-{#if audioChatActive}
-  <AudioChat
-    user={localPlayers[$localUserSessionID]}
-    userName={localPlayers[$localUserSessionID].name}
-    roomName={$currentAudioRoom}
-    roomId={$currentAudioRoom}
-    on:close={e => {
-      audioChatActive = false
-    }} />
-{/if}
+  <!-- AUDIO CHAT -->
+  {#if audioChatActive}
+    <AudioChat
+      user={localPlayers[$localUserSessionID]}
+      userName={localPlayers[$localUserSessionID].name}
+      roomName={get(audioRoomNames, 'audioRoom_' + $currentAudioRoom, 'ERROR')}
+      roomId={$currentAudioRoom}
+      on:close={e => {
+        audioChatActive = false
+      }} />
+  {/if}
+{/await}
+
 
 <!-- LOADING -->
 {#if UI.state == STATE.LOADING}

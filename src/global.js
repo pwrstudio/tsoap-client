@@ -55,6 +55,7 @@ export const QUERY = {
   TARGET_STREAM: 
   "*[_id == $id]{..., participants[]->{slug,name,username}}[0]",
   PINNED_MESSAGE: "*[_id == 'pinned-message'][0]",
+  AUDIOROOM_NAMES: "*[_id == 'audioroom-names'][0]",
 }
 
 export const TEXT_STYLE_AVATAR = {
