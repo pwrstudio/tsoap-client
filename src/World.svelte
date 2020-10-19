@@ -524,14 +524,13 @@
             if (player.authenticated) {
               console.log("______ user")
               console.dir(player)
-              // TODO: get correct slug
-              navigate(
-                "/profiles/" +
-                  slugify(player.discourseName, {
-                    lower: true,
-                    strict: true,
-                  })
+              // __ Get user from userlist
+              const targetUser = $globalUserList.find(
+                u => u.username === player.discourseName
               )
+              if (targetUser && get(targetUser, "slug.current", false)) {
+                navigate("/profiles/" + targetUser.slug.current)
+              }
             }
             if (player.uuid != $localUserUUID) {
               e.stopPropagation()
@@ -1858,8 +1857,7 @@
 
 <!-- AUDIOCHAT BOX  -->
 {#await audioRoomNames then audioRoomNames}
-  <!-- $localUserAuthenticated && -->
-  {#if !audioChatActive && $currentAudioRoom}
+  {#if $localUserAuthenticated && !audioChatActive && $currentAudioRoom}
     <div class="audiochat-box">
       <div class="message">
         Nearby audioroom
@@ -1898,7 +1896,7 @@
   <Error message={UI.errorMessage} />
 {/if}
 
-{#if $currentAreaObject}
+<!-- {#if $currentAreaObject}
   <div class="debug" style={'background-color:' + $currentAreaObject.color}>
     <strong>{$currentAreaObject.title}</strong>
     / video:
@@ -1908,4 +1906,4 @@
     / text:
     {$currentAreaObject.textRoom}
   </div>
-{/if}
+{/if} -->
