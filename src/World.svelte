@@ -547,7 +547,7 @@
             })
             localUserSessionID.set(player.id)
             // __ Uncomment this line to show the accredited user toolkit while developing...
-            // localUserAuthenticated.set(true)
+            localUserAuthenticated.set(true)
 
             // __ Set cookie if user is successfully authenticated
             if (player.authenticated) {
@@ -1221,7 +1221,7 @@
     width: auto;
     background: $COLOR_LIGHT;
     height: auto;
-    line-height: 2em;
+    // line-height: 2em;
     text-align: center;
     top: $SPACE_S;
     left: $SPACE_S;
@@ -1248,8 +1248,9 @@
     }
 
     .button {
-      padding-left: $SPACE_M;
-      padding-right: $SPACE_M;
+      padding: 0 $SPACE_M;
+      display: inline-table;
+
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_MID_2;
       border-radius: 10px;
