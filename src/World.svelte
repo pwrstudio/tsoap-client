@@ -504,13 +504,14 @@
             if (player.authenticated) {
               console.log("______ user")
               console.dir(player)
-              // navigate(
-              //   "/profiles/" +
-              //     slugify(player.discourseName, {
-              //       lower: true,
-              //       strict: true,
-              //     })
-              // )
+              // TODO: get correct slug
+              navigate(
+                "/profiles/" +
+                  slugify(player.discourseName, {
+                    lower: true,
+                    strict: true,
+                  })
+              )
             }
             if (player.uuid != $localUserUUID) {
               e.stopPropagation()
