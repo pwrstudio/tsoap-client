@@ -12,7 +12,7 @@
   import { Viewport } from "pixi-viewport"
   import get from "lodash/get"
   import sample from "lodash/sample"
-  import { fly, scale } from "svelte/transition"
+  import { fly, scale, fade } from "svelte/transition"
   import { quartOut } from "svelte/easing"
   import { urlFor, loadData, client } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
@@ -50,6 +50,7 @@
   import InventoryMessage from "./InventoryMessage.svelte"
   import MetaData from "./MetaData.svelte"
   import Card from "./Card.svelte"
+  import Tutorial from "./overlays/Tutorial.svelte"
 
   // *** GLOBAL
   import {
@@ -187,7 +188,7 @@
 
   loadData(QUERY.GLOBAL_SETTINGS)
     .then(gS => {
-      // console.log("globalSettings", gS)
+      console.log("globalSettings", gS)
       globalSettings.set(gS)
     })
     .catch(err => {
@@ -1420,42 +1421,6 @@
 
       @include hide-scroll;
 
-      .close {
-        margin-bottom: 20px;
-        position: absolute;
-        top: -6px;
-        right: $SPACE_S;
-        font-size: 38px;
-        color: $COLOR_MID_2;
-        cursor: pointer;
-        text-decoration: none;
-        transition: color 0.3s $transition;
-        z-index: 10000;
-
-        @include screen-size("small") {
-          margin-bottom: 0;
-          margin-top: 0;
-
-          &.passive {
-            min-height: 100vh;
-          }
-        }
-
-        &:hover {
-          // transform: scale(1.1);
-          color: $COLOR_MID_3;
-        }
-      }
-
-      @include screen-size("small") {
-        margin-top: 0;
-        margin-bottom: 0;
-
-        &.passive {
-          min-height: 100vh;
-        }
-      }
-
       transition: transform 0.3s ease-out;
     }
   }
@@ -1532,6 +1497,53 @@
     border-bottom: 1px solid $COLOR_MID_1;
   }
 
+  .tutorial-wrap-outer{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter:blur(2px);
+    z-index: 100000;
+
+    .close {
+        margin-bottom: 20px;
+        position: absolute;
+        top: -6px;
+        right: $SPACE_S;
+        font-size: 38px;
+        color: $COLOR_MID_2;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.3s $transition;
+        // z-index: 1000000;  
+
+        @include screen-size("small") {
+          margin-bottom: 0;
+          margin-top: 0;
+
+          &.passive {
+            min-height: 100vh;
+          }
+        }
+
+        &:hover {
+          // transform: scale(1.1);
+          color: $COLOR_MID_3;
+        }
+    }
+
+      .background-hittable{
+        height:100%;
+        width:100%;
+        position:absolute;
+        top:0;
+        cursor:pointer;
+        z-index:-99;
+      }
+  }
+
   .debug {
     position: fixed;
     bottom: $SPACE_S;
@@ -1539,6 +1551,7 @@
     padding: $SPACE_S;
     font-size: 8px;
   }
+  
 </style>
 
 <!-- <MetaData /> -->
@@ -1633,7 +1646,7 @@
 <!-- MAIN CONTENT -->
 <div class="main-content-slot" class:pushed={sidebarHidden}>
   <!-- INFORMATION BOX -->
-  {#if showWelcomeCard && $globalSettings && $globalSettings.welcomeCard}
+  <!-- {#if showWelcomeCard && $globalSettings && $globalSettings.welcomeCard}
     <div class="content-item active" transition:fly={{ y: -200 }}>
       <div
         class="close"
@@ -1644,7 +1657,7 @@
       </div>
       <Card card={$globalSettings.welcomeCard} />
     </div>
-  {/if}
+  {/if} -->
 
   <!-- AUDIOZONE -->
   {#if inAudioZone}
@@ -1867,6 +1880,17 @@
 <!-- LOADING -->
 {#if UI.state == STATE.LOADING}
   <LoadingScreen />
+{/if}
+
+<!-- WELCOME / TUTORIAL -->
+{#if UI.state != STATE.LOADING && showWelcomeCard}
+  <div class="tutorial-wrap-outer" transition:fade >
+      <Tutorial card={$globalSettings.welcomeCard} bind:showWelcomeCard={showWelcomeCard}/>
+      <div 
+        class="background-hittable"
+        on:click={e => { showWelcomeCard = false }}
+      ></div>
+  </div>
 {/if}
 
 <!-- ERROR -->
