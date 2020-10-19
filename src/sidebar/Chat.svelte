@@ -115,14 +115,15 @@
       left: 0;
       width: 100%;
       padding-top: $SPACE_XS;
-      margin-bottom: $SPACE_XS;
       padding-bottom: $SPACE_XS;
       padding-left: $SPACE_S;
       padding-right: $SPACE_S;
+      margin-bottom: $SPACE_XS;
       color: $COLOR_LIGHT;
       font-size: $FONT_SIZE_SMALL;
       user-select: none;
       border-bottom: 1px solid $COLOR_MID_2;
+      pointer-events: all;
     }
 
     @include screen-size("small") {
