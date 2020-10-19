@@ -27,8 +27,11 @@
   const opaqueId = "audiobridgetest-" + Janus.randomString(12)
   let webrtcUp = false
   let audioenabled = false
+  let volumeOn = true
   let myId = ""
+  let audioEl = {}
   let toggleaudio = () => {}
+  let togglevolume = () => {}
 
   let userList = []
 
@@ -107,14 +110,14 @@
                       userList = [...userList, ...msg["participants"]]
                     }
                   } else if (event === "talking") {
-                    console.log("TALKING")
+                    // console.log("TALKING")
                     let index = userList.findIndex(u => u.id === msg["id"])
-                    console.log(index)
+                    // console.log(index)
                     userList[index].talking = true
                   } else if (event === "stopped-talking") {
-                    console.log("STOPPED TALKING")
+                    // console.log("STOPPED TALKING")
                     let index = userList.findIndex(u => u.id === msg["id"])
-                    console.log(index)
+                    // console.log(index)
                     userList[index].talking = false
                   } else if (event === "event") {
                     if (msg["error"]) {
@@ -146,9 +149,19 @@
                 audioenabled = true
                 toggleaudio = () => {
                   audioenabled = !audioenabled
+                  console.log("audioenabled", audioenabled)
                   mixertest.send({
                     message: { request: "configure", muted: !audioenabled },
                   })
+                }
+                // Mute button
+                togglevolume = () => {
+                  volumeOn = !volumeOn
+                  if (audioEl) {
+                    console.log("volumeOn", volumeOn)
+                    audioEl.volume = volumeOn ? 1 : 0
+                    console.dir(audioEl)
+                  }
                 }
               },
               oncleanup: () => {
@@ -183,7 +196,7 @@
   .audioChatContainer {
     position: fixed;
     width: auto;
-    min-width: 400px;
+    min-width: 460px;
     background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
@@ -237,7 +250,17 @@
       .microphone {
         opacity: 0.5;
         position: relative;
-        top: 2px;
+        top: 6px;
+        cursor: pointer;
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+
+      .volume {
+        opacity: 0.5;
+        position: relative;
+        top: 6px;
         cursor: pointer;
         &:hover {
           opacity: 0.7;
@@ -258,7 +281,12 @@
 
 <div transition:fade class="audioChatContainer">
   <!-- AUDIO ELEMENT -->
-  <audio id="roomaudio" width="100%" height="100%" autoplay />
+  <audio
+    id="roomaudio"
+    width="100%"
+    height="100%"
+    autoplay
+    bind:this={audioEl} />
 
   <!-- HEADER -->
   <div class="header">
@@ -267,13 +295,13 @@
       users in
       <strong>{roomName}</strong>
     </div>
-    <div class="microphone" on:click={toggleaudio}>
-      {#if audioenabled}
+    <div class="volume" on:click={togglevolume}>
+      {#if volumeOn}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          height="24"
+          height="20"
           viewBox="0 0 24 24"
-          width="24">
+          width="20">
           <path d="M0 0h24v24H0z" fill="none" />
           <path
             d="M3 9v6h4l5 5V4L7 9H3zm13.5
@@ -284,9 +312,9 @@
       {:else}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          height="24"
+          height="20"
           viewBox="0 0 24 24"
-          width="24">
+          width="20">
           <path d="M0 0h24v24H0z" fill="none" />
           <path
             d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45
@@ -296,6 +324,25 @@
       4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73
       21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
         </svg>
+      {/if}
+    </div>
+    <div class="microphone" on:click={toggleaudio}>
+      {#if audioenabled}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="20"
+          viewBox="0 0 24 24"
+          width="20"><path d="M0 0h24v24H0z" fill="none" />
+          <path
+            d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z" /></svg>
+      {:else}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="20"
+          viewBox="0 0 24 24"
+          width="20"><path d="M0 0h24v24H0zm0 0h24v24H0z" fill="none" />
+          <path
+            d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z" /></svg>
       {/if}
     </div>
     <div

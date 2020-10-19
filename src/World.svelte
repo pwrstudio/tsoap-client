@@ -133,7 +133,7 @@
         const targetArea = $areaList.find(a => a.slug.current === slug)
         if (targetArea) {
           console.log(REVERSE_HEX_MAP[targetArea.color])
-          if(REVERSE_HEX_MAP[targetArea.color]) {
+          if (REVERSE_HEX_MAP[targetArea.color]) {
             teleportTo(REVERSE_HEX_MAP[targetArea.color])
           }
         }
@@ -197,10 +197,12 @@
     console.log(err)
   })
 
-  // exhibitions.then(exhibitions => {
-  //   console.dir(exhibitions)
-  //   return exhibitions
-  // })
+  // __ Set global user list
+  users.then(users => {
+    console.dir(users)
+    globalUserList.set(users)
+    return users
+  })
 
   loadData(QUERY.GLOBAL_SETTINGS)
     .then(gS => {
@@ -1178,7 +1180,7 @@
     // !!! HACK
     setTimeout(() => {
       caseStudiesLoaded = true
-    }, 5000)
+    }, 10000)
 
     // ___ Show welcome card if user has not visited in last 7 days
     // showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
@@ -1856,7 +1858,8 @@
 
 <!-- AUDIOCHAT BOX  -->
 {#await audioRoomNames then audioRoomNames}
-  {#if $localUserAuthenticated && !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
+  <!-- $localUserAuthenticated && -->
+  {#if !audioChatActive && $currentAudioRoom}
     <div class="audiochat-box">
       <div class="message">
         Nearby audioroom
