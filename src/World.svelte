@@ -1752,7 +1752,7 @@
           class:expanded={mobileExpanded}
           on:click={e => {
             console.log(e.target.nodeName)
-            if (!mobileExpanded && e.target.nodeName == 'INPUT') {
+            if (!mobileExpanded && e.target.nodeName == 'INPUT' || e.target.classList.contains('toolbar-item')) {
               mobileExpanded = true
             }
           }}>
