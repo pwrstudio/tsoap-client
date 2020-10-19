@@ -161,6 +161,9 @@
   const events = loadData(QUERY.EVENTS).catch(err => {
     console.log(err)
   })
+  const exhibitions = loadData(QUERY.EXHIBITIONS).catch(err => {
+    console.log(err)
+  })
   const caseStudies = loadData(QUERY.CASE_STUDIES).catch(err => {
     console.log(err)
   })
@@ -180,9 +183,9 @@
     console.log(err)
   })
 
-  // audioRoomNames.then(audioRoomNames => {
-  //   console.dir(audioRoomNames)
-  //   return audioRoomNames
+  // exhibitions.then(exhibitions => {
+  //   console.dir(exhibitions)
+  //   return exhibitions
   // })
 
   loadData(QUERY.GLOBAL_SETTINGS)
@@ -1584,7 +1587,9 @@
           <div class="top-area">
             <!-- CALENDAR -->
             {#await events then events}
-              <EventList {events} />
+              {#await exhibitions then exhibitions}
+                <EventList {events} {exhibitions} />
+              {/await}
             {/await}
           </div>
           <div class="bottom-area">
@@ -1742,7 +1747,7 @@
 <!-- MOBILE -->
 <MediaQuery query="(max-width: 800px)" let:matches>
   {#if matches}
-      <Clock />
+    <Clock />
     {#if localPlayers[$localUserSessionID]}
       <!-- MOBILE CALENDAR-->
       <div class="mobile-calendar" use:links>
@@ -1758,7 +1763,7 @@
           class:expanded={mobileExpanded}
           on:click={e => {
             console.log(e.target.nodeName)
-            if (!mobileExpanded && e.target.nodeName == 'INPUT' || e.target.classList.contains('toolbar-item')) {
+            if ((!mobileExpanded && e.target.nodeName == 'INPUT') || e.target.classList.contains('toolbar-item')) {
               mobileExpanded = true
             }
           }}>
@@ -1874,7 +1879,7 @@
   <Error message={UI.errorMessage} />
 {/if}
 
-<!-- {#if $currentAreaObject}
+{#if $currentAreaObject}
   <div class="debug" style={'background-color:' + $currentAreaObject.color}>
     <strong>{$currentAreaObject.title}</strong>
     / video:
@@ -1884,4 +1889,4 @@
     / text:
     {$currentAreaObject.textRoom}
   </div>
-{/if} -->
+{/if}

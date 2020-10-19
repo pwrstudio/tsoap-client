@@ -33,6 +33,8 @@ export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
 export const QUERY = {
   GRAPHICS_SETTINGS:
     "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'miniImage': miniImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
+  EXHIBITIONS:
+    "*[_type == 'exhibition']{..., area->{slug,name}, participants[]->{slug,name,username}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}}}",
   EVENTS:
     "*[_type == 'event']{..., participants[]->{slug,name,username}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}}} | order(startDate asc)",
   USERS: "*[_type == 'participant']{...,avatarLink->{'iconUrl': rest[0].asset->url}}",
