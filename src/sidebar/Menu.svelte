@@ -47,7 +47,7 @@
 
 <div class="menu-container">
   <div>
-    <a href="/case-studies" class="menu-item">Case-Studies</a>
+    <a href="/case-studies" class="menu-item">Case Studies</a>
     <a href="/pages/guide" class="menu-item">Guide</a>
     <a href="/pages/imprint" class="menu-item">Imprint</a>
   </div>
