@@ -1677,7 +1677,7 @@
       </div>
     {/if}
     <!-- SUPPORT AREA -->
-    {#if $currentVideoRoom == 'support' && activeStreams.supportStream}
+    {#if $currentVideoRoom == 'support' && activeStreams && activeStreams.supportStream}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
@@ -1686,7 +1686,9 @@
           }}>
           ×
         </div>
-        <LiveSingle event={{ streamURL: activeStreams.supportStream }} />
+        {#if activeStreams && activeStreams.supportStream}
+          <LiveSingle event={{ streamURL: activeStreams.supportStream }} />
+        {/if}
       </div>
     {/if}
   {/await}
