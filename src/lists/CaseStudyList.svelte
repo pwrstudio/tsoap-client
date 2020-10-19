@@ -266,7 +266,7 @@
         <div>Sort by:</div>
         <select name="sortOrder" bind:value={sortOrder}>
           <option value="title" selected>Title</option>
-          <option value="seminar">Seminar</option>
+          <option value="seminar">Practice</option>
         </select>
       </div>
       <div class="filter">
@@ -301,7 +301,11 @@
         </div>
         <div class="date">
           {#if caseStudy.category}
-            {caseStudy.category === 'communication' ? 'communicating' : caseStudy.category}
+            {#if caseStudy.category === 'communication'}
+              communicating
+            {:else if caseStudy.category === 'consensus-building'}
+              consensus building
+            {:else}{caseStudy.category}{/if}
           {/if}
         </div>
       </div>
