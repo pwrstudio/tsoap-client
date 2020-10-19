@@ -1221,7 +1221,7 @@
     width: auto;
     background: $COLOR_LIGHT;
     height: auto;
-    line-height: 2em;
+    // line-height: 2em;
     text-align: center;
     top: $SPACE_S;
     left: $SPACE_S;
@@ -1248,8 +1248,9 @@
     }
 
     .button {
-      padding-left: $SPACE_M;
-      padding-right: $SPACE_M;
+      padding: 0 $SPACE_M;
+      display: inline-table;
+
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_MID_2;
       border-radius: 10px;
@@ -1752,7 +1753,7 @@
           class:expanded={mobileExpanded}
           on:click={e => {
             console.log(e.target.nodeName)
-            if (!mobileExpanded && e.target.nodeName == 'INPUT') {
+            if (!mobileExpanded && e.target.nodeName == 'INPUT' || e.target.classList.contains('toolbar-item')) {
               mobileExpanded = true
             }
           }}>
