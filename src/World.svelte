@@ -30,6 +30,7 @@
   import ToolBar from "./sidebar/ToolBar.svelte"
   import Seminar from "./sidebar/Seminar.svelte"
   import Messaging from "./sidebar/Messaging.svelte"
+  import Clock from "./sidebar/Clock.svelte"
   // lists
   import EventList from "./lists/EventList.svelte"
   import EventListFull from "./lists/EventListFull.svelte"
@@ -1573,6 +1574,9 @@
           }
         }}>
         <!-- MINIMAP -->
+        <div class="clock">
+          <Clock />
+        </div>
         <div class="minimap">
           <MiniMap {miniImage} player={localPlayers[$localUserSessionID]} />
         </div>
@@ -1738,6 +1742,7 @@
 <!-- MOBILE -->
 <MediaQuery query="(max-width: 800px)" let:matches>
   {#if matches}
+      <Clock />
     {#if localPlayers[$localUserSessionID]}
       <!-- MOBILE CALENDAR-->
       <div class="mobile-calendar" use:links>
