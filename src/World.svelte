@@ -1421,6 +1421,33 @@
 
       @include hide-scroll;
 
+      @include screen-size("small") {
+        margin-bottom: 0;
+        margin-top: 0;
+
+        &.passive {
+          min-height: 100vh;
+        }
+      }
+
+        .close {
+          margin-bottom: 20px;
+          position: absolute;
+          top: -6px;
+          right: $SPACE_S;
+          font-size: 38px;
+          color: $COLOR_MID_2;
+          cursor: pointer;
+          text-decoration: none;
+          transition: color 0.3s $transition;
+          // z-index: 1000000;  
+
+          &:hover {
+            // transform: scale(1.1);
+            color: $COLOR_MID_3;
+          }
+      }
+
       transition: transform 0.3s ease-out;
     }
   }
@@ -1432,6 +1459,7 @@
     width: 100%;
     height: 50px;
     z-index: 1000;
+    box-shadow:0px 0px 15px rgba(0,0,0,0.1);
   }
 
   .mobile-toolkit {
@@ -1460,7 +1488,7 @@
       transition: height 250ms $transition;
       pointer-events: all;
       background: $COLOR_DARK_OPACITY;
-      height: calc(100% - 250px);
+      height: 50%;
       box-shadow: 0 0 15px 15px $COLOR_DARK_OPACITY;
       .toolbar {
         background: transparent;
@@ -1469,7 +1497,7 @@
 
     .close {
       position: fixed;
-      top: 185px;
+      bottom: calc(50% + 15px);
       right: $SPACE_S;
       font-size: 38px;
       color: $COLOR_MID_2;
@@ -1495,6 +1523,7 @@
     overflow-x: auto;
     @include hide-scroll;
     border-bottom: 1px solid $COLOR_MID_1;
+    box-shadow:0px 0px 15px rgba(0,0,0,0.1);
   }
 
   .tutorial-wrap-outer{
@@ -1506,33 +1535,6 @@
     background-color: rgba(0,0,0,0.5);
     backdrop-filter:blur(2px);
     z-index: 100000;
-
-    .close {
-        margin-bottom: 20px;
-        position: absolute;
-        top: -6px;
-        right: $SPACE_S;
-        font-size: 38px;
-        color: $COLOR_MID_2;
-        cursor: pointer;
-        text-decoration: none;
-        transition: color 0.3s $transition;
-        // z-index: 1000000;  
-
-        @include screen-size("small") {
-          margin-bottom: 0;
-          margin-top: 0;
-
-          &.passive {
-            min-height: 100vh;
-          }
-        }
-
-        &:hover {
-          // transform: scale(1.1);
-          color: $COLOR_MID_3;
-        }
-    }
 
       .background-hittable{
         height:100%;

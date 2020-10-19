@@ -41,6 +41,7 @@
 
   @include screen-size("small"){
     top:80px;
+    z-index:1;
   }
 }
 </style>
