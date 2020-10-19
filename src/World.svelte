@@ -547,7 +547,7 @@
             })
             localUserSessionID.set(player.id)
             // __ Uncomment this line to show the accredited user toolkit while developing...
-            localUserAuthenticated.set(true)
+            // localUserAuthenticated.set(true)
 
             // __ Set cookie if user is successfully authenticated
             if (player.authenticated) {
