@@ -57,6 +57,7 @@
     MAP,
     COLORMAP,
     TINTMAP,
+    REVERSE_HEX_MAP,
     QUERY,
     AREA,
     TEXT_ROOMS,
@@ -126,6 +127,19 @@
     }
   }
 
+  $: {
+    if (section === "area" && slug) {
+      if ($areaList && Array.isArray($areaList)) {
+        const targetArea = $areaList.find(a => a.slug.current === slug)
+        if (targetArea) {
+          console.log(REVERSE_HEX_MAP[targetArea.color])
+          if(REVERSE_HEX_MAP[targetArea.color]) {
+            teleportTo(REVERSE_HEX_MAP[targetArea.color])
+          }
+        }
+      }
+    }
+  }
   // ___ Listen for changes to page visibility (ie. tab being out of focus etc..)
   // ___ Fastforward animations when window is refocused
   let deltaJump = 0

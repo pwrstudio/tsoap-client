@@ -119,7 +119,7 @@
           .elips {
             margin-left: $SPACE_XS;
             margin-right: $SPACE_XS;
-            width: 60%;
+            width: 30%;
             white-space: nowrap;
             overflow: hidden;
             flex-shrink: 4;
@@ -234,7 +234,7 @@
             .elips {
               margin-left: $SPACE_XS;
               margin-right: $SPACE_XS;
-              width: 60%;
+              width: 30%;
               white-space: nowrap;
               overflow: hidden;
               flex-shrink: 4;
