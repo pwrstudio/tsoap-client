@@ -26,6 +26,7 @@
   export let mobileExpanded = false
 
   const getPrivateMessages = () => {
+    console.log("getting messages")
     if (
       $localUserAuthenticated &&
       get($authenticatedUserInformation, "username", false)
@@ -35,8 +36,8 @@
       fetch("https://sso.tsoap.dev/messages?user=" + username)
         .then(response => response.json())
         .then(data => {
-          console.log("private messages", data)
           privateMessages = data.messages
+          console.log("private messages", privateMessages)
         })
         .catch(err => {
           console.error(err)
@@ -44,8 +45,9 @@
     }
   }
 
-  getPrivateMessages()
-
+  setTimeout(() => {
+    getPrivateMessages()
+  }, 500)
   setInterval(getPrivateMessages, 10000)
 </script>
 
