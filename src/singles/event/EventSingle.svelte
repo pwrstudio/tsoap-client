@@ -26,8 +26,6 @@
 <style lang="scss">
   @import "../../variables.scss";
 
-  
-
   .event-single {
     .go-back {
       padding-top: $SPACE_XS;
@@ -98,13 +96,21 @@
 </style>
 
 <!-- METADATA -->
-<MetaData post={event}/>
+<MetaData post={event} />
 
 <div class="event-single" in:fade use:links>
   <!-- BACK LINK -->
-  <div class='go-back' on:click={e => {
-    window.history.back()}}>
-    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M21 11H6.83l3.58-3.59L9 6l-6 6 6 6 1.41-1.41L6.83 13H21z"/></svg>
+  <div
+    class="go-back"
+    on:click={e => {
+      window.history.back()
+    }}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"><path
+        d="M21 11H6.83l3.58-3.59L9 6l-6 6 6 6 1.41-1.41L6.83 13H21z" /></svg>
   </div>
   <!-- HEADER -->
   <div class="main-header">
@@ -114,7 +120,7 @@
     <!-- PARTICIPANTS -->
     {#if get(event, 'participants', false) && Array.isArray(event.participants)}
       <div class="participants">
-        <ParticipantsList participants={event.participants} messaging={true}/>
+        <ParticipantsList participants={event.participants} messaging={true} />
       </div>
     {/if}
   </div>
@@ -148,8 +154,8 @@
 
   <!-- CONNECTED CASE STUDIES -->
   <div class="connected-case-studies">
-      {#if Array.isArray(get(event, 'connectedCaseStudies')) && event.connectedCaseStudies.length > 0}
-        <CaseStudyList caseStudies={event.connectedCaseStudies} related={true} />
-      {/if}
+    {#if Array.isArray(get(event, 'connectedCaseStudies')) && event.connectedCaseStudies.length > 0}
+      <CaseStudyList caseStudies={event.connectedCaseStudies} related={true} />
+    {/if}
   </div>
 </div>
