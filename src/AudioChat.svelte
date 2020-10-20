@@ -197,7 +197,6 @@
     position: fixed;
     width: auto;
     min-width: 460px;
-    // max-height: calc(100vh - #{$SPACE_M} * 2);
     max-height: calc(100vh - 100px); // Arbitrary number to not go over the inventroy box most of the time
     overflow-y: auto;
     background: $COLOR_LIGHT;

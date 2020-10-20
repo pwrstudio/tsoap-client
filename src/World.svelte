@@ -1861,8 +1861,7 @@
 
 <!-- AUDIOCHAT BOX  -->
 {#await audioRoomNames then audioRoomNames}
-<!-- $localUserAuthenticated && -->
-  {#if  !audioChatActive && $currentAudioRoom}
+  {#if $localUserAuthenticated && !audioChatActive && $currentAudioRoom}
     <div class="audiochat-box">
       <div class="message">
         Nearby audioroom
