@@ -202,7 +202,7 @@
 
   // __ Set global user list
   users.then(users => {
-    console.dir(users)
+    // console.dir(users)
     globalUserList.set(users)
     return users
   })
@@ -288,8 +288,8 @@
   }
 
   // __ Connect to Colyseus gameserver
-  const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
-  // const gameClient = new Colyseus.Client("ws://localhost:2567")
+  // const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
+  const gameClient = new Colyseus.Client("ws://localhost:2567")
 
   // ___ For animations
   const tweener = new Tweener(1 / 60)
@@ -526,7 +526,7 @@
             // __ Open profile if accredited user
             if (player.authenticated) {
               console.log("______ user")
-              console.dir(player)
+              // console.dir(player)
               // __ Get user from userlist
               const targetUser = $globalUserList.find(
                 u => u.username === player.discourseName
@@ -649,6 +649,36 @@
             // PLAYER => ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
               localPlayers[sessionId] = createPlayer(player, sessionId)
+              
+              // PLAYER => CHANGE
+              player.onChange = changes => {
+                // console.log('CHANGES', changes)
+                // console.dir(player.path.waypoints)
+                // console.log(player.carrying)
+                if ($localUserSessionID === sessionId) {
+                  localPlayers[sessionId].carrying = player.carrying
+                  // __ Carrying ?
+                  if (localPlayers[sessionId].carrying && intentToPickUp) {
+                    let g = emergentLayer.children.find(
+                      cs => cs.uuid === player.carrying
+                    )
+                    navigate("/case-studies/" + g.slug)
+                    intentToPickUp = false
+                  }
+                }
+                if (player.path.waypoints.length > 0) {
+                  // __ Normal movement
+                  moveQ[sessionId] = player.path.waypoints
+                } else {
+                  // __ Teleport
+                  localPlayers[sessionId].area = player.area
+                  localPlayers[sessionId].avatar.x = player.x
+                  localPlayers[sessionId].avatar.y = player.y
+                  if ($localUserSessionID === sessionId) {
+                    currentArea.set(localPlayers[sessionId].area)
+                  }
+                }
+              }
             }
 
             // PLAYER => BANNED
@@ -682,33 +712,6 @@
                 )
               hideTarget()
             })
-
-            // PLAYER => CHANGE
-            gameRoom.state.players.onChange = (player, sessionId) => {
-              if ($localUserSessionID === sessionId) {
-                localPlayers[sessionId].carrying = player.carrying
-                // __ Carrying ?
-                if (localPlayers[sessionId].carrying && intentToPickUp) {
-                  let g = emergentLayer.children.find(
-                    cs => cs.uuid === player.carrying
-                  )
-                  navigate("/case-studies/" + g.slug)
-                  intentToPickUp = false
-                }
-              }
-              if (player.path.waypoints.length > 0) {
-                // __ Normal movement
-                moveQ[sessionId] = player.path.waypoints
-              } else {
-                // __ Teleport
-                localPlayers[sessionId].area = player.area
-                localPlayers[sessionId].avatar.x = player.x
-                localPlayers[sessionId].avatar.y = player.y
-                if ($localUserSessionID === sessionId) {
-                  currentArea.set(localPlayers[sessionId].area)
-                }
-              }
-            }
 
             // PLAYER => CLICK / TAP
             viewport.on("clicked", e => {
@@ -781,13 +784,9 @@
 
             // MESSAGE => REMOVE
             gameRoom.onMessage("nukeMessage", msgIdToRemove => {
-              console.log("!!!! MESGS")
-              console.dir(msgIdToRemove)
               const itemIndex = chatMessages.findIndex(
                 m => m.msgId === msgIdToRemove
               )
-              console.log(itemIndex)
-              console.dir(chatMessages[itemIndex])
               chatMessages.splice(itemIndex, 1)
               chatMessages = chatMessages
             })
@@ -1792,7 +1791,6 @@
           use:links
           class:expanded={mobileExpanded}
           on:click={e => {
-            console.log(e.target.nodeName)
             if ((!mobileExpanded && e.target.nodeName == 'INPUT') || e.target.classList.contains('toolbar-item')) {
               mobileExpanded = true
             }

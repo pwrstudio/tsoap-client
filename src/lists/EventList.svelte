@@ -21,9 +21,7 @@
   export let events = []
   export let exhibitions = []
   export let related = false
-
-  console.dir(exhibitions)
-
+  
   // *** VARIABLES
   let containerWidth = "100%"
   let showArchive = false

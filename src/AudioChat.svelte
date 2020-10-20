@@ -18,7 +18,7 @@
   export let userName = ""
   export let roomName = ""
   export let roomId = 4
-  console.dir(user)
+  // console.dir(user)
 
   const dispatch = createEventDispatcher()
   const server = "https://janus.tsoap.dev"

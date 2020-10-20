@@ -37,10 +37,6 @@
     })
   }
 
-  connectedCaseStudies.then(connectedCaseStudies => {
-    console.dir(connectedCaseStudies)
-  })
-
   onDestroy(async () => {
     Howler.volume(1)
   })
