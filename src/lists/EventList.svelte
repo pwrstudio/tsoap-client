@@ -26,6 +26,7 @@
 
   // *** VARIABLES
   let containerWidth = "100%"
+  let showArchive = false
 
   const now = Date.now()
   const upcomingEvents = events.filter(e => Date.parse(e.startDate) > now)
@@ -151,7 +152,9 @@
         height: 40px;
         border-bottom: 1px solid $COLOR_MID_1;
         padding-bottom: $SPACE_S;
+        
         .archive-link {
+          cursor: pointer;
           font-size: 90%;
           word-spacing: -0.3em;
           color: $COLOR_MID_2;
@@ -271,17 +274,23 @@
   <div class="event header" class:related>
     <div class="inner">
       <div class="row">
-        <div>{related ? 'Related Events' : 'Events'}</div>
-        <a
-          href="/events"
-          class="archive-link">{related ? 'View All' : 'Event Archive'}</a>
+        {#if related}
+          <div>Related Events</div>
+          <a
+            href="/events"
+            class="archive-link">View All</a>
+        {:else}
+          <a
+          href="/events">Events</a>
+          <div on:click={e => {showArchive = !showArchive}} class="archive-link">{showArchive ? 'Upcoming Events' : 'Event Archive'}</div>
+        {/if}
       </div>
     </div>
   </div>
 
   <!-- EVENTS -->
   <div class="inner-container">
-    {#each upcomingEvents as event, index (event._id)}
+    {#each (showArchive ? archivedEvents : upcomingEvents) as event, index (event._id)}
       <a
         class="event"
         class:related

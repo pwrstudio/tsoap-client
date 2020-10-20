@@ -23,15 +23,18 @@
 
   // *** PROPS
   export let events = []
+  export let exhibitions = []
   export let related = false
 
   console.dir(events)
 
   const now = Date.now()
-  const upcomingEvents = events.filter(e => Date.parse(e.startDate) > now)
+  // __ HACK: Show all events if related 
+  const upcomingEvents = related ? events : events.filter(e => Date.parse(e.startDate) > now)
   const archivedEvents = events.filter(e => Date.parse(e.startDate) < now)
 
   console.dir(upcomingEvents)
+
   // *** VARIABLES
   let containerWidth = "100%"
 
@@ -198,6 +201,77 @@
       }
     }
   }
+
+  .exhibition {
+        padding: 0px $SPACE_S;
+        padding-top: $SPACE_S;
+        padding-bottom: $SPACE_S;
+        width: 100%;
+        background: $COLOR_LIGHT;
+        color: $COLOR_DARK;
+        display: block;
+        text-decoration: none;
+        user-select: none;
+        overflow: hidden;
+
+        @include screen-size("small") {
+          width: 80vw;
+          display: inline-flex;
+          padding-top: $SPACE_S;
+          height: 80px;
+          border-right: 1px solid $COLOR_MID_1;
+        }
+
+        .inner {
+          width: 100%;
+
+          .row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+
+            .title {
+              font-family: $SANS_STACK;
+              font-weight: 500;
+              white-space: nowrap;
+              max-width: 70%;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              margin-bottom: $SPACE_XS / 2;
+            }
+
+            .elips {
+              margin-left: $SPACE_XS;
+              margin-right: $SPACE_XS;
+              width: 30%;
+              white-space: nowrap;
+              overflow: hidden;
+              flex-shrink: 4;
+              color: $COLOR_MID_2;
+            }
+
+            .date {
+              font-size: 90%;
+              white-space: nowrap;
+              color: $COLOR_MID_2;
+              word-spacing: -0.3em;
+            }
+
+            .participants {
+              pointer-events: none;
+              color: $COLOR_MID_2;
+              font-size: $FONT_SIZE_SMALL;
+            }
+          }
+        }
+
+        transition: background 0.5s $transition;
+
+        &:hover {
+          background: $COLOR_MID_1;
+        }
+      }
 </style>
 
 <div class="eventlist-container" style={'width:' + containerWidth + ';'}>
@@ -311,6 +385,21 @@
           </div>
         </div>
       </div>
+      {#each exhibitions as exhibition, index (exhibition._id)}
+      <a
+        href={'/area/' + get(exhibition, 'area.slug.current', '')}
+        class="exhibition">
+        <div class="inner">
+          <div class="row">
+            <div class="title">{exhibition.title}</div>
+            <div class="elips">
+              .........................................................
+            </div>
+            <div class="date">{exhibition.period}</div>
+          </div>
+        </div>
+      </a>
+    {/each}
     </div>
   </div>
 </div>

@@ -1745,15 +1745,17 @@
       {/await}
       <!-- EVENTS -->
       {#await events then events}
-        {#if section === 'events'}
-          {#if slug}
-            <!-- SINGLE EVENT -->
-            <EventSingle event={events.find(ev => ev.slug.current === slug)} />
-          {:else}
-            <!-- LIST EVENTS -->
-            <EventListFull {events} />
+        {#await exhibitions then exhibitions}
+          {#if section === 'events'}
+            {#if slug}
+              <!-- SINGLE EVENT -->
+              <EventSingle event={events.find(ev => ev.slug.current === slug)} />
+            {:else}
+              <!-- LIST EVENTS -->
+              <EventListFull {events} {exhibitions} />
+            {/if}
           {/if}
-        {/if}
+        {/await}
       {/await}
       <!-- PAGES -->
       {#await pages then pages}
