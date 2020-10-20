@@ -46,8 +46,6 @@
 <style lang="scss">
   @import "../variables.scss";
 
-  
-
   .eventlist-container {
     height: 100%;
     color: $COLOR_DARK;
@@ -106,8 +104,6 @@
         }
       }
 
-     
-
       .inner {
         width: 100%;
 
@@ -137,7 +133,7 @@
           }
 
           .date {
-            font-size:90%;
+            font-size: 90%;
             white-space: nowrap;
             color: $COLOR_MID_2;
             word-spacing: -0.3em;
@@ -158,7 +154,7 @@
       }
 
       &.footer {
-        height: $SPACE_S * 4; 
+        height: $SPACE_S * 4;
         border-top: 1px solid $COLOR_MID_1;
         padding-bottom: $SPACE_S;
         &:hover {
@@ -171,12 +167,12 @@
       }
 
       &.header {
-        height: 40px; 
+        height: 40px;
         border-bottom: 1px solid $COLOR_MID_1;
         padding-bottom: $SPACE_S;
         background-color: white;
         word-spacing: -0.3em;
-        &:hover{
+        &:hover {
           background: white !important;
         }
         .archive-link {
@@ -207,106 +203,114 @@
 <div class="eventlist-container" style={'width:' + containerWidth + ';'}>
   <!-- HEADER -->
   <div class="event header" class:related>
-      <div class="inner">
-        <div class="row">
-          <div>Events</div>
-        </div>
+    <div class="inner">
+      <div class="row">
+        <div>Events</div>
       </div>
     </div>
+  </div>
 
   <!-- TEXT -->
   {#if Array.isArray(get($globalSettings, 'eventOverview.content', false))}
-        <div class='description'>
-            {@html renderBlockText($globalSettings.eventOverview.content)}
-        </div>
-    {/if}
+    <div class="description">
+      {@html renderBlockText($globalSettings.eventOverview.content)}
+    </div>
+  {/if}
 
   <!-- EVENTS -->
-  <div class='inner-container'>
-
-        <!-- UPCOMING EVENTS -->
-        <div class='section'>
-            <!-- SUBHEADER -->
-            <div class="event header" class:related>
-                <div class="inner">
-                    <div class="row">
-                        <div>Upcoming Events</div>
-                    </div>
-                </div>
-            </div>
-            {#each upcomingEvents as event, index (event._id)}
-                <a
-                    class="event"
-                    class:related
-                    in:fade={{ delay: 100 * index }}
-                    href={'/events/' + get(event, 'slug.current', '')}>
-                    <div class="inner">
-                        <div class="row">
-                        <div class="title">{event.title}</div>
-                        <!-- <div class="elips">
+  <div class="inner-container">
+    <!-- UPCOMING EVENTS -->
+    <div class="section">
+      <!-- SUBHEADER -->
+      <div class="event header" class:related>
+        <div class="inner">
+          <div class="row">
+            <div>Upcoming Events</div>
+          </div>
+        </div>
+      </div>
+      {#each upcomingEvents as event, index (event._id)}
+        <a
+          class="event"
+          class:related
+          in:fade={{ delay: 100 * index }}
+          href={'/events/' + get(event, 'slug.current', '')}>
+          <div class="inner">
+            <div class="row">
+              <div class="title">{event.title}</div>
+              <!-- <div class="elips">
                             .........................................................
                         </div> -->
-                        <div class="date">{formattedDate(event.startDate)}</div>
-                        </div>
-                        <div class="row">
-                        <div class="participants">
-                            {#if get(event, 'participants', false) && Array.isArray(event.participants)}
-                            <ParticipantsList participants={event.participants} />
-                            {/if}
-                        </div>
-                        </div>
-                    </div>
-                </a>
-            {/each}
-        </div>
-
-        <!-- ARCHIVED EVENTS -->
-        <div class='section'>
-            <!-- SUBHEADER -->
-            <div class="event header" class:related>
-                <div class="inner">
-                    <div class="row">
-                        <div>Archived Events</div>
-                    </div>
-                </div>
+              <div class="date">{formattedDate(event.startDate)}</div>
             </div>
-            {#each archivedEvents as event, index (event._id)}
-                <a
-                    class="event"
-                    class:related
-                    in:fade={{ delay: 100 * index }}
-                    href={'/events/' + get(event, 'slug.current', '')}>
-                    <div class="inner">
-                        <div class="row">
-                        <div class="title">{event.title}</div>
-                        <!-- <div class="elips">
-                            .........................................................
-                        </div> -->
-                        <div class="date">{formattedDate(event.startDate)}</div>
-                        </div>
-                        <div class="row">
-                        <div class="participants">
-                            {#if get(event, 'participants', false) && Array.isArray(event.participants)}
-                            <ParticipantsList participants={event.participants} />
-                            {/if}
-                        </div>
-                        </div>
-                    </div>
-                </a>
-            {/each}
-        </div>
-
-        <!-- EXHIBITIONS -->
-        <div class='section'>
-            <!-- SUBHEADER -->
-            <div class="event header" class:related>
-                <div class="inner">
-                    <div class="row">
-                        <div>Exhibitions</div>
-                    </div>
-                </div>
+            <div class="row">
+              <div class="participants">
+                {#if get(event, 'moderators', false) && Array.isArray(event.moderators)}
+                  <ParticipantsList
+                    participants={event.moderators}
+                    isModerators />
+                {/if}
+                {#if get(event, 'participants', false) && Array.isArray(event.participants)}
+                  <ParticipantsList participants={event.participants} />
+                {/if}
+              </div>
             </div>
-        </div>
-                
+          </div>
+        </a>
+      {/each}
     </div>
+
+    <!-- ARCHIVED EVENTS -->
+    <div class="section">
+      <!-- SUBHEADER -->
+      <div class="event header" class:related>
+        <div class="inner">
+          <div class="row">
+            <div>Archived Events</div>
+          </div>
+        </div>
+      </div>
+      {#each archivedEvents as event, index (event._id)}
+        <a
+          class="event"
+          class:related
+          in:fade={{ delay: 100 * index }}
+          href={'/events/' + get(event, 'slug.current', '')}>
+          <div class="inner">
+            <div class="row">
+              <div class="title">{event.title}</div>
+              <!-- <div class="elips">
+                            .........................................................
+                        </div> -->
+              <div class="date">{formattedDate(event.startDate)}</div>
+            </div>
+            <div class="row">
+              <div class="participants">
+                {#if get(event, 'moderators', false) && Array.isArray(event.moderators)}
+                  <ParticipantsList
+                    participants={event.moderators}
+                    isModerators />
+                {/if}
+                {#if get(event, 'participants', false) && Array.isArray(event.participants)}
+                  <ParticipantsList participants={event.participants} />
+                {/if}
+              </div>
+            </div>
+          </div>
+        </a>
+      {/each}
+    </div>
+
+    <!-- EXHIBITIONS -->
+    <div class="section">
+      <!-- SUBHEADER -->
+      <div class="event header" class:related>
+        <div class="inner">
+          <div class="row">
+            <div>Exhibitions</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

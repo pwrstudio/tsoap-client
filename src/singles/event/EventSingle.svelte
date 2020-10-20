@@ -118,11 +118,17 @@
     <div class="title">{event.title}</div>
 
     <!-- PARTICIPANTS -->
-    {#if get(event, 'participants', false) && Array.isArray(event.participants)}
-      <div class="participants">
+    <div class="participants">
+      {#if get(event, 'moderators', false) && Array.isArray(event.moderators)}
+        <ParticipantsList
+          participants={event.moderators}
+          isModerators
+          messaging={true} />
+      {/if}
+      {#if get(event, 'participants', false) && Array.isArray(event.participants)}
         <ParticipantsList participants={event.participants} messaging={true} />
-      </div>
-    {/if}
+      {/if}
+    </div>
   </div>
   <div class="divider" />
 

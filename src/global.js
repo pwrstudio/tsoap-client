@@ -37,7 +37,7 @@ export const QUERY = {
   EXHIBITIONS:
     "*[_type == 'exhibition']{..., area->{slug,name}, participants[]->{slug,name,username}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}}}",
   EVENTS:
-    "*[_type == 'event']{..., participants[]->{slug,name,username}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}}} | order(startDate asc)",
+    "*[_type == 'event']{..., moderators[]->{slug,name,username}, participants[]->{slug,name,username}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}}} | order(startDate asc)",
   USERS: "*[_type == 'participant']{...,avatarLink->{'iconUrl': rest[0].asset->url}}",
   PAGES: "*[_type == 'page']",
   SEMINAR: "*[_type == 'seminar' && slug.current == $slug][0]",
@@ -47,12 +47,12 @@ export const QUERY = {
   AUDIO_INSTALLATIONS:
     "*[_type == 'audioInstallation']{..., participants[]->{slug,name,username}, 'audioURL': soundFile.asset->url,spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   CASE_STUDIES:
-    "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., connectedEvents[]->{...,participants[]->{slug,name,username}}, participants[]->{slug,name,username}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
+    "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., connectedEvents[]->{...,moderators[]->{slug,name,username}, participants[]->{slug,name,username}}, participants[]->{slug,name,username}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   LAND_MARKS:
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
   ACTIVE_STREAMS:
-    "*[_id == 'active-streams']{..., mainStream->{..., participants[]->{slug,name,username}}}[0]",
-  CONNECTED_TO_USER: "*[participants[]._ref == $id]{...,participants[]->{...}}",
+    "*[_id == 'active-streams']{..., mainStream->{..., moderators[]->{slug,name,username}, participants[]->{slug,name,username}}}[0]",
+  CONNECTED_TO_USER: "*[participants[]._ref == $id]{..., moderators[]->{...}, participants[]->{...}}",
   GLOBAL_SETTINGS: "*[_id == 'global-settings']{..., welcomeCard->{...}}[0]",
   AREAS: "*[_type == 'area']",
   TARGET_STREAM: 
