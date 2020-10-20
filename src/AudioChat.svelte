@@ -146,7 +146,7 @@
                 )
 
                 // Mute button
-                audioenabled = true
+                audioenabled = false
                 toggleaudio = () => {
                   audioenabled = !audioenabled
                   console.log("audioenabled", audioenabled)
