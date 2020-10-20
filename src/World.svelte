@@ -288,8 +288,8 @@
   }
 
   // __ Connect to Colyseus gameserver
-  // const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
-  const gameClient = new Colyseus.Client("ws://localhost:2567")
+  const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
+  // const gameClient = new Colyseus.Client("ws://localhost:2567")
 
   // ___ For animations
   const tweener = new Tweener(1 / 60)
