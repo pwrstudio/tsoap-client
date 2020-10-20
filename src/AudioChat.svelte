@@ -65,7 +65,6 @@
               },
               error: error => {
                 console.error("-- Error attaching plugin...", error)
-                Sentry.captureException(err);
               },
               onmessage: (msg, jsep) => {
                 // console.log(" ::: Got a message :::", msg)
