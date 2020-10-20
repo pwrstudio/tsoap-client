@@ -289,7 +289,7 @@
 
   // __ Connect to Colyseus gameserver
   const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
-  // const client = new Colyseus.Client("ws://localhost:2567")
+  // const gameClient = new Colyseus.Client("ws://localhost:2567")
 
   // ___ For animations
   const tweener = new Tweener(1 / 60)
@@ -958,8 +958,17 @@
               }
             }
 
+            // ******************************
+            // CLIENT LEFT / WAS DISCONNECTED
+            // ******************************
+            gameRoom.onLeave((code) => {
+              const exitMsg = 'Disconnected from server. Code: ' + code
+              window.alert(exitMsg)
+              console.log(exitMsg);
+            });
+
             // ************************
-            // GENERAL ERROR HANDELING
+            // GENERAL ERROR HANDLING
             // ************************
             gameRoom.onError((code, message) => {
               setUIState(STATE.ERROR, message)

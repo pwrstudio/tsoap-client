@@ -29,7 +29,8 @@
   let showArchive = false
 
   const now = Date.now()
-  const upcomingEvents = events.filter(e => Date.parse(e.startDate) > now)
+  // __ HACK: Show all events if related 
+  const upcomingEvents = related ? events : events.filter(e => Date.parse(e.startDate) > now)
   const archivedEvents = events.filter(e => Date.parse(e.startDate) < now)
 
   onMount(async () => {
@@ -279,10 +280,13 @@
           <a
             href="/events"
             class="archive-link">View All</a>
-        {:else}
+       {:else}
           <a
           href="/events">Events</a>
-          <div on:click={e => {showArchive = !showArchive}} class="archive-link">{showArchive ? 'Upcoming Events' : 'Event Archive'}</div>
+          <a
+          href="/events"
+          class="archive-link">View All</a>
+          <!-- <div on:click={e => {showArchive = !showArchive}} class="archive-link">{showArchive ? 'Upcoming Events' : 'Event Archive'}</div> -->
         {/if}
       </div>
     </div>
