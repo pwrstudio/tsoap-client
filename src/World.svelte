@@ -640,6 +640,7 @@
               } catch (err) {
                 setUIState(STATE.ERROR, err)
                 console.dir(err)
+                Sentry.captureException(err);
               }
             }
 
@@ -806,6 +807,7 @@
               } catch (err) {
                 setUIState(STATE.ERROR, err)
                 console.dir(err)
+                Sentry.captureException(err);
               }
             }
 
@@ -969,6 +971,7 @@
               setUIState(STATE.ERROR, "You have been banned")
             } else {
               setUIState(STATE.ERROR, "FAILED TO CONNECT TO GAMESERVER")
+              Sentry.captureException(e);
               // Sentry.captureException(err)
             }
           })
