@@ -133,6 +133,9 @@
         const targetArea = $areaList.find(a => a.slug.current === slug)
         if (targetArea) {
           console.log(REVERSE_HEX_MAP[targetArea.color])
+          // __ Clear section and slug
+          navigate('/')
+          // __ Teleport
           if (REVERSE_HEX_MAP[targetArea.color]) {
             teleportTo(REVERSE_HEX_MAP[targetArea.color])
           }
