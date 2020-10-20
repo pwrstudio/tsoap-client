@@ -197,16 +197,21 @@
     position: fixed;
     width: auto;
     min-width: 460px;
+    // max-height: calc(100vh - #{$SPACE_M} * 2);
+    max-height: calc(100vh - 100px); // Arbitrary number to not go over the inventroy box most of the time
+    overflow-y: auto;
     background: $COLOR_LIGHT;
     height: auto;
     line-height: 2em;
     text-align: center;
-    top: $SPACE_M;
-    left: $SPACE_M;
+    top: $SPACE_S;
+    left: $SPACE_S;
     padding: $SPACE_S;
     border-radius: 4px;
     font-size: $FONT_SIZE_BASE;
     font-family: $MONO_STACK;
+
+    @include hide-scroll;
 
     padding-left: $SPACE_M;
     padding-right: $SPACE_M;
