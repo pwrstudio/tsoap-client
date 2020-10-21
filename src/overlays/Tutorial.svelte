@@ -39,7 +39,7 @@
   .tutorial {
     font-size: $FONT_SIZE_LARGE;
     font-family: $SANS_STACK;
-    padding: $SPACE_L;
+    padding: $SPACE_L $SPACE_L $SPACE_L*3 $SPACE_L;
     margin: 0 auto;
     background: $COLOR_MID_1;
     color: $COLOR_DARK;
@@ -49,7 +49,7 @@
     flex-direction: column;
     width: 60vw;
     max-width: 900px;
-    height: 70%;
+    min-height: 70%;
     pointer-events: all;
     position:relative;
 
@@ -69,7 +69,7 @@
 
     .tutorial-slide :global(figure) { 
       display:block;
-      
+      margin:$SPACE_L 0;
     };
 
     .tutorial-slide :global(img) { 
