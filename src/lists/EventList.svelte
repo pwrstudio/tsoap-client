@@ -66,10 +66,10 @@
     }
 
     .event {
-      padding: 0px $SPACE_S;
-      padding-top: $SPACE_S;
+      padding: $SPACE_S;
+      // padding-top: $SPACE_S;
       width: 100%;
-      height: $ITEM_HEIGHT;
+      min-height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
       color: $COLOR_DARK;
       display: block;
