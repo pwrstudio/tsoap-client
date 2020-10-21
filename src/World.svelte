@@ -105,7 +105,8 @@
   let localPlayers = {}
   let chatMessages = []
   let moveQ = []
-  let currentStream = false
+  let currentStreamEvent = false
+  let currentStreamUrl = false
 
   // ___ Routing
   let section = false
@@ -235,32 +236,24 @@
       console.log(err)
     })
     .then(activeStreams => {
-      currentStream = activeStreams.mainStream
-      // client
-      //   .listen(QUERY.TARGET_STREAM, { id: activeStreams.mainStream._id })
-      //   .subscribe(u => {
-      //     console.log("11 = = = = = = =")
-      //     currentStream = u
-      //   })
+      currentStreamEvent = activeStreams.mainStreamEvent
+      currentStreamUrl = activeStreams.mainStream
     })
 
   // __ Listen for changes to the active streams post
   client.listen(QUERY.ACTIVE_STREAMS).subscribe(update => {
-    currentStream = false
+    currentStreamUrl = false
+    currentStreamEvent = false
     setTimeout(() => {
       activeStreams = loadData(QUERY.ACTIVE_STREAMS)
         .then(aS => {
           if (aS.mainStream) {
-            currentStream = aS.mainStream
+            currentStreamEvent = aS.mainStreamEvent
+            currentStreamUrl = aS.mainStream
             activeContentClosed = false
-            // client
-            //   .listen(QUERY.TARGET_STREAM, { id: aS.mainStream._id })
-            //   .subscribe(u => {
-            //     console.log("22 = = = = = = =")
-            //     currentStream = u
-            //   })
           } else {
-            currentStream = false
+            currentStreamUrl = false
+            currentStreamEvent = false
           }
         })
         .catch(err => {
@@ -1708,7 +1701,7 @@
   <!-- LIVE -->
   {#await activeStreams then activeStreams}
     <!-- MAIN AREA -->
-    {#if $currentVideoRoom == 'main' && currentStream && !activeContentClosed}
+    {#if $currentVideoRoom == 'main' && currentStreamUrl && !activeContentClosed}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
@@ -1717,7 +1710,7 @@
           }}>
           ×
         </div>
-        <LiveSingle event={currentStream} />
+        <LiveSingle event={currentStreamEvent} url={currentStreamUrl} />
       </div>
     {/if}
     <!-- SUPPORT AREA -->
@@ -1731,7 +1724,7 @@
           ×
         </div>
         {#if activeStreams && activeStreams.supportStream}
-          <LiveSingle event={{ streamURL: activeStreams.supportStream }} />
+          <LiveSingle url={activeStreams.supportStream} />
         {/if}
       </div>
     {/if}
