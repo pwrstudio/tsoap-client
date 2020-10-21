@@ -36,12 +36,7 @@
   // *** VARIABLES
   let containerWidth = "100%"
 
-  onMount(async () => {
-    // __ Enabled horizontal scroll layout on mobile
-    if (window.matchMedia("(max-width: 800px)").matches ) {
-      containerWidth = window.innerWidth * 0.8 * events.length + "px"
-    }
-  })
+  
 </script>
 
 <style lang="scss">
@@ -86,11 +81,11 @@
       user-select: none;
 
       @include screen-size("small") {
-        width: 80vw;
+        // width: 80vw;
         display: inline-flex;
         padding-top: $SPACE_S;
-        height: 80px;
-        border-right: 1px solid $COLOR_MID_1;
+        // height: 80px;
+        // border-right: 1px solid $COLOR_MID_1;
       }
 
       .inner {
@@ -170,7 +165,7 @@
         }
 
         @include screen-size("small") {
-          display: none;
+          // display: none;
         }
 
         &:hover {
@@ -193,11 +188,11 @@
         overflow: hidden;
 
         @include screen-size("small") {
-          width: 80vw;
+          // width: 80vw;
           display: inline-flex;
           padding-top: $SPACE_S;
-          height: 80px;
-          border-right: 1px solid $COLOR_MID_1;
+          // height: 80px;
+          // border-right: 1px solid $COLOR_MID_1;
         }
 
         .inner {

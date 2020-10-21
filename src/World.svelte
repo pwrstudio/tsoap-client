@@ -35,6 +35,7 @@
   import EventList from "./lists/EventList.svelte"
   import EventListFull from "./lists/EventListFull.svelte"
   import CaseStudyList from "./lists/CaseStudyList.svelte"
+  import EventListSliderMobile from "./lists/EventListSliderMobile.svelte"
   // singles
   import CaseStudySingle from "./singles/CaseStudySingle.svelte"
   import PageSingle from "./singles/PageSingle.svelte"
@@ -1794,12 +1795,13 @@
 <!-- MOBILE -->
 <MediaQuery query="(max-width: 800px)" let:matches>
   {#if matches}
+    
     <Clock />
     {#if localPlayers[$localUserSessionID]}
       <!-- MOBILE CALENDAR-->
       <div class="mobile-calendar" use:links>
         {#await events then events}
-          <EventList {events} />
+          <EventListSliderMobile {events} />
         {/await}
       </div>
       <!-- MOBILE TOOLKIT -->
