@@ -8,7 +8,6 @@
   import isArray from "lodash/isArray"
   import isEmpty from "lodash/isEmpty"
   import truncate from "lodash/truncate"
-import { window } from "lodash/_freeGlobal";
 
   // *** SANITY
   import { toPlainText, urlFor } from "./sanity.js"
