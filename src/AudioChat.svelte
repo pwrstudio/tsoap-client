@@ -34,7 +34,7 @@
   let myId = ""
   let audioEl = {}
   let userList = []
-  let minimized = false;
+  let minimized = true;
   let toggleaudio = () => {}
   let togglevolume = () => {}
 
@@ -296,6 +296,10 @@
       }
     }
   }
+
+  .user-number {
+    text-decoration: underline;
+  }
 </style>
 
 <div transition:fade class:minimized class="audioChatContainer">
@@ -310,7 +314,7 @@
   <!-- HEADER -->
   <div class="header">
     <div class="text" on:click={() => {minimized = !minimized}}>
-      {userList.length}
+      <span class='user-number'>{userList.length}</span>
       users in
       <strong>{roomName}</strong>
     </div>
