@@ -21,7 +21,9 @@
 
   // *** PROPS
   export let event = {}
+  export let url = ''
 
+  console.log('event', event)
   let expanded = false
   let connectedCaseStudies = []
 
@@ -113,7 +115,7 @@
 </style>
 
 <div class="event-single" in:fade use:links>
-  <VideoPlayer streamUrl={event.streamURL} />
+  <VideoPlayer streamUrl={url} />
 
   {#if event.title}
     <!-- HEADER -->
