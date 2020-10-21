@@ -69,7 +69,7 @@
 
     .tutorial-slide :global(figure) { 
       display:block;
-      
+      margin:$SPACE_L 0;
     };
 
     .tutorial-slide :global(img) { 
