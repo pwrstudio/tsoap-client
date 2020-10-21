@@ -47,9 +47,9 @@
     // justify-content: space-evenly;
     align-items: center;
     flex-direction: column;
-    width: 60vw;
+    width: 50vw;
     max-width: 900px;
-    min-height: 70%;
+    min-height: 60%;
     pointer-events: all;
     position:relative;
 
@@ -57,14 +57,6 @@
       font-size: $FONT_SIZE_SMALL;
       width: calc(100vw - #{$SPACE_M}*2);
       height: calc(100% - #{$SPACE_M}*2);
-    }
-
-    .placeholder-img{
-      margin:$SPACE_L 0;
-      background-color: $COLOR_DARK;
-      width: 200px;
-      height: 200px;
-      display:block;
     }
 
     .tutorial-slide :global(figure) { 
@@ -101,12 +93,14 @@
 
     .tutorial-slide :global(li::before) { 
       content:(' ');
-      background:red;
       width: $SPACE_L;
       height: $SPACE_L;
       margin-bottom: $SPACE_XS * -1;
-      margin-right:$SPACE_XS;
+      margin-right:$SPACE_S;
       display: inline-block;
+      @include screen-size("small"){
+        margin-right:$SPACE_XS;
+      }
     };
 
     .tutorial-slide :global(li:nth-of-type(1)::before) { 
