@@ -237,10 +237,10 @@
             .elips {
               margin-left: $SPACE_XS;
               margin-right: $SPACE_XS;
-              width: 30%;
+              width: 80%;
               white-space: nowrap;
               overflow: hidden;
-              flex-shrink: 4;
+              flex-shrink: 999999;
               color: $COLOR_MID_2;
             }
 
