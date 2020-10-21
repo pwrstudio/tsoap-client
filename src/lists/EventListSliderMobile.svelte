@@ -155,6 +155,17 @@
       border-right: 1px solid $COLOR_MID_1;
     }
     
+    .fade{
+      background:linear-gradient(0deg, $COLOR_LIGHT 0%, rgba(240, 240, 240, 0) 100%);
+      width: 100%;
+      height: 35%;
+      display: block;
+      pointer-events: none;
+      position:absolute;
+      bottom:0;
+      left:0;
+
+    }
 
     .inner {
         width: 100%;
@@ -223,6 +234,7 @@
         class:related
         in:fade={{ delay: 100 * index }}
         href={'/events/' + get(event, 'slug.current', '')}>
+        <div class="fade"></div>
         <div class="inner">
           <div class="row">
             <div class="title">{event.title}</div>
