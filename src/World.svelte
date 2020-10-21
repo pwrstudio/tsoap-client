@@ -1468,7 +1468,7 @@
           cursor: pointer;
           text-decoration: none;
           transition: color 0.3s $transition;
-          // z-index: 1000000;  
+          z-index: 5;
 
           &:hover {
             // transform: scale(1.1);
