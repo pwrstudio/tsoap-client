@@ -27,6 +27,7 @@
   let title = ""
   let description = ""
   let image = ""
+  // let url = "https://shape.anthropocene-curriculum.org/"
 
   $: {
     if (has(post, "name") && !isEmpty(post.name)) {
@@ -91,4 +92,9 @@
   <meta property="image" content={image} />
   <meta property="og:image" content={image} />
   <meta property="twitter:image" content={image} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <!-- <meta name="twitter:url" content={url} /> -->
+  <!-- <meta property="og:url" content={url} /> -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="The Shape of a Practice" />
 </svelte:head>

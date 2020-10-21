@@ -8,7 +8,7 @@
   // *** IMPORTS
   import get from "lodash/get"
   import { fade } from "svelte/transition"
-  import { urlFor, renderBlockText } from "../../sanity.js"
+  import { renderBlockText } from "../../sanity.js"
   import { links } from "svelte-routing"
 
   // COMPONENTS
@@ -118,11 +118,17 @@
     <div class="title">{event.title}</div>
 
     <!-- PARTICIPANTS -->
-    {#if get(event, 'participants', false) && Array.isArray(event.participants)}
-      <div class="participants">
+    <div class="participants">
+      {#if get(event, 'moderators', false) && Array.isArray(event.moderators)}
+        <ParticipantsList
+          participants={event.moderators}
+          isModerators
+          messaging={true} />
+      {/if}
+      {#if get(event, 'participants', false) && Array.isArray(event.participants)}
         <ParticipantsList participants={event.participants} messaging={true} />
-      </div>
-    {/if}
+      {/if}
+    </div>
   </div>
   <div class="divider" />
 
@@ -130,7 +136,7 @@
   <div class="date">{formattedDate(event.startDate)}</div>
   <div class="divider" />
 
-  <!-- IMAGE -->
+  <!-- IMAGE
   {#if get(event, 'mainImage.asset', false)}
     <div class="image">
       <img
@@ -142,7 +148,7 @@
           .url()} />
     </div>
     <div class="divider" />
-  {/if}
+  {/if} -->
 
   <!-- TEXT -->
   {#if Array.isArray(get(event, 'content.content', false)) && event.content.content.length > 0}

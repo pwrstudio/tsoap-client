@@ -22,8 +22,6 @@
 
   // *** VARIABLES
   let expanded = false
-
-  console.dir(message)
 </script>
 
 <style lang="scss">

@@ -62,7 +62,7 @@
 
   getNotifications()
 
-  setInterval(getNotifications, 10000)
+  // setInterval(getNotifications, 10000)
 </script>
 
 <style lang="scss">
@@ -141,7 +141,7 @@
       color: $COLOR_LIGHT;
       cursor: pointer;
       text-decoration: none;
-      padding:$SPACE_XS 2px;
+      padding: $SPACE_XS 2px;
       height: 30px;
 
       &:hover {
@@ -156,7 +156,7 @@
         border: 1px solid $COLOR_MID_2;
         border-radius: 10px;
         padding: 5px;
-        
+
         text-decoration: none;
         padding-right: $SPACE_L;
         padding-left: $SPACE_L;

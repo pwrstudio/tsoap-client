@@ -19,13 +19,16 @@
 
   // *** PROPS
   export let events = []
+  export let exhibitions = []
   export let related = false
-
+  
   // *** VARIABLES
   let containerWidth = "100%"
+  let showArchive = false
 
   const now = Date.now()
-  const upcomingEvents = events.filter(e => Date.parse(e.startDate) > now)
+  // __ HACK: Show all events if related 
+  const upcomingEvents = related ? events : events.filter(e => Date.parse(e.startDate) > now)
   const archivedEvents = events.filter(e => Date.parse(e.startDate) < now)
 
   onMount(async () => {
@@ -116,7 +119,7 @@
           .elips {
             margin-left: $SPACE_XS;
             margin-right: $SPACE_XS;
-            width: 60%;
+            width: 30%;
             white-space: nowrap;
             overflow: hidden;
             flex-shrink: 4;
@@ -144,24 +147,13 @@
         background: $COLOR_MID_1;
       }
 
-      &.footer {
-        height: $SPACE_S * 4;
-        border-top: 1px solid $COLOR_MID_1;
-        padding-bottom: $SPACE_S;
-        &:hover {
-          background: unset;
-        }
-
-        @include screen-size("small") {
-          display: none;
-        }
-      }
-
       &.header {
         height: 40px;
         border-bottom: 1px solid $COLOR_MID_1;
         padding-bottom: $SPACE_S;
+        
         .archive-link {
+          cursor: pointer;
           font-size: 90%;
           word-spacing: -0.3em;
           color: $COLOR_MID_2;
@@ -189,6 +181,90 @@
         }
       }
     }
+
+    .footer {
+      height: $SPACE_S * 6;
+      border-top: 1px solid $COLOR_MID_1;
+      padding-bottom: $SPACE_S;
+      &:hover {
+        background: unset;
+      }
+
+      @include screen-size("small") {
+        display: none;
+      }
+
+      .exhibition {
+        padding: 0px $SPACE_S;
+        padding-top: $SPACE_S / 2;
+        width: 100%;
+        height: $SPACE_S * 3;
+        background: $COLOR_LIGHT;
+        color: $COLOR_DARK;
+        display: block;
+        text-decoration: none;
+        user-select: none;
+        overflow: hidden;
+
+        @include screen-size("small") {
+          width: 80vw;
+          display: inline-flex;
+          padding-top: $SPACE_S;
+          height: 80px;
+          border-right: 1px solid $COLOR_MID_1;
+        }
+
+        .inner {
+          width: 100%;
+
+          .row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+
+            .title {
+              font-family: $SANS_STACK;
+              font-weight: 500;
+              white-space: nowrap;
+              max-width: 70%;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              margin-bottom: $SPACE_XS / 2;
+            }
+
+            .elips {
+              margin-left: $SPACE_XS;
+              margin-right: $SPACE_XS;
+              width: 30%;
+              white-space: nowrap;
+              overflow: hidden;
+              flex-shrink: 4;
+              color: $COLOR_MID_2;
+            }
+
+            .date {
+              font-size: 90%;
+              white-space: nowrap;
+              color: $COLOR_MID_2;
+              word-spacing: -0.3em;
+            }
+
+            .participants {
+              pointer-events: none;
+              color: $COLOR_MID_2;
+              font-size: $FONT_SIZE_SMALL;
+            }
+          }
+        }
+
+        transition: background 0.5s $transition;
+
+        &:hover {
+          background: $COLOR_MID_1;
+        }
+      }
+    }
   }
 </style>
 
@@ -197,17 +273,26 @@
   <div class="event header" class:related>
     <div class="inner">
       <div class="row">
-        <div>{related ? 'Related Events' : 'Events'}</div>
-        <a
+        {#if related}
+          <div>Related Events</div>
+          <a
+            href="/events"
+            class="archive-link">View All</a>
+       {:else}
+          <a
+          href="/events">Events</a>
+          <a
           href="/events"
-          class="archive-link">{related ? 'View All' : 'Event Archive'}</a>
+          class="archive-link">View All</a>
+          <!-- <div on:click={e => {showArchive = !showArchive}} class="archive-link">{showArchive ? 'Upcoming Events' : 'Event Archive'}</div> -->
+        {/if}
       </div>
     </div>
   </div>
 
   <!-- EVENTS -->
   <div class="inner-container">
-    {#each upcomingEvents as event, index (event._id)}
+    {#each (showArchive ? archivedEvents : upcomingEvents) as event, index (event._id)}
       <a
         class="event"
         class:related
@@ -223,6 +308,11 @@
           </div>
           <div class="row">
             <div class="participants">
+              {#if get(event, 'moderators', false) && Array.isArray(event.moderators)}
+                <ParticipantsList
+                  participants={event.moderators}
+                  isModerators />
+              {/if}
               {#if get(event, 'participants', false) && Array.isArray(event.participants)}
                 <ParticipantsList participants={event.participants} />
               {/if}
@@ -234,17 +324,23 @@
   </div>
 
   <!-- FOOTER -->
-  {#if !related}
-    <div class="event footer">
-      <div class="inner">
-        <div class="row">
-          <div class="title">Mississippi exhibition</div>
-          <div class="elips">
-            .........................................................
+  {#if !related && exhibitions && exhibitions.length > 0}
+    <div class="footer">
+      {#each exhibitions as exhibition, index (exhibition._id)}
+        <a
+          href={'/area/' + get(exhibition, 'area.slug.current', '')}
+          class="exhibition">
+          <div class="inner">
+            <div class="row">
+              <div class="title">{exhibition.title}</div>
+              <div class="elips">
+                .........................................................
+              </div>
+              <div class="date">{exhibition.period}</div>
+            </div>
           </div>
-          <div class="date">Ongoing</div>
-        </div>
-      </div>
+        </a>
+      {/each}
     </div>
   {/if}
 </div>

@@ -58,6 +58,7 @@
     MAP,
     COLORMAP,
     TINTMAP,
+    REVERSE_HEX_MAP,
     QUERY,
     AREA,
     TEXT_ROOMS,
@@ -127,6 +128,22 @@
     }
   }
 
+  $: {
+    if (section === "area" && slug) {
+      if ($areaList && Array.isArray($areaList)) {
+        const targetArea = $areaList.find(a => a.slug.current === slug)
+        if (targetArea) {
+          console.log(REVERSE_HEX_MAP[targetArea.color])
+          // __ Clear section and slug
+          navigate('/')
+          // __ Teleport
+          if (REVERSE_HEX_MAP[targetArea.color]) {
+            teleportTo(REVERSE_HEX_MAP[targetArea.color])
+          }
+        }
+      }
+    }
+  }
   // ___ Listen for changes to page visibility (ie. tab being out of focus etc..)
   // ___ Fastforward animations when window is refocused
   let deltaJump = 0
@@ -162,6 +179,9 @@
   const events = loadData(QUERY.EVENTS).catch(err => {
     console.log(err)
   })
+  const exhibitions = loadData(QUERY.EXHIBITIONS).catch(err => {
+    console.log(err)
+  })
   const caseStudies = loadData(QUERY.CASE_STUDIES).catch(err => {
     console.log(err)
   })
@@ -181,10 +201,12 @@
     console.log(err)
   })
 
-  // audioRoomNames.then(audioRoomNames => {
-  //   console.dir(audioRoomNames)
-  //   return audioRoomNames
-  // })
+  // __ Set global user list
+  users.then(users => {
+    // console.dir(users)
+    globalUserList.set(users)
+    return users
+  })
 
   loadData(QUERY.GLOBAL_SETTINGS)
     .then(gS => {
@@ -268,7 +290,7 @@
 
   // __ Connect to Colyseus gameserver
   const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
-  // const client = new Colyseus.Client("ws://localhost:2567")
+  // const gameClient = new Colyseus.Client("ws://localhost:2567")
 
   // ___ For animations
   const tweener = new Tweener(1 / 60)
@@ -505,15 +527,14 @@
             // __ Open profile if accredited user
             if (player.authenticated) {
               console.log("______ user")
-              console.dir(player)
-              // TODO: get correct slug
-              navigate(
-                "/profiles/" +
-                  slugify(player.discourseName, {
-                    lower: true,
-                    strict: true,
-                  })
+              // console.dir(player)
+              // __ Get user from userlist
+              const targetUser = $globalUserList.find(
+                u => u.username === player.discourseName
               )
+              if (targetUser && get(targetUser, "slug.current", false)) {
+                navigate("/profiles/" + targetUser.slug.current)
+              }
             }
             if (player.uuid != $localUserUUID) {
               e.stopPropagation()
@@ -629,6 +650,36 @@
             // PLAYER => ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
               localPlayers[sessionId] = createPlayer(player, sessionId)
+              
+              // PLAYER => CHANGE
+              player.onChange = changes => {
+                // console.log('CHANGES', changes)
+                // console.dir(player.path.waypoints)
+                // console.log(player.carrying)
+                if ($localUserSessionID === sessionId) {
+                  localPlayers[sessionId].carrying = player.carrying
+                  // __ Carrying ?
+                  if (localPlayers[sessionId].carrying && intentToPickUp) {
+                    let g = emergentLayer.children.find(
+                      cs => cs.uuid === player.carrying
+                    )
+                    navigate("/case-studies/" + g.slug)
+                    intentToPickUp = false
+                  }
+                }
+                if (player.path.waypoints.length > 0) {
+                  // __ Normal movement
+                  moveQ[sessionId] = player.path.waypoints
+                } else {
+                  // __ Teleport
+                  localPlayers[sessionId].area = player.area
+                  localPlayers[sessionId].avatar.x = player.x
+                  localPlayers[sessionId].avatar.y = player.y
+                  if ($localUserSessionID === sessionId) {
+                    currentArea.set(localPlayers[sessionId].area)
+                  }
+                }
+              }
             }
 
             // PLAYER => BANNED
@@ -662,33 +713,6 @@
                 )
               hideTarget()
             })
-
-            // PLAYER => CHANGE
-            gameRoom.state.players.onChange = (player, sessionId) => {
-              if ($localUserSessionID === sessionId) {
-                localPlayers[sessionId].carrying = player.carrying
-                // __ Carrying ?
-                if (localPlayers[sessionId].carrying && intentToPickUp) {
-                  let g = emergentLayer.children.find(
-                    cs => cs.uuid === player.carrying
-                  )
-                  navigate("/case-studies/" + g.slug)
-                  intentToPickUp = false
-                }
-              }
-              if (player.path.waypoints.length > 0) {
-                // __ Normal movement
-                moveQ[sessionId] = player.path.waypoints
-              } else {
-                // __ Teleport
-                localPlayers[sessionId].area = player.area
-                localPlayers[sessionId].avatar.x = player.x
-                localPlayers[sessionId].avatar.y = player.y
-                if ($localUserSessionID === sessionId) {
-                  currentArea.set(localPlayers[sessionId].area)
-                }
-              }
-            }
 
             // PLAYER => CLICK / TAP
             viewport.on("clicked", e => {
@@ -761,13 +785,9 @@
 
             // MESSAGE => REMOVE
             gameRoom.onMessage("nukeMessage", msgIdToRemove => {
-              console.log("!!!! MESGS")
-              console.dir(msgIdToRemove)
               const itemIndex = chatMessages.findIndex(
                 m => m.msgId === msgIdToRemove
               )
-              console.log(itemIndex)
-              console.dir(chatMessages[itemIndex])
               chatMessages.splice(itemIndex, 1)
               chatMessages = chatMessages
             })
@@ -938,8 +958,17 @@
               }
             }
 
+            // ******************************
+            // CLIENT LEFT / WAS DISCONNECTED
+            // ******************************
+            gameRoom.onLeave((code) => {
+              const exitMsg = 'Disconnected from server. Code: ' + code
+              window.alert(exitMsg)
+              console.log(exitMsg);
+            });
+
             // ************************
-            // GENERAL ERROR HANDELING
+            // GENERAL ERROR HANDLING
             // ************************
             gameRoom.onError((code, message) => {
               setUIState(STATE.ERROR, message)
@@ -952,7 +981,6 @@
               setUIState(STATE.ERROR, "You have been banned")
             } else {
               setUIState(STATE.ERROR, "FAILED TO CONNECT TO GAMESERVER")
-              // Sentry.captureException(err)
             }
           })
       })
@@ -1162,7 +1190,7 @@
     // !!! HACK
     setTimeout(() => {
       caseStudiesLoaded = true
-    }, 5000)
+    }, 10000)
 
     // ___ Show welcome card if user has not visited in last 7 days
     // showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
@@ -1599,7 +1627,9 @@
           <div class="top-area">
             <!-- CALENDAR -->
             {#await events then events}
-              <EventList {events} />
+              {#await exhibitions then exhibitions}
+                <EventList {events} {exhibitions} />
+              {/await}
             {/await}
           </div>
           <div class="bottom-area">
@@ -1687,7 +1717,7 @@
       </div>
     {/if}
     <!-- SUPPORT AREA -->
-    {#if $currentVideoRoom == 'support' && activeStreams.supportStream}
+    {#if $currentVideoRoom == 'support' && activeStreams && activeStreams.supportStream}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
@@ -1696,7 +1726,9 @@
           }}>
           ×
         </div>
-        <LiveSingle event={{ streamURL: activeStreams.supportStream }} />
+        {#if activeStreams && activeStreams.supportStream}
+          <LiveSingle event={{ streamURL: activeStreams.supportStream }} />
+        {/if}
       </div>
     {/if}
   {/await}
@@ -1732,15 +1764,17 @@
       {/await}
       <!-- EVENTS -->
       {#await events then events}
-        {#if section === 'events'}
-          {#if slug}
-            <!-- SINGLE EVENT -->
-            <EventSingle event={events.find(ev => ev.slug.current === slug)} />
-          {:else}
-            <!-- LIST EVENTS -->
-            <EventListFull {events} />
+        {#await exhibitions then exhibitions}
+          {#if section === 'events'}
+            {#if slug}
+              <!-- SINGLE EVENT -->
+              <EventSingle event={events.find(ev => ev.slug.current === slug)} />
+            {:else}
+              <!-- LIST EVENTS -->
+              <EventListFull {events} {exhibitions} />
+            {/if}
           {/if}
-        {/if}
+        {/await}
       {/await}
       <!-- PAGES -->
       {#await pages then pages}
@@ -1757,7 +1791,7 @@
 <!-- MOBILE -->
 <MediaQuery query="(max-width: 800px)" let:matches>
   {#if matches}
-      <Clock />
+    <Clock />
     {#if localPlayers[$localUserSessionID]}
       <!-- MOBILE CALENDAR-->
       <div class="mobile-calendar" use:links>
@@ -1772,8 +1806,7 @@
           use:links
           class:expanded={mobileExpanded}
           on:click={e => {
-            console.log(e.target.nodeName)
-            if (!mobileExpanded && e.target.nodeName == 'INPUT' || e.target.classList.contains('toolbar-item')) {
+            if ((!mobileExpanded && e.target.nodeName == 'INPUT') || e.target.classList.contains('toolbar-item')) {
               mobileExpanded = true
             }
           }}>
@@ -1850,7 +1883,7 @@
 
 <!-- AUDIOCHAT BOX  -->
 {#await audioRoomNames then audioRoomNames}
-  {#if $localUserAuthenticated && !audioChatActive && localPlayers[$localUserSessionID] && localPlayers[$localUserSessionID].area}
+  {#if $localUserAuthenticated && !audioChatActive && $currentAudioRoom}
     <div class="audiochat-box">
       <div class="message">
         Nearby audioroom

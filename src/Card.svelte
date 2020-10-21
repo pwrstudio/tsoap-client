@@ -16,7 +16,7 @@
 
   let currentIndex = 0
 
-  console.dir(card)
+  // console.dir(card)
 </script>
 
 <style lang="scss">

@@ -6,6 +6,7 @@ export const VIDEO_ROOMS = {MAIN: "main", SUPPORT: "support"}
 export const AUDIO_ROOMS= [1,2,3,4,5,6,7]
 export const TEXT_ROOMS = [1,2,3,4]
 export const AREA = { YELLOW: 2, RED: 3, GREEN: 4, BLUE: 5, MAGENTA: 6, CYAN: 7, PURPLE: 8, TEAL: 9 }
+export const REVERSE_HEX_MAP = { '#FFFF00': 'yellow','#FF0000':'red','#00FF00': 'green', '#0000FF': 'blue', '#FF00FF': 'magenta', '#00FFFF': 'cyan', '#880088': 'purple',  '#008888': 'teal' }
 export const HEX_MAP = { YELLOW: '#FFFF00', RED: '#FF0000', GREEN: '#00FF00', BLUE: '#0000FF', MAGENTA: '#FF00FF', CYAN: '#00FFFF', PURPLE: '#880088', TEAL: '#008888' }
 export const COLORMAP = ["WHITE", "BLACK", "YELLOW", "RED", "GREEN", "BLUE", "MAGENTA", "CYAN", "PURPLE", "TEAL"]
 export const TINTMAP = [
@@ -33,8 +34,10 @@ export const MAP = { WIDTH: 4000, HEIGHT: 4000 }
 export const QUERY = {
   GRAPHICS_SETTINGS:
     "*[_id == 'graphics-settings']{..., mapLink->{'mainImage': mainImage,'miniImage': miniImage,'pathfindingGridUrl': pathfindingGrid.asset->url}, activeAvatars[]->{title, _id, 'spriteJsonURL': spriteJson.asset->url}}[0]",
+  EXHIBITIONS:
+    "*[_type == 'exhibition']{..., area->{slug,name}, participants[]->{slug,name,username}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}}}",
   EVENTS:
-    "*[_type == 'event']{..., participants[]->{slug,name,username}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}}} | order(startDate asc)",
+    "*[_type == 'event']{..., moderators[]->{slug,name,username}, participants[]->{slug,name,username}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}}} | order(startDate asc)",
   USERS: "*[_type == 'participant']{...,avatarLink->{'iconUrl': rest[0].asset->url}}",
   PAGES: "*[_type == 'page']",
   SEMINAR: "*[_type == 'seminar' && slug.current == $slug][0]",
@@ -44,12 +47,12 @@ export const QUERY = {
   AUDIO_INSTALLATIONS:
     "*[_type == 'audioInstallation']{..., participants[]->{slug,name,username}, 'audioURL': soundFile.asset->url,spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   CASE_STUDIES:
-    "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., connectedEvents[]->{...,participants[]->{slug,name,username}}, participants[]->{slug,name,username}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
+    "*[_type in ['caseStudyEmergent', 'caseStudyExhibition']]{..., connectedEvents[]->{...,moderators[]->{slug,name,username}, participants[]->{slug,name,username}}, participants[]->{slug,name,username}, spriteLink->{spritesheet, 'spriteJsonURL': spriteJson.asset->url}}",
   LAND_MARKS:
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
   ACTIVE_STREAMS:
-    "*[_id == 'active-streams']{..., mainStream->{..., participants[]->{slug,name,username}}}[0]",
-  CONNECTED_TO_USER: "*[participants[]._ref == $id]{...,participants[]->{...}}",
+    "*[_id == 'active-streams']{..., mainStream->{..., moderators[]->{slug,name,username}, participants[]->{slug,name,username}}}[0]",
+  CONNECTED_TO_USER: "*[participants[]._ref == $id]{..., moderators[]->{...}, participants[]->{...}}",
   GLOBAL_SETTINGS: "*[_id == 'global-settings']{..., welcomeCard->{...}}[0]",
   AREAS: "*[_type == 'area']",
   TARGET_STREAM: 
