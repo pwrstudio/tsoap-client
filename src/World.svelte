@@ -5,7 +5,7 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
+  // *** IMPORTS
   import { onMount } from "svelte"
   import * as Colyseus from "colyseus.js"
   import * as PIXI from "pixi.js"
@@ -20,7 +20,6 @@
   import MediaQuery from "svelte-media-query"
   import Tweener from "tweener"
   import Cookies from "js-cookie"
-  import slugify from "slugify"
 
   // *** COMPONENTS
   // sidebar
@@ -57,14 +56,10 @@
   import {
     nanoid,
     MAP,
-    COLORMAP,
     TINTMAP,
     REVERSE_HEX_MAP,
     QUERY,
-    AREA,
     TEXT_ROOMS,
-    VIDEO_ROOMS,
-    AUDIO_ROOMS,
     TEXT_STYLE_AVATAR,
     TEXT_STYLE_AVATAR_AUTHENTICATED,
     TEXT_STYLE_CASE_STUDY,
@@ -82,21 +77,16 @@
     currentTextRoom,
     currentAudioRoom,
     currentVideoRoom,
-    currentAreaObject,
     globalUserList,
   } from "./stores.js"
 
   // *** PROPS
   export let params = false
 
-  $: {
-    console.log('$currentVideoRoom', $currentVideoRoom)
-  }
-
-  // DOM REFERENCES
+  // *** DOM REFERENCES
   let gameContainer = {}
 
-  // VARIABLES
+  // *** VARIABLES
   let activeContentClosed = false
   let supportStreamClosed = false
   let audioChatActive = false
@@ -122,7 +112,6 @@
   let returnSection = false
   let returnSlug = false
   
-
   $: {
     // ___ Split the url parameter into variables
     const args = get(params, "[*]", "").split("/")
@@ -142,7 +131,6 @@
       if ($areaList && Array.isArray($areaList)) {
         const targetArea = $areaList.find(a => a.slug.current === slug)
         if (targetArea) {
-          console.log(REVERSE_HEX_MAP[targetArea.color])
           // __ Clear section and slug
           navigate('/')
           // __ Teleport
@@ -215,14 +203,12 @@
 
   // __ Set global user list
   users.then(users => {
-    // console.dir(users)
     globalUserList.set(users)
     return users
   })
 
   loadData(QUERY.GLOBAL_SETTINGS)
     .then(gS => {
-      console.log("globalSettings", gS)
       globalSettings.set(gS)
     })
     .catch(err => {
@@ -231,7 +217,6 @@
 
   loadData(QUERY.AREAS)
     .then(areas => {
-      // console.log("areas", areas)
       areaList.set(areas)
     })
     .catch(err => {
@@ -243,7 +228,6 @@
       console.log(err)
     })
     .then(activeStreams => {
-      console.log('activeStreams', activeStreams)
       currentStreamEvent = activeStreams.mainStreamEvent
       currentStreamUrl = activeStreams.mainStream
       supportStreamUrl = activeStreams.supportStream
@@ -536,8 +520,6 @@
           const onDown = e => {
             // __ Open profile if accredited user
             if (player.authenticated) {
-              console.log("______ user")
-              // console.dir(player)
               // __ Get user from userlist
               const targetUser = $globalUserList.find(
                 u => u.username === player.discourseName
@@ -662,9 +644,6 @@
               localPlayers[sessionId] = createPlayer(player, sessionId)
               // PLAYER => CHANGE
               player.onChange = changes => {
-                // console.log('CHANGES', changes)
-                // console.dir(player.path.waypoints)
-                // console.log(player.carrying)
                 if ($localUserSessionID === sessionId) {
                   localPlayers[sessionId].carrying = player.carrying
                   // __ Carrying ?
@@ -962,8 +941,6 @@
             // CASE STUDY => REMOVE
             gameRoom.state.caseStudies.onRemove = (caseStudy, sessionId) => {
               // !! TODO: PROPERLY REMOVE CASE STUDY
-              // console.log("%_%_%_ Case study removed")
-              // console.dir(caseStudy)
             }
 
             // ******************************
@@ -971,7 +948,6 @@
             // ******************************
             gameRoom.onLeave((code) => {
               const exitMsg = 'Disconnected from server. Code: ' + code
-              window.alert(exitMsg)
               console.log(exitMsg);
             });
 
@@ -1714,13 +1690,6 @@
     <!-- MAIN AREA -->
     {#if $currentVideoRoom == 'main' && currentStreamUrl && !activeContentClosed}
       <div class="content-item active" transition:fly={{ y: -200 }}>
-        <!-- <div
-          class="close"
-          on:click={e => {
-            activeContentClosed = true
-          }}>
-          ×
-        </div> -->
         <LiveSingle event={currentStreamEvent} url={currentStreamUrl} />
       </div>
     {/if}
@@ -1932,7 +1901,7 @@
         <Tutorial card={tutorialCard} bind:showWelcomeCard={showWelcomeCard}/>
         <div 
           class="background-hittable"
-          on:click={e => { showWelcomeCard = false; console.log(tutorialCard) }}
+          on:click={e => { showWelcomeCard = false; }}
         ></div>
     </div>
   {/await}
@@ -1942,15 +1911,3 @@
 {#if UI.state == STATE.ERROR}
   <Error message={UI.errorMessage} />
 {/if}
-
-<!-- {#if $currentAreaObject}
-  <div class="debug" style={'background-color:' + $currentAreaObject.color}>
-    <strong>{$currentAreaObject.title}</strong>
-    / video:
-    {$currentAreaObject.videoRoom}
-    / audio:
-    {$currentAreaObject.audioRoom}
-    / text:
-    {$currentAreaObject.textRoom}
-  </div>
-{/if} -->

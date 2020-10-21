@@ -14,11 +14,8 @@
 
   // *** STORES
   import { globalUserList } from "./stores"
-
-  // console.dir(user)
-  // console.dir($globalUserList)
+  
   const userIndex = $globalUserList.findIndex(u => u.name == user.display)
-  // console.log("userIndex =>", userIndex)
 </script>
 
 <style lang="scss">

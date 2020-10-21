@@ -5,7 +5,7 @@
   //
   // # # # # # # # # # # # # #
 
-  // PROPS
+  // *** PROPS
   export let caseStudy = ""
 </script>
 

@@ -18,7 +18,6 @@
   export let userName = ""
   export let roomName = ""
   export let roomId = 4
-  // console.dir(user)
 
   // *** CONSTANTS
   const dispatch = createEventDispatcher()
@@ -152,7 +151,6 @@
                 audioenabled = false
                 toggleaudio = () => {
                   audioenabled = !audioenabled
-                  console.log("audioenabled", audioenabled)
                   mixertest.send({
                     message: { request: "configure", muted: !audioenabled },
                   })
@@ -161,9 +159,7 @@
                 togglevolume = () => {
                   volumeOn = !volumeOn
                   if (audioEl) {
-                    console.log("volumeOn", volumeOn)
                     audioEl.volume = volumeOn ? 1 : 0
-                    console.dir(audioEl)
                   }
                 }
               },
@@ -178,7 +174,6 @@
   }
 
   const registerUsername = () => {
-    // console.log("ROOM ID", roomId)
     let register = { request: "join", room: roomId, display: userName }
     mixertest.send({ message: register })
   }
@@ -191,7 +186,7 @@
     // console.log("--- Revoke microphone permissions")
     // const microphone = navigator.permissions.query({ name: 'microphone' })
     // navigator.permissions.revoke(microphone)
-    console.log("--- DESTROYING JANUS SESSION")
+    // console.log("--- DESTROYING JANUS SESSION")
     janus.destroy()
   })
 </script>

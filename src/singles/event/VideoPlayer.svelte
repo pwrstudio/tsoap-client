@@ -5,12 +5,12 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
+  // *** IMPORTS
   import {fade} from 'svelte/transition'
   import { quartOut } from 'svelte/easing'
   import getVideoId from "get-video-id"
 
-  // PROPS
+  // *** PROPS
   export let streamUrl = ""
 </script>
 

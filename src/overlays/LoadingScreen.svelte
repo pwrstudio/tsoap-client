@@ -4,15 +4,6 @@
   //  LOADING SCREEN
   //
   // # # # # # # # # # # # # #
-
-  // let counter = 0
-
-  // const inc = () => {
-  //   counter++
-  //   requestAnimationFrame(inc)
-  // }
-
-  // requestAnimationFrame(inc)
 </script>
 
 <style lang="scss">

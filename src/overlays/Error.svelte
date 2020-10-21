@@ -18,8 +18,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: red;
-    color: black;
+    background: black;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;

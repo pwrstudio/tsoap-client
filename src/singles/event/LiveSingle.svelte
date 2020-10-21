@@ -11,27 +11,23 @@
   import { renderBlockText, loadData } from "../../sanity.js"
   import { links } from "svelte-routing"
 
-  // COMPONENTS
+  // *** COMPONENTS
   import ParticipantsList from "../../lists/ParticipantsList.svelte"
   import CaseStudyList from "../../lists/CaseStudyList.svelte"
   import VideoPlayer from "./VideoPlayer.svelte"
 
-  // GLOBAL
+  // *** GLOBAL
   import { QUERY } from "../../global.js"
 
   // *** PROPS
   export let event = {}
   export let url = ''
 
-  // console.log('LIVE EVENT')
-  // console.log('event', event)
-  // console.log('url', url)
   let expanded = false
   let showVideo = true
   let connectedCaseStudies = []
 
   if (event._id) {
-    console.log("event._id", event._id)
     connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
       id: event._id,
     }).catch(err => {

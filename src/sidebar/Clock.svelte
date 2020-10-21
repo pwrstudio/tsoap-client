@@ -1,5 +1,10 @@
-<!-- Clock.svelte -->
 <script>
+  // # # # # # # # # # # # # #
+  //
+  //  CLOCK
+  //
+  // # # # # # # # # # # # # #
+
   function berlinTime(){
     var d = new Date();
     var cet = new Intl.DateTimeFormat('de-DE', {
@@ -7,7 +12,6 @@
       hour: 'numeric',
       minute: 'numeric'
     }).format(d)
-    // console.log(cet);
     time = cet;
     return cet;
   }
@@ -20,30 +24,30 @@
 
 <style lang="scss"> 
 
-@import "../variables.scss";
+  @import "../variables.scss";
 
-.clock-berlin{
-  font-family: $MONO_STACK;
-  font-size:$FONT_SIZE_SMALL;
-  background:$COLOR_DARK_OPACITY;
-  color:$COLOR_LIGHT;
-  z-index:1001;
-  position:absolute;
-  top:0;
-  right:0;
-  padding: $SPACE_XS;
-  // border:1px solid red;
-  word-spacing: -0.3em;
-  a{
-    color:white;
-    text-decoration: none;
-  }
+  .clock-berlin{
+    font-family: $MONO_STACK;
+    font-size:$FONT_SIZE_SMALL;
+    background:$COLOR_DARK_OPACITY;
+    color:$COLOR_LIGHT;
+    z-index:1001;
+    position:absolute;
+    top:0;
+    right:0;
+    padding: $SPACE_XS;
+    word-spacing: -0.3em;
 
-  @include screen-size("small"){
-    top:80px;
-    z-index:1;
+    a {
+      color:white;
+      text-decoration: none;
+    }
+
+    @include screen-size("small"){
+      top:80px;
+      z-index:1;
+    }
   }
-}
 </style>
 
 <div class="clock-berlin">

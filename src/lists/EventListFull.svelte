@@ -6,7 +6,6 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import { onMount } from "svelte"
   import { fade } from "svelte/transition"
   import get from "lodash/get"
   import { renderBlockText } from "../sanity.js"
@@ -16,7 +15,6 @@
 
   // COMPONENTS
   import ParticipantsList from "./ParticipantsList.svelte"
-  import { window } from "lodash/_freeGlobal"
 
   // *** STORES
   import { globalSettings } from "../stores.js"
@@ -25,18 +23,13 @@
   export let events = []
   export let exhibitions = []
 
-  console.dir(events)
+   // *** VARIABLES
+   let containerWidth = "100%"
 
   const now = Date.now()
   const upcomingEvents = events.filter(e => Date.parse(e.startDate) > now)
   const archivedEvents = events.filter(e => Date.parse(e.startDate) < now)
 
-  console.dir(upcomingEvents)
-
-  // *** VARIABLES
-  let containerWidth = "100%"
-
-  
 </script>
 
 <style lang="scss">

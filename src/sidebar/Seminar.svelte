@@ -5,20 +5,20 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
+  // *** IMPORTS
   import get from "lodash/get"
   import { loadData, renderBlockText } from "../sanity.js"
 
-  // COMPONENTS
+  // *** COMPONENTS
   import ParticipantsList from "../lists/ParticipantsList.svelte"
 
-  // GLOBAL
+  // *** GLOBAL
   import { QUERY } from "../global.js"
 
   // *** STORES
   import { authenticatedUserInformation } from "../stores"
 
-  // PROPS
+  // *** PROPS
   export let slug = "test-seminar-1"
   export let mobile = false
   export let mobileExpanded = false
