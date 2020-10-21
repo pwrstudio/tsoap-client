@@ -18,8 +18,8 @@
   // *** STORES
   import { localUserAuthenticated, authenticatedUserInformation } from "../stores"
 
-  console.log('message')
-  console.log('$authenticatedUserInformation', $authenticatedUserInformation)
+  // console.log('message')
+  // console.log('$authenticatedUserInformation', $authenticatedUserInformation)
 </script>
 
 <style lang="scss">
