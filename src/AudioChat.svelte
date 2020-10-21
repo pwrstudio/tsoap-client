@@ -185,7 +185,10 @@
   })
 
   onDestroy(async () => {
-    console.log("DESTROYING JANUS SESSION")
+    // console.log("--- Revoke microphone permissions")
+    // const microphone = navigator.permissions.query({ name: 'microphone' })
+    // navigator.permissions.revoke(microphone)
+    console.log("--- DESTROYING JANUS SESSION")
     janus.destroy()
   })
 </script>

@@ -59,6 +59,7 @@ export const QUERY = {
   "*[_id == $id]{..., participants[]->{slug,name,username}}[0]",
   PINNED_MESSAGE: "*[_id == 'pinned-message'][0]",
   AUDIOROOM_NAMES: "*[_id == 'audioroom-names'][0]",
+  TUTORIAL_CARD: "*[_id == 'tutorial-card'][0]",
 }
 
 export const TEXT_STYLE_AVATAR = {

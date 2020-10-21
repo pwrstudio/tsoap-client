@@ -200,6 +200,9 @@
   const audioRoomNames = loadData(QUERY.AUDIOROOM_NAMES).catch(err => {
     console.log(err)
   })
+  const tutorialCard = loadData(QUERY.TUTORIAL_CARD).catch(err => {
+    console.log(err)
+  })
 
   // __ Set global user list
   users.then(users => {
@@ -1883,6 +1886,7 @@
 
 <!-- AUDIOCHAT BOX  -->
 {#await audioRoomNames then audioRoomNames}
+<!-- $localUserAuthenticated &&  -->
   {#if $localUserAuthenticated && !audioChatActive && $currentAudioRoom}
     <div class="audiochat-box">
       <div class="message">
