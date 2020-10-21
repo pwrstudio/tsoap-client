@@ -1923,13 +1923,15 @@
 
 <!-- WELCOME / TUTORIAL -->
 {#if UI.state != STATE.LOADING && showWelcomeCard}
-  <div class="tutorial-wrap-outer" transition:fade >
-      <Tutorial card={$globalSettings.welcomeCard} bind:showWelcomeCard={showWelcomeCard}/>
+  {#await tutorialCard then tutorialCard}
+  <div class="tutorial-wrap-outer" transition:fade >    
+      <Tutorial card={tutorialCard} bind:showWelcomeCard={showWelcomeCard}/>
       <div 
         class="background-hittable"
-        on:click={e => { showWelcomeCard = false }}
+        on:click={e => { showWelcomeCard = false; console.log(tutorialCard) }}
       ></div>
   </div>
+  {/await}
 {/if}
 
 <!-- ERROR -->
