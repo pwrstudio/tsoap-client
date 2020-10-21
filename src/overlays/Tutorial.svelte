@@ -62,6 +62,9 @@
     .tutorial-slide :global(figure) { 
       display:block;
       margin:$SPACE_L 0;
+      @include screen-size("small"){
+        margin:$SPACE_S 0;
+      }
     };
 
     .tutorial-slide :global(img) { 
