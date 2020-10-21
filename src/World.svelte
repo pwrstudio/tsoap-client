@@ -1201,8 +1201,8 @@
     }, 10000)
 
     // ___ Show welcome card if user has not visited in last 7 days
-    // showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
-    showWelcomeCard = true
+    showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
+    // showWelcomeCard = true
     Cookies.set("tsoap-visitor", "true", { expires: 7 })
 
     // __ Redirect to authentication if user is marked as logged in
@@ -1928,13 +1928,13 @@
 <!-- WELCOME / TUTORIAL -->
 {#if UI.state != STATE.LOADING && showWelcomeCard}
   {#await tutorialCard then tutorialCard}
-  <div class="tutorial-wrap-outer" transition:fade >    
-      <Tutorial card={tutorialCard} bind:showWelcomeCard={showWelcomeCard}/>
-      <div 
-        class="background-hittable"
-        on:click={e => { showWelcomeCard = false; console.log(tutorialCard) }}
-      ></div>
-  </div>
+    <div class="tutorial-wrap-outer" transition:fade >    
+        <Tutorial card={tutorialCard} bind:showWelcomeCard={showWelcomeCard}/>
+        <div 
+          class="background-hittable"
+          on:click={e => { showWelcomeCard = false; console.log(tutorialCard) }}
+        ></div>
+    </div>
   {/await}
 {/if}
 
