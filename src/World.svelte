@@ -89,11 +89,16 @@
   // *** PROPS
   export let params = false
 
+  $: {
+    console.log('$currentVideoRoom', $currentVideoRoom)
+  }
+
   // DOM REFERENCES
   let gameContainer = {}
 
   // VARIABLES
   let activeContentClosed = false
+  let supportStreamClosed = false
   let audioChatActive = false
   let sidebarHidden = false
   let caseStudiesLoaded = false
@@ -107,6 +112,7 @@
   let moveQ = []
   let currentStreamEvent = false
   let currentStreamUrl = false
+  let supportStreamUrl = false
 
   // ___ Routing
   let section = false
@@ -115,6 +121,7 @@
   let sig = false
   let returnSection = false
   let returnSlug = false
+  
 
   $: {
     // ___ Split the url parameter into variables
@@ -236,24 +243,30 @@
       console.log(err)
     })
     .then(activeStreams => {
+      console.log('activeStreams', activeStreams)
       currentStreamEvent = activeStreams.mainStreamEvent
       currentStreamUrl = activeStreams.mainStream
+      supportStreamUrl = activeStreams.supportStream
     })
 
   // __ Listen for changes to the active streams post
   client.listen(QUERY.ACTIVE_STREAMS).subscribe(update => {
     currentStreamUrl = false
     currentStreamEvent = false
+    supportStreamUrl = false
     setTimeout(() => {
       activeStreams = loadData(QUERY.ACTIVE_STREAMS)
         .then(aS => {
           if (aS.mainStream) {
             currentStreamEvent = aS.mainStreamEvent
             currentStreamUrl = aS.mainStream
+            supportStreamUrl = activeStreams.supportStream
             activeContentClosed = false
+            supportStreamClosed = false
           } else {
             currentStreamUrl = false
             currentStreamEvent = false
+            supportStreamUrl = false
           }
         })
         .catch(err => {
@@ -1714,18 +1727,16 @@
       </div>
     {/if}
     <!-- SUPPORT AREA -->
-    {#if $currentVideoRoom == 'support' && activeStreams && activeStreams.supportStream}
+    {#if $currentVideoRoom == 'support' && supportStreamUrl && !supportStreamClosed}
       <div class="content-item active" transition:fly={{ y: -200 }}>
         <div
           class="close"
           on:click={e => {
-            activeContentClosed = true
+            supportStreamClosed = true
           }}>
           ×
         </div>
-        {#if activeStreams && activeStreams.supportStream}
-          <LiveSingle url={activeStreams.supportStream} />
-        {/if}
+        <LiveSingle url={supportStreamUrl} />
       </div>
     {/if}
   {/await}

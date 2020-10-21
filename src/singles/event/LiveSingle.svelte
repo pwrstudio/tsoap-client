@@ -23,7 +23,11 @@
   export let event = {}
   export let url = ''
 
-  console.log('event', event)
+  // console.log('LIVE EVENT')
+
+  // console.log('event', event)
+
+  // console.log('url', url)
   let expanded = false
   let connectedCaseStudies = []
 
