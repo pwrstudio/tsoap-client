@@ -1640,7 +1640,7 @@
               {#each TEXT_ROOMS as TR}
                 {#if $currentTextRoom === TR}
                   <Chat
-                    chatMessages={chatMessages.filter(m => m.room === TR)}
+                    chatMessages={chatMessages.filter(m => m.room === TR || m.directed)}
                     currentRoom={TR} />
                 {/if}
               {/each}
@@ -1828,7 +1828,7 @@
             {#each TEXT_ROOMS as TR}
               {#if $currentTextRoom === TR}
                 <Chat
-                  chatMessages={chatMessages.filter(m => m.room === TR)}
+                  chatMessages={chatMessages.filter(m => m.room === TR || m.directed)}
                   currentRoom={TR}
                   mobile={true}
                   {mobileExpanded} />
