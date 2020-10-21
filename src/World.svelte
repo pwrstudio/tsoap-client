@@ -660,7 +660,6 @@
             // PLAYER => ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
               localPlayers[sessionId] = createPlayer(player, sessionId)
-              
               // PLAYER => CHANGE
               player.onChange = changes => {
                 // console.log('CHANGES', changes)
@@ -940,6 +939,24 @@
               } else {
                 createCaseStudy(caseStudy, false)
               }
+              // CASE STUDY => CHANGE
+              caseStudy.onChange = changes => {
+                const g = emergentLayer.children.find(
+                  cs => cs.uuid === caseStudy.uuid
+                )
+                if (g) {
+                  // __ Darken color one step
+                  g.children[0].tint = TINTMAP[caseStudy.age - 1]
+                  // __ Update position if not currently in a user's inventory
+                  if (caseStudy.carriedBy === "") {
+                    g.x = caseStudy.x
+                    g.y = caseStudy.y
+                    g.visible = true
+                  } else {
+                    g.visible = false
+                  }
+                }
+              }
             }
 
             // CASE STUDY => REMOVE
@@ -947,25 +964,6 @@
               // !! TODO: PROPERLY REMOVE CASE STUDY
               // console.log("%_%_%_ Case study removed")
               // console.dir(caseStudy)
-            }
-
-            // CASE STUDY => CHANGE
-            gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
-              const g = emergentLayer.children.find(
-                cs => cs.uuid === caseStudy.uuid
-              )
-              if (g) {
-                // __ Darken color one step
-                g.children[0].tint = TINTMAP[caseStudy.age - 1]
-                // __ Update position if not currently in a user's inventory
-                if (caseStudy.carriedBy === "") {
-                  g.x = caseStudy.x
-                  g.y = caseStudy.y
-                  g.visible = true
-                } else {
-                  g.visible = false
-                }
-              }
             }
 
             // ******************************
