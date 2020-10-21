@@ -1558,7 +1558,7 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0,0,0,0.5);
-    backdrop-filter:blur(2px);
+    // backdrop-filter:blur(2px);
     z-index: 100000;
 
       .background-hittable{
