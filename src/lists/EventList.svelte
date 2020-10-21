@@ -151,6 +151,7 @@
         height: 40px;
         border-bottom: 1px solid $COLOR_MID_1;
         padding-bottom: $SPACE_S;
+        min-height: unset;
         
         .archive-link {
           cursor: pointer;
