@@ -52,6 +52,7 @@
     overflow: hidden;
 
     @include screen-size("small") {
+      // display: none;
       padding-top: 0;
     }
 
