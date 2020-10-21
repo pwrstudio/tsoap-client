@@ -52,8 +52,8 @@
       if (isPaused) return;
       if (flickity.slides) {
         flickity.x = (flickity.x - tickerSpeed) % flickity.slideableWidth;
-        flickity.selectedIndex = flickity.dragEndRestingSelect();
-        flickity.updateSelectedSlide();
+        // flickity.selectedIndex = flickity.dragEndRestingSelect();
+        // flickity.updateSelectedSlide();
         flickity.settle(flickity.x);
       }
       window.requestAnimationFrame(update);
