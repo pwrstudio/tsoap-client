@@ -12,18 +12,19 @@
   import { client, renderBlockText, loadData } from "../sanity"
   import get from "lodash/get"
 
-  // DOM REFERENCES
+  // *** DOM REFERENCES
   let messageContainerEl = {}
 
-  // GLOBAL
+  // *** GLOBAL
   import { QUERY } from "../global.js"
 
-  // PROPS
+  // *** PROPS
   export let chatMessages = []
   export let currentRoom = 2
   export let mobile = false
   export let mobileExpanded = false
-
+  
+  // *** VARIABLES
   let pinnedText = false
   let pinnedMessageClosed = false
 
