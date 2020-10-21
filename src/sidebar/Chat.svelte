@@ -110,8 +110,8 @@
 
     .pinned-message {
       background: $COLOR_DARK;
-      position: fixed;
-      top: 80px;
+      position: absolute;
+      top: 0;
       left: 0;
       width: 100%;
       padding-top: $SPACE_XS;
@@ -124,6 +124,11 @@
       user-select: none;
       border-bottom: 1px solid $COLOR_MID_2;
       pointer-events: all;
+
+      @include screen-size("small"){
+        position: fixed;
+        top: 80px;
+      }
     }
 
     @include screen-size("small") {
