@@ -1,7 +1,7 @@
 <script>
   // # # # # # # # # # # # # #
   //
-  //  Audio Chat
+  //  AUDIO CHAT
   //
   // # # # # # # # # # # # # #
 
@@ -20,20 +20,23 @@
   export let roomId = 4
   // console.dir(user)
 
+  // *** CONSTANTS
   const dispatch = createEventDispatcher()
   const server = "https://janus.tsoap.dev"
+  const opaqueId = "audiobridgetest-" + Janus.randomString(12)
+
+  // *** VARIABLES
   let janus = {}
   let mixertest = null
-  const opaqueId = "audiobridgetest-" + Janus.randomString(12)
   let webrtcUp = false
   let audioenabled = false
   let volumeOn = true
   let myId = ""
   let audioEl = {}
+  let userList = []
+  let minimized = false;
   let toggleaudio = () => {}
   let togglevolume = () => {}
-
-  let userList = []
 
   const startAudioChat = () => {
     Janus.init({
@@ -231,13 +234,13 @@
     }
 
     .button {
-      padding-left: $SPACE_M;
-      padding-right: $SPACE_M;
+      padding: 0 $SPACE_M;
+      display: inline-table;
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_MID_2;
       font-size: $FONT_SIZE_BASE;
 
-      border-radius: $SPACE_S;
+      border-radius: 10px;
       text-align: center;
 
       &:hover {
@@ -253,6 +256,10 @@
       flex-direction: row;
       width: 100%;
       height: 30px;
+
+      .text {
+        cursor: pointer;
+      }
 
       .microphone {
         opacity: 0.5;
@@ -275,6 +282,11 @@
       }
     }
 
+    &.minimized {
+      height: 50px;
+      transition: height 0.3s ease-out;
+    }
+
     .userlist {
       min-height: 200px;
       margin-top: $SPACE_L;
@@ -286,7 +298,7 @@
   }
 </style>
 
-<div transition:fade class="audioChatContainer">
+<div transition:fade class:minimized class="audioChatContainer">
   <!-- AUDIO ELEMENT -->
   <audio
     id="roomaudio"
@@ -297,7 +309,7 @@
 
   <!-- HEADER -->
   <div class="header">
-    <div class="text">
+    <div class="text" on:click={() => {minimized = !minimized}}>
       {userList.length}
       users in
       <strong>{roomName}</strong>
