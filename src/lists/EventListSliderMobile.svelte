@@ -141,8 +141,8 @@
     &__slideshow {
       height: 80px;
       width: 100%;
-
     }
+
     .event{
       display: block;
       text-decoration: none;
