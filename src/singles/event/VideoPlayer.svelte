@@ -6,6 +6,8 @@
   // # # # # # # # # # # # # #
 
   // IMPORTS
+  import {fade} from 'svelte/transition'
+  import { quartOut } from 'svelte/easing'
   import getVideoId from "get-video-id"
 
   // PROPS
@@ -22,7 +24,6 @@
     justify-content: center;
     align-items: center;
 
-    .youtube-container,
     .vimeo-container {
       position: relative;
       padding-bottom: 56.25%;
@@ -42,7 +43,7 @@
   }
 </style>
 
-<div class="embed">
+<div class="embed" in:fade={{duration: 300, easing: quartOut}}>
   {#if streamUrl.includes('vimeo')}
     <div class="vimeo-container">
       <iframe

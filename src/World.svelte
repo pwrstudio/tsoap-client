@@ -1714,13 +1714,13 @@
     <!-- MAIN AREA -->
     {#if $currentVideoRoom == 'main' && currentStreamUrl && !activeContentClosed}
       <div class="content-item active" transition:fly={{ y: -200 }}>
-        <div
+        <!-- <div
           class="close"
           on:click={e => {
             activeContentClosed = true
           }}>
           ×
-        </div>
+        </div> -->
         <LiveSingle event={currentStreamEvent} url={currentStreamUrl} />
       </div>
     {/if}

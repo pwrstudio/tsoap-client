@@ -27,6 +27,7 @@
   // console.log('event', event)
   // console.log('url', url)
   let expanded = false
+  let showVideo = true
   let connectedCaseStudies = []
 
   if (event._id) {
@@ -57,18 +58,29 @@
 
       .expand {
         position: absolute;
-        top: $SPACE_S;
-        right: $SPACE_S;
+        top: 8px;
+        right: 40px;
         color: $COLOR_MID_2;
         opacity: 0.4;
         cursor: pointer;
         transition: opacity 0.3s $transition;
-        // svg {
-        //   color: $COLOR_MID_2;
-        //   path {
-        //     stroke: $COLOR_MID_2;
-        //   }
-        // }
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+
+      .toggleVideo {
+        position: absolute;
+        top: 1px;
+        right: 14px;
+        color: #000000;
+        opacity: 0.4;
+        cursor: pointer;
+        transition: opacity 0.3s $transition;
+        font-size: 36px;
+        -webkit-text-stroke: 1px;
+
 
         &:hover {
           opacity: 0.7;
@@ -117,19 +129,19 @@
 </style>
 
 <div class="event-single" in:fade use:links>
-  <VideoPlayer streamUrl={url} />
+  {#if showVideo}
+    <VideoPlayer streamUrl={url} />
+  {/if}
 
   {#if event.title}
     <!-- HEADER -->
-    <div
-      class="main-header"
-      on:click={() => {
-        expanded = !expanded
-      }}>
+    <div class="main-header">
       <!-- TITLE -->
       <div class="title">{event.title}</div>
       <!-- ARROW DOWN -->
-      <div class="expand">
+      <div class="expand" on:click={() => {
+        expanded = !expanded
+      }}>
         {#if expanded}
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -146,6 +158,12 @@
             <path
               d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" /></svg>
         {/if}
+      </div>
+      <!-- TOGGLE VIDEO -->
+      <div class="toggleVideo" on:click={() => {
+        showVideo = !showVideo
+      }}>
+        {#if showVideo}–{:else}+{/if}
       </div>
 
       <!-- PARTICIPANTS -->
