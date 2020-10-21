@@ -110,8 +110,8 @@
 
     .pinned-message {
       background: $COLOR_DARK;
-      position: absolute;
-      top: 0;
+      position: fixed;
+      top: 80px;
       left: 0;
       width: 100%;
       padding-top: $SPACE_XS;
@@ -140,7 +140,7 @@
 
   .close-pinned-message {
     position: absolute;
-    top: 0px;
+    top: -2px;
     right: 10px;
     font-size: 22px;
     cursor: pointer;
