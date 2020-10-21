@@ -32,6 +32,7 @@
       }
 
       .participants {
+        margin-top: $SPACE_XS;
         color: $COLOR_MID_2;
         font-family: $MONO_STACK;
         font-size: $FONT_SIZE_SMALL;

@@ -124,6 +124,11 @@
       user-select: none;
       border-bottom: 1px solid $COLOR_MID_2;
       pointer-events: all;
+
+      @include screen-size("small"){
+        position: fixed;
+        top: 80px;
+      }
     }
 
     @include screen-size("small") {
@@ -140,7 +145,7 @@
 
   .close-pinned-message {
     position: absolute;
-    top: 0px;
+    top: -2px;
     right: 10px;
     font-size: 22px;
     cursor: pointer;

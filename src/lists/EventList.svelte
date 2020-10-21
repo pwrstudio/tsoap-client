@@ -66,10 +66,10 @@
     }
 
     .event {
-      padding: 0px $SPACE_S;
-      padding-top: $SPACE_S;
+      padding: $SPACE_S;
+      // padding-top: $SPACE_S;
       width: 100%;
-      height: $ITEM_HEIGHT;
+      min-height: $ITEM_HEIGHT;
       background: $COLOR_LIGHT;
       color: $COLOR_DARK;
       display: block;
@@ -151,6 +151,7 @@
         height: 40px;
         border-bottom: 1px solid $COLOR_MID_1;
         padding-bottom: $SPACE_S;
+        min-height: unset;
         
         .archive-link {
           cursor: pointer;
@@ -236,10 +237,10 @@
             .elips {
               margin-left: $SPACE_XS;
               margin-right: $SPACE_XS;
-              width: 30%;
+              width: 80%;
               white-space: nowrap;
               overflow: hidden;
-              flex-shrink: 4;
+              flex-shrink: 999999;
               color: $COLOR_MID_2;
             }
 

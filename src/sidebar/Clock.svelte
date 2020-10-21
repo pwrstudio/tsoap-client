@@ -48,6 +48,6 @@
 
 <div class="clock-berlin">
   <a href="https://www.anthropocene-curriculum.org/" target="_blank">
-    {time} CET
+    {time}&nbsp;CET
   </a>
 </div>
