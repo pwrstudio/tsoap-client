@@ -93,7 +93,7 @@
         @include screen-size("small") {
           display: block;
           width: 100%;
-          height: $ITEM_HEIGHT;
+          // height: $ITEM_HEIGHT;
           border-right: unset;
         }
       }
