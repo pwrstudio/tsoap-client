@@ -8,6 +8,7 @@
   import isArray from "lodash/isArray"
   import isEmpty from "lodash/isEmpty"
   import truncate from "lodash/truncate"
+import { window } from "lodash/_freeGlobal";
 
   // *** SANITY
   import { toPlainText, urlFor } from "./sanity.js"
@@ -18,6 +19,8 @@
   // *** PROPS
   export let post = {}
 
+  let url = window.location 
+
   const stripHtml = html => {
     let tmp = document.createElement("DIV")
     tmp.innerHTML = html
@@ -27,7 +30,6 @@
   let title = ""
   let description = ""
   let image = ""
-  // let url = "https://shape.anthropocene-curriculum.org/"
 
   $: {
     if (has(post, "name") && !isEmpty(post.name)) {
@@ -93,8 +95,9 @@
   <meta property="og:image" content={image} />
   <meta property="twitter:image" content={image} />
   <meta name="twitter:card" content="summary_large_image" />
-  <!-- <meta name="twitter:url" content={url} /> -->
-  <!-- <meta property="og:url" content={url} /> -->
+  <meta name="twitter:url" content={url} />
+  <meta name="twitter:site" content='anthrocur' />
+  <meta property="og:url" content={url} />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="The Shape of a Practice" />
 </svelte:head>
