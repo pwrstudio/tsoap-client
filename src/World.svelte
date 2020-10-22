@@ -45,12 +45,13 @@
   // overlays
   import LoadingScreen from "./overlays/LoadingScreen.svelte"
   import Error from "./overlays/Error.svelte"
+  import Reconnection from "./overlays/Reconnection.svelte"
+  import Tutorial from "./overlays/Tutorial.svelte"
   // ...
   import AudioChat from "./AudioChat.svelte"
   import InventoryMessage from "./InventoryMessage.svelte"
   import MetaData from "./MetaData.svelte"
   import Card from "./Card.svelte"
-  import Tutorial from "./overlays/Tutorial.svelte"
 
   // *** GLOBAL
   import {
@@ -100,6 +101,8 @@
   let localPlayers = {}
   let chatMessages = []
   let moveQ = []
+  let reconnectionAttempts = 0
+  let disconnectionCode = 0
   let currentStreamEvent = false
   let currentStreamUrl = false
   let supportStreamUrl = false
@@ -264,6 +267,7 @@
     ERROR: 0,
     READY: 1,
     LOADING: 2,
+    DISCONNECTED: 3,
   }
 
   const UI = { state: STATE.LOADING, errorMessage: false }
@@ -276,10 +280,17 @@
       case STATE.LOADING:
         UI.state = STATE.LOADING
         break
+      case STATE.DISCONNECTED:
+        UI.state = STATE.DISCONNECTED
+        break
       default:
         UI.state = STATE.ERROR
         UI.errorMessage = errorMessage
     }
+  }
+
+  $: {
+    console.log('STATE', UI.state)
   }
 
   // __ Connect to Colyseus gameserver
@@ -663,6 +674,7 @@
                   localPlayers[sessionId].area = player.area
                   localPlayers[sessionId].avatar.x = player.x
                   localPlayers[sessionId].avatar.y = player.y
+                  localPlayers[sessionId].avatar.setAnimation("rest")
                   if ($localUserSessionID === sessionId) {
                     currentArea.set(localPlayers[sessionId].area)
                   }
@@ -949,6 +961,24 @@
             gameRoom.onLeave((code) => {
               const exitMsg = 'Disconnected from server. Code: ' + code
               console.log(exitMsg);
+              // __ Show notification of disconnection
+              setUIState(STATE.DISCONNECTED)
+              disconnectionCode = code
+              reconnectionAttempts = 1
+              // TODO: Try to reconnect
+              const reconnect = i => {
+                console.log('Trying to reconnect user:', $localUserSessionID, '....', i)
+                // gameRoom.reconnect(XXXX).then(yyyy => {
+                //   // __ Successfully reconnected
+                //   setUIState(STATE.READY)
+                // }).catch(err => {
+                //   console.log(err)
+                // })
+                //   setInterval(() => {
+                //   reconnectionAttempts++
+                // }, 5000)
+              }
+              reconnect(1)
             });
 
             // ************************
@@ -1235,7 +1265,6 @@
     width: auto;
     background: $COLOR_LIGHT;
     height: auto;
-    // line-height: 2em;
     text-align: center;
     top: $SPACE_S;
     left: $SPACE_S;
@@ -1558,13 +1587,13 @@
       }
   }
 
-  .debug {
-    position: fixed;
-    bottom: $SPACE_S;
-    right: 420px;
-    padding: $SPACE_S;
-    font-size: 8px;
-  }
+  // .debug {
+  //   position: fixed;
+  //   bottom: $SPACE_S;
+  //   right: 420px;
+  //   padding: $SPACE_S;
+  //   font-size: 8px;
+  // }
   
 </style>
 
@@ -1910,4 +1939,9 @@
 <!-- ERROR -->
 {#if UI.state == STATE.ERROR}
   <Error message={UI.errorMessage} />
+{/if}
+
+<!-- DISCONNECTED -->
+{#if UI.state == STATE.DISCONNECTED}
+  <Reconnection {reconnectionAttempts} {disconnectionCode}/>
 {/if}

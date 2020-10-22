@@ -28,7 +28,7 @@
     .box {
       font-family: $MONO_STACK;
       padding: 20px;
-      font-size: 64px;
+      font-size: $FONT_SIZE_LARGE;
       text-align: center;
       user-select: none;
     }

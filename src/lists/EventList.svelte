@@ -328,7 +328,7 @@
   <!-- FOOTER -->
   {#if !related && exhibitions && exhibitions.length > 0}
     <div class="footer">
-      {#each exhibitions as exhibition, index (exhibition._id)}
+      {#each exhibitions.reverse() as exhibition, index (exhibition._id)}
         <a
           href={'/area/' + get(exhibition, 'area.slug.current', '')}
           class="exhibition">
