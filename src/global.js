@@ -1,4 +1,5 @@
 import { format, getYear } from "date-fns"
+import { parseFromTimeZone, formatToTimeZone } from "date-fns-timezone"
 
 export const SANITY_PROJECT_ID = "bu5rnal5"
 
@@ -91,7 +92,9 @@ export const TEXT_STYLE_CASE_STUDY = {
 
 // const mainFormat = "MMM dd yyyy – HH:mm"
 // const mainFormat = "MMM dd – HH:mm"
-const mainFormat = "HH:mm 'CET,' EEE MMM dd"
+// const mainFormat = "HH:mm 'CET,' EEE MMM dd"
+// const mainFormat = 'HH:mm (z) E MMM dd'
+const mainFormat = 'HH:mm z, dd MMM DD'
 
 export const formattedDate = (start, end) => {
   try {
@@ -105,7 +108,8 @@ export const formattedDate = (start, end) => {
     }
 
     if (!end) {
-      return format(startDate, mainFormat)
+      return formatToTimeZone(startDate, mainFormat, { timeZone: 'Europe/Berlin' })
+      // return format(startDate, mainFormat)
     }
 
     const endDate = Date.parse(end)
