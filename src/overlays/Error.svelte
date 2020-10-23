@@ -18,8 +18,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: red;
-    color: black;
+    background: black;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,7 +28,7 @@
     .box {
       font-family: $MONO_STACK;
       padding: 20px;
-      font-size: 64px;
+      font-size: $FONT_SIZE_LARGE;
       text-align: center;
       user-select: none;
     }

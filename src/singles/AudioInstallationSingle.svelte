@@ -13,12 +13,12 @@
   import { links } from "svelte-routing"
   import { Howler } from "howler"
 
-  // COMPONENTS
+  // *** COMPONENTS
   import ParticipantsList from "../lists/ParticipantsList.svelte"
   import CaseStudyList from "../lists/CaseStudyList.svelte"
   import MetaData from "../MetaData.svelte"
 
-  // GLOBAL
+  // *** GLOBAL
   import { QUERY } from "../global.js"
 
   // *** PROPS

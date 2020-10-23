@@ -25,6 +25,7 @@
   // *** PROPS
   export let user = {}
 
+  // *** VARIABLES
   let relatedCaseStudies = false
   let relatedEvents = false
 
@@ -47,9 +48,7 @@
 
 <style lang="scss">
   @import "../variables.scss";
-
   
-
   .user-profile-single {
     .go-back {
       padding-top: $SPACE_S;

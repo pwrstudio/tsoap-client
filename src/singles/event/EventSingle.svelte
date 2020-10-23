@@ -11,12 +11,12 @@
   import { renderBlockText } from "../../sanity.js"
   import { links } from "svelte-routing"
 
-  // COMPONENTS
+  // *** COMPONENTS
   import ParticipantsList from "../../lists/ParticipantsList.svelte"
   import CaseStudyList from "../../lists/CaseStudyList.svelte"
   import MetaData from "../../MetaData.svelte"
 
-  // GLOBAL
+  // *** GLOBAL
   import { formattedDate } from "../../global.js"
 
   // *** PROPS
@@ -136,20 +136,6 @@
   <!-- DATE -->
   <div class="date">{formattedDate(event.startDate)}</div>
   <div class="divider" />
-
-  <!-- IMAGE
-  {#if get(event, 'mainImage.asset', false)}
-    <div class="image">
-      <img
-        alt={event.title}
-        src={urlFor(event.mainImage.asset)
-          .width(600)
-          .quality(90)
-          .auto('format')
-          .url()} />
-    </div>
-    <div class="divider" />
-  {/if} -->
 
   <!-- TEXT -->
   {#if Array.isArray(get(event, 'content.content', false)) && event.content.content.length > 0}

@@ -52,8 +52,6 @@
 
   // FILTER
   $: {
-    // console.log("filterTerm", filterTerm)
-    // console.log("sortOrder", sortOrder)
     if (filterTerm) {
       filteredCaseStudies = fuseList[sortOrder]
         .search(filterTerm)

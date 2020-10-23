@@ -5,21 +5,18 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
+  // *** IMPORTS
   import { fade } from "svelte/transition"
   import anchorme from "anchorme"
 
-  // GLOBALS
+  // *** GLOBALS
   import { formattedChatDate } from "../global.js"
 
-  // PROPS
+  // *** PROPS
   export let message = {}
 
   // *** STORES
   import { localUserAuthenticated, authenticatedUserInformation } from "../stores"
-
-  // console.log('message')
-  // console.log('$authenticatedUserInformation', $authenticatedUserInformation)
 </script>
 
 <style lang="scss">

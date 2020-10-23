@@ -5,7 +5,7 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
+  // *** IMPORTS
   import { onMount } from "svelte"
   import * as Colyseus from "colyseus.js"
   import * as PIXI from "pixi.js"
@@ -20,7 +20,6 @@
   import MediaQuery from "svelte-media-query"
   import Tweener from "tweener"
   import Cookies from "js-cookie"
-  import slugify from "slugify"
 
   // *** COMPONENTS
   // sidebar
@@ -46,25 +45,22 @@
   // overlays
   import LoadingScreen from "./overlays/LoadingScreen.svelte"
   import Error from "./overlays/Error.svelte"
+  import Reconnection from "./overlays/Reconnection.svelte"
+  import Tutorial from "./overlays/Tutorial.svelte"
   // ...
   import AudioChat from "./AudioChat.svelte"
   import InventoryMessage from "./InventoryMessage.svelte"
   import MetaData from "./MetaData.svelte"
   import Card from "./Card.svelte"
-  import Tutorial from "./overlays/Tutorial.svelte"
 
   // *** GLOBAL
   import {
     nanoid,
     MAP,
-    COLORMAP,
     TINTMAP,
     REVERSE_HEX_MAP,
     QUERY,
-    AREA,
     TEXT_ROOMS,
-    VIDEO_ROOMS,
-    AUDIO_ROOMS,
     TEXT_STYLE_AVATAR,
     TEXT_STYLE_AVATAR_AUTHENTICATED,
     TEXT_STYLE_CASE_STUDY,
@@ -82,21 +78,16 @@
     currentTextRoom,
     currentAudioRoom,
     currentVideoRoom,
-    currentAreaObject,
     globalUserList,
   } from "./stores.js"
 
   // *** PROPS
   export let params = false
 
-  $: {
-    console.log('$currentVideoRoom', $currentVideoRoom)
-  }
-
-  // DOM REFERENCES
+  // *** DOM REFERENCES
   let gameContainer = {}
 
-  // VARIABLES
+  // *** VARIABLES
   let activeContentClosed = false
   let supportStreamClosed = false
   let audioChatActive = false
@@ -110,6 +101,8 @@
   let localPlayers = {}
   let chatMessages = []
   let moveQ = []
+  let reconnectionAttempts = 0
+  let disconnectionCode = 0
   let currentStreamEvent = false
   let currentStreamUrl = false
   let supportStreamUrl = false
@@ -122,7 +115,6 @@
   let returnSection = false
   let returnSlug = false
   
-
   $: {
     // ___ Split the url parameter into variables
     const args = get(params, "[*]", "").split("/")
@@ -142,7 +134,6 @@
       if ($areaList && Array.isArray($areaList)) {
         const targetArea = $areaList.find(a => a.slug.current === slug)
         if (targetArea) {
-          console.log(REVERSE_HEX_MAP[targetArea.color])
           // __ Clear section and slug
           navigate('/')
           // __ Teleport
@@ -215,14 +206,12 @@
 
   // __ Set global user list
   users.then(users => {
-    // console.dir(users)
     globalUserList.set(users)
     return users
   })
 
   loadData(QUERY.GLOBAL_SETTINGS)
     .then(gS => {
-      console.log("globalSettings", gS)
       globalSettings.set(gS)
     })
     .catch(err => {
@@ -231,7 +220,6 @@
 
   loadData(QUERY.AREAS)
     .then(areas => {
-      // console.log("areas", areas)
       areaList.set(areas)
     })
     .catch(err => {
@@ -243,7 +231,6 @@
       console.log(err)
     })
     .then(activeStreams => {
-      console.log('activeStreams', activeStreams)
       currentStreamEvent = activeStreams.mainStreamEvent
       currentStreamUrl = activeStreams.mainStream
       supportStreamUrl = activeStreams.supportStream
@@ -280,6 +267,7 @@
     ERROR: 0,
     READY: 1,
     LOADING: 2,
+    DISCONNECTED: 3,
   }
 
   const UI = { state: STATE.LOADING, errorMessage: false }
@@ -292,10 +280,17 @@
       case STATE.LOADING:
         UI.state = STATE.LOADING
         break
+      case STATE.DISCONNECTED:
+        UI.state = STATE.DISCONNECTED
+        break
       default:
         UI.state = STATE.ERROR
         UI.errorMessage = errorMessage
     }
+  }
+
+  $: {
+    console.log('STATE', UI.state)
   }
 
   // __ Connect to Colyseus gameserver
@@ -536,8 +531,6 @@
           const onDown = e => {
             // __ Open profile if accredited user
             if (player.authenticated) {
-              console.log("______ user")
-              // console.dir(player)
               // __ Get user from userlist
               const targetUser = $globalUserList.find(
                 u => u.username === player.discourseName
@@ -660,12 +653,8 @@
             // PLAYER => ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
               localPlayers[sessionId] = createPlayer(player, sessionId)
-              
               // PLAYER => CHANGE
               player.onChange = changes => {
-                // console.log('CHANGES', changes)
-                // console.dir(player.path.waypoints)
-                // console.log(player.carrying)
                 if ($localUserSessionID === sessionId) {
                   localPlayers[sessionId].carrying = player.carrying
                   // __ Carrying ?
@@ -685,6 +674,7 @@
                   localPlayers[sessionId].area = player.area
                   localPlayers[sessionId].avatar.x = player.x
                   localPlayers[sessionId].avatar.y = player.y
+                  localPlayers[sessionId].avatar.setAnimation("rest")
                   if ($localUserSessionID === sessionId) {
                     currentArea.set(localPlayers[sessionId].area)
                   }
@@ -940,32 +930,29 @@
               } else {
                 createCaseStudy(caseStudy, false)
               }
+              // CASE STUDY => CHANGE
+              caseStudy.onChange = changes => {
+                const g = emergentLayer.children.find(
+                  cs => cs.uuid === caseStudy.uuid
+                )
+                if (g) {
+                  // __ Darken color one step
+                  g.children[0].tint = TINTMAP[caseStudy.age - 1]
+                  // __ Update position if not currently in a user's inventory
+                  if (caseStudy.carriedBy === "") {
+                    g.x = caseStudy.x
+                    g.y = caseStudy.y
+                    g.visible = true
+                  } else {
+                    g.visible = false
+                  }
+                }
+              }
             }
 
             // CASE STUDY => REMOVE
             gameRoom.state.caseStudies.onRemove = (caseStudy, sessionId) => {
               // !! TODO: PROPERLY REMOVE CASE STUDY
-              // console.log("%_%_%_ Case study removed")
-              // console.dir(caseStudy)
-            }
-
-            // CASE STUDY => CHANGE
-            gameRoom.state.caseStudies.onChange = (caseStudy, sessionId) => {
-              const g = emergentLayer.children.find(
-                cs => cs.uuid === caseStudy.uuid
-              )
-              if (g) {
-                // __ Darken color one step
-                g.children[0].tint = TINTMAP[caseStudy.age - 1]
-                // __ Update position if not currently in a user's inventory
-                if (caseStudy.carriedBy === "") {
-                  g.x = caseStudy.x
-                  g.y = caseStudy.y
-                  g.visible = true
-                } else {
-                  g.visible = false
-                }
-              }
             }
 
             // ******************************
@@ -973,8 +960,25 @@
             // ******************************
             gameRoom.onLeave((code) => {
               const exitMsg = 'Disconnected from server. Code: ' + code
-              window.alert(exitMsg)
               console.log(exitMsg);
+              // __ Show notification of disconnection
+              setUIState(STATE.DISCONNECTED)
+              disconnectionCode = code
+              reconnectionAttempts = 1
+              // TODO: Try to reconnect
+              const reconnect = i => {
+                console.log('Trying to reconnect user:', $localUserSessionID, '....', i)
+                // gameRoom.reconnect(XXXX).then(yyyy => {
+                //   // __ Successfully reconnected
+                //   setUIState(STATE.READY)
+                // }).catch(err => {
+                //   console.log(err)
+                // })
+                //   setInterval(() => {
+                //   reconnectionAttempts++
+                // }, 5000)
+              }
+              reconnect(1)
             });
 
             // ************************
@@ -1203,8 +1207,8 @@
     }, 10000)
 
     // ___ Show welcome card if user has not visited in last 7 days
-    // showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
-    showWelcomeCard = true
+    showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
+    // showWelcomeCard = true
     Cookies.set("tsoap-visitor", "true", { expires: 7 })
 
     // __ Redirect to authentication if user is marked as logged in
@@ -1261,7 +1265,6 @@
     width: auto;
     background: $COLOR_LIGHT;
     height: auto;
-    // line-height: 2em;
     text-align: center;
     top: $SPACE_S;
     left: $SPACE_S;
@@ -1584,13 +1587,13 @@
       }
   }
 
-  .debug {
-    position: fixed;
-    bottom: $SPACE_S;
-    right: 420px;
-    padding: $SPACE_S;
-    font-size: 8px;
-  }
+  // .debug {
+  //   position: fixed;
+  //   bottom: $SPACE_S;
+  //   right: 420px;
+  //   padding: $SPACE_S;
+  //   font-size: 8px;
+  // }
   
 </style>
 
@@ -1716,13 +1719,6 @@
     <!-- MAIN AREA -->
     {#if $currentVideoRoom == 'main' && currentStreamUrl && !activeContentClosed}
       <div class="content-item active" transition:fly={{ y: -200 }}>
-        <div
-          class="close"
-          on:click={e => {
-            activeContentClosed = true
-          }}>
-          ×
-        </div>
         <LiveSingle event={currentStreamEvent} url={currentStreamUrl} />
       </div>
     {/if}
@@ -1930,13 +1926,13 @@
 <!-- WELCOME / TUTORIAL -->
 {#if UI.state != STATE.LOADING && showWelcomeCard}
   {#await tutorialCard then tutorialCard}
-  <div class="tutorial-wrap-outer" transition:fade >    
-      <Tutorial card={tutorialCard} bind:showWelcomeCard={showWelcomeCard}/>
-      <div 
-        class="background-hittable"
-        on:click={e => { showWelcomeCard = false; console.log(tutorialCard) }}
-      ></div>
-  </div>
+    <div class="tutorial-wrap-outer" transition:fade >    
+        <Tutorial card={tutorialCard} bind:showWelcomeCard={showWelcomeCard}/>
+        <div 
+          class="background-hittable"
+          on:click={e => { showWelcomeCard = false; }}
+        ></div>
+    </div>
   {/await}
 {/if}
 
@@ -1945,14 +1941,7 @@
   <Error message={UI.errorMessage} />
 {/if}
 
-<!-- {#if $currentAreaObject}
-  <div class="debug" style={'background-color:' + $currentAreaObject.color}>
-    <strong>{$currentAreaObject.title}</strong>
-    / video:
-    {$currentAreaObject.videoRoom}
-    / audio:
-    {$currentAreaObject.audioRoom}
-    / text:
-    {$currentAreaObject.textRoom}
-  </div>
-{/if} -->
+<!-- DISCONNECTED -->
+{#if UI.state == STATE.DISCONNECTED}
+  <Reconnection {reconnectionAttempts} {disconnectionCode}/>
+{/if}

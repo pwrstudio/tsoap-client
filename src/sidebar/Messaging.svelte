@@ -8,7 +8,7 @@
   // *** IMPORTS
   import get from "lodash/get"
 
-  // COMPONENTS
+  // *** COMPONENTS
   import PrivateMessageThread from "./PrivateMessageThread.svelte"
   import NewPrivateMessage from "./NewPrivateMessage.svelte"
 

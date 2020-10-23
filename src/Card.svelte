@@ -5,18 +5,17 @@
   //
   // # # # # # # # # # # # # #
 
-  //   *** IMPORT
+  // *** IMPORT
   import { renderBlockText } from "./sanity.js"
   import get from "lodash/get"
   import { fade } from "svelte/transition"
   import { links } from "svelte-routing"
 
-  // PROPS
+  // *** PROPS
   export let card = {}
 
+  // *** VARIABLES
   let currentIndex = 0
-
-  // console.dir(card)
 </script>
 
 <style lang="scss">

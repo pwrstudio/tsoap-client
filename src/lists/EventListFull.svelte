@@ -6,7 +6,6 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import { onMount } from "svelte"
   import { fade } from "svelte/transition"
   import get from "lodash/get"
   import { renderBlockText } from "../sanity.js"
@@ -16,7 +15,6 @@
 
   // COMPONENTS
   import ParticipantsList from "./ParticipantsList.svelte"
-  import { window } from "lodash/_freeGlobal"
 
   // *** STORES
   import { globalSettings } from "../stores.js"
@@ -25,18 +23,13 @@
   export let events = []
   export let exhibitions = []
 
-  console.dir(events)
+   // *** VARIABLES
+   let containerWidth = "100%"
 
   const now = Date.now()
   const upcomingEvents = events.filter(e => Date.parse(e.startDate) > now)
   const archivedEvents = events.filter(e => Date.parse(e.startDate) < now)
 
-  console.dir(upcomingEvents)
-
-  // *** VARIABLES
-  let containerWidth = "100%"
-
-  
 </script>
 
 <style lang="scss">
@@ -266,6 +259,49 @@
 
   <!-- EVENTS -->
   <div class="inner-container">
+
+    <!-- ARCHIVED EVENTS -->
+    {#if archivedEvents.length}
+      <div class="section">
+        <!-- SUBHEADER -->
+        <div class="event header">
+          <div class="inner">
+            <div class="row">
+              <div>Archived Events</div>
+            </div>
+          </div>
+        </div>
+        {#each archivedEvents as event, index (event._id)}
+          <a
+            class="event"
+            in:fade={{ delay: 100 * index }}
+            href={'/events/' + get(event, 'slug.current', '')}>
+            <div class="inner">
+              <div class="row">
+                <div class="title">{event.title}</div>
+                <!-- <div class="elips">
+                              .........................................................
+                          </div> -->
+                <div class="date">{formattedDate(event.startDate)}</div>
+              </div>
+              <div class="row">
+                <div class="participants">
+                  {#if get(event, 'moderators', false) && Array.isArray(event.moderators)}
+                    <ParticipantsList
+                      participants={event.moderators}
+                      isModerators />
+                  {/if}
+                  {#if get(event, 'participants', false) && Array.isArray(event.participants)}
+                    <ParticipantsList participants={event.participants} />
+                  {/if}
+                </div>
+              </div>
+            </div>
+          </a>
+        {/each}
+      </div>
+    {/if}
+    
     <!-- UPCOMING EVENTS -->
     <div class="section">
       <!-- SUBHEADER -->
@@ -306,71 +342,31 @@
       {/each}
     </div>
 
-    <!-- ARCHIVED EVENTS -->
-    <div class="section">
-      <!-- SUBHEADER -->
-      <div class="event header">
-        <div class="inner">
-          <div class="row">
-            <div>Archived Events</div>
-          </div>
-        </div>
-      </div>
-      {#each archivedEvents as event, index (event._id)}
-        <a
-          class="event"
-          in:fade={{ delay: 100 * index }}
-          href={'/events/' + get(event, 'slug.current', '')}>
-          <div class="inner">
-            <div class="row">
-              <div class="title">{event.title}</div>
-              <!-- <div class="elips">
-                            .........................................................
-                        </div> -->
-              <div class="date">{formattedDate(event.startDate)}</div>
-            </div>
-            <div class="row">
-              <div class="participants">
-                {#if get(event, 'moderators', false) && Array.isArray(event.moderators)}
-                  <ParticipantsList
-                    participants={event.moderators}
-                    isModerators />
-                {/if}
-                {#if get(event, 'participants', false) && Array.isArray(event.participants)}
-                  <ParticipantsList participants={event.participants} />
-                {/if}
-              </div>
-            </div>
-          </div>
-        </a>
-      {/each}
-    </div>
-
     <!-- EXHIBITIONS -->
     <div class="section">
       <!-- SUBHEADER -->
       <div class="event header">
         <div class="inner">
           <div class="row">
-            <div>Exhibitions</div>
+            <div>Ongoing</div>
           </div>
         </div>
       </div>
-      {#each exhibitions as exhibition, index (exhibition._id)}
-      <a
-        href={'/area/' + get(exhibition, 'area.slug.current', '')}
-        class="exhibition">
-        <div class="inner">
-          <div class="row">
-            <div class="title">{exhibition.title}</div>
-            <div class="elips">
-              .........................................................
+      {#each exhibitions.reverse() as exhibition, index (exhibition._id)}
+        <a
+          href={'/area/' + get(exhibition, 'area.slug.current', '')}
+          class="exhibition">
+          <div class="inner">
+            <div class="row">
+              <div class="title">{exhibition.title}</div>
+              <div class="elips">
+                .........................................................
+              </div>
+              <div class="date">{exhibition.period}</div>
             </div>
-            <div class="date">{exhibition.period}</div>
           </div>
-        </div>
-      </a>
-    {/each}
+        </a>
+      {/each}
     </div>
   </div>
 </div>

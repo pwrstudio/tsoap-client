@@ -4,7 +4,7 @@
   //  Menu
   //
   // # # # # # # # # # # # # #
-  // IMPORTS
+  // *** IMPORTS
   import Cookies from "js-cookie"
 
   // *** STORES

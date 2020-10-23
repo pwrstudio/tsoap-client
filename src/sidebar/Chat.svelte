@@ -5,7 +5,7 @@
   //
   // # # # # # # # # # # # # #
 
-  // COMPONENTS
+  // *** COMPONENTS
   import { onMount } from "svelte"
   import { fade } from "svelte/transition"
   import ChatMessage from "./ChatMessage.svelte"

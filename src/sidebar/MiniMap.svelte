@@ -5,10 +5,10 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
+  // *** IMPORTS
   import get from "lodash/get"
 
-  // PROPS
+  // *** PROPS
   export let miniImage = false
   export let player = false
 </script>

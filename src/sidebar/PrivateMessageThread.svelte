@@ -16,7 +16,7 @@
   import NewPrivateMessage from "./NewPrivateMessage.svelte"
   import { authenticatedUserInformation } from "../stores"
 
-  // PROPS
+  // *** PROPS
   export let message = {}
   export let own = {}
 

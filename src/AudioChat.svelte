@@ -1,7 +1,7 @@
 <script>
   // # # # # # # # # # # # # #
   //
-  //  Audio Chat
+  //  AUDIO CHAT
   //
   // # # # # # # # # # # # # #
 
@@ -18,22 +18,24 @@
   export let userName = ""
   export let roomName = ""
   export let roomId = 4
-  // console.dir(user)
 
+  // *** CONSTANTS
   const dispatch = createEventDispatcher()
   const server = "https://janus.tsoap.dev"
+  const opaqueId = "audiobridgetest-" + Janus.randomString(12)
+
+  // *** VARIABLES
   let janus = {}
   let mixertest = null
-  const opaqueId = "audiobridgetest-" + Janus.randomString(12)
   let webrtcUp = false
   let audioenabled = false
   let volumeOn = true
   let myId = ""
   let audioEl = {}
+  let userList = []
+  let minimized = true;
   let toggleaudio = () => {}
   let togglevolume = () => {}
-
-  let userList = []
 
   const startAudioChat = () => {
     Janus.init({
@@ -149,7 +151,6 @@
                 audioenabled = false
                 toggleaudio = () => {
                   audioenabled = !audioenabled
-                  console.log("audioenabled", audioenabled)
                   mixertest.send({
                     message: { request: "configure", muted: !audioenabled },
                   })
@@ -158,9 +159,7 @@
                 togglevolume = () => {
                   volumeOn = !volumeOn
                   if (audioEl) {
-                    console.log("volumeOn", volumeOn)
                     audioEl.volume = volumeOn ? 1 : 0
-                    console.dir(audioEl)
                   }
                 }
               },
@@ -175,7 +174,6 @@
   }
 
   const registerUsername = () => {
-    // console.log("ROOM ID", roomId)
     let register = { request: "join", room: roomId, display: userName }
     mixertest.send({ message: register })
   }
@@ -188,7 +186,6 @@
     // console.log("--- Revoke microphone permissions")
     // const microphone = navigator.permissions.query({ name: 'microphone' })
     // navigator.permissions.revoke(microphone)
-    console.log("--- DESTROYING JANUS SESSION")
     janus.destroy()
   })
 </script>
@@ -231,13 +228,13 @@
     }
 
     .button {
-      padding-left: $SPACE_M;
-      padding-right: $SPACE_M;
+      padding: 0 $SPACE_M;
+      display: inline-table;
       border: 1px solid $COLOR_MID_2;
       color: $COLOR_MID_2;
       font-size: $FONT_SIZE_BASE;
 
-      border-radius: $SPACE_S;
+      border-radius: 10px;
       text-align: center;
 
       &:hover {
@@ -253,6 +250,10 @@
       flex-direction: row;
       width: 100%;
       height: 30px;
+
+      .text {
+        cursor: pointer;
+      }
 
       .microphone {
         opacity: 0.5;
@@ -275,6 +276,11 @@
       }
     }
 
+    &.minimized {
+      height: 50px;
+      transition: height 0.3s ease-out;
+    }
+
     .userlist {
       min-height: 200px;
       margin-top: $SPACE_L;
@@ -284,9 +290,13 @@
       }
     }
   }
+
+  .user-number {
+    text-decoration: underline;
+  }
 </style>
 
-<div transition:fade class="audioChatContainer">
+<div transition:fade class:minimized class="audioChatContainer">
   <!-- AUDIO ELEMENT -->
   <audio
     id="roomaudio"
@@ -297,8 +307,8 @@
 
   <!-- HEADER -->
   <div class="header">
-    <div class="text">
-      {userList.length}
+    <div class="text" on:click={() => {minimized = !minimized}}>
+      <span class='user-number'>{userList.length}</span>
       users in
       <strong>{roomName}</strong>
     </div>

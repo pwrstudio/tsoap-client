@@ -56,8 +56,6 @@ export const QUERY = {
   CONNECTED_TO_USER: "*[participants[]._ref == $id]{..., moderators[]->{...}, participants[]->{...}}",
   GLOBAL_SETTINGS: "*[_id == 'global-settings']{..., welcomeCard->{...}}[0]",
   AREAS: "*[_type == 'area']",
-  TARGET_STREAM: 
-  "*[_id == $id]{..., participants[]->{slug,name,username}}[0]",
   PINNED_MESSAGE: "*[_id == 'pinned-message'][0]",
   AUDIOROOM_NAMES: "*[_id == 'audioroom-names'][0]",
   TUTORIAL_CARD: "*[_id == 'tutorial-card'][0]",

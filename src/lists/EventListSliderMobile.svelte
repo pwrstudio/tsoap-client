@@ -20,14 +20,12 @@
   import ParticipantsList from "./ParticipantsList.svelte"
   import { window } from "lodash/_freeGlobal"
 
-
   // *** PROPS
   export let events = []
   export let exhibitions = []
   export let related = false
   
   // *** VARIABLES
-  let containerWidth = "100%"
   let showArchive = false
   let maxEvents = 5
   

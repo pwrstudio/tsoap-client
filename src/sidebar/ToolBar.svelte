@@ -5,7 +5,7 @@
   //
   // # # # # # # # # # # # # #
 
-  // IMPORTS
+  // *** IMPORTS
   import { links, navigate } from "svelte-routing"
   import { createEventDispatcher } from "svelte"
   import get from "lodash/get"
@@ -20,7 +20,7 @@
   // *** PROPS
   export let section = ""
 
-  // VARIABLES
+  // *** VARIABLES
   let chatInputValue = ""
   let showChatInput = false
 
@@ -46,13 +46,13 @@
       fetch("https://sso.tsoap.dev/notifications?user=" + username)
         .then(response => response.json())
         .then(data => {
-          console.log("polling notifications in toolbar", data)
+          // console.log("polling notifications in toolbar", data)
           notificationCount = get(
             data,
             "notifications.notifications",
             []
           ).filter(n => n.notification_type === 6 && !n.read).length
-          console.log("notificationCount", notificationCount)
+          // console.log("notificationCount", notificationCount)
         })
         .catch(err => {
           console.error(err)
