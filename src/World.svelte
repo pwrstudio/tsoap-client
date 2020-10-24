@@ -14,7 +14,7 @@
   import sample from "lodash/sample"
   import { fly, scale, fade } from "svelte/transition"
   import { quartOut } from "svelte/easing"
-  import { urlFor, loadData, client } from "./sanity.js"
+  import { urlFor, loadData, liveClient } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
   import MediaQuery from "svelte-media-query"
@@ -247,7 +247,7 @@
     })
 
   // __ Listen for changes to the active streams post
-  client.listen(QUERY.ACTIVE_STREAMS).subscribe(update => {
+  liveClient.listen(QUERY.ACTIVE_STREAMS).subscribe(update => {
     currentStreamUrl = false
     currentStreamEvent = false
     supportStreamUrl = false
@@ -300,7 +300,7 @@
   }
 
   $: {
-    console.log('STATE', UI.state)
+    console.log('inAudioZone', inAudioZone)
   }
 
   // __ Connect to Colyseus gameserver
@@ -336,11 +336,11 @@
       // console.log('inAudioZone', inAudioZone)
       // Check if user is within range of audio installation
       if (dist < a.radius) {
-        console.log(a.slug)
         if(inAudioZone !== a.slug) {
           inAudioZone = a.slug
         }
-        if (!a.audio.playing() && !a.noAutoplay) {
+        // && !a.noAutoplay
+        if (!a.audio.playing()) {
           a.audio.play()
         }
         // Set volume proportionally to distance
@@ -348,10 +348,10 @@
         // NewValue = ((OldValue - OldMin) * NewRange) / OldRange + NewMin;
         a.audio.volume(1 - dist / a.radius)
       }
-      if (dist > a.radius) {
+      if (dist > a.radius && inAudioZone === a.slug) {
+        inAudioZone = false
         if (a.audio.playing()) {
           a.audio.pause()
-          inAudioZone = false
         }
       }
     })

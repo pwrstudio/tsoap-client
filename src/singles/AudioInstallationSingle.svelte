@@ -6,7 +6,7 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import { onDestroy } from "svelte"
+  import { onDestroy, onMount } from "svelte"
   import get from "lodash/get"
   import { fade } from "svelte/transition"
   import { renderBlockText, loadData } from "../sanity.js"
@@ -26,16 +26,23 @@
 
   // *** VARIABLES
   let expanded = false
-  let playing = true
-  let connectedCaseStudies = []
+  let playing = audioInstallation.noAutoplay ? false : true
+  // let connectedCaseStudies = []
 
-  if (audioInstallation._id) {
-    connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
-      id: audioInstallation._id,
-    }).catch(err => {
-      console.log(err)
-    })
-  }
+  // if (audioInstallation._id) {
+  //   connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
+  //     id: audioInstallation._id,
+  //   }).catch(err => {
+  //     console.log(err)
+  //   })
+  // }
+
+  onMount(async () => {
+    console.log('audioI')
+    console.log(playing)
+    Howler.volume(playing ? 1 : 0)
+    console.dir(Howler)
+  })
 
   onDestroy(async () => {
     Howler.volume(1)
@@ -208,11 +215,11 @@
       {/if}
 
       <!-- CONNECTED CASE STUDIES -->
-      <div class="connected-case-studies">
+      <!-- <div class="connected-case-studies">
         {#await connectedCaseStudies then connectedCaseStudies}
           <CaseStudyList caseStudies={connectedCaseStudies} related={true} />
         {/await}
-      </div>
+      </div> -->
     {/if}
   {/if}
 </div>
