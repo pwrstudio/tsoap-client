@@ -1639,7 +1639,7 @@
 
 <!-- <MetaData /> -->
 <!-- Show default if not in special section -->
-{#if !['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}
+{#if !['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section) && !inAudioZone }
   <MetaData />
 {/if}
 
