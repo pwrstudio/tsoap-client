@@ -159,7 +159,7 @@
       <div class="toggleVideo" on:click={() => {
         showVideo = !showVideo
       }}>
-        {#if showVideo}–{:else}+{/if}
+        {#if showVideo}×{:else}+{/if}
       </div>
 
       <!-- PARTICIPANTS -->
