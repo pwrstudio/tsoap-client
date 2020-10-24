@@ -332,11 +332,16 @@
         Math.pow(a.x - localPlayers[$localUserSessionID].avatar.x, 2) +
           Math.pow(a.y - localPlayers[$localUserSessionID].avatar.y, 2)
       )
+
+      // console.log('inAudioZone', inAudioZone)
       // Check if user is within range of audio installation
       if (dist < a.radius) {
+        console.log(a.slug)
+        if(inAudioZone !== a.slug) {
+          inAudioZone = a.slug
+        }
         if (!a.audio.playing() && !a.noAutoplay) {
           a.audio.play()
-          inAudioZone = a.slug
         }
         // Set volume proportionally to distance
         // Formula to translate ranges:
