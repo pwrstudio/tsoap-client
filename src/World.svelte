@@ -75,11 +75,17 @@
     globalSettings,
     areaList,
     currentArea,
+    currentAreaObject,
     currentTextRoom,
     currentAudioRoom,
     currentVideoRoom,
     globalUserList,
   } from "./stores.js"
+
+
+//  $: {
+//    console.dir($currentAreaObject)
+//  }
 
   // *** PROPS
   export let params = false
@@ -92,7 +98,6 @@
   let supportStreamClosed = false
   let audioChatActive = false
   let sidebarHidden = false
-  let caseStudiesLoaded = false
   let intentToPickUp = false
   let inAudioZone = false
   let mobileExpanded = false
@@ -106,6 +111,7 @@
   let currentStreamEvent = false
   let currentStreamUrl = false
   let supportStreamUrl = false
+  let closedAreaCards = []
 
   // ___ Routing
   let section = false
@@ -114,6 +120,9 @@
   let sig = false
   let returnSection = false
   let returnSlug = false
+
+  /// *** CONSTANTS
+  const loadingTimestamp = Date.now()
   
   $: {
     // ___ Split the url parameter into variables
@@ -220,6 +229,7 @@
 
   loadData(QUERY.AREAS)
     .then(areas => {
+      console.dir(areas)
       areaList.set(areas)
     })
     .catch(err => {
@@ -925,7 +935,9 @@
 
             // CASE STUDY => ADD
             gameRoom.state.caseStudies.onAdd = (caseStudy, sessionId) => {
-              if (caseStudiesLoaded) {
+              // console.log('loadingTimestamp', loadingTimestamp)
+              // console.log('caseStudy.timestamp', caseStudy.timestamp)
+              if (get(caseStudy, 'timestamp', Date.now()) > loadingTimestamp) {
                 createCaseStudy(caseStudy, true)
               } else {
                 createCaseStudy(caseStudy, false)
@@ -1200,11 +1212,6 @@
 
     // ___ Give the local user a UUID
     localUserUUID.set(nanoid())
-
-    // !!! HACK
-    setTimeout(() => {
-      caseStudiesLoaded = true
-    }, 10000)
 
     // ___ Show welcome card if user has not visited in last 7 days
     showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
@@ -1722,18 +1729,19 @@
 <!-- MAIN CONTENT -->
 <div class="main-content-slot" class:pushed={sidebarHidden}>
   <!-- INFORMATION BOX -->
-  <!-- {#if showWelcomeCard && $globalSettings && $globalSettings.welcomeCard}
+  {#if get($currentAreaObject, 'informationCard', false) && !closedAreaCards.includes($currentAreaObject.areaIndex)}
     <div class="content-item active" transition:fly={{ y: -200 }}>
       <div
         class="close"
         on:click={e => {
-          showWelcomeCard = false
+          closedAreaCards.push($currentAreaObject.areaIndex)
+          closedAreaCards = closedAreaCards
         }}>
         ×
       </div>
-      <Card card={$globalSettings.welcomeCard} />
+      <Card card={$currentAreaObject.informationCard} />
     </div>
-  {/if} -->
+  {/if}
 
   <!-- AUDIOZONE -->
   {#if inAudioZone}

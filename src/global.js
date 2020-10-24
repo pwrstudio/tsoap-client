@@ -55,7 +55,7 @@ export const QUERY = {
     "*[_id == 'active-streams']{..., mainStreamEvent->{..., moderators[]->{slug,name,username}, participants[]->{slug,name,username}}}[0]",
   CONNECTED_TO_USER: "*[participants[]._ref == $id]{..., moderators[]->{...}, participants[]->{...}}",
   GLOBAL_SETTINGS: "*[_id == 'global-settings']{..., welcomeCard->{...}}[0]",
-  AREAS: "*[_type == 'area']",
+  AREAS: "*[_type == 'area']{..., informationCard->{...}}",
   PINNED_MESSAGE: "*[_id == 'pinned-message'][0]",
   AUDIOROOM_NAMES: "*[_id == 'audioroom-names'][0]",
   TUTORIAL_CARD: "*[_id == 'tutorial-card'][0]",
