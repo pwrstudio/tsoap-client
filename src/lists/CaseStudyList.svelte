@@ -298,12 +298,16 @@
           </div>
         </div>
         <div class="date">
-          {#if caseStudy.category}
-            {#if caseStudy.category === 'communication'}
-              communicating
-            {:else if caseStudy.category === 'consensus-building'}
-              consensus building
-            {:else}{caseStudy.category}{/if}
+          {#if caseStudy._type == 'caseStudyExhibition'}
+            the current
+          {:else}
+            {#if caseStudy.category}
+              {#if caseStudy.category === 'communication'}
+                communicating
+              {:else if caseStudy.category === 'consensus-building'}
+                consensus building
+              {:else}{caseStudy.category}{/if}
+            {/if}
           {/if}
         </div>
       </div>
