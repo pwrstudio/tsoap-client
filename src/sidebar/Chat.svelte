@@ -68,10 +68,13 @@
 
   onMount(async () => {
     if (messageContainerEl) {
-      messageContainerEl.scrollTo({
-        top: messageContainerEl.scrollHeight,
-        left: 0,
-      })
+        setTimeout(() => {
+          messageContainerEl.scrollTo({
+          top: messageContainerEl.scrollHeight,
+          left: 0,
+          behaviour: 'smooth'
+        })
+      }, 2000)
     }
   })
 </script>

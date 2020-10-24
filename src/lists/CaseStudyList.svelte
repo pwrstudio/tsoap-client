@@ -282,7 +282,7 @@
     </div>
   {/if}
   <!-- CASE STUDIES -->
-  {#each filteredCaseStudies as caseStudy, index (caseStudy._id)}
+  {#each (related ? caseStudies : filteredCaseStudies) as caseStudy, index (caseStudy._id)}
     <a
       class="case-study-item"
       class:related
