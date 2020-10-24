@@ -1594,6 +1594,34 @@
   //   padding: $SPACE_S;
   //   font-size: 8px;
   // }
+
+  .link-to-ac {
+    font-family: $MONO_STACK;
+    font-size:$FONT_SIZE_SMALL;
+    background:$COLOR_DARK_OPACITY;
+    color:$COLOR_MID_1;
+    z-index:1001;
+    position:absolute;
+    top:170px;
+    right:0;
+    padding: $SPACE_XS;
+    word-spacing: -0.3em;
+
+    a {
+      color:white;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+    @include screen-size("small"){
+      background: transparent;
+      top:80px;
+      right: unset;
+      left: 0;
+      z-index:1;
+    }
+  }
   
 </style>
 
@@ -1632,6 +1660,9 @@
         <!-- MINIMAP -->
         <div class="clock">
           <Clock />
+        </div>
+        <div class="link-to-ac">
+          <a href='https://anthropocene-curriculum.org/' target=_blank>to AC.org</a>
         </div>
         <div class="minimap">
           <MiniMap {miniImage} player={localPlayers[$localUserSessionID]} />
@@ -1797,6 +1828,11 @@
   {#if matches}
     
     <Clock />
+
+    <div class="link-to-ac">
+      <a href='https://anthropocene-curriculum.org/' target=_blank>to AC.org</a>
+    </div>
+    
     {#if localPlayers[$localUserSessionID]}
       <!-- MOBILE CALENDAR-->
       <div class="mobile-calendar" use:links>
