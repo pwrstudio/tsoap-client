@@ -1832,7 +1832,7 @@
     <div class="link-to-ac">
       <a href='https://anthropocene-curriculum.org/' target=_blank>to AC.org</a>
     </div>
-    
+
     {#if localPlayers[$localUserSessionID]}
       <!-- MOBILE CALENDAR-->
       <div class="mobile-calendar" use:links>

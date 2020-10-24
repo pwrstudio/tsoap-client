@@ -160,7 +160,7 @@
 
       <div class="mid-section">
         <!-- TITLE -->
-        <div class="title">NOW: {audioInstallation.title}</div>
+        <div class="title">{audioInstallation.title}</div>
         <!-- PARTICIPANTS -->
         {#if get(audioInstallation, 'participants', false) && Array.isArray(audioInstallation.participants)}
           <div class="participants">
