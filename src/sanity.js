@@ -13,18 +13,11 @@ const tracer = x => {
   return x
 }
 
-export const liveClient = sanityClient({
+export const client = sanityClient({
   projectId: SANITY_PROJECT_ID,
   dataset: "production",
   token: "", // or leave blank to be anonymous user
   useCdn: false, // `false` if you want to ensure fresh data
-})
-
-const client = sanityClient({
-  projectId: SANITY_PROJECT_ID,
-  dataset: "production",
-  token: "", // or leave blank to be anonymous user
-  useCdn: true, // `false` if you want to ensure fresh data
 })
 
 const h = blocksToHtml.h

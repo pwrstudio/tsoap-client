@@ -14,7 +14,7 @@
   import sample from "lodash/sample"
   import { fly, scale, fade } from "svelte/transition"
   import { quartOut } from "svelte/easing"
-  import { urlFor, loadData, liveClient } from "./sanity.js"
+  import { urlFor, loadData } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
   import MediaQuery from "svelte-media-query"
@@ -247,7 +247,7 @@
     })
 
   // __ Listen for changes to the active streams post
-  liveClient.listen(QUERY.ACTIVE_STREAMS).subscribe(update => {
+  client.listen(QUERY.ACTIVE_STREAMS).subscribe(update => {
     currentStreamUrl = false
     currentStreamEvent = false
     supportStreamUrl = false

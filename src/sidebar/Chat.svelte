@@ -9,7 +9,7 @@
   import { onMount } from "svelte"
   import { fade } from "svelte/transition"
   import ChatMessage from "./ChatMessage.svelte"
-  import { liveClient, renderBlockText, loadData } from "../sanity"
+  import { renderBlockText, loadData } from "../sanity"
   import get from "lodash/get"
 
   // *** DOM REFERENCES
@@ -45,7 +45,7 @@
     })
 
   // __ Listen for changes to the pinned message
-  liveClient.listen(QUERY.PINNED_MESSAGE).subscribe(update => {
+  client.listen(QUERY.PINNED_MESSAGE).subscribe(update => {
     pinnedText = false
     setTimeout(() => {
       loadData(QUERY.PINNED_MESSAGE)
