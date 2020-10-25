@@ -1337,6 +1337,11 @@
     &.expanded {
       width: 100vw;
     }
+
+    &.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
   }
 
   .hide-button {
@@ -1729,7 +1734,7 @@
 </MediaQuery>
 
 <!-- GAME WORLD -->
-<div class="game" class:expanded={sidebarHidden} bind:this={gameContainer} />
+<div class="game" class:disabled={UI.state == STATE.DISCONNECTED} class:expanded={sidebarHidden} bind:this={gameContainer} />
 
 <!-- MAIN CONTENT -->
 <div class="main-content-slot" class:pushed={sidebarHidden}>
