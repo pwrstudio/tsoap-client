@@ -618,6 +618,8 @@
         }
 
         // __ Get a random avatar
+        // console.log('!!!!!! activeAvatars', activeAvatars)
+        // console.log('===> filtered', activeAvatars.filter(a => !a.notRandom))
         const randomAvatar = sample(activeAvatars.filter(a => !a.notRandom))
 
         let playerObject = {}
