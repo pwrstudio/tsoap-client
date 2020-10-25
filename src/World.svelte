@@ -14,7 +14,7 @@
   import sample from "lodash/sample"
   import { fly, scale, fade } from "svelte/transition"
   import { quartOut } from "svelte/easing"
-  import { urlFor, loadData } from "./sanity.js"
+  import { urlFor, loadData, client } from "./sanity.js"
   import { links, navigate } from "svelte-routing"
   import { Howl } from "howler"
   import MediaQuery from "svelte-media-query"

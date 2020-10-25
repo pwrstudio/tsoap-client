@@ -9,7 +9,7 @@
   import { onMount } from "svelte"
   import { fade } from "svelte/transition"
   import ChatMessage from "./ChatMessage.svelte"
-  import { renderBlockText, loadData } from "../sanity"
+  import { renderBlockText, loadData, client } from "../sanity"
   import get from "lodash/get"
 
   // *** DOM REFERENCES
