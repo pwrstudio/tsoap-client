@@ -80,7 +80,7 @@
 <div class="inventory-message">
   <div class="color-icon {caseStudy.category}" />
   <div class="inventory-message-inner">
-    You are holding:<strong> {caseStudy.name}</strong>
+    You are holding: <strong>{caseStudy.name}</strong>
   </div>
   <span class="button">DROP</span>
 </div>
