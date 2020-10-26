@@ -16,10 +16,35 @@
     display: flex;
     align-items: center;
 
+    .inventory-message-inner{
+      margin-right: $SPACE_S;
+    }
+
+    @include screen-size("small") {
+      font-size:$FONT_SIZE_SMALL;
+      align-items: baseline;
+      justify-content: space-between;
+
+      .inventory-message-inner{
+        display: inline-block;
+        white-space: nowrap;
+        max-width: 55vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 0;
+      }
+
+      
+    }
+
     .color-icon {
       height: 10px;
       width: 10px;
       margin-right: $SPACE_S;
+
+      @include screen-size("small") {
+        margin-right: 0;
+      }
 
       &.communication {
         background: $COLOR_COMMUNICATION;
@@ -54,9 +79,8 @@
 
 <div class="inventory-message">
   <div class="color-icon {caseStudy.category}" />
-  <div>
-    You are holding:
-    <strong> {caseStudy.name}</strong>
-    <span class="button">DROP</span>
+  <div class="inventory-message-inner">
+    You are holding:<strong> {caseStudy.name}</strong>
   </div>
+  <span class="button">DROP</span>
 </div>

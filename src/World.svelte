@@ -1269,6 +1269,7 @@
     @include screen-size("small") {
       bottom: 60px;
       left: $SPACE_S;
+      width: calc(100vw - #{$SPACE_L});
       max-width: calc(100vw - #{$SPACE_L});
       z-index: 10;
     }
