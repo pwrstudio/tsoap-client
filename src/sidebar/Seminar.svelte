@@ -145,7 +145,7 @@
         <!-- PARTICIPANTS LIST -->
         <div class="participants-list">
           <div>Participants in seminar:</div>
-          <ParticipantsList participants={loadedParticipants} messaging={true}/>
+          <ParticipantsList participants={loadedParticipants} messaging={true} isSeminar={true}/>
         </div>
       </div>
     {/if}

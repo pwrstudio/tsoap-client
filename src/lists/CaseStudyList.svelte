@@ -282,7 +282,7 @@
     </div>
   {/if}
   <!-- CASE STUDIES -->
-  {#each filteredCaseStudies as caseStudy, index (caseStudy._id)}
+  {#each (related ? caseStudies : filteredCaseStudies) as caseStudy, index (caseStudy._id)}
     <a
       class="case-study-item"
       class:related
@@ -298,12 +298,16 @@
           </div>
         </div>
         <div class="date">
-          {#if caseStudy.category}
-            {#if caseStudy.category === 'communication'}
-              communicating
-            {:else if caseStudy.category === 'consensus-building'}
-              consensus building
-            {:else}{caseStudy.category}{/if}
+          {#if caseStudy._type == 'caseStudyExhibition'}
+            the current
+          {:else}
+            {#if caseStudy.category}
+              {#if caseStudy.category === 'communication'}
+                communicating
+              {:else if caseStudy.category === 'consensus-building'}
+                consensus building
+              {:else}{caseStudy.category}{/if}
+            {/if}
           {/if}
         </div>
       </div>

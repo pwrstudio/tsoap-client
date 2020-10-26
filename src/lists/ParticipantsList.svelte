@@ -15,6 +15,7 @@
   export let participants = {}
   export let messaging = false
   export let isModerators = false
+  export let isSeminar = false
 </script>
 
 <style lang="scss">
@@ -42,6 +43,30 @@
     }
   }
 
+  .seminar {
+    a {
+      color: inherit;
+      text-decoration: none;
+
+      &:hover {
+        color: $COLOR_LIGHT;
+      }
+
+      svg {
+        margin-left: $SPACE_XS;
+        margin-right: 2px;
+        path {
+          fill: $COLOR_MID_2;
+        }
+        &:hover {
+          path {
+            fill: $COLOR_LIGHT;
+          }
+        }
+      }
+    }
+  }
+
   .participant{
 
     word-spacing: -0.2em;
@@ -60,7 +85,7 @@
 
 {#if participants && Array.isArray(participants)}
   {#each participants as participant, index}
-    <span class="participant"><a href={'/profiles/' + get(participant, 'slug.current', '')}>{participant.name}{#if isModerators}&nbsp;(moderator){/if}</a>{#if $localUserAuthenticated && messaging && participant.username}<a
+    <span class="participant" class:seminar={isSeminar}><a href={'/profiles/' + get(participant, 'slug.current', '')}>{participant.name}{#if isModerators}&nbsp;(moderator){/if}</a>{#if $localUserAuthenticated && messaging && participant.username}<a
         class="message-icon"
         href={'https://work.anthropocene-curriculum.org/new-message?username=' + participant.username}
         target="_blanks">

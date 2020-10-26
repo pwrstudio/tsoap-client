@@ -9,7 +9,7 @@
   import { onMount } from "svelte"
   import { fade } from "svelte/transition"
   import ChatMessage from "./ChatMessage.svelte"
-  import { client, renderBlockText, loadData } from "../sanity"
+  import { renderBlockText, loadData, client } from "../sanity"
   import get from "lodash/get"
 
   // *** DOM REFERENCES
@@ -68,10 +68,13 @@
 
   onMount(async () => {
     if (messageContainerEl) {
-      messageContainerEl.scrollTo({
-        top: messageContainerEl.scrollHeight,
-        left: 0,
-      })
+        setTimeout(() => {
+          messageContainerEl.scrollTo({
+          top: messageContainerEl.scrollHeight,
+          left: 0,
+          behaviour: 'smooth'
+        })
+      }, 2000)
     }
   })
 </script>

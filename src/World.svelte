@@ -75,11 +75,17 @@
     globalSettings,
     areaList,
     currentArea,
+    currentAreaObject,
     currentTextRoom,
     currentAudioRoom,
     currentVideoRoom,
     globalUserList,
   } from "./stores.js"
+
+
+//  $: {
+//    console.dir($currentAreaObject)
+//  }
 
   // *** PROPS
   export let params = false
@@ -92,7 +98,6 @@
   let supportStreamClosed = false
   let audioChatActive = false
   let sidebarHidden = false
-  let caseStudiesLoaded = false
   let intentToPickUp = false
   let inAudioZone = false
   let mobileExpanded = false
@@ -106,6 +111,7 @@
   let currentStreamEvent = false
   let currentStreamUrl = false
   let supportStreamUrl = false
+  let closedAreaCards = []
 
   // ___ Routing
   let section = false
@@ -114,6 +120,9 @@
   let sig = false
   let returnSection = false
   let returnSlug = false
+
+  /// *** CONSTANTS
+  const loadingTimestamp = Date.now()
   
   $: {
     // ___ Split the url parameter into variables
@@ -220,6 +229,7 @@
 
   loadData(QUERY.AREAS)
     .then(areas => {
+      console.dir(areas)
       areaList.set(areas)
     })
     .catch(err => {
@@ -290,7 +300,7 @@
   }
 
   $: {
-    console.log('STATE', UI.state)
+    console.log('inAudioZone', inAudioZone)
   }
 
   // __ Connect to Colyseus gameserver
@@ -322,21 +332,26 @@
         Math.pow(a.x - localPlayers[$localUserSessionID].avatar.x, 2) +
           Math.pow(a.y - localPlayers[$localUserSessionID].avatar.y, 2)
       )
+
+      // console.log('inAudioZone', inAudioZone)
       // Check if user is within range of audio installation
       if (dist < a.radius) {
-        if (!a.audio.playing() && !a.noAutoplay) {
-          a.audio.play()
+        if(inAudioZone !== a.slug) {
           inAudioZone = a.slug
+        }
+        // && !a.noAutoplay
+        if (!a.audio.playing()) {
+          a.audio.play()
         }
         // Set volume proportionally to distance
         // Formula to translate ranges:
         // NewValue = ((OldValue - OldMin) * NewRange) / OldRange + NewMin;
         a.audio.volume(1 - dist / a.radius)
       }
-      if (dist > a.radius) {
+      if (dist > a.radius && inAudioZone === a.slug) {
+        inAudioZone = false
         if (a.audio.playing()) {
           a.audio.pause()
-          inAudioZone = false
         }
       }
     })
@@ -603,6 +618,8 @@
         }
 
         // __ Get a random avatar
+        // console.log('!!!!!! activeAvatars', activeAvatars)
+        // console.log('===> filtered', activeAvatars.filter(a => !a.notRandom))
         const randomAvatar = sample(activeAvatars.filter(a => !a.notRandom))
 
         let playerObject = {}
@@ -925,7 +942,9 @@
 
             // CASE STUDY => ADD
             gameRoom.state.caseStudies.onAdd = (caseStudy, sessionId) => {
-              if (caseStudiesLoaded) {
+              // console.log('loadingTimestamp', loadingTimestamp)
+              // console.log('caseStudy.timestamp', caseStudy.timestamp)
+              if (get(caseStudy, 'timestamp', Date.now()) > loadingTimestamp) {
                 createCaseStudy(caseStudy, true)
               } else {
                 createCaseStudy(caseStudy, false)
@@ -1201,11 +1220,6 @@
     // ___ Give the local user a UUID
     localUserUUID.set(nanoid())
 
-    // !!! HACK
-    setTimeout(() => {
-      caseStudiesLoaded = true
-    }, 10000)
-
     // ___ Show welcome card if user has not visited in last 7 days
     showWelcomeCard = Cookies.get("tsoap-visitor") ? false : true
     // showWelcomeCard = true
@@ -1345,6 +1359,11 @@
 
     &.expanded {
       width: 100vw;
+    }
+
+    &.disabled {
+      opacity: 0.3;
+      pointer-events: none;
     }
   }
 
@@ -1615,12 +1634,40 @@
   //   padding: $SPACE_S;
   //   font-size: 8px;
   // }
+
+  .link-to-ac {
+    font-family: $MONO_STACK;
+    font-size:$FONT_SIZE_SMALL;
+    background:$COLOR_DARK_OPACITY;
+    color:$COLOR_MID_1;
+    z-index:1001;
+    position:absolute;
+    top:170px;
+    right:0;
+    padding: $SPACE_XS;
+    word-spacing: -0.3em;
+
+    a {
+      color:white;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+    @include screen-size("small"){
+      background: transparent;
+      top:80px;
+      right: unset;
+      left: 0;
+      z-index:1;
+    }
+  }
   
 </style>
 
 <!-- <MetaData /> -->
 <!-- Show default if not in special section -->
-{#if !['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section)}
+{#if !['case-studies', 'profiles', 'profiles', 'events', 'pages'].includes(section) && !inAudioZone }
   <MetaData />
 {/if}
 
@@ -1653,6 +1700,9 @@
         <!-- MINIMAP -->
         <div class="clock">
           <Clock />
+        </div>
+        <div class="link-to-ac">
+          <a href='https://anthropocene-curriculum.org/' target=_blank>to AC.org</a>
         </div>
         <div class="minimap">
           <MiniMap {miniImage} player={localPlayers[$localUserSessionID]} />
@@ -1707,23 +1757,24 @@
 </MediaQuery>
 
 <!-- GAME WORLD -->
-<div class="game" class:expanded={sidebarHidden} bind:this={gameContainer} />
+<div class="game" class:disabled={UI.state == STATE.DISCONNECTED} class:expanded={sidebarHidden} bind:this={gameContainer} />
 
 <!-- MAIN CONTENT -->
 <div class="main-content-slot" class:pushed={sidebarHidden}>
   <!-- INFORMATION BOX -->
-  <!-- {#if showWelcomeCard && $globalSettings && $globalSettings.welcomeCard}
+  {#if get($currentAreaObject, 'informationCard', false) && !closedAreaCards.includes($currentAreaObject.areaIndex)}
     <div class="content-item active" transition:fly={{ y: -200 }}>
       <div
         class="close"
         on:click={e => {
-          showWelcomeCard = false
+          closedAreaCards.push($currentAreaObject.areaIndex)
+          closedAreaCards = closedAreaCards
         }}>
         ×
       </div>
-      <Card card={$globalSettings.welcomeCard} />
+      <Card card={$currentAreaObject.informationCard} />
     </div>
-  {/if} -->
+  {/if}
 
   <!-- AUDIOZONE -->
   {#if inAudioZone}
@@ -1818,6 +1869,11 @@
   {#if matches}
     
     <Clock />
+
+    <div class="link-to-ac">
+      <a href='https://anthropocene-curriculum.org/' target=_blank>to AC.org</a>
+    </div>
+
     {#if localPlayers[$localUserSessionID]}
       <!-- MOBILE CALENDAR-->
       <div class="mobile-calendar" use:links>

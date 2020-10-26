@@ -61,7 +61,7 @@
       </div>
     {/if}
   {/each}
-  {#if card.slides && card.slides.length > 0}
+  {#if card.slides && card.slides.length > 1}
     <div class="navigation">
       <div
         class="nav-button back"

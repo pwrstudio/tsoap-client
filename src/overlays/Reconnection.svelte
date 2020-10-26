@@ -14,16 +14,25 @@
     @import "../variables.scss";
   
     .reconnection {
+      // position: fixed;
+      // top: 0;
+      // left: 0;
+      // width: 100vw;
+      // height: 100vh;
+      // background: rgba(0,0,0,0.9);
+      // display: flex;
+      // justify-content: center;
+      // align-items: center;
+      // z-index: 100000;
+
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.9);
+      bottom: 15px;
+      left: 15px;
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 100000;
+      z-index: 10;
+  
   
       .box {
         font-family: $MONO_STACK;
@@ -39,8 +48,9 @@
   
   <div class="reconnection">
     <div class="box">
-      <div class="header">You have been disconnected from the gameserver. (Code:{disconnectionCode})</div>
-      <div class="header">Attempting to reconnect...</div>
+      <div class="header">You have been disconnected from the gameserver. (Error: {disconnectionCode})</div>
+      <div class="header">Please reload the page to attempt to reconnect.</div>
+      <!-- <div class="header">Attempting to reconnect...</div> -->
     </div>
   </div>
   
