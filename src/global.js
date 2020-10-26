@@ -1,5 +1,5 @@
 import { format, getYear } from "date-fns"
-import { parseFromTimeZone, formatToTimeZone } from "date-fns-timezone"
+// import { parseFromTimeZone, formatToTimeZone } from "date-fns-timezone"
 
 export const SANITY_PROJECT_ID = "bu5rnal5"
 
@@ -94,33 +94,51 @@ export const TEXT_STYLE_CASE_STUDY = {
 // const mainFormat = 'HH:mm (z) E MMM dd'
 const mainFormat = 'HH:mm z, dd MMM DD'
 
+const intlFormat = new Intl.DateTimeFormat('en-DE', {
+  hour: 'numeric',
+  minute: 'numeric',
+  weekday: 'short',
+  month: 'short',
+  day: '2-digit',
+  timeZone: 'CET',
+})
+
 export const formattedDate = (start, end) => {
   try {
     if (!start) {
       return false
     }
     const startDate = Date.parse(start)
+    const dateParts = intlFormat.formatToParts(startDate);
+    const startDateFormatted = dateParts[6].value + dateParts[7].value + dateParts[8].value + ' CET, ' + dateParts[0].value + ' ' + dateParts[4].value + ' ' + dateParts[2].value;
+    // const startDateCETFormatted = startDateCET + 'CET';
 
     if (!startDate) {
       return false
     }
 
     if (!end) {
-      return formatToTimeZone(startDate, mainFormat, { timeZone: 'Europe/Berlin' })
+      // return formatToTimeZone(startDate, mainFormat, { timeZone: 'Europe/Berlin' })
       // return format(startDate, mainFormat)
+      // console.log(dateParts);
+      return startDateFormatted;
     }
 
     const endDate = Date.parse(end)
+    // const startDate = Date.parse(start)
+    const endDateParts = intlFormat.formatToParts(endDate);
+    const endDateFormatted = endDateParts[6].value + endDateParts[7].value + endDateParts[8].value + ' CET, ' + endDateParts[0].value + ' ' + endDateParts[4].value + ' ' + endDateParts[2].value;
 
-    if (format(startDate, "dd.MM.yyyy") == format(endDate, "dd.MM.yyyy")) {
-      return format(startDate, "dd.MM.yyyy")
+
+    if (startDateFormatted == endDateFormatted) {
+      return startDateFormatted
     }
 
     const startFormat =
       getYear(startDate) == getYear(endDate) ? "dd.MM" : "dd.MM.yyyy"
     const endFormat = "dd.MM.yyyy"
 
-    return format(startDate, startFormat) + " – " + format(endDate, endFormat)
+    return startDateFormatted + " – " + endDateFormatted
   } catch (err) {
     console.dir(err)
   }
