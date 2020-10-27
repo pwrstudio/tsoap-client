@@ -279,13 +279,13 @@
           <div>Related Events</div>
           <a
             href="/events"
-            class="archive-link">View All</a>
+            class="archive-link">Archived streams</a>
        {:else}
           <a
           href="/events">Events</a>
           <a
           href="/events"
-          class="archive-link">View All</a>
+          class="archive-link">Archived streams</a>
           <!-- <div on:click={e => {showArchive = !showArchive}} class="archive-link">{showArchive ? 'Upcoming Events' : 'Event Archive'}</div> -->
         {/if}
       </div>
