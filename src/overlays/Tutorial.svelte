@@ -252,7 +252,6 @@ import { window } from "lodash/_freeGlobal";
       <div
         class="nav-button enter"
         on:click={e => {
-          console.log(showWelcomeCard);
           showWelcomeCard = false;
         }}>
         Enter

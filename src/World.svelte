@@ -82,11 +82,6 @@
     globalUserList,
   } from "./stores.js"
 
-
-//  $: {
-//    console.dir($currentAreaObject)
-//  }
-
   // *** PROPS
   export let params = false
 
@@ -299,9 +294,9 @@
     }
   }
 
-  $: {
-    console.log('inAudioZone', inAudioZone)
-  }
+  // $: {
+  //   console.log('inAudioZone', inAudioZone)
+  // }
 
   // __ Connect to Colyseus gameserver
   const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
@@ -657,6 +652,7 @@
                   // !!! HACK
                   setTimeout(() => {
                     // Delete player object
+                    // console.log('deleting player')
                     delete localPlayers[sessionId]
                     localPlayers = localPlayers
                   }, 500)
@@ -979,7 +975,7 @@
             // ******************************
             gameRoom.onLeave((code) => {
               const exitMsg = 'Disconnected from server. Code: ' + code
-              console.log(exitMsg);
+              // console.log(exitMsg);
               // __ Show notification of disconnection
               setUIState(STATE.DISCONNECTED)
               disconnectionCode = code

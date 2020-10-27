@@ -38,8 +38,8 @@
   // }
 
   onMount(async () => {
-    console.log('audioI')
-    console.log(playing)
+    // console.log('audioI')
+    // console.log(playing)
     Howler.volume(playing ? 1 : 0)
     console.dir(Howler)
   })
