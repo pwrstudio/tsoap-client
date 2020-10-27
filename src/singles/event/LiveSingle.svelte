@@ -190,9 +190,9 @@
 
       <!-- CONNECTED CASE STUDIES -->
       <div class="connected-case-studies">
-        {#await connectedCaseStudies then connectedCaseStudies}
-          <CaseStudyList caseStudies={connectedCaseStudies} related={true} />
-        {/await}
+        {#if Array.isArray(get(event, 'connectedCaseStudies')) && event.connectedCaseStudies.length > 0}
+          <CaseStudyList caseStudies={event.connectedCaseStudies} related={true} />
+        {/if}
       </div>
     {/if}
   {/if}
