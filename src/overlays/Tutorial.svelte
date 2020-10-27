@@ -74,6 +74,7 @@ import { window } from "lodash/_freeGlobal";
     .tutorial-slide :global(img) { 
       max-width: 50%;
       margin: unset;
+      object-fit: cover;
       @include screen-size("small"){
         max-width: 100%;
       }
@@ -224,7 +225,7 @@ import { window } from "lodash/_freeGlobal";
   {#each card.slides as slide, index (slide._key)}
     {#if Array.isArray(get(slide, 'content.content', false)) && currentIndex === index}
       <div class="tutorial-slide" in:fade|local>
-        <img src={urlFor(get(slide, 'topImage', "")).width(800).quality(90).auto("format").url()} alt='The Shape of a Practice'/>
+        <img height="300" src={urlFor(get(slide, 'topImage', "")).url()} alt='The Shape of a Practice'/>
         {@html renderBlockText(get(slide, 'content.content', []))}
       </div>
     {/if}
