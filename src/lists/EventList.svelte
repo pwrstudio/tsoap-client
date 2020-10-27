@@ -28,8 +28,8 @@
 
   const now = Date.now()
   // __ HACK: Show all events if related 
-  const upcomingEvents = related ? events : events.filter(e => Date.parse(e.startDate) > now)
-  const archivedEvents = events.filter(e => Date.parse(e.startDate) < now)
+  const upcomingEvents = related ? events : events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) > now)
+  const archivedEvents = events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) < now)
 
   onMount(async () => {
     // __ Enabled horizontal scroll layout on mobile

@@ -31,9 +31,9 @@
   
   const now = Date.now()
   // __ HACK: Show all events if related 
-  const upcomingEvents = related ? events : events.filter(e => Date.parse(e.startDate) > now)
+  const upcomingEvents = related ? events : events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) > now)
   const upcomingEventsSlice =  upcomingEvents.slice(0, maxEvents);
-  const archivedEvents = events.filter(e => Date.parse(e.startDate) < now)
+  const archivedEvents = events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) < now)
 
   // *** PROPS
   const tagArray = ["test 1", "test 2", "test 3"];

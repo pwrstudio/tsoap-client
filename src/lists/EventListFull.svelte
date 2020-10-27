@@ -27,8 +27,8 @@
    let containerWidth = "100%"
 
   const now = Date.now()
-  const upcomingEvents = events.filter(e => Date.parse(e.startDate) > now)
-  const archivedEvents = events.filter(e => Date.parse(e.startDate) < now)
+  const upcomingEvents = events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) > now)
+  const archivedEvents = events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) < now)
 
 </script>
 
