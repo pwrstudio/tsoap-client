@@ -379,10 +379,10 @@
             localPlayers[key].avatar.x = step.x
             localPlayers[key].avatar.y = step.y
             localPlayers[key].area = step.area
-            if (key === $localUserSessionID && moveQ[key].length % 10 === 0) {
+            if (key === $localUserSessionID && moveQ[key].length % 30 === 0) {
               // Set current area for users
               currentArea.set(localPlayers[$localUserSessionID].area)
-              // Check proximity to audio installations every 10th step
+              // Check proximity to audio installations every 30th step
               checkAudioProximity()
             }
           }
@@ -983,12 +983,12 @@
               // TODO: Try to reconnect
               const reconnect = i => {
                 console.log('Trying to reconnect user:', $localUserSessionID, '....', i)
-                // gameRoom.reconnect(XXXX).then(yyyy => {
+                // client.reconnect("game", $localUserSessionID).then(room => {
                 //   // __ Successfully reconnected
                 //   setUIState(STATE.READY)
-                // }).catch(err => {
-                //   console.log(err)
-                // })
+                // }).catch(e => {
+                //   console.error("join error", e);
+                // });
                 //   setInterval(() => {
                 //   reconnectionAttempts++
                 // }, 5000)
