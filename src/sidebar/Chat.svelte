@@ -6,7 +6,7 @@
   // # # # # # # # # # # # # #
 
   // *** COMPONENTS
-  import { onMount } from "svelte"
+  import { afterUpdate, onMount } from "svelte"
   import { fade } from "svelte/transition"
   import ChatMessage from "./ChatMessage.svelte"
   import { renderBlockText, loadData, client } from "../sanity"
@@ -66,13 +66,23 @@
     }, 500)
   })
 
+	afterUpdate(() => {
+    if (messageContainerEl) {
+      // if(messageContainerEl.scrollHeight - messageContainerEl.scrollTop < 300) {
+      messageContainerEl.scrollTo({
+        top: messageContainerEl.scrollHeight,
+        left: 0
+      })
+      // }
+    }
+	});
+
   onMount(async () => {
     if (messageContainerEl) {
         setTimeout(() => {
           messageContainerEl.scrollTo({
           top: messageContainerEl.scrollHeight,
-          left: 0,
-          behaviour: 'smooth'
+          left: 0
         })
       }, 2000)
     }

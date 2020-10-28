@@ -6,47 +6,37 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import { onDestroy, onMount } from "svelte"
   import get from "lodash/get"
   import { fade } from "svelte/transition"
-  import { renderBlockText, loadData } from "../sanity.js"
+  import { renderBlockText } from "../sanity.js"
   import { links } from "svelte-routing"
-  import { Howler } from "howler"
 
   // *** COMPONENTS
   import ParticipantsList from "../lists/ParticipantsList.svelte"
-  import CaseStudyList from "../lists/CaseStudyList.svelte"
   import MetaData from "../MetaData.svelte"
-
-  // *** GLOBAL
-  import { QUERY } from "../global.js"
 
   // *** PROPS
   export let audioInstallation = {}
+  export let audioInstallationLayer = {}
 
   // *** VARIABLES
   let expanded = false
   let playing = audioInstallation.noAutoplay ? false : true
-  // let connectedCaseStudies = []
 
-  // if (audioInstallation._id) {
-  //   connectedCaseStudies = loadData(QUERY.CONNECTED_CASE_STUDIES, {
-  //     id: audioInstallation._id,
-  //   }).catch(err => {
-  //     console.log(err)
-  //   })
-  // }
 
-  onMount(async () => {
-    // console.log('audioI')
-    // console.log(playing)
-    Howler.volume(playing ? 1 : 0)
-    console.dir(Howler)
-  })
+  const installationsInstance = get(audioInstallationLayer, 'children', []).find(a => a.slug == get(audioInstallation, 'slug.current',''))  
+  const audioPlayer = installationsInstance.audio
 
-  onDestroy(async () => {
-    Howler.volume(1)
-  })
+  const togglePlay = () => {
+    if(audioPlayer.playing()) {
+      audioPlayer.pause()
+      playing = false
+    } else {
+      audioPlayer.play()
+      playing = true
+    }
+  }
+
 </script>
 
 <style lang="scss">
@@ -142,10 +132,7 @@
       <!-- CONTROLS -->
       <div
         class="controls"
-        on:click={e => {
-          playing = !playing
-          Howler.volume(playing ? 1 : 0)
-        }}>
+        on:click={togglePlay}>
         {#if playing}
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -213,13 +200,6 @@
         </div>
         <div class="divider" />
       {/if}
-
-      <!-- CONNECTED CASE STUDIES -->
-      <!-- <div class="connected-case-studies">
-        {#await connectedCaseStudies then connectedCaseStudies}
-          <CaseStudyList caseStudies={connectedCaseStudies} related={true} />
-        {/await}
-      </div> -->
     {/if}
   {/if}
 </div>
