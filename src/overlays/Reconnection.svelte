@@ -23,7 +23,8 @@
       z-index: 10;
   
       @include screen-size('small') {
-        bottom: 40px;
+        bottom: 55px;
+        left: 0;
       }
   
       .box {
@@ -36,7 +37,7 @@
         user-select: none;
 
         @include screen-size('small') {
-          width: calc(100% - 30px);
+          width: calc(100% - 20px);
         }
       }
     }
