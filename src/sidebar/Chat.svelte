@@ -67,11 +67,7 @@
   })
 
 	afterUpdate(() => {
-    console.log('___ BEFORE UPDATE')
     if (messageContainerEl) {
-        // console.log('messageContainerEl.scrollHeight', messageContainerEl.scrollHeight)
-        // console.log('messageContainerEl.scrollTop', messageContainerEl.scrollTop)
-        // console.log('delta', messageContainerEl.scrollHeight - messageContainerEl.scrollTop)
       // if(messageContainerEl.scrollHeight - messageContainerEl.scrollTop < 300) {
       messageContainerEl.scrollTo({
         top: messageContainerEl.scrollHeight,

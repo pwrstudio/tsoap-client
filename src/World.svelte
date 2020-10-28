@@ -224,7 +224,6 @@
 
   loadData(QUERY.AREAS)
     .then(areas => {
-      console.dir(areas)
       areaList.set(areas)
     })
     .catch(err => {
@@ -294,10 +293,6 @@
     }
   }
 
-  $: {
-    console.log('inAudioZone', inAudioZone)
-  }
-
   // __ Connect to Colyseus gameserver
   const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
   // const gameClient = new Colyseus.Client("ws://localhost:2567")
@@ -319,6 +314,8 @@
   let landMarkLayer = {}
   // misc
   let targetGraphics = {}
+  // let cull = {}
+  // const cull = new Cull.Simple();
 
   const checkAudioProximity = () => {
     audioInstallationLayer.children.forEach(a => {
@@ -669,6 +666,8 @@
             // PLAYER => ADD
             gameRoom.state.players.onAdd = (player, sessionId) => {
               localPlayers[sessionId] = createPlayer(player, sessionId)
+              // cull.add(localPlayers[sessionId].avatar);
+              // console.dir(cull)
               // PLAYER => CHANGE
               player.onChange = changes => {
                 if ($localUserSessionID === sessionId) {
@@ -986,12 +985,12 @@
               // TODO: Try to reconnect
               const reconnect = i => {
                 console.log('Trying to reconnect user:', $localUserSessionID, '....', i)
-                // client.reconnect("game", $localUserSessionID).then(room => {
-                //   // __ Successfully reconnected
-                //   setUIState(STATE.READY)
-                // }).catch(e => {
-                //   console.error("join error", e);
-                // });
+                client.reconnect("game", $localUserSessionID).then(room => {
+                  // __ Successfully reconnected
+                  setUIState(STATE.READY)
+                }).catch(e => {
+                  console.error("join error", e);
+                });
                 //   setInterval(() => {
                 //   reconnectionAttempts++
                 // }, 5000)
@@ -1108,8 +1107,6 @@
             })
           }
 
-          console.log('audioInstallationLocation.width', audioInstallationLocation.width)
-
           audioInstallationLocation.x = ai.x
           audioInstallationLocation.y = ai.y
           audioInstallationLocation.pivot.x =
@@ -1205,6 +1202,31 @@
     ticker = PIXI.Ticker.shared
     ticker.start()
     ticker.add(updatePositions)
+
+    // cull = new Cull().addAll(viewport.children);
+
+    // // Flags whether culling, should be set "true" when a child is added to the viewport's subtree.
+    // let cullDirty = false;
+
+    // viewport.on('frame-end', function() {
+    //   if (viewport.dirty || cullDirty) {
+    //     cull.cull(renderer.screen);
+    //     viewport.dirty = false;
+    //     cullDirty = false;
+    //   }
+    // })
+
+    // cull whenever the viewport moves
+    // ticker.add(() =>
+    // {
+    //     if (viewport.dirty) {
+    //       console.log('---- DIRTY')
+    //       cull.cull(viewport.getVisibleBounds());
+    //       console.log(cull.stats())
+    //       console.log(viewport.getVisibleBounds())
+    //       viewport.dirty = false;
+    //     }
+    // });
 
     window.onresize = () => {
       const responsiveWidth = getResponsiveWidth()

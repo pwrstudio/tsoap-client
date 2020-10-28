@@ -48,6 +48,11 @@
   resolved "https://registry.yarnpkg.com/@gamestdio/websocket/-/websocket-0.3.2.tgz#321ba0976ee30fd14e51dbf8faa85ce7b325f76a"
   integrity sha512-J3n5SKim+ZoLbe44hRGI/VYAwSMCeIJuBy+FfP6EZaujEpNchPRFcIsVQLWAwpU1bP2Ji63rC+rEUOd1vjUB6Q==
 
+"@pixi-essentials/cull@^1.0.9":
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/@pixi-essentials/cull/-/cull-1.0.9.tgz#471325cc3155015d3b054fdd027ffd396447b99f"
+  integrity sha512-wNvwsFUD6ErcRJOtlcXFoq3GSVZyVnwM4wju8qWQWAs2QtRI4VGFS10M3sLsE3TRjUvvcmaHFM2LHZ4OVR/yEA==
+
 "@pixi/accessibility@5.3.3":
   version "5.3.3"
   resolved "https://registry.yarnpkg.com/@pixi/accessibility/-/accessibility-5.3.3.tgz#b7bab17e3cf5eb5f511471df943155a4eadf0c6e"
@@ -2424,6 +2429,11 @@ pinkie@^2.0.0:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/pinkie/-/pinkie-2.0.4.tgz#72556b80cfa0d48a974e80e77248e80ed4f7f870"
   integrity sha1-clVrgM+g1IqXToDnckjoDtT3+HA=
+
+pixi-cull@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/pixi-cull/-/pixi-cull-1.0.0.tgz#caa76fb3ce2544ba9aa24cd8a8f768a692d2522a"
+  integrity sha512-K0b0cI/Hd+yAbFRe0qrYr/XLUwYzFidNNCkFv/MH+SZt7rwJlKnO4xgID6tR7GvE/LyKDPn1Hfgaoer3NAc4/w==
 
 pixi-viewport@^4.15.0:
   version "4.15.0"
