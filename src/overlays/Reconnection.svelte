@@ -14,17 +14,6 @@
     @import "../variables.scss";
   
     .reconnection {
-      // position: fixed;
-      // top: 0;
-      // left: 0;
-      // width: 100vw;
-      // height: 100vh;
-      // background: rgba(0,0,0,0.9);
-      // display: flex;
-      // justify-content: center;
-      // align-items: center;
-      // z-index: 100000;
-
       position: fixed;
       bottom: 15px;
       left: 15px;
@@ -33,15 +22,22 @@
       align-items: center;
       z-index: 10;
   
+      @include screen-size('small') {
+        bottom: 40px;
+      }
   
       .box {
         font-family: $MONO_STACK;
         padding: 20px;
         background: white;
         color: black;
-        font-size: $FONT_SIZE_LARGE;
+        font-size: $FONT_SIZE_BASE;
         text-align: center;
         user-select: none;
+
+        @include screen-size('small') {
+          width: calc(100% - 30px);
+        }
       }
     }
   </style>
@@ -50,7 +46,6 @@
     <div class="box">
       <div class="header">You have been disconnected from the gameserver. (Error: {disconnectionCode})</div>
       <div class="header">Please reload the page to attempt to reconnect.</div>
-      <!-- <div class="header">Attempting to reconnect...</div> -->
     </div>
   </div>
   

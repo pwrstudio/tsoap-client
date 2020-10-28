@@ -294,9 +294,9 @@
     }
   }
 
-  // $: {
-  //   console.log('inAudioZone', inAudioZone)
-  // }
+  $: {
+    console.log('inAudioZone', inAudioZone)
+  }
 
   // __ Connect to Colyseus gameserver
   const gameClient = new Colyseus.Client("wss://gameserver.tsoap.dev")
@@ -327,15 +327,10 @@
         Math.pow(a.x - localPlayers[$localUserSessionID].avatar.x, 2) +
           Math.pow(a.y - localPlayers[$localUserSessionID].avatar.y, 2)
       )
-
-      // console.log('inAudioZone', inAudioZone)
       // Check if user is within range of audio installation
       if (dist < a.radius) {
-        if(inAudioZone !== a.slug) {
-          inAudioZone = a.slug
-        }
-        // && !a.noAutoplay
-        if (!a.audio.playing()) {
+        inAudioZone = a.slug
+        if (!a.audio.playing() && !a.noAutoplay) {
           a.audio.play()
         }
         // Set volume proportionally to distance
@@ -343,10 +338,13 @@
         // NewValue = ((OldValue - OldMin) * NewRange) / OldRange + NewMin;
         a.audio.volume(1 - dist / a.radius)
       }
-      if (dist > a.radius && inAudioZone === a.slug) {
-        inAudioZone = false
+      if (dist > a.radius) {
+        if(inAudioZone == a.slug) {
+          inAudioZone = false
+        }
         if (a.audio.playing()) {
           a.audio.pause()
+          a.audio.volume(0)
         }
       }
     })
@@ -371,6 +369,9 @@
             localPlayers[key].avatar.y = step.y
             localPlayers[key].area = step.area
             moveQ[key] = []
+            if (key === $localUserSessionID) {
+              checkAudioProximity()
+            }
           } else {
             // Get next step, adjusting for delta
             moveQ[key].splice(0, deltaRounded - 1)
@@ -390,6 +391,7 @@
           // Destination reached
           if (key === $localUserSessionID) {
             hideTarget()
+            checkAudioProximity()
             // User was walking towards a case study
             if (intentToPickUp) {
               pickUpCaseStudy(intentToPickUp)
@@ -468,6 +470,7 @@
         setUIState(STATE.ERROR, "Unable to load avatars")
         throw "Unable to load avatars"
       }
+
       avatarLoader.load((loader, resources) => {
         for (let key of Object.keys(resources)) {
           if (resources[key].extension === "json") {
@@ -1082,47 +1085,44 @@
       // __ Add audio installations
       audioInstallations.then(audioInstallations => {
         audioInstallations.forEach((ai, i) => {
-          const spriteUrl = get(ai, "spriteLink.spriteJsonURL", "")
-          const spriteId = "audioInstallation-" + ai._id
-          const aiLoader = new PIXI.Loader()
-          aiLoader.add(spriteId, spriteUrl).load((loader, resources) => {
-            const frames = new PIXI.AnimatedSprite(
-              resources[spriteId].spritesheet.animations["frames"]
-            )
-            frames.animationSpeed = 0.02
-            frames.play()
+          const effectiveRadius = ai.radius || 400
+          const audioInstallationLocation = new PIXI.Container()
+          // const aIgfx = new PIXI.Graphics()
+          // aIgfx.beginFill(0xff0000)
+          // aIgfx.alpha = 0.4
+          // aIgfx.drawCircle(effectiveRadius, effectiveRadius, effectiveRadius)
+          // aIgfx.endFill()
+          // audioInstallationLocation.addChild(aIgfx)
 
-            const audioInstallationLocation = new PIXI.Container()
-            audioInstallationLocation.addChild(frames)
+          // __ Either load stream URL or audio file
+          if (ai.streamURL) {
+            audioInstallationLocation.audio = new Howl({
+              src: ai.streamURL,
+              html5: true,
+              format: ["mp3", "aac"],
+            })
+          } else {
+            audioInstallationLocation.audio = new Howl({
+              src: [ai.audioURL],
+              loop: true,
+            })
+          }
 
-            // __ Either load stream URL or audio file
-            if (ai.streamURL) {
-              audioInstallationLocation.audio = new Howl({
-                src: ai.streamURL,
-                html5: true,
-                format: ["mp3", "aac"],
-              })
-            } else {
-              audioInstallationLocation.audio = new Howl({
-                src: [ai.audioURL],
-                loop: true,
-              })
-            }
+          console.log('audioInstallationLocation.width', audioInstallationLocation.width)
 
-            audioInstallationLocation.x = ai.x
-            audioInstallationLocation.y = ai.y
-            audioInstallationLocation.pivot.x =
-              audioInstallationLocation.width / 2
-            audioInstallationLocation.pivot.y =
-              audioInstallationLocation.height / 2
-            audioInstallationLocation.title = ai.title
-            audioInstallationLocation.noAutoplay = ai.noAutoplay
-            audioInstallationLocation.slug = get(ai, "slug.current")
-            audioInstallationLocation.radius = ai.radius || 400
-            audioInstallationLocation.interactive = false
+          audioInstallationLocation.x = ai.x
+          audioInstallationLocation.y = ai.y
+          audioInstallationLocation.pivot.x =
+            audioInstallationLocation.width / 2
+          audioInstallationLocation.pivot.y =
+            audioInstallationLocation.height / 2
+          audioInstallationLocation.title = ai.title
+          audioInstallationLocation.noAutoplay = ai.noAutoplay
+          audioInstallationLocation.slug = get(ai, "slug.current")
+          audioInstallationLocation.radius = effectiveRadius
+          audioInstallationLocation.interactive = false
 
-            audioInstallationLayer.addChild(audioInstallationLocation)
-          })
+          audioInstallationLayer.addChild(audioInstallationLocation)
         })
       })
 
@@ -1778,6 +1778,7 @@
     <div class="content-item active" transition:fly={{ y: -200 }}>
       {#await audioInstallations then audioInstallations}
         <AudioInstallationSingle
+          {audioInstallationLayer}
           audioInstallation={audioInstallations.find(aI => aI.slug.current === inAudioZone)} />
       {/await}
     </div>
