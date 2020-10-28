@@ -985,7 +985,7 @@
               // TODO: Try to reconnect
               const reconnect = i => {
                 console.log('Trying to reconnect user:', $localUserSessionID, '....', i)
-                client.reconnect("game", $localUserSessionID).then(room => {
+                gameClient.reconnect("game", $localUserSessionID).then(room => {
                   // __ Successfully reconnected
                   setUIState(STATE.READY)
                 }).catch(e => {
