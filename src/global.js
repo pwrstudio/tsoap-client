@@ -52,7 +52,7 @@ export const QUERY = {
     "*[_type == 'landmark']{..., 'spriteJsonURL': spriteJson.asset->url}",
   ACTIVE_STREAMS:
     "*[_id == 'active-streams']{..., mainStreamEvent->{..., moderators[]->{slug,name,username}, participants[]->{slug,name,username}, connectedCaseStudies[]->{...,participants[]->{slug,name,username}}}}[0]",
-  CONNECTED_TO_USER: "*[participants[]._ref == $id || moderators[]._ref == $id]{..., moderators[]->{...}, participants[]->{...}}",
+  CONNECTED_TO_USER: "*[participants[]._ref == $id || moderators[]._ref == $id]{..., moderators[]->{...}, participants[]->{...}} | order(startDate asc)",
   GLOBAL_SETTINGS: "*[_id == 'global-settings']{..., welcomeCard->{...}}[0]",
   AREAS: "*[_type == 'area']{..., informationCard->{...}}",
   PINNED_MESSAGE: "*[_id == 'pinned-message'][0]",
