@@ -21,10 +21,10 @@
   export let events = []
   export let exhibitions = []
   export let related = false
+  export let showArchived = false
   
   // *** VARIABLES
   let containerWidth = "100%"
-  let showArchive = false
 
   const now = Date.now()
   // __ HACK: Show all events if related 
@@ -294,7 +294,7 @@
 
   <!-- EVENTS -->
   <div class="inner-container">
-    {#each (showArchive ? archivedEvents : upcomingEvents) as event, index (event._id)}
+    {#each (showArchived ? archivedEvents : upcomingEvents) as event, index (event._id)}
       <a
         class="event"
         class:related

@@ -1709,7 +1709,7 @@
             <!-- CALENDAR -->
             {#await events then events}
               {#await exhibitions then exhibitions}
-                <EventList {events} {exhibitions} />
+                <EventList {events} {exhibitions} showArchived={get($globalSettings, 'showArchived', false)} />
               {/await}
             {/await}
           </div>
