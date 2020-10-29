@@ -985,15 +985,16 @@
               // TODO: Try to reconnect
               const reconnect = i => {
                 console.log('Trying to reconnect user:', $localUserSessionID, '....', i)
-                gameClient.reconnect("game", $localUserSessionID).then(room => {
-                  // __ Successfully reconnected
-                  setUIState(STATE.READY)
-                }).catch(e => {
-                  console.error("join error", e);
-                });
-                //   setInterval(() => {
-                //   reconnectionAttempts++
-                // }, 5000)
+                try {
+                  gameClient.reconnect("game", $localUserSessionID).then(room => {
+                    // __ Successfully reconnected
+                    setUIState(STATE.READY)
+                  }).catch(e => {
+                    console.error("join error", e);
+                  });
+                } catch(err) {
+                  console.error("Exception in reconnect", e);
+                }
               }
               reconnect(1)
             });
