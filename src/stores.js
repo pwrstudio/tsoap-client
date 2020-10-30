@@ -16,6 +16,7 @@ export const globalUserList = writable([])
 export const globalSettings = writable({})
 export const areaList = writable({})
 export const currentArea = writable(4)
+export const roomId = writable("")
 
 export const currentAreaObject = derived(
     [currentArea, areaList ],

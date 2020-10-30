@@ -80,6 +80,7 @@
     currentAudioRoom,
     currentVideoRoom,
     globalUserList,
+    roomId
   } from "./stores.js"
 
   // *** PROPS
@@ -327,7 +328,22 @@
       // Check if user is within range of audio installation
       if (dist < a.radius) {
         inAudioZone = a.slug
-        if (!a.audio.playing() && !a.noAutoplay) {
+        // console.log('---', a.slug, '=>', a.audio.state())
+        if (a.audio.state() == 'unloaded') {
+          console.log('--- LOADING:', a.slug)
+          a.audio.load()
+          a.audio.once('load', () => {
+            console.log('!!! DONE:', a.slug)
+            // __ If autoplay is enabled – play the sound
+            if(!a.noAutoplay) {
+              console.log('--- AUTOPLAYING AFTER LOAD:', a.slug)
+              a.audio.play();
+            }
+          });
+        }
+        // __ If the sound is loaded, not playing and autoplay is enabled – play the sound
+        if (a.audio.state() == 'loaded' && !a.audio.playing() && !a.noAutoplay) {
+          console.log('--- AUTOPLAYING:', a.slug)
           a.audio.play()
         }
         // Set volume proportionally to distance
@@ -340,9 +356,11 @@
           inAudioZone = false
         }
         if (a.audio.playing()) {
+          console.log('___ PAUSING:', a.slug)
           a.audio.pause()
           a.audio.volume(0)
         }
+        // a.audio.unload()
       }
     })
   }
@@ -642,6 +660,10 @@
             // ******
             // PLAYER
             // ******
+
+            console.dir(gameRoom)
+
+            roomId.set(gameRoom.id)
 
             // PLAYER => REMOVE
             gameRoom.state.players.onRemove = (player, sessionId) => {
@@ -984,9 +1006,9 @@
               reconnectionAttempts = 1
               // TODO: Try to reconnect
               const reconnect = i => {
-                console.log('Trying to reconnect user:', $localUserSessionID, '....', i)
+                console.log('Trying to reconnect user', $localUserSessionID, ' to room', $roomId, '....', i)
                 try {
-                  gameClient.reconnect("game", $localUserSessionID).then(room => {
+                  gameClient.reconnect($roomId, $localUserSessionID).then(room => {
                     // __ Successfully reconnected
                     setUIState(STATE.READY)
                   }).catch(e => {
@@ -1099,11 +1121,14 @@
             audioInstallationLocation.audio = new Howl({
               src: ai.streamURL,
               html5: true,
+              preload: false,
               format: ["mp3", "aac"],
             })
           } else {
             audioInstallationLocation.audio = new Howl({
               src: [ai.audioURL],
+              html5: true,
+              preload: false,
               loop: true,
             })
           }
