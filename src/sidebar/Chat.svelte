@@ -23,6 +23,11 @@
   export let currentRoom = 2
   export let mobile = false
   export let mobileExpanded = false
+
+    // *** STORES
+    import {
+    globalSettings
+  } from "../stores"
   
   // *** VARIABLES
   let pinnedText = false
@@ -98,6 +103,10 @@
 
     @include screen-size("small") {
       height: calc(100% - 40px);
+
+      &.noinput {
+        height: 100%;
+      }
     }
   }
 
@@ -166,7 +175,7 @@
   }
 </style>
 
-<div class="chat-container">
+<div class="chat-container" class:noinput={$globalSettings.disableChat}>
   {#if mobile && mobileExpanded}
     <div class="header">You are in: {currentRoom}</div>
   {/if}

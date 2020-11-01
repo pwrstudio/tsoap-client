@@ -15,6 +15,7 @@
   import {
     localUserAuthenticated,
     authenticatedUserInformation,
+    globalSettings
   } from "../stores"
 
   // *** PROPS
@@ -175,7 +176,9 @@
     <div
       class="toolbar-item chat"
       on:click={e => {
-        showChatInput = true
+        if(!$globalSettings.disableChat) {
+          showChatInput = true
+        }
         navigate('/')
       }}>
       Chat
@@ -194,7 +197,7 @@
         ({notificationCount})
       {/if}</a>
     <div class="toolbar-item" on:click={teleport}>Support</div>
-  {:else}
+  {:else if !$globalSettings.disableChat}
     <!-- CHAT -->
     <input
       placeholder="Write a message..."

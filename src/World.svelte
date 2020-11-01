@@ -217,6 +217,7 @@
 
   loadData(QUERY.GLOBAL_SETTINGS)
     .then(gS => {
+      // console.log('gS', gS)
       globalSettings.set(gS)
     })
     .catch(err => {
@@ -330,20 +331,20 @@
         inAudioZone = a.slug
         // console.log('---', a.slug, '=>', a.audio.state())
         if (a.audio.state() == 'unloaded') {
-          console.log('--- LOADING:', a.slug)
+          // console.log('--- LOADING:', a.slug)
           a.audio.load()
           a.audio.once('load', () => {
-            console.log('!!! DONE:', a.slug)
+            // console.log('!!! DONE:', a.slug)
             // __ If autoplay is enabled – play the sound
             if(!a.noAutoplay) {
-              console.log('--- AUTOPLAYING AFTER LOAD:', a.slug)
+              // console.log('--- AUTOPLAYING AFTER LOAD:', a.slug)
               a.audio.play();
             }
           });
         }
         // __ If the sound is loaded, not playing and autoplay is enabled – play the sound
         if (a.audio.state() == 'loaded' && !a.audio.playing() && !a.noAutoplay) {
-          console.log('--- AUTOPLAYING:', a.slug)
+          // console.log('--- AUTOPLAYING:', a.slug)
           a.audio.play()
         }
         // Set volume proportionally to distance
@@ -1479,6 +1480,10 @@
         background: $COLOR_DARK;
         height: calc(50% - 50px);
         @include hide-scroll;
+
+        &.noinput {
+          height: 50%;
+        }
       }
 
       .toolbar {
@@ -1761,7 +1766,7 @@
               {/await}
             {/await}
           </div>
-          <div class="bottom-area">
+          <div class="bottom-area" class:noinput={$globalSettings.disableChat}>
             {#if section == 'seminar'}
               <!-- SEMINAR -->
               <Seminar {slug} />
