@@ -1766,7 +1766,7 @@
               {/await}
             {/await}
           </div>
-          <div class="bottom-area" class:noinput={$globalSettings.disableChat}>
+          <div class="bottom-area" class:noinput={$globalSettings.disableChat && !$localUserAuthenticated}>
             {#if section == 'seminar'}
               <!-- SEMINAR -->
               <Seminar {slug} />
