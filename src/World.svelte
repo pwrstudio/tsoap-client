@@ -1471,15 +1471,17 @@
 
       .top-area {
         position: relative;
-        height: 50%;
+        height: 100%;
         width: 100%;
         overflow: hidden;
+        border-bottom: 1px solid #c5c5c5;
       }
 
       .bottom-area {
         background: $COLOR_DARK;
         height: calc(50% - 50px);
         @include hide-scroll;
+        display: none;
 
         &.noinput {
           height: 50%;
@@ -1933,7 +1935,8 @@
         {/await}
       </div>
       <!-- MOBILE TOOLKIT -->
-      {#if !audioChatActive}
+      <!-- NOTE! DISABLED -->
+      {#if false && !audioChatActive}
         <div
           class="mobile-toolkit"
           use:links
