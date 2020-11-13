@@ -282,7 +282,7 @@
             class="archive-link">Archived streams</a>
        {:else}
           <a
-          href="/events">Events</a>
+          href="/events">View all events</a>
           <a
           href="/events"
           class="archive-link">Archived streams</a>
