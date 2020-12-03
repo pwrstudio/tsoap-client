@@ -246,7 +246,7 @@
   <div class="case-study-item header" class:related>
     <div class="inner">
       <div class="row">
-        <div>{related ? 'Connected Case Studies' : 'Case Studies'}</div>
+        <div>{related ? 'Connected Case Studies' : 'Case Studies TSOAP'}</div>
       </div>
     </div>
   </div>
@@ -282,7 +282,7 @@
     </div>
   {/if}
   <!-- CASE STUDIES -->
-  {#each (related ? caseStudies : filteredCaseStudies) as caseStudy, index (caseStudy._id)}
+  {#each related ? caseStudies : filteredCaseStudies as caseStudy, index (caseStudy._id)}
     <a
       class="case-study-item"
       class:related
@@ -300,14 +300,12 @@
         <div class="date">
           {#if caseStudy._type == 'caseStudyExhibition'}
             the current
-          {:else}
-            {#if caseStudy.category}
-              {#if caseStudy.category === 'communication'}
-                communicating
-              {:else if caseStudy.category === 'consensus-building'}
-                consensus building
-              {:else}{caseStudy.category}{/if}
-            {/if}
+          {:else if caseStudy.category}
+            {#if caseStudy.category === 'communication'}
+              communicating
+            {:else if caseStudy.category === 'consensus-building'}
+              consensus building
+            {:else}{caseStudy.category}{/if}
           {/if}
         </div>
       </div>
