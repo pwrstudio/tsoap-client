@@ -9,9 +9,13 @@
   import { onMount } from "svelte"
   import { fade } from "svelte/transition"
   import get from "lodash/get"
+  import { renderBlockText } from "../sanity.js"
 
   // *** GLOBAL
   import { formattedDate } from "../global.js"
+
+  // *** STORES
+  import { globalSettings } from "../stores.js"
 
   // COMPONENTS
   import ParticipantsList from "./ParticipantsList.svelte"
@@ -158,6 +162,10 @@
         padding-bottom: $SPACE_S;
         min-height: unset;
 
+        .eventlist-text {
+          font-size: $FONT_SIZE_SMALL;
+        }
+
         .archive-link {
           cursor: pointer;
           font-size: 90%;
@@ -285,6 +293,11 @@
             href="/events"
             class="archive-link">Archived streams</a> -->
         {:else}
+          {#if $globalSettings.eventListText}
+            <span class="eventlist-text">
+              {@html renderBlockText(get($globalSettings, 'eventListText.content', []))}
+            </span>
+          {/if}
           <!-- <a
           href="/events">View all events</a>
           <a

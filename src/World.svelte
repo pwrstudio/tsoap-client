@@ -217,7 +217,7 @@
 
   loadData(QUERY.GLOBAL_SETTINGS)
     .then(gS => {
-      // console.log('gS', gS)
+      // console.log("gS", gS)
       globalSettings.set(gS)
     })
     .catch(err => {
