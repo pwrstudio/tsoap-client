@@ -84,7 +84,7 @@
       display: block;
       text-decoration: none;
       user-select: none;
-      overflow: hidden;
+      // overflow: hidden;
 
       @include screen-size("small") {
         width: 80vw;
@@ -157,9 +157,9 @@
       }
 
       &.header {
-        height: 40px;
+        height: auto;
         border-bottom: 1px solid $COLOR_MID_1;
-        padding-bottom: $SPACE_S;
+        padding-bottom: 0;
         min-height: unset;
 
         .eventlist-text {
