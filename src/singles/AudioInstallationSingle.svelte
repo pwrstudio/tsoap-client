@@ -20,22 +20,26 @@
   export let audioInstallationLayer = {}
 
   // *** VARIABLES
+  let playing = false
   let expanded = false
-  let playing = audioInstallation.noAutoplay ? false : true
-
-
   const installationsInstance = get(audioInstallationLayer, 'children', []).find(a => a.slug == get(audioInstallation, 'slug.current',''))  
   const audioPlayer = installationsInstance.audio
 
   const togglePlay = () => {
     if(audioPlayer.playing()) {
       audioPlayer.pause()
-      playing = false
     } else {
       audioPlayer.play()
-      playing = true
     }
   }
+
+  audioPlayer.on('play', () => {
+    playing = true
+  })
+
+  audioPlayer.on('pause', () => {
+    playing = false
+  })
 
 </script>
 

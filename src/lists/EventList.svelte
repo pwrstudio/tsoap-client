@@ -22,14 +22,18 @@
   export let exhibitions = []
   export let related = false
   export let showArchived = false
-  
+
   // *** VARIABLES
   let containerWidth = "100%"
 
   const now = Date.now()
-  // __ HACK: Show all events if related 
-  const upcomingEvents = related ? events : events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) > now)
-  const archivedEvents = events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) < now)
+  // __ HACK: Show all events if related
+  const upcomingEvents = related
+    ? events
+    : events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) > now)
+  const archivedEvents = events.filter(
+    e => Date.parse(e.endDate ? e.endDate : e.startDate) < now
+  )
 
   onMount(async () => {
     // __ Enabled horizontal scroll layout on mobile
@@ -153,7 +157,7 @@
         border-bottom: 1px solid $COLOR_MID_1;
         padding-bottom: $SPACE_S;
         min-height: unset;
-        
+
         .archive-link {
           cursor: pointer;
           font-size: 90%;
@@ -277,15 +281,15 @@
       <div class="row">
         {#if related}
           <div>Related Events</div>
-          <a
+          <!-- <a
             href="/events"
-            class="archive-link">Archived streams</a>
-       {:else}
-          <a
-          href="/events">Events</a>
+            class="archive-link">Archived streams</a> -->
+        {:else}
+          <!-- <a
+          href="/events">View all events</a>
           <a
           href="/events"
-          class="archive-link">Archived streams</a>
+          class="archive-link">Archived streams</a> -->
           <!-- <div on:click={e => {showArchive = !showArchive}} class="archive-link">{showArchive ? 'Upcoming Events' : 'Event Archive'}</div> -->
         {/if}
       </div>
@@ -294,7 +298,7 @@
 
   <!-- EVENTS -->
   <div class="inner-container">
-    {#each (showArchived ? archivedEvents : upcomingEvents) as event, index (event._id)}
+    {#each showArchived ? archivedEvents : upcomingEvents as event, index (event._id)}
       <a
         class="event"
         class:related
