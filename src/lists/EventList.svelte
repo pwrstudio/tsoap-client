@@ -6,45 +6,48 @@
   // # # # # # # # # # # # # #
 
   // *** IMPORTS
-  import { onMount } from "svelte"
-  import { fade } from "svelte/transition"
-  import get from "lodash/get"
-  import { renderBlockText } from "../sanity.js"
+  import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
+  import get from "lodash/get";
+  import { renderBlockText } from "../sanity.js";
 
   // *** GLOBAL
-  import { formattedDate } from "../global.js"
+  import { formattedDate } from "../global.js";
 
   // *** STORES
-  import { globalSettings } from "../stores.js"
+  import { globalSettings } from "../stores.js";
 
   // COMPONENTS
-  import ParticipantsList from "./ParticipantsList.svelte"
-  import { window } from "lodash/_freeGlobal"
+  import ParticipantsList from "./ParticipantsList.svelte";
+  import { window } from "lodash/_freeGlobal";
 
   // *** PROPS
-  export let events = []
-  export let exhibitions = []
-  export let related = false
-  export let showArchived = false
+  export let events = [];
+  export let exhibitions = [];
+  export let featuredEvents = [];
+  export let related = false;
+  export let showArchived = false;
 
   // *** VARIABLES
-  let containerWidth = "100%"
+  let containerWidth = "100%";
 
-  const now = Date.now()
+  const now = Date.now();
   // __ HACK: Show all events if related
   const upcomingEvents = related
     ? events
-    : events.filter(e => Date.parse(e.endDate ? e.endDate : e.startDate) > now)
+    : events.filter(
+        (e) => Date.parse(e.endDate ? e.endDate : e.startDate) > now
+      );
   const archivedEvents = events.filter(
-    e => Date.parse(e.endDate ? e.endDate : e.startDate) < now
-  )
+    (e) => Date.parse(e.endDate ? e.endDate : e.startDate) < now
+  );
 
   onMount(async () => {
     // __ Enabled horizontal scroll layout on mobile
     if (window.matchMedia("(max-width: 800px)").matches && !related) {
-      containerWidth = window.innerWidth * 0.8 * events.length + "px"
+      containerWidth = window.innerWidth * 0.8 * events.length + "px";
     }
-  })
+  });
 </script>
 
 <style lang="scss">
@@ -159,7 +162,7 @@
       &.header {
         height: auto;
         border-bottom: 1px solid $COLOR_MID_1;
-        padding-bottom: 0;
+        // padding-bottom: 0;
         min-height: unset;
 
         .eventlist-text {
@@ -309,8 +312,59 @@
     </div>
   </div>
 
-  <!-- EVENTS -->
   <div class="inner-container">
+    {#if featuredEvents && featuredEvents.length > 0}
+      <!-- FEATURED EVENTS: HEADER -->
+      <div class="event header" class:related>
+        <div class="inner">
+          <div class="row">
+            <div>Featured Events</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEATURED EVENTS -->
+      {#each featuredEvents as event, index (event._id)}
+        <a
+          class="event"
+          class:related
+          in:fade={{ delay: 100 * index }}
+          href={'/events/' + get(event, 'slug.current', '')}>
+          <div class="inner">
+            <div class="row">
+              <div class="title">{event.title}</div>
+              <!-- <div class="elips">
+            .........................................................
+          </div> -->
+              <div class="date">{formattedDate(event.startDate)}</div>
+            </div>
+            <div class="row">
+              <div class="participants">
+                {#if get(event, 'moderators', false) && Array.isArray(event.moderators)}
+                  <ParticipantsList
+                    participants={event.moderators}
+                    isModerators />
+                {/if}
+                {#if get(event, 'participants', false) && Array.isArray(event.participants)}
+                  <ParticipantsList participants={event.participants} />
+                {/if}
+              </div>
+            </div>
+          </div>
+        </a>
+      {/each}
+    {/if}
+
+    <!-- PAST EVENTS: HEADER -->
+    <div class="event header" class:related>
+      <div class="inner">
+        <div class="row">
+          <div>Past Events</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAST EVENTS -->
     {#each showArchived ? archivedEvents : upcomingEvents as event, index (event._id)}
       <a
         class="event"
